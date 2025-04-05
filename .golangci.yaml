@@ -1,0 +1,51 @@
+version: "2"
+
+run:
+  allow-parallel-runners: true
+
+output:
+  formats:
+    text:
+      path: stdout
+    html:
+      path: ./output/golangci-report.html
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+linters:
+  exclusions:
+    rules:
+      - path: internal/controller/http/v1
+        linters:
+          - nilerr
+          - ireturn
+      - path: _test\.go
+        linters:
+          - err113
+  settings:
+    varnamelen:
+      min-name-length: 2
+      max-distance: 20
+    nlreturn:
+      # Size of the block (including return statement that is still "OK")
+      # so no return split required.
+      # Default: 1
+      block-size: 2
+    tagliatelle:
+      case:
+        use-field-name: true
+        rules:
+          json: goCamel
+  default: all
+  disable:
+    - dupword
+    - dupl
+    - depguard
+    - mnd
+    - exhaustruct
+    - funlen
+    - varnamelen
+    - containedctx
+    - godox
