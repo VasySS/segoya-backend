@@ -1,9 +1,9 @@
 # segoya-backend
 
-[![License](https://img.shields.io/github/license/VasySS/segoya-backend)](LICENSE)
+[![License](https://img.shields.io/github/license/vasyss/segoya-backend)](LICENSE)
 [![OpenAPI Spec](https://img.shields.io/badge/OpenAPI-3.1-blue)](api/openapi.yaml)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/VasySS/segoya-backend)](go.mod)
-[![Go Report Card](https://goreportcard.com/badge/github.com/VasySS/segoya-backend)](https://goreportcard.com/report/github.com/VasySS/segoya-backend)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/vasyss/segoya-backend)](go.mod)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vasyss/segoya-backend)](https://goreportcard.com/report/github.com/vasyss/segoya-backend)
 
 A backend for [Segoya](https://segoya.vasys.su) - panorama guessing game.
 
