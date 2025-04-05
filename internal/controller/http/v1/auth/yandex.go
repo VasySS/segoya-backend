@@ -101,8 +101,7 @@ func (h Handler) NewYandexCallback(
 			Status: http.StatusBadRequest,
 			Detail: "This Yandex account is already connected to another user",
 		}, nil
-	}
-	if err != nil {
+	} else if err != nil {
 		slog.Error("error adding yandex auth", slog.Any("error", err))
 
 		return &api.NewYandexCallbackInternalServerError{

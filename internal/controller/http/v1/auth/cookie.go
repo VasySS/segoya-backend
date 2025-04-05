@@ -8,10 +8,8 @@ import (
 	"slices"
 )
 
-var (
-	// ErrCookieParsing is returned when an error occurs while parsing a cookie.
-	ErrCookieParsing = errors.New("error parsing cookie")
-)
+// ErrCookieParsing is returned when an error occurs while parsing a cookie.
+var ErrCookieParsing = errors.New("error parsing cookie")
 
 const (
 	accessCookieName  = "accessToken"

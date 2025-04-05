@@ -62,6 +62,7 @@ func (r *Repository) NewMultiplayerGame(
 	}
 
 	var gameID int
+
 	err := pgxscan.Get(ctx, tx, &gameID, query, pgx.NamedArgs{
 		"created_at":       req.RequestTime,
 		"creator_id":       req.CreatorID,
@@ -72,7 +73,6 @@ func (r *Repository) NewMultiplayerGame(
 		"players":          len(req.ConnectedPlayers),
 		"user_ids":         userIDs,
 	})
-
 	if err != nil {
 		return -1, fmt.Errorf("failed to create multiplayer game: %w", err)
 	}

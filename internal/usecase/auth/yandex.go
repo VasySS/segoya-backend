@@ -15,10 +15,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var (
-	// ErrYandexNotAvailable is returned when Yandex oauth provider is not available.
-	ErrYandexNotAvailable = errors.New("yandex is not available")
-)
+// ErrYandexNotAvailable is returned when Yandex oauth provider is not available.
+var ErrYandexNotAvailable = errors.New("yandex is not available")
 
 func yandexExchangeCodeForToken(ctx context.Context, config oauth2.Config, code string) (string, error) {
 	token, err := config.Exchange(ctx, code)

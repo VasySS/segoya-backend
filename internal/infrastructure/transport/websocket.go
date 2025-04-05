@@ -55,10 +55,8 @@ type (
 	}
 )
 
-var (
-	// WebSocketErrorMessage is a websocket error message type.
-	WebSocketErrorMessage WebSocketMessageOutputType = "error" //nolint:gochecknoglobals
-)
+// WebSocketErrorMessage is a websocket error message type.
+var WebSocketErrorMessage WebSocketMessageOutputType = "error" //nolint:gochecknoglobals
 
 // NewWebsocketErrorMessage creates a new websocket error message.
 func NewWebsocketErrorMessage(message string) WebSocketMessageOutput {

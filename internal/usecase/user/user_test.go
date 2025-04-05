@@ -327,7 +327,8 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 					File:        bytes.NewReader(avatarFileBytes),
 					RequestTime: time.Now().UTC(),
 					MimeType:    "image/webp",
-				}},
+				},
+			},
 			wantErr: assert.NoError,
 		},
 		{

@@ -14,10 +14,8 @@ import (
 
 const cloudflareCaptchaURL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
-var (
-	// ErrTokenIsNotProvided is returned when the token is not provided.
-	ErrTokenIsNotProvided = errors.New("token is not provided")
-)
+// ErrTokenIsNotProvided is returned when the token is not provided.
+var ErrTokenIsNotProvided = errors.New("token is not provided")
 
 // CloudflareService is a captcha checker service.
 type CloudflareService struct {
