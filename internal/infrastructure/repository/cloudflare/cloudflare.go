@@ -46,6 +46,7 @@ func New(
 	})
 
 	return &Repository{
+		cfg:      cfg,
 		s3client: s3client,
 		tracer:   otel.GetTracerProvider().Tracer("CloudflareS3Repository"),
 	}, nil

@@ -1,6 +1,8 @@
 package cloudflare
 
-import "github.com/VasySS/segoya-backend/internal/config"
+import (
+	"github.com/VasySS/segoya-backend/internal/config"
+)
 
 // Config is a Cloudflare repository configuration.
 type Config struct {

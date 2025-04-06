@@ -78,8 +78,10 @@ func (uc Usecase) UpdateAvatar(ctx context.Context, req dto.UpdateAvatarRequest)
 			return fmt.Errorf("failed to update avatar in db: %w", err)
 		}
 
-		if err := uc.s3.DeleteAvatar(ctx, userRepo.AvatarHash); err != nil {
-			return fmt.Errorf("failed to delete old avatar from s3: %w", err)
+		if userRepo.AvatarHash != "" {
+			if err := uc.s3.DeleteAvatar(ctx, userRepo.AvatarHash); err != nil {
+				return fmt.Errorf("failed to delete old avatar from s3: %w", err)
+			}
 		}
 
 		return nil
