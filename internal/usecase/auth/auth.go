@@ -64,7 +64,7 @@ func (uc Usecase) Register(ctx context.Context, req dto.RegisterRequest) error {
 	defer span.End()
 
 	_, err := uc.userRepo.GetUserByUsername(ctx, req.Username)
-	if !errors.Is(err, user.ErrUserNotFound) {
+	if !errors.Is(err, user.ErrUserNotFound) && err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}
 

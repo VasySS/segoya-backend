@@ -13,7 +13,7 @@ var (
 	ErrOAuthAlreadyExists = errors.New("oauth is already connected to another user")
 	// ErrUserNotFound is returned when the user tries to access a user that does not exist.
 	ErrUserNotFound = errors.New("user not found")
-	// ErrAlreadyExists is returned when the user tries to create an aco=count that already exists.
+	// ErrAlreadyExists is returned when the user tries to create an account that already exists.
 	ErrAlreadyExists = errors.New("user already exists")
 	// ErrWrongPassword is returned when the user tries to login with a wrong password.
 	ErrWrongPassword = errors.New("wrong password")
