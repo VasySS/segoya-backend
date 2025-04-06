@@ -1,0 +1,21 @@
+get:
+  operationId: getMultiplayerGame
+  summary: Get multiplayer game by ID
+  description: Get multiplayer game information by ID
+  tags: ["multiplayer"]
+  x-ogen-operation-group: Multiplayer
+  parameters:
+    - $ref: "../../components/parameters.yaml#/idInt"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/multiplayer.yaml#/MultiplayerGame"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

@@ -1,0 +1,37 @@
+get:
+  operationId: getPrivateProfile
+  summary: Get current user profile
+  description: Retrieve authenticated user profile details
+  tags: ["users"]
+  x-ogen-operation-group: Users
+  responses:
+    "200":
+      description: User profile details
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/user.yaml#/UserPrivateProfile"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"
+
+patch:
+  operationId: updateUser
+  summary: Update user
+  description: Update authenticated user's profile information
+  tags: ["users"]
+  x-ogen-operation-group: Users
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/user.yaml#/UserUpdate"
+  responses:
+    "204":
+      description: Profile updated successfully
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

@@ -1,0 +1,140 @@
+NewSingleplayerGameReq:
+  type: object
+  properties:
+    rounds:
+      type: integer
+      minimum: 1
+      maximum: 10
+    timerSeconds:
+      type: integer
+      minimum: 10
+      maximum: 600
+    movementAllowed:
+      type: boolean
+    provider:
+      $ref: "panorama.yaml#/Provider"
+  required: [rounds, movementAllowed, provider]
+
+SingleplayerGame:
+  type: object
+  properties:
+    id:
+      type: integer
+    userID:
+      type: integer
+    rounds:
+      type: integer
+    roundCurrent:
+      type: integer
+    timerSeconds:
+      type: integer
+    movementAllowed:
+      type: boolean
+    provider:
+      $ref: "panorama.yaml#/Provider"
+    score:
+      type: integer
+    finished:
+      type: boolean
+    createdAt:
+      type: string
+      format: date-time
+  required:
+    [
+      id,
+      userID,
+      rounds,
+      roundCurrent,
+      timerSeconds,
+      movementAllowed,
+      provider,
+      score,
+      finished,
+      createdAt,
+    ]
+
+SingleplayerGames:
+  type: object
+  properties:
+    total:
+      type: integer
+    games:
+      type: array
+      items:
+        $ref: "#/SingleplayerGame"
+  required: [total, games]
+
+SingleplayerRoundResp:
+  type: object
+  properties:
+    id:
+      type: integer
+    gameID:
+      type: integer
+    streetviewID:
+      type: string
+    roundNum:
+      type: integer
+    lat:
+      type: number
+    lng:
+      type: number
+    panoramaURL:
+      type: string
+    finished:
+      type: boolean
+    createdAt:
+      type: string
+      format: date-time
+    startedAt:
+      type: string
+      format: date-time
+  required:
+    [
+      id,
+      gameID,
+      streetviewID,
+      roundNum,
+      lat,
+      lng,
+      panoramaURL,
+      finished,
+      createdAt,
+      startedAt,
+    ]
+
+SingleplayerRoundGuess:
+  type: object
+  properties:
+    guess:
+      $ref: "panorama.yaml#/LatLng"
+  required: [guess]
+
+SingleplayerRoundsWithGuess:
+  type: object
+  properties:
+    roundNum:
+      type: integer
+    roundLat:
+      type: number
+    roundLng:
+      type: number
+    guessLat:
+      type: number
+    guessLng:
+      type: number
+    score:
+      type: integer
+    missDistance:
+      type: integer
+  required:
+    [roundNum, roundLat, roundLng, guessLat, guessLng, score, missDistance]
+
+EndSingleplayerRoundResp:
+  type: object
+  properties:
+    score:
+      type: integer
+    distance:
+      type: integer
+  required: [score, distance]

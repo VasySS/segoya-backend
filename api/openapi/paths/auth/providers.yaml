@@ -1,0 +1,19 @@
+get:
+  operationId: getOAuthProviders
+  summary: Get all connected OAuth providers
+  description: Get all connected OAuth providers
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../../components/schemas/auth.yaml#/AuthProvider"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

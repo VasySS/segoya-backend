@@ -1,0 +1,105 @@
+MultiplayerGame:
+  type: object
+  properties:
+    id:
+      type: integer
+    creatorID:
+      type: integer
+    rounds:
+      type: integer
+    roundCurrent:
+      type: integer
+    timerSeconds:
+      type: integer
+    movementAllowed:
+      type: boolean
+    players:
+      type: integer
+    provider:
+      $ref: "panorama.yaml#/Provider"
+    finished:
+      type: boolean
+    createdAt:
+      type: string
+      format: date-time
+  required:
+    [
+      id,
+      creatorID,
+      rounds,
+      roundCurrent,
+      timerSeconds,
+      movementAllowed,
+      players,
+      provider,
+      finished,
+      createdAt,
+    ]
+
+MultiplayerRound:
+  type: object
+  properties:
+    id:
+      type: integer
+    gameID:
+      type: integer
+    streetviewID:
+      type: string
+    roundNum:
+      type: integer
+    lat:
+      type: number
+    lng:
+      type: number
+    panoramaURL:
+      type: string
+    guessesCount:
+      type: integer
+    finished:
+      type: boolean
+    createdAt:
+      type: string
+      format: date-time
+    startedAt:
+      type: string
+      format: date-time
+    endedAt:
+      type: string
+      format: date-time
+  required:
+    [
+      id,
+      gameID,
+      streetviewID,
+      roundNum,
+      lat,
+      lng,
+      panoramaURL,
+      guessesCount,
+      finished,
+      createdAt,
+      startedAt,
+      endedAt,
+    ]
+
+MultiplayerGuess:
+  type: object
+  properties:
+    username:
+      type: string
+    avatarHash:
+      type: string
+    roundNum:
+      type: integer
+    roundLat:
+      type: number
+    roundLng:
+      type: number
+    lat:
+      type: number
+    lng:
+      type: number
+    score:
+      type: integer
+  required:
+    [username, avatarHash, roundNum, roundLat, roundLng, lat, lng, score]

@@ -1,0 +1,55 @@
+UserSession:
+  type: object
+  properties:
+    sessionID:
+      type: string
+    userID:
+      type: integer
+    refreshToken:
+      type: string
+    ua:
+      type: string
+    lastActive:
+      type: string
+      format: date-time
+  required: [sessionID, userID, refreshToken, ua, lastActive]
+
+AuthProvider:
+  type: object
+  properties:
+    provider:
+      type: string
+    createdAt:
+      type: string
+      format: date-time
+  required: [provider, createdAt]
+
+LoginReq:
+  type: object
+  properties:
+    username:
+      type: string
+      minLength: 3
+      maxLength: 20
+    password:
+      type: string
+      minLength: 5
+      maxLength: 20
+  required: [username, password]
+
+RegisterReq:
+  type: object
+  properties:
+    username:
+      type: string
+      minLength: 3
+      maxLength: 20
+    password:
+      type: string
+      minLength: 5
+      maxLength: 20
+    name:
+      type: string
+      minLength: 3
+      maxLength: 20
+  required: [username, password]

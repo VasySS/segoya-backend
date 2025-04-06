@@ -1,0 +1,43 @@
+get:
+  operationId: getMultiplayerRound
+  summary: Get multiplayer game round
+  description: Get multiplayer game round
+  tags: ["multiplayer"]
+  x-ogen-operation-group: Multiplayer
+  parameters:
+    - $ref: "../../components/parameters.yaml#/idInt"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/multiplayer.yaml#/MultiplayerRound"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"
+
+post:
+  operationId: newMultiplayerRound
+  summary: Get or generate multiplayer game round
+  description: Get or generate multiplayer game round
+  tags: ["multiplayer"]
+  x-ogen-operation-group: Multiplayer
+  parameters:
+    - $ref: "../../components/parameters.yaml#/idInt"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/multiplayer.yaml#/MultiplayerRound"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

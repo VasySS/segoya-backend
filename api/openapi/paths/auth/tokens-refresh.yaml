@@ -1,0 +1,31 @@
+post:
+  operationId: refreshTokens
+  summary: Get new refresh and access tokens
+  description: Get new refresh and access tokens
+  security: []
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - refreshToken
+          properties:
+            refreshToken:
+              type: string
+  responses:
+    "204":
+      description: OK
+      headers:
+        Set-Cookie:
+          required: true
+          description: Access and refresh JWT tokens (accessToken, refreshToken)
+          schema:
+            type: string
+    "400":
+      $ref: "../../components/responses.yaml#/BadRequest"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

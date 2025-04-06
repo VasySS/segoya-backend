@@ -1,0 +1,53 @@
+get:
+  operationId: getSingleplayerGames
+  summary: Get all singleplayer user games
+  description: Get all singleplayer user games
+  tags: ["singleplayer"]
+  x-ogen-operation-group: Singleplayer
+  parameters:
+    - $ref: "../../components/parameters.yaml#/pageQuery"
+    - $ref: "../../components/parameters.yaml#/pageSizeQuery"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerGames"
+    "400":
+      $ref: "../../components/responses.yaml#/BadRequest"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"
+
+post:
+  operationId: newSingleplayerGame
+  summary: Create new singleplayer game
+  description: Create new singleplayer game
+  tags: ["singleplayer"]
+  x-ogen-operation-group: Singleplayer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/singleplayer.yaml#/NewSingleplayerGameReq"
+  responses:
+    "201":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+            required:
+              - id
+    "400":
+      $ref: "../../components/responses.yaml#/BadRequest"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

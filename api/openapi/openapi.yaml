@@ -1,0 +1,145 @@
+openapi: 3.1.0
+
+info:
+  title: Segoya backend REST API
+  version: 0.4.0
+  description: |
+    A REST API for Segoya panorama guessing game.
+  contact:
+    name: Telegram
+    url: https://t.me/vasyss
+  license:
+    name: GNU AGPLv3
+    url: https://www.gnu.org/licenses/agpl-3.0.en.html
+
+servers:
+  - url: https://segoya-api.vasys.su
+    description: Production environment
+  - url: http://localhost:4174
+    description: Local development environment
+
+security:
+  - Bearer: []
+
+tags:
+  - name: users
+    description: User profile management
+  - name: auth
+    description: Authentication and authorization
+  - name: singleplayer
+    description: Singleplayer game operations
+  - name: multiplayer
+    description: Multiplayer game operations
+  - name: lobbies
+    description: Multiplayer lobby management
+
+paths:
+  ##### users #####
+
+  /v1/users/me:
+    $ref: "paths/users/me.yaml"
+
+  /v1/users/{id}:
+    $ref: "paths/users/{id}.yaml"
+
+  /v1/users/avatar:
+    $ref: "paths/users/avatar.yaml"
+
+  ##### auth #####
+
+  /v1/auth/register:
+    $ref: "paths/auth/register.yaml"
+
+  /v1/auth/login:
+    $ref: "paths/auth/login.yaml"
+
+  /v1/auth/tokens/refresh:
+    $ref: "paths/auth/tokens-refresh.yaml"
+
+  /v1/auth/sessions:
+    $ref: "paths/auth/sessions.yaml"
+
+  /v1/auth/sessions/{id}:
+    $ref: "paths/auth/sessions-{id}.yaml"
+
+  /v1/auth/providers:
+    $ref: "paths/auth/providers.yaml"
+
+  /v1/auth/yandex/login:
+    $ref: "paths/auth/oauth/yandex-login.yaml"
+
+  /v1/auth/yandex/login/callback:
+    $ref: "paths/auth/oauth/yandex-login-callback.yaml"
+
+  /v1/auth/yandex/new:
+    $ref: "paths/auth/oauth/yandex-new.yaml"
+
+  /v1/auth/yandex/new/callback:
+    $ref: "paths/auth/oauth/yandex-new-callback.yaml"
+
+  /v1/auth/yandex:
+    $ref: "paths/auth/oauth/yandex-delete.yaml"
+
+  /v1/auth/discord/login:
+    $ref: "paths/auth/oauth/discord-login.yaml"
+
+  /v1/auth/discord/login/callback:
+    $ref: "paths/auth/oauth/discord-login-callback.yaml"
+
+  /v1/auth/discord/new:
+    $ref: "paths/auth/oauth/discord-new.yaml"
+
+  /v1/auth/discord/new/callback:
+    $ref: "paths/auth/oauth/discord-new-callback.yaml"
+
+  /v1/auth/discord:
+    $ref: "paths/auth/oauth/discord-delete.yaml"
+
+  ##### lobbies #####
+
+  /v1/lobbies:
+    $ref: "paths/lobbies/lobbies.yaml"
+
+  /v1/lobbies/{id}:
+    $ref: "paths/lobbies/lobbies-{id}.yaml"
+
+  ##### singleplayer #####
+
+  /v1/singleplayer:
+    $ref: "paths/singleplayer/singleplayer.yaml"
+
+  /v1/singleplayer/{id}:
+    $ref: "paths/singleplayer/singleplayer-{id}.yaml"
+
+  /v1/singleplayer/{id}/end:
+    $ref: "paths/singleplayer/singleplayer-{id}-end.yaml"
+
+  /v1/singleplayer/{id}/round:
+    $ref: "paths/singleplayer/singleplayer-{id}-round.yaml"
+
+  /v1/singleplayer/{id}/round/end:
+    $ref: "paths/singleplayer/singleplayer-{id}-round-end.yaml"
+
+  /v1/singleplayer/{id}/rounds:
+    $ref: "paths/singleplayer/singleplayer-{id}-rounds.yaml"
+
+  ##### multiplayer #####
+
+  /v1/multiplayer/{id}:
+    $ref: "paths/multiplayer/multiplayer-{id}.yaml"
+
+  /v1/multiplayer/{id}/round:
+    $ref: "paths/multiplayer/multiplayer-{id}-round.yaml"
+
+  /v1/multiplayer/{id}/guesses:
+    $ref: "paths/multiplayer/multiplayer-{id}-guesses.yaml"
+
+components:
+  securitySchemes:
+    Bearer:
+      description: >
+        JWT authentication. Format: `Authorization: Bearer <access-token>`.
+        Token can be obtained from `/v1/auth/login`
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,52 @@
+UserPublicProfile:
+  type: object
+  properties:
+    id:
+      type: integer
+    username:
+      type: string
+    name:
+      type: string
+    avatarHash:
+      type: string
+    registerDate:
+      type: string
+      format: date-time
+  required: [id, username, name, avatarHash, registerDate]
+
+UserPrivateProfile:
+  type: object
+  properties:
+    id:
+      type: integer
+    username:
+      type: string
+    name:
+      type: string
+    avatarHash:
+      type: string
+    registerDate:
+      type: string
+      format: date-time
+    yandexConnected:
+      type: boolean
+    discordConnected:
+      type: boolean
+  required:
+    [
+      id,
+      username,
+      name,
+      avatarHash,
+      registerDate,
+      yandexConnected,
+      discordConnected,
+    ]
+
+UserUpdate:
+  type: object
+  properties:
+    name:
+      type: string
+      minLength: 3
+      maxLength: 20

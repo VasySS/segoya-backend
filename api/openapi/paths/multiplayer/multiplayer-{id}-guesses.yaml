@@ -1,0 +1,21 @@
+get:
+  operationId: getMultiplayerGameGuesses
+  summary: Get multiplayer game guesses
+  description: Get multiplayer game user guesses
+  tags: ["multiplayer"]
+  x-ogen-operation-group: Multiplayer
+  parameters:
+    - $ref: "../../components/parameters.yaml#/idInt"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../../components/schemas/multiplayer.yaml#/MultiplayerGuess"
+    "400":
+      $ref: "../../components/responses.yaml#/BadRequest"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

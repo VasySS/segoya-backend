@@ -1,0 +1,19 @@
+get:
+  operationId: getLobby
+  summary: Get lobby by ID
+  description: Get lobby information by ID
+  tags: ["lobbies"]
+  x-ogen-operation-group: Lobbies
+  parameters:
+    - $ref: "../../components/parameters.yaml#/idStr"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/lobby.yaml#/Lobby"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

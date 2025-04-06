@@ -1,7 +1,7 @@
 # segoya-backend
 
 [![License](https://img.shields.io/github/license/vasyss/segoya-backend)](LICENSE)
-[![OpenAPI Spec](https://img.shields.io/badge/OpenAPI-3.1-blue)](api/openapi.yaml)
+[![OpenAPI Spec](https://img.shields.io/badge/OpenAPI-3.1-blue)](api/openapi/openapi.yaml)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/vasyss/segoya-backend)](go.mod)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vasyss/segoya-backend)](https://goreportcard.com/report/github.com/vasyss/segoya-backend)
 
@@ -38,7 +38,7 @@ docker compose up -d --build
 | Service                  | URL                                             |
 | ------------------------ | ----------------------------------------------- |
 | Backend API base URL     | http://localhost:4174                           |
-| Backend interactive docs | http://localhost:4174/docs/                     |
+| Backend interactive docs | http://localhost:4174/docs                      |
 | Jaeger UI                | http://localhost:16686                          |
 | Postgres                 | postgres://postgres:postgrespass@localhost:5432 |
 | Valkey                   | valkey://localhost:6379                         |

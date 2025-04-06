@@ -1,0 +1,22 @@
+get:
+  operationId: newYandex
+  summary: New Yandex auth
+  description: Create Yandex OAuth connection
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  responses:
+    "307":
+      description: Redirect to Yandex OAuth page
+      headers:
+        Location:
+          required: true
+          description: Yandex OAuth page URL
+          schema:
+            type: string
+        Set-Cookie:
+          required: true
+          description: OAuth state cookie (oauthState)
+          schema:
+            type: string
+    "500":
+      $ref: "../../../components/responses.yaml#/ServerError"

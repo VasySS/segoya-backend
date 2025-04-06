@@ -10,7 +10,7 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
-// Ref: #/components/schemas/AuthProvider
+// Ref: #/AuthProvider
 type AuthProvider struct {
 	Provider  string    `json:"provider"`
 	CreatedAt time.Time `json:"createdAt"`
@@ -188,7 +188,7 @@ type EndSingleplayerRoundNotFound Error
 
 func (*EndSingleplayerRoundNotFound) endSingleplayerRoundRes() {}
 
-// Ref: #/components/schemas/EndSingleplayerRoundResp
+// Ref: #/EndSingleplayerRoundResp
 type EndSingleplayerRoundResp struct {
 	Score    int `json:"score"`
 	Distance int `json:"distance"`
@@ -221,7 +221,7 @@ type EndSingleplayerRoundUnauthorized Error
 func (*EndSingleplayerRoundUnauthorized) endSingleplayerRoundRes() {}
 
 // An RFC 7807/RFC 9457 application/problem+json object.
-// Ref: #/components/schemas/Error
+// Ref: #/Error
 type Error struct {
 	// A short, human-readable summary of the problem type.
 	Title string `json:"title"`
@@ -473,7 +473,7 @@ func (s *GetUserSessionsOKItem) SetLastActive(val time.Time) {
 	s.LastActive = val
 }
 
-// Ref: #/components/schemas/LatLng
+// Ref: #/LatLng
 type LatLng struct {
 	Lat float64 `json:"lat"`
 	Lng float64 `json:"lng"`
@@ -499,7 +499,7 @@ func (s *LatLng) SetLng(val float64) {
 	s.Lng = val
 }
 
-// Ref: #/components/schemas/LobbiesResponse
+// Ref: #/LobbiesResponse
 type LobbiesResponse struct {
 	Total   int     `json:"total"`
 	Lobbies []Lobby `json:"lobbies"`
@@ -527,7 +527,7 @@ func (s *LobbiesResponse) SetLobbies(val []Lobby) {
 
 func (*LobbiesResponse) getLobbiesRes() {}
 
-// Ref: #/components/schemas/Lobby
+// Ref: #/Lobby
 type Lobby struct {
 	ID              string    `json:"id"`
 	CreatorID       int       `json:"creatorID"`
@@ -657,7 +657,7 @@ func (s *LoginNoContent) SetSetCookie(val string) {
 
 func (*LoginNoContent) loginRes() {}
 
-// Ref: #/components/schemas/LoginReq
+// Ref: #/LoginReq
 type LoginReq struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -687,7 +687,7 @@ type LoginUnauthorized Error
 
 func (*LoginUnauthorized) loginRes() {}
 
-// Ref: #/components/schemas/MultiplayerGame
+// Ref: #/MultiplayerGame
 type MultiplayerGame struct {
 	ID              int       `json:"id"`
 	CreatorID       int       `json:"creatorID"`
@@ -803,7 +803,7 @@ func (s *MultiplayerGame) SetCreatedAt(val time.Time) {
 
 func (*MultiplayerGame) getMultiplayerGameRes() {}
 
-// Ref: #/components/schemas/MultiplayerGuess
+// Ref: #/MultiplayerGuess
 type MultiplayerGuess struct {
 	Username   string  `json:"username"`
 	AvatarHash string  `json:"avatarHash"`
@@ -895,7 +895,7 @@ func (s *MultiplayerGuess) SetScore(val int) {
 	s.Score = val
 }
 
-// Ref: #/components/schemas/MultiplayerRound
+// Ref: #/MultiplayerRound
 type MultiplayerRound struct {
 	ID           int       `json:"id"`
 	GameID       int       `json:"gameID"`
@@ -1091,7 +1091,7 @@ func (s *NewDiscordTemporaryRedirect) SetSetCookie(val string) {
 
 func (*NewDiscordTemporaryRedirect) newDiscordRes() {}
 
-// Ref: #/components/schemas/NewLobby
+// Ref: #/NewLobby
 type NewLobby struct {
 	CreatorID       int      `json:"creatorID"`
 	MaxPlayers      int      `json:"maxPlayers"`
@@ -1221,7 +1221,7 @@ type NewSingleplayerGameInternalServerError Error
 
 func (*NewSingleplayerGameInternalServerError) newSingleplayerGameRes() {}
 
-// Ref: #/components/schemas/NewSingleplayerGameReq
+// Ref: #/NewSingleplayerGameReq
 type NewSingleplayerGameReq struct {
 	Rounds          int      `json:"rounds"`
 	TimerSeconds    OptInt   `json:"timerSeconds"`
@@ -1442,7 +1442,7 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
-// Ref: #/components/schemas/Provider
+// Ref: #/Provider
 type Provider string
 
 const (
@@ -1554,7 +1554,7 @@ type RegisterInternalServerError Error
 
 func (*RegisterInternalServerError) registerRes() {}
 
-// Ref: #/components/schemas/RegisterReq
+// Ref: #/RegisterReq
 type RegisterReq struct {
 	Username string    `json:"username"`
 	Password string    `json:"password"`
@@ -1591,7 +1591,7 @@ func (s *RegisterReq) SetName(val OptString) {
 	s.Name = val
 }
 
-// Ref: #/components/schemas/SingleplayerGame
+// Ref: #/SingleplayerGame
 type SingleplayerGame struct {
 	ID              int       `json:"id"`
 	UserID          int       `json:"userID"`
@@ -1707,7 +1707,7 @@ func (s *SingleplayerGame) SetCreatedAt(val time.Time) {
 
 func (*SingleplayerGame) getSingleplayerGameRes() {}
 
-// Ref: #/components/schemas/SingleplayerGames
+// Ref: #/SingleplayerGames
 type SingleplayerGames struct {
 	Total int                `json:"total"`
 	Games []SingleplayerGame `json:"games"`
@@ -1735,7 +1735,7 @@ func (s *SingleplayerGames) SetGames(val []SingleplayerGame) {
 
 func (*SingleplayerGames) getSingleplayerGamesRes() {}
 
-// Ref: #/components/schemas/SingleplayerRoundGuess
+// Ref: #/SingleplayerRoundGuess
 type SingleplayerRoundGuess struct {
 	Guess LatLng `json:"guess"`
 }
@@ -1750,7 +1750,7 @@ func (s *SingleplayerRoundGuess) SetGuess(val LatLng) {
 	s.Guess = val
 }
 
-// Ref: #/components/schemas/SingleplayerRoundResp
+// Ref: #/SingleplayerRoundResp
 type SingleplayerRoundResp struct {
 	ID           int       `json:"id"`
 	GameID       int       `json:"gameID"`
@@ -1867,7 +1867,7 @@ func (s *SingleplayerRoundResp) SetStartedAt(val time.Time) {
 func (*SingleplayerRoundResp) getSingleplayerRoundRes() {}
 func (*SingleplayerRoundResp) newSingleplayerRoundRes() {}
 
-// Ref: #/components/schemas/SingleplayerRoundsWithGuess
+// Ref: #/SingleplayerRoundsWithGuess
 type SingleplayerRoundsWithGuess struct {
 	RoundNum     int     `json:"roundNum"`
 	RoundLat     float64 `json:"roundLat"`
@@ -1997,7 +1997,7 @@ type UpdateUserUnauthorized Error
 
 func (*UpdateUserUnauthorized) updateUserRes() {}
 
-// Ref: #/components/schemas/UserPrivateProfile
+// Ref: #/UserPrivateProfile
 type UserPrivateProfile struct {
 	ID               int       `json:"id"`
 	Username         string    `json:"username"`
@@ -2080,7 +2080,7 @@ func (s *UserPrivateProfile) SetDiscordConnected(val bool) {
 
 func (*UserPrivateProfile) getPrivateProfileRes() {}
 
-// Ref: #/components/schemas/UserPublicProfile
+// Ref: #/UserPublicProfile
 type UserPublicProfile struct {
 	ID           int       `json:"id"`
 	Username     string    `json:"username"`
@@ -2141,7 +2141,7 @@ func (s *UserPublicProfile) SetRegisterDate(val time.Time) {
 
 func (*UserPublicProfile) getPublicProfileRes() {}
 
-// Ref: #/components/schemas/UserUpdate
+// Ref: #/UserUpdate
 type UserUpdate struct {
 	Name OptString `json:"name"`
 }

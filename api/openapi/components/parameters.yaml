@@ -1,0 +1,33 @@
+idInt:
+  name: id
+  description: Numeric ID of the resource in path
+  in: path
+  required: true
+  schema:
+    type: integer
+idStr:
+  name: id
+  description: String ID of the resource in path
+  in: path
+  required: true
+  schema:
+    type: string
+
+pageQuery:
+  name: page
+  in: query
+  description: Page number in the query
+  required: true
+  schema:
+    type: integer
+    minimum: 1
+
+pageSizeQuery:
+  name: page-size
+  in: query
+  description: Page size in the query
+  required: true
+  schema:
+    type: integer
+    minimum: 1
+    maximum: 50

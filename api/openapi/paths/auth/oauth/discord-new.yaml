@@ -1,0 +1,22 @@
+get:
+  operationId: newDiscord
+  summary: New Discord auth
+  description: Create Discord OAuth connection
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  responses:
+    "307":
+      description: Redirect to Discord OAuth page
+      headers:
+        Location:
+          required: true
+          description: Discord OAuth page URL
+          schema:
+            type: string
+        Set-Cookie:
+          required: true
+          description: OAuth state cookie (oauthState)
+          schema:
+            type: string
+    "500":
+      $ref: "../../../components/responses.yaml#/ServerError"

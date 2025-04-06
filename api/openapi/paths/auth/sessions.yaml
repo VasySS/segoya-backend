@@ -1,0 +1,18 @@
+get:
+  operationId: getUserSessions
+  summary: User sessions
+  description: Get user sessions
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              allOf:
+                - $ref: "../../components/schemas/auth.yaml#/UserSession"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

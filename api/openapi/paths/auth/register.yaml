@@ -1,0 +1,28 @@
+post:
+  operationId: register
+  summary: Register new user
+  description: Register new user
+  security: []
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  parameters:
+    - in: header
+      name: X-Captcha-Token
+      description: Captcha token, required only for production environment
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/auth.yaml#/RegisterReq"
+  responses:
+    "201":
+      description: User created successfully
+    "400":
+      $ref: "../../components/responses.yaml#/BadRequest"
+    "409":
+      $ref: "../../components/responses.yaml#/Conflict"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

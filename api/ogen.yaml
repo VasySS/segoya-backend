@@ -1,3 +1,5 @@
+parser:
+  allow_remote: true
 generator:
   # `auto` (default) generates `NewError` if possible
   # `on` tells generator to fail if spec does not meet requirements

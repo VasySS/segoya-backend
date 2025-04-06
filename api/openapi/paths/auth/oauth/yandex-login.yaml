@@ -1,0 +1,21 @@
+get:
+  operationId: yandexLogin
+  summary: Yandex login
+  description: Log in using Yandex OAuth
+  security: []
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  responses:
+    "307":
+      description: Redirect to Yandex OAuth page
+      headers:
+        Location:
+          required: true
+          description: Yandex OAuth page URL
+          schema:
+            type: string
+        Set-Cookie:
+          required: true
+          description: OAuth state cookie (oauthState)
+          schema:
+            type: string

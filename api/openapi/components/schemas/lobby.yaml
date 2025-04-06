@@ -1,0 +1,68 @@
+NewLobby:
+  type: object
+  properties:
+    creatorID:
+      type: integer
+    maxPlayers:
+      type: integer
+      minimum: 2
+      maximum: 10
+    rounds:
+      type: integer
+      minimum: 1
+      maximum: 10
+    provider:
+      $ref: "panorama.yaml#/Provider"
+    timerSeconds:
+      type: integer
+      minimum: 10
+      maximum: 600
+    movementAllowed:
+      type: boolean
+  required: [creatorID, maxPlayers, rounds, provider, movementAllowed]
+
+Lobby:
+  type: object
+  properties:
+    id:
+      type: string
+    creatorID:
+      type: integer
+    createdAt:
+      type: string
+      format: date-time
+    rounds:
+      type: integer
+    provider:
+      $ref: "panorama.yaml#/Provider"
+    movementAllowed:
+      type: boolean
+    timerSeconds:
+      type: integer
+    currentPlayers:
+      type: integer
+    maxPlayers:
+      type: integer
+  required:
+    [
+      id,
+      creatorID,
+      createdAt,
+      rounds,
+      provider,
+      movementAllowed,
+      timerSeconds,
+      currentPlayers,
+      maxPlayers,
+    ]
+
+LobbiesResponse:
+  type: object
+  properties:
+    total:
+      type: integer
+    lobbies:
+      type: array
+      items:
+        $ref: "#/Lobby"
+  required: [total, lobbies]

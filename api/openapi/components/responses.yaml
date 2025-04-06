@@ -1,0 +1,48 @@
+BadRequest:
+  description: Invalid request parameters
+  content:
+    application/problem+json:
+      schema:
+        $ref: "schemas/error.yaml#/Error"
+
+Unauthorized:
+  description: Missing or invalid authentication
+  content:
+    application/problem+json:
+      schema:
+        $ref: "schemas/error.yaml#/Error"
+
+Forbidden:
+  description: Forbidden
+  content:
+    application/problem+json:
+      schema:
+        $ref: "schemas/error.yaml#/Error"
+
+NotFound:
+  description: Requested resource not found
+  content:
+    application/problem+json:
+      schema:
+        $ref: "schemas/error.yaml#/Error"
+
+ServerError:
+  description: Internal server error
+  content:
+    application/problem+json:
+      schema:
+        $ref: "schemas/error.yaml#/Error"
+
+RateLimited:
+  description: Too many requests
+  content:
+    application/problem+json:
+      schema:
+        $ref: "schemas/error.yaml#/Error"
+
+Conflict:
+  description: Conflict
+  content:
+    application/problem+json:
+      schema:
+        $ref: "schemas/error.yaml#/Error"

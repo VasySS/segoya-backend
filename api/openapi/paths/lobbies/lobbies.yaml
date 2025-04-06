@@ -1,0 +1,47 @@
+get:
+  operationId: getLobbies
+  summary: Get available lobbies
+  description: Get all available lobbies
+  tags: ["lobbies"]
+  x-ogen-operation-group: Lobbies
+  parameters:
+    - $ref: "../../components/parameters.yaml#/pageQuery"
+    - $ref: "../../components/parameters.yaml#/pageSizeQuery"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/lobby.yaml#/LobbiesResponse"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"
+
+post:
+  operationId: newLobby
+  summary: Create new lobby
+  description: Create new lobby
+  tags: ["lobbies"]
+  x-ogen-operation-group: Lobbies
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/lobby.yaml#/NewLobby"
+  responses:
+    "201":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+            required:
+              - id
+    "400":
+      $ref: "../../components/responses.yaml#/BadRequest"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

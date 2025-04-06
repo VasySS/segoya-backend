@@ -1,0 +1,41 @@
+get:
+  operationId: newYandexCallback
+  summary: New Yandex auth callback
+  description: A callback for new Yandex OAuth
+  security: []
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  parameters:
+    - in: header
+      name: Cookie
+      description: OAuth state cookie (oauthState)
+      required: true
+      schema:
+        type: string
+    - in: query
+      name: code
+      description: Yandex OAuth code
+      required: true
+      schema:
+        type: string
+    - in: query
+      name: state
+      description: Yandex OAuth state
+      required: true
+      schema:
+        type: string
+  responses:
+    "307":
+      description: Redirect to Segoya profile page
+      headers:
+        Location:
+          required: true
+          description: Segoya profile page URL
+          schema:
+            type: string
+    "400":
+      $ref: "../../../components/responses.yaml#/BadRequest"
+    "401":
+      $ref: "../../../components/responses.yaml#/Unauthorized"
+    "500":
+      $ref: "../../../components/responses.yaml#/ServerError"

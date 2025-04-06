@@ -98,10 +98,7 @@ func NewRouter(
 		r.With(authMW.HandleWS).HandleFunc("/multiplayer/{id}/ws", mh.HandleWS)
 	})
 
-	mux.HandleFunc("/docs/openapi.yaml", func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/yaml")
-		_, _ = w.Write(apiembed.OpenAPISpec)
-	})
+	mux.Handle("/openapi/*", http.FileServer(http.FS(apiembed.OpenAPISpec)))
 
 	mux.HandleFunc("/docs", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html")

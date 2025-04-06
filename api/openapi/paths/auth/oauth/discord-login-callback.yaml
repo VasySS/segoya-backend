@@ -1,0 +1,46 @@
+get:
+  operationId: discordLoginCallback
+  summary: Discord login callback
+  description: A callback for Discord OAuth login
+  security: []
+  tags: ["auth"]
+  x-ogen-operation-group: Auth
+  parameters:
+    - in: header
+      name: Cookie
+      description: OAuth state cookie (oauthState)
+      required: true
+      schema:
+        type: string
+    - in: query
+      name: code
+      description: Discord OAuth code
+      required: true
+      schema:
+        type: string
+    - in: query
+      name: state
+      description: Discord OAuth state
+      required: true
+      schema:
+        type: string
+  responses:
+    "307":
+      description: Redirect to Segoya login page
+      headers:
+        Location:
+          required: true
+          description: Segoya login page URL
+          schema:
+            type: string
+        Set-Cookie:
+          required: true
+          description: Access and refresh JWT tokens (accessToken, refreshToken)
+          schema:
+            type: string
+    "400":
+      $ref: "../../../components/responses.yaml#/BadRequest"
+    "404":
+      $ref: "../../../components/responses.yaml#/NotFound"
+    "500":
+      $ref: "../../../components/responses.yaml#/ServerError"

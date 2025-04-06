@@ -1,0 +1,28 @@
+get:
+  operationId: getSingleplayerGameRounds
+  summary: Get singleplayer game rounds
+  description: Get singleplayer game rounds
+  tags: ["singleplayer"]
+  x-ogen-operation-group: Singleplayer
+  parameters:
+    - $ref: "../../components/parameters.yaml#/idInt"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerRoundsWithGuess"
+    "400":
+      $ref: "../../components/responses.yaml#/BadRequest"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "403":
+      $ref: "../../components/responses.yaml#/Forbidden"
+    "404":
+      description: Singleplayer game not found
+      $ref: "../../components/responses.yaml#/NotFound"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

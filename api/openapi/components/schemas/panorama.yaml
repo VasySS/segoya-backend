@@ -1,0 +1,16 @@
+Provider:
+  type: string
+  enum: ["google", "yandex", "yandex_air", "seznam"]
+
+LatLng:
+  type: object
+  properties:
+    lat:
+      type: number
+      minimum: -90
+      maximum: 90
+    lng:
+      type: number
+      minimum: -180
+      maximum: 180
+  required: [lat, lng]

@@ -1,0 +1,19 @@
+get:
+  operationId: getPublicProfile
+  summary: Get user by ID
+  description: Retrieve public user profile by ID
+  tags: ["users"]
+  x-ogen-operation-group: Users
+  parameters:
+    - $ref: "../../components/parameters.yaml#/idInt"
+  responses:
+    "200":
+      description: User profile details
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/user.yaml#/UserPublicProfile"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"

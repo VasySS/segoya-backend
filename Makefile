@@ -21,7 +21,7 @@ ogen:
 		--target ./api/ogen \
 		--package api \
 		--clean \
-		./api/openapi.yaml
+		./api/openapi/openapi.yaml
 
 # golangci-lint should use binary installation instead of "go tool":
 # https://golangci-lint.run/welcome/install/#local-installation

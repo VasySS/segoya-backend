@@ -1,0 +1,32 @@
+post:
+  operationId: endSingleplayerRound
+  summary: End singleplayer game round
+  description: End singleplayer game round
+  tags: ["singleplayer"]
+  x-ogen-operation-group: Singleplayer
+  parameters:
+    - $ref: "../../components/parameters.yaml#/idInt"
+  requestBody:
+    required: true
+    description: Round guess
+    content:
+      application/json:
+        schema:
+          $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerRoundGuess"
+  responses:
+    "200":
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: "../../components/schemas/singleplayer.yaml#/EndSingleplayerRoundResp"
+    "400":
+      $ref: "../../components/responses.yaml#/BadRequest"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "403":
+      $ref: "../../components/responses.yaml#/Forbidden"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
+    "500":
+      $ref: "../../components/responses.yaml#/ServerError"
