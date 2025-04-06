@@ -1,12 +1,12 @@
 get:
   operationId: getOAuthProviders
   summary: Get all connected OAuth providers
-  description: Get all connected OAuth providers
+  description: Get all connected OAuth providers.
   tags: ["auth"]
   x-ogen-operation-group: Auth
   responses:
     "200":
-      description: OK
+      description: A list of connected OAuth providers.
       content:
         application/json:
           schema:

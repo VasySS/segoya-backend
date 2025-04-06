@@ -1,5 +1,13 @@
-# https://swagger.io/blog/problem-details-rfc9457-api-error-handling/
+extends: [
+    "https://unpkg.com/@apisyouwonthate/style-guide@1.4.0/dist/ruleset.js",
+    "https://unpkg.com/@stoplight/spectral-documentation/dist/ruleset.mjs",
+    # "https://unpkg.com/@stoplight/spectral-owasp-ruleset/dist/ruleset.mjs",
+  ]
+
 rules:
+  hosts-https-only-oas3: "off"
+
+  # https://swagger.io/blog/problem-details-rfc9457-api-error-handling/
   # Author: Frank Kilcommins (https://github.com/frankkilcommins)
   no-errors-without-content:
     message: Error responses MUST describe the error

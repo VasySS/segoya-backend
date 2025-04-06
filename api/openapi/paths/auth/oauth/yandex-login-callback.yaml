@@ -1,32 +1,32 @@
 get:
   operationId: yandexLoginCallback
   summary: Yandex login callback
-  description: A callback for Yandex OAuth login
+  description: A callback for Yandex OAuth login.
   security: []
   tags: ["auth"]
   x-ogen-operation-group: Auth
   parameters:
     - in: header
       name: Cookie
-      description: OAuth state cookie (oauthState)
+      description: OAuth state cookie (oauthState).
       required: true
       schema:
         type: string
     - in: query
       name: code
-      description: Yandex OAuth code
+      description: Yandex OAuth code from Yandex OAuth page.
       required: true
       schema:
         type: string
     - in: query
       name: state
-      description: Yandex OAuth state
+      description: Yandex OAuth state (oauthState).
       required: true
       schema:
         type: string
   responses:
     "307":
-      description: Redirect to Segoya login page
+      description: Redirect to Segoya login page.
       headers:
         Location:
           required: true

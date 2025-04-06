@@ -29,6 +29,11 @@ ogen:
 lint:
 	golangci-lint run --show-stats
 
+# npm i -g @stoplight/spectral-cli
+.PHONY: lint-spec
+lint-spec:
+	spectral lint ./api/openapi/openapi.yaml --ruleset ./api/.spectral.yaml
+
 .PHONY: generate
 generate:
 	go generate ./...

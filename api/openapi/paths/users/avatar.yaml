@@ -1,7 +1,7 @@
 put:
   operationId: updateUserAvatar
   summary: Update user avatar
-  description: Upload a new avatar image (max 2MB)
+  description: Upload a new avatar image (max 2MB).
   tags: ["users"]
   x-ogen-operation-group: Users
   requestBody:
@@ -20,11 +20,11 @@ put:
               description: Image file
   responses:
     "204":
-      description: Avatar updated successfully
+      description: Avatar updated successfully.
     "401":
       $ref: "../../components/responses.yaml#/Unauthorized"
     "413":
-      description: File exceeds size limit
+      description: File exceeds size limit.
       content:
         application/problem+json:
           schema:

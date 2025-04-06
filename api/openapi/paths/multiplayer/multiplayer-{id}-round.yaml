@@ -1,14 +1,14 @@
 get:
   operationId: getMultiplayerRound
   summary: Get multiplayer game round
-  description: Get multiplayer game round
+  description: Get multiplayer game round.
   tags: ["multiplayer"]
   x-ogen-operation-group: Multiplayer
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "200":
-      description: OK
+      description: Multiplayer game round information.
       content:
         application/json:
           schema:
@@ -23,14 +23,14 @@ get:
 post:
   operationId: newMultiplayerRound
   summary: Get or generate multiplayer game round
-  description: Get or generate multiplayer game round
+  description: Get or generate multiplayer game round.
   tags: ["multiplayer"]
   x-ogen-operation-group: Multiplayer
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "200":
-      description: OK
+      description: Multiplayer game round information.
       content:
         application/json:
           schema:

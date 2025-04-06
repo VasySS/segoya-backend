@@ -1,7 +1,7 @@
 post:
   operationId: endSingleplayerRound
   summary: End singleplayer game round
-  description: End singleplayer game round
+  description: End singleplayer game round and get results.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
@@ -15,7 +15,7 @@ post:
           $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerRoundGuess"
   responses:
     "200":
-      description: OK
+      description: Singleplayer game round ended successfully.
       content:
         application/json:
           schema:

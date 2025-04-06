@@ -1,14 +1,14 @@
 get:
   operationId: getLobby
   summary: Get lobby by ID
-  description: Get lobby information by ID
+  description: Get lobby information by ID.
   tags: ["lobbies"]
   x-ogen-operation-group: Lobbies
   parameters:
     - $ref: "../../components/parameters.yaml#/idStr"
   responses:
     "200":
-      description: OK
+      description: Lobby information fetched successfully.
       content:
         application/json:
           schema:

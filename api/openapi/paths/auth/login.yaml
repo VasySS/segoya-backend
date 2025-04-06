@@ -1,19 +1,20 @@
 post:
   operationId: login
   summary: Login user
-  description: Login user
+  description: Log in using username and password.
   security: []
   tags: ["auth"]
   x-ogen-operation-group: Auth
   parameters:
     - in: header
       name: User-Agent
+      description: User agent is required to store sessions.
       required: true
       schema:
         type: string
     - in: header
       name: X-Captcha-Token
-      description: Captcha token, required only for production environment
+      description: Captcha token, required only for production environment.
       schema:
         type: string
   requestBody:
@@ -24,7 +25,7 @@ post:
           $ref: "../../components/schemas/auth.yaml#/LoginRequest"
   responses:
     "204":
-      description: OK
+      description: User logged in successfully.
       headers:
         Set-Cookie:
           required: true

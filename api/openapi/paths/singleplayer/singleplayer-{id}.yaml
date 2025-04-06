@@ -1,14 +1,14 @@
 get:
   operationId: getSingleplayerGame
   summary: Get singleplayer game by ID
-  description: Get singleplayer game information by ID
+  description: Get singleplayer game information by ID.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "200":
-      description: OK
+      description: Singleplayer game details.
       content:
         application/json:
           schema:

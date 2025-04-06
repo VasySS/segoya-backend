@@ -1,12 +1,12 @@
 get:
   operationId: newDiscord
   summary: New Discord auth
-  description: Create Discord OAuth connection
+  description: Create Discord OAuth connection.
   tags: ["auth"]
   x-ogen-operation-group: Auth
   responses:
     "307":
-      description: Redirect to Discord OAuth page
+      description: Redirect to Discord OAuth page.
       headers:
         Location:
           required: true

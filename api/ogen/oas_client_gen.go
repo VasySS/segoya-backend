@@ -36,13 +36,13 @@ type Invoker interface {
 	UsersInvoker
 	// GetHealth invokes getHealth operation.
 	//
-	// Check API health.
+	// Check API health status.
 	//
 	// GET /health
 	GetHealth(ctx context.Context) (*GetHealthOK, error)
 	// GetRoot invokes getRoot operation.
 	//
-	// Redirect to documentation.
+	// Redirect to documentation page.
 	//
 	// GET /
 	GetRoot(ctx context.Context) (*GetRootFound, error)
@@ -90,13 +90,13 @@ type AuthInvoker interface {
 	GetOAuthProviders(ctx context.Context) (GetOAuthProvidersRes, error)
 	// GetUserSessions invokes getUserSessions operation.
 	//
-	// Get user sessions.
+	// Get user sessions associated with the authenticated user.
 	//
 	// GET /v1/auth/sessions
 	GetUserSessions(ctx context.Context) (GetUserSessionsRes, error)
 	// Login invokes login operation.
 	//
-	// Login user.
+	// Log in using username and password.
 	//
 	// POST /v1/auth/login
 	Login(ctx context.Context, request *LoginRequest, params LoginParams) (LoginRes, error)
@@ -126,13 +126,13 @@ type AuthInvoker interface {
 	NewYandexCallback(ctx context.Context, params NewYandexCallbackParams) (NewYandexCallbackRes, error)
 	// RefreshTokens invokes refreshTokens operation.
 	//
-	// Get new refresh and access tokens.
+	// Get new refresh and access tokens (Set-Cookie header).
 	//
 	// POST /v1/auth/tokens/refresh
 	RefreshTokens(ctx context.Context, request *RefreshTokensReq) (RefreshTokensRes, error)
 	// Register invokes register operation.
 	//
-	// Register new user.
+	// Register new user account.
 	//
 	// POST /v1/auth/register
 	Register(ctx context.Context, request *RegisterRequest, params RegisterParams) (RegisterRes, error)
@@ -168,7 +168,7 @@ type LobbiesInvoker interface {
 	GetLobby(ctx context.Context, params GetLobbyParams) (GetLobbyRes, error)
 	// NewLobby invokes newLobby operation.
 	//
-	// Create new lobby.
+	// Create new lobby with specified parameters.
 	//
 	// POST /v1/lobbies
 	NewLobby(ctx context.Context, request *NewLobby) (NewLobbyRes, error)
@@ -216,7 +216,7 @@ type SingleplayerInvoker interface {
 	EndSingleplayerGame(ctx context.Context, params EndSingleplayerGameParams) (EndSingleplayerGameRes, error)
 	// EndSingleplayerRound invokes endSingleplayerRound operation.
 	//
-	// End singleplayer game round.
+	// End singleplayer game round and get results.
 	//
 	// POST /v1/singleplayer/{id}/round/end
 	EndSingleplayerRound(ctx context.Context, request *SingleplayerRoundGuess, params EndSingleplayerRoundParams) (EndSingleplayerRoundRes, error)
@@ -982,7 +982,7 @@ func (c *Client) sendEndSingleplayerGame(ctx context.Context, params EndSinglepl
 
 // EndSingleplayerRound invokes endSingleplayerRound operation.
 //
-// End singleplayer game round.
+// End singleplayer game round and get results.
 //
 // POST /v1/singleplayer/{id}/round/end
 func (c *Client) EndSingleplayerRound(ctx context.Context, request *SingleplayerRoundGuess, params EndSingleplayerRoundParams) (EndSingleplayerRoundRes, error) {
@@ -1109,7 +1109,7 @@ func (c *Client) sendEndSingleplayerRound(ctx context.Context, request *Singlepl
 
 // GetHealth invokes getHealth operation.
 //
-// Check API health.
+// Check API health status.
 //
 // GET /health
 func (c *Client) GetHealth(ctx context.Context) (*GetHealthOK, error) {
@@ -2145,7 +2145,7 @@ func (c *Client) sendGetPublicProfile(ctx context.Context, params GetPublicProfi
 
 // GetRoot invokes getRoot operation.
 //
-// Redirect to documentation.
+// Redirect to documentation page.
 //
 // GET /
 func (c *Client) GetRoot(ctx context.Context) (*GetRootFound, error) {
@@ -2725,7 +2725,7 @@ func (c *Client) sendGetSingleplayerRound(ctx context.Context, params GetSinglep
 
 // GetUserSessions invokes getUserSessions operation.
 //
-// Get user sessions.
+// Get user sessions associated with the authenticated user.
 //
 // GET /v1/auth/sessions
 func (c *Client) GetUserSessions(ctx context.Context) (GetUserSessionsRes, error) {
@@ -2830,7 +2830,7 @@ func (c *Client) sendGetUserSessions(ctx context.Context) (res GetUserSessionsRe
 
 // Login invokes login operation.
 //
-// Login user.
+// Log in using username and password.
 //
 // POST /v1/auth/login
 func (c *Client) Login(ctx context.Context, request *LoginRequest, params LoginParams) (LoginRes, error) {
@@ -3156,7 +3156,7 @@ func (c *Client) sendNewDiscordCallback(ctx context.Context, params NewDiscordCa
 
 // NewLobby invokes newLobby operation.
 //
-// Create new lobby.
+// Create new lobby with specified parameters.
 //
 // POST /v1/lobbies
 func (c *Client) NewLobby(ctx context.Context, request *NewLobby) (NewLobbyRes, error) {
@@ -3843,7 +3843,7 @@ func (c *Client) sendNewYandexCallback(ctx context.Context, params NewYandexCall
 
 // RefreshTokens invokes refreshTokens operation.
 //
-// Get new refresh and access tokens.
+// Get new refresh and access tokens (Set-Cookie header).
 //
 // POST /v1/auth/tokens/refresh
 func (c *Client) RefreshTokens(ctx context.Context, request *RefreshTokensReq) (RefreshTokensRes, error) {
@@ -3918,7 +3918,7 @@ func (c *Client) sendRefreshTokens(ctx context.Context, request *RefreshTokensRe
 
 // Register invokes register operation.
 //
-// Register new user.
+// Register new user account.
 //
 // POST /v1/auth/register
 func (c *Client) Register(ctx context.Context, request *RegisterRequest, params RegisterParams) (RegisterRes, error) {

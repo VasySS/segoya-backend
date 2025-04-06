@@ -1,14 +1,14 @@
 post:
   operationId: endSingleplayerGame
   summary: End singleplayer game
-  description: End singleplayer game
+  description: End singleplayer game.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "204":
-      description: OK
+      description: Singleplayer game ended successfully.
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
     "401":

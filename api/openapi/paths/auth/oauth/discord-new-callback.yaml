@@ -1,32 +1,32 @@
 get:
   operationId: newDiscordCallback
   summary: Discord new auth callback
-  description: A callback for new Discord OAuth
+  description: A callback for new Discord OAuth.
   security: []
   tags: ["auth"]
   x-ogen-operation-group: Auth
   parameters:
     - in: header
       name: Cookie
-      description: OAuth state cookie (oauthState)
+      description: OAuth state cookie (oauthState).
       required: true
       schema:
         type: string
     - in: query
       name: code
-      description: Discord OAuth code
+      description: Discord OAuth code from Discord OAuth page.
       required: true
       schema:
         type: string
     - in: query
       name: state
-      description: Discord OAuth state
+      description: Discord OAuth state (oauthState).
       required: true
       schema:
         type: string
   responses:
     "307":
-      description: Redirect to Segoya profile page
+      description: Redirect to Segoya profile page.
       headers:
         Location:
           required: true

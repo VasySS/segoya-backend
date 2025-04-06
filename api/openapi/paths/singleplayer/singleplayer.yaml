@@ -1,7 +1,7 @@
 get:
   operationId: getSingleplayerGames
   summary: Get all singleplayer user games
-  description: Get all singleplayer user games
+  description: Get all singleplayer user games.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
@@ -9,7 +9,7 @@ get:
     - $ref: "../../components/parameters.yaml#/pageSizeQuery"
   responses:
     "200":
-      description: OK
+      description: List of singleplayer user games fetched successfully.
       content:
         application/json:
           schema:
@@ -24,7 +24,7 @@ get:
 post:
   operationId: newSingleplayerGame
   summary: Create new singleplayer game
-  description: Create new singleplayer game
+  description: Create new singleplayer game.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   requestBody:
@@ -35,7 +35,7 @@ post:
           $ref: "../../components/schemas/singleplayer.yaml#/NewSingleplayerGameRequest"
   responses:
     "201":
-      description: OK
+      description: Singleplayer game created successfully.
       content:
         application/json:
           schema:

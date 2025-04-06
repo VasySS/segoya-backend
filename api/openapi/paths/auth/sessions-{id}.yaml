@@ -1,13 +1,13 @@
 delete:
   operationId: deleteUserSession
   summary: Delete user session
-  description: Delete user session
+  description: Delete user session.
   tags: ["auth"]
   x-ogen-operation-group: Auth
   parameters:
     - $ref: "../../components/parameters.yaml#/idStr"
   responses:
     "204":
-      description: OK
+      description: User session deleted successfully.
     "500":
       $ref: "../../components/responses.yaml#/ServerError"

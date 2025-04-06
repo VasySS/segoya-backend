@@ -1,14 +1,14 @@
 get:
   operationId: getSingleplayerGameRounds
   summary: Get singleplayer game rounds
-  description: Get singleplayer game rounds
+  description: Get singleplayer game rounds.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "200":
-      description: OK
+      description: List of singleplayer game rounds.
       content:
         application/json:
           schema:

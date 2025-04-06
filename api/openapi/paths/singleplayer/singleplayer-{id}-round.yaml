@@ -1,14 +1,14 @@
 get:
   operationId: getSingleplayerRound
   summary: Get singleplayer game round
-  description: Get singleplayer game round
+  description: Get singleplayer game round.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "200":
-      description: OK
+      description: Singleplayer game round details.
       content:
         application/json:
           schema:
@@ -27,14 +27,14 @@ get:
 post:
   operationId: newSingleplayerRound
   summary: Create singleplayer game round
-  description: Create singleplayer game round
+  description: Create singleplayer game round.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "200":
-      description: OK
+      description: Singleplayer game round created successfully.
       content:
         application/json:
           schema:

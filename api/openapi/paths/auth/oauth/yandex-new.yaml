@@ -1,12 +1,12 @@
 get:
   operationId: newYandex
   summary: New Yandex auth
-  description: Create Yandex OAuth connection
+  description: Create Yandex OAuth connection.
   tags: ["auth"]
   x-ogen-operation-group: Auth
   responses:
     "307":
-      description: Redirect to Yandex OAuth page
+      description: Redirect to Yandex OAuth page.
       headers:
         Location:
           required: true

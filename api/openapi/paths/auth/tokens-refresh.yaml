@@ -1,7 +1,7 @@
 post:
   operationId: refreshTokens
   summary: Get new refresh and access tokens
-  description: Get new refresh and access tokens
+  description: Get new refresh and access tokens (Set-Cookie header).
   security: []
   tags: ["auth"]
   x-ogen-operation-group: Auth
@@ -18,7 +18,7 @@ post:
               type: string
   responses:
     "204":
-      description: OK
+      description: Tokens refreshed successfully.
       headers:
         Set-Cookie:
           required: true

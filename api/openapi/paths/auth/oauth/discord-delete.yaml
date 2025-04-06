@@ -1,12 +1,12 @@
 delete:
   operationId: deleteDiscord
   summary: Delete Discord auth
-  description: Delete login with Discord OAuth
+  description: Delete login with Discord OAuth.
   tags: ["auth"]
   x-ogen-operation-group: Auth
   responses:
     "204":
-      description: OK
+      description: Discord OAuth deleted successfully.
     "401":
       $ref: "../../../components/responses.yaml#/Unauthorized"
     "500":

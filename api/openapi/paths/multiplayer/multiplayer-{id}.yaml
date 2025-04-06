@@ -1,14 +1,14 @@
 get:
   operationId: getMultiplayerGame
   summary: Get multiplayer game by ID
-  description: Get multiplayer game information by ID
+  description: Get multiplayer game information by ID.
   tags: ["multiplayer"]
   x-ogen-operation-group: Multiplayer
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "200":
-      description: OK
+      description: Multiplayer game details.
       content:
         application/json:
           schema:

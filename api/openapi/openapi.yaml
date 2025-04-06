@@ -3,8 +3,7 @@ openapi: 3.1.0
 info:
   title: Segoya backend REST API
   version: 0.4.0
-  description: |
-    A REST API for Segoya panorama guessing game.
+  description: A REST API for Segoya panorama guessing game.
   contact:
     name: Telegram
     url: https://t.me/vasyss
@@ -14,34 +13,39 @@ info:
 
 servers:
   - url: https://segoya-api.vasys.su
-    description: Production environment
+    description: Production environment URL.
   - url: http://localhost:4174
-    description: Local development environment
+    description: Local development environment URL.
 
 security:
   - Bearer: []
 
 tags:
-  - name: users
-    description: User profile management
   - name: auth
-    description: Authentication and authorization
-  - name: singleplayer
-    description: Singleplayer game operations
-  - name: multiplayer
-    description: Multiplayer game operations
+    description: Authentication and authorization.
+  - name: general
+    description: General operations, that do not fall into other categories.
   - name: lobbies
-    description: Multiplayer lobby management
+    description: Multiplayer lobby management.
+  - name: multiplayer
+    description: Multiplayer game operations.
+  - name: singleplayer
+    description: Singleplayer game operations.
+  - name: users
+    description: User profile management.
 
 paths:
   /:
     get:
       operationId: getRoot
       summary: Redirect to documentation
+      description: Redirect to documentation page.
       security: []
+      tags:
+        - general
       responses:
         "302":
-          description: Redirect to documentation
+          description: Redirect to documentation page.
           headers:
             Location:
               description: Redirect location
@@ -54,10 +58,13 @@ paths:
     get:
       operationId: getHealth
       summary: Check API health
+      description: Check API health status.
       security: []
+      tags:
+        - general
       responses:
         "200":
-          description: API is healthy
+          description: API is operating normally.
           content:
             application/vnd.health+json:
               schema:

@@ -1,14 +1,14 @@
 get:
   operationId: getPublicProfile
   summary: Get user by ID
-  description: Retrieve public user profile by ID
+  description: Retrieve public user profile by ID.
   tags: ["users"]
   x-ogen-operation-group: Users
   parameters:
     - $ref: "../../components/parameters.yaml#/idInt"
   responses:
     "200":
-      description: User profile details
+      description: User profile details.
       content:
         application/json:
           schema:

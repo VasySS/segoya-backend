@@ -1,13 +1,13 @@
 get:
   operationId: yandexLogin
   summary: Yandex login
-  description: Log in using Yandex OAuth
+  description: Log in using Yandex OAuth.
   security: []
   tags: ["auth"]
   x-ogen-operation-group: Auth
   responses:
     "307":
-      description: Redirect to Yandex OAuth page
+      description: Redirect to Yandex OAuth page.
       headers:
         Location:
           required: true

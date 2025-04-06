@@ -1,7 +1,7 @@
 get:
   operationId: getLobbies
   summary: Get available lobbies
-  description: Get all available lobbies
+  description: Get all available lobbies.
   tags: ["lobbies"]
   x-ogen-operation-group: Lobbies
   parameters:
@@ -9,7 +9,7 @@ get:
     - $ref: "../../components/parameters.yaml#/pageSizeQuery"
   responses:
     "200":
-      description: OK
+      description: A list of available lobbies.
       content:
         application/json:
           schema:
@@ -20,7 +20,7 @@ get:
 post:
   operationId: newLobby
   summary: Create new lobby
-  description: Create new lobby
+  description: Create new lobby with specified parameters.
   tags: ["lobbies"]
   x-ogen-operation-group: Lobbies
   requestBody:
@@ -31,7 +31,7 @@ post:
           $ref: "../../components/schemas/lobby.yaml#/NewLobby"
   responses:
     "201":
-      description: OK
+      description: Lobby created, lobby ID is returned.
       content:
         application/json:
           schema:

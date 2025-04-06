@@ -69,7 +69,7 @@ func (UnimplementedHandler) EndSingleplayerGame(ctx context.Context, params EndS
 
 // EndSingleplayerRound implements endSingleplayerRound operation.
 //
-// End singleplayer game round.
+// End singleplayer game round and get results.
 //
 // POST /v1/singleplayer/{id}/round/end
 func (UnimplementedHandler) EndSingleplayerRound(ctx context.Context, req *SingleplayerRoundGuess, params EndSingleplayerRoundParams) (r EndSingleplayerRoundRes, _ error) {
@@ -78,7 +78,7 @@ func (UnimplementedHandler) EndSingleplayerRound(ctx context.Context, req *Singl
 
 // GetHealth implements getHealth operation.
 //
-// Check API health.
+// Check API health status.
 //
 // GET /health
 func (UnimplementedHandler) GetHealth(ctx context.Context) (r *GetHealthOK, _ error) {
@@ -159,7 +159,7 @@ func (UnimplementedHandler) GetPublicProfile(ctx context.Context, params GetPubl
 
 // GetRoot implements getRoot operation.
 //
-// Redirect to documentation.
+// Redirect to documentation page.
 //
 // GET /
 func (UnimplementedHandler) GetRoot(ctx context.Context) (r *GetRootFound, _ error) {
@@ -204,7 +204,7 @@ func (UnimplementedHandler) GetSingleplayerRound(ctx context.Context, params Get
 
 // GetUserSessions implements getUserSessions operation.
 //
-// Get user sessions.
+// Get user sessions associated with the authenticated user.
 //
 // GET /v1/auth/sessions
 func (UnimplementedHandler) GetUserSessions(ctx context.Context) (r GetUserSessionsRes, _ error) {
@@ -213,7 +213,7 @@ func (UnimplementedHandler) GetUserSessions(ctx context.Context) (r GetUserSessi
 
 // Login implements login operation.
 //
-// Login user.
+// Log in using username and password.
 //
 // POST /v1/auth/login
 func (UnimplementedHandler) Login(ctx context.Context, req *LoginRequest, params LoginParams) (r LoginRes, _ error) {
@@ -240,7 +240,7 @@ func (UnimplementedHandler) NewDiscordCallback(ctx context.Context, params NewDi
 
 // NewLobby implements newLobby operation.
 //
-// Create new lobby.
+// Create new lobby with specified parameters.
 //
 // POST /v1/lobbies
 func (UnimplementedHandler) NewLobby(ctx context.Context, req *NewLobby) (r NewLobbyRes, _ error) {
@@ -294,7 +294,7 @@ func (UnimplementedHandler) NewYandexCallback(ctx context.Context, params NewYan
 
 // RefreshTokens implements refreshTokens operation.
 //
-// Get new refresh and access tokens.
+// Get new refresh and access tokens (Set-Cookie header).
 //
 // POST /v1/auth/tokens/refresh
 func (UnimplementedHandler) RefreshTokens(ctx context.Context, req *RefreshTokensReq) (r RefreshTokensRes, _ error) {
@@ -303,7 +303,7 @@ func (UnimplementedHandler) RefreshTokens(ctx context.Context, req *RefreshToken
 
 // Register implements register operation.
 //
-// Register new user.
+// Register new user account.
 //
 // POST /v1/auth/register
 func (UnimplementedHandler) Register(ctx context.Context, req *RegisterRequest, params RegisterParams) (r RegisterRes, _ error) {

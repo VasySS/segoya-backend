@@ -995,7 +995,7 @@ func (s *Server) handleEndSingleplayerGameRequest(args [1]string, argsEscaped bo
 
 // handleEndSingleplayerRoundRequest handles endSingleplayerRound operation.
 //
-// End singleplayer game round.
+// End singleplayer game round and get results.
 //
 // POST /v1/singleplayer/{id}/round/end
 func (s *Server) handleEndSingleplayerRoundRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -1192,7 +1192,7 @@ func (s *Server) handleEndSingleplayerRoundRequest(args [1]string, argsEscaped b
 
 // handleGetHealthRequest handles getHealth operation.
 //
-// Check API health.
+// Check API health status.
 //
 // GET /health
 func (s *Server) handleGetHealthRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -2741,7 +2741,7 @@ func (s *Server) handleGetPublicProfileRequest(args [1]string, argsEscaped bool,
 
 // handleGetRootRequest handles getRoot operation.
 //
-// Redirect to documentation.
+// Redirect to documentation page.
 //
 // GET /
 func (s *Server) handleGetRootRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -3592,7 +3592,7 @@ func (s *Server) handleGetSingleplayerRoundRequest(args [1]string, argsEscaped b
 
 // handleGetUserSessionsRequest handles getUserSessions operation.
 //
-// Get user sessions.
+// Get user sessions associated with the authenticated user.
 //
 // GET /v1/auth/sessions
 func (s *Server) handleGetUserSessionsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -3759,7 +3759,7 @@ func (s *Server) handleGetUserSessionsRequest(args [0]string, argsEscaped bool, 
 
 // handleLoginRequest handles login operation.
 //
-// Login user.
+// Log in using username and password.
 //
 // POST /v1/auth/login
 func (s *Server) handleLoginRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -4229,7 +4229,7 @@ func (s *Server) handleNewDiscordCallbackRequest(args [0]string, argsEscaped boo
 
 // handleNewLobbyRequest handles newLobby operation.
 //
-// Create new lobby.
+// Create new lobby with specified parameters.
 //
 // POST /v1/lobbies
 func (s *Server) handleNewLobbyRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5270,7 +5270,7 @@ func (s *Server) handleNewYandexCallbackRequest(args [0]string, argsEscaped bool
 
 // handleRefreshTokensRequest handles refreshTokens operation.
 //
-// Get new refresh and access tokens.
+// Get new refresh and access tokens (Set-Cookie header).
 //
 // POST /v1/auth/tokens/refresh
 func (s *Server) handleRefreshTokensRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
@@ -5408,7 +5408,7 @@ func (s *Server) handleRefreshTokensRequest(args [0]string, argsEscaped bool, w 
 
 // handleRegisterRequest handles register operation.
 //
-// Register new user.
+// Register new user account.
 //
 // POST /v1/auth/register
 func (s *Server) handleRegisterRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {

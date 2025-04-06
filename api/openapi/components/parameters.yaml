@@ -1,13 +1,13 @@
 idInt:
   name: id
-  description: Numeric ID of the resource in path
+  description: Numeric ID of the resource in path.
   in: path
   required: true
   schema:
     type: integer
 idStr:
   name: id
-  description: String ID of the resource in path
+  description: String ID of the resource in path.
   in: path
   required: true
   schema:
@@ -16,7 +16,7 @@ idStr:
 pageQuery:
   name: page
   in: query
-  description: Page number in the query
+  description: Page number in the query.
   required: true
   schema:
     type: integer
@@ -25,7 +25,7 @@ pageQuery:
 pageSizeQuery:
   name: page-size
   in: query
-  description: Page size in the query
+  description: Page size in the query.
   required: true
   schema:
     type: integer

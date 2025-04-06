@@ -85,9 +85,9 @@ func decodeDeleteUserSessionParams(args [1]string, argsEscaped bool, r *http.Req
 type DiscordLoginCallbackParams struct {
 	// OAuth state cookie (oauthState).
 	Cookie string
-	// Discord OAuth code.
+	// Discord OAuth code from Discord OAuth page.
 	Code string
-	// Discord OAuth state.
+	// Discord OAuth state (oauthState).
 	State string
 }
 
@@ -1164,6 +1164,7 @@ func decodeGetSingleplayerRoundParams(args [1]string, argsEscaped bool, r *http.
 
 // LoginParams is parameters of login operation.
 type LoginParams struct {
+	// User agent is required to store sessions.
 	UserAgent string
 	// Captcha token, required only for production environment.
 	XCaptchaToken OptString
@@ -1271,9 +1272,9 @@ func decodeLoginParams(args [0]string, argsEscaped bool, r *http.Request) (param
 type NewDiscordCallbackParams struct {
 	// OAuth state cookie (oauthState).
 	Cookie string
-	// Discord OAuth code.
+	// Discord OAuth code from Discord OAuth page.
 	Code string
-	// Discord OAuth state.
+	// Discord OAuth state (oauthState).
 	State string
 }
 
@@ -1550,9 +1551,9 @@ func decodeNewSingleplayerRoundParams(args [1]string, argsEscaped bool, r *http.
 type NewYandexCallbackParams struct {
 	// OAuth state cookie (oauthState).
 	Cookie string
-	// Yandex OAuth code.
+	// Yandex OAuth code from Yandex OAuth page.
 	Code string
-	// Yandex OAuth state.
+	// Yandex OAuth state (oauthState).
 	State string
 }
 
@@ -1760,9 +1761,9 @@ func decodeRegisterParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 type YandexLoginCallbackParams struct {
 	// OAuth state cookie (oauthState).
 	Cookie string
-	// Yandex OAuth code.
+	// Yandex OAuth code from Yandex OAuth page.
 	Code string
-	// Yandex OAuth state.
+	// Yandex OAuth state (oauthState).
 	State string
 }
 

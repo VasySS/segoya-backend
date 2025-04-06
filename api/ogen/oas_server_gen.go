@@ -15,13 +15,13 @@ type Handler interface {
 	UsersHandler
 	// GetHealth implements getHealth operation.
 	//
-	// Check API health.
+	// Check API health status.
 	//
 	// GET /health
 	GetHealth(ctx context.Context) (*GetHealthOK, error)
 	// GetRoot implements getRoot operation.
 	//
-	// Redirect to documentation.
+	// Redirect to documentation page.
 	//
 	// GET /
 	GetRoot(ctx context.Context) (*GetRootFound, error)
@@ -69,13 +69,13 @@ type AuthHandler interface {
 	GetOAuthProviders(ctx context.Context) (GetOAuthProvidersRes, error)
 	// GetUserSessions implements getUserSessions operation.
 	//
-	// Get user sessions.
+	// Get user sessions associated with the authenticated user.
 	//
 	// GET /v1/auth/sessions
 	GetUserSessions(ctx context.Context) (GetUserSessionsRes, error)
 	// Login implements login operation.
 	//
-	// Login user.
+	// Log in using username and password.
 	//
 	// POST /v1/auth/login
 	Login(ctx context.Context, req *LoginRequest, params LoginParams) (LoginRes, error)
@@ -105,13 +105,13 @@ type AuthHandler interface {
 	NewYandexCallback(ctx context.Context, params NewYandexCallbackParams) (NewYandexCallbackRes, error)
 	// RefreshTokens implements refreshTokens operation.
 	//
-	// Get new refresh and access tokens.
+	// Get new refresh and access tokens (Set-Cookie header).
 	//
 	// POST /v1/auth/tokens/refresh
 	RefreshTokens(ctx context.Context, req *RefreshTokensReq) (RefreshTokensRes, error)
 	// Register implements register operation.
 	//
-	// Register new user.
+	// Register new user account.
 	//
 	// POST /v1/auth/register
 	Register(ctx context.Context, req *RegisterRequest, params RegisterParams) (RegisterRes, error)
@@ -147,7 +147,7 @@ type LobbiesHandler interface {
 	GetLobby(ctx context.Context, params GetLobbyParams) (GetLobbyRes, error)
 	// NewLobby implements newLobby operation.
 	//
-	// Create new lobby.
+	// Create new lobby with specified parameters.
 	//
 	// POST /v1/lobbies
 	NewLobby(ctx context.Context, req *NewLobby) (NewLobbyRes, error)
@@ -195,7 +195,7 @@ type SingleplayerHandler interface {
 	EndSingleplayerGame(ctx context.Context, params EndSingleplayerGameParams) (EndSingleplayerGameRes, error)
 	// EndSingleplayerRound implements endSingleplayerRound operation.
 	//
-	// End singleplayer game round.
+	// End singleplayer game round and get results.
 	//
 	// POST /v1/singleplayer/{id}/round/end
 	EndSingleplayerRound(ctx context.Context, req *SingleplayerRoundGuess, params EndSingleplayerRoundParams) (EndSingleplayerRoundRes, error)

@@ -1,13 +1,13 @@
 get:
   operationId: discordLogin
   summary: Discord login
-  description: Log in using Discord OAuth
+  description: Log in using Discord OAuth.
   security: []
   tags: ["auth"]
   x-ogen-operation-group: Auth
   responses:
     "307":
-      description: Redirect to Discord OAuth page
+      description: Redirect to Discord OAuth page.
       headers:
         Location:
           required: true

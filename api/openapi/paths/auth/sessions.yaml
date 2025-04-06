@@ -1,12 +1,12 @@
 get:
   operationId: getUserSessions
   summary: User sessions
-  description: Get user sessions
+  description: Get user sessions associated with the authenticated user.
   tags: ["auth"]
   x-ogen-operation-group: Auth
   responses:
     "200":
-      description: OK
+      description: A list of user sessions.
       content:
         application/json:
           schema:

@@ -1,47 +1,47 @@
 BadRequest:
-  description: Invalid request parameters
+  description: A bad request error response.
   content:
     application/problem+json:
       schema:
         $ref: "schemas/error.yaml#/Error"
 
 Unauthorized:
-  description: Missing or invalid authentication
+  description: An unauthorized request error response.
   content:
     application/problem+json:
       schema:
         $ref: "schemas/error.yaml#/Error"
 
 Forbidden:
-  description: Forbidden
+  description: A forbidden request error response.
   content:
     application/problem+json:
       schema:
         $ref: "schemas/error.yaml#/Error"
 
 NotFound:
-  description: Requested resource not found
+  description: A not found error response.
   content:
     application/problem+json:
       schema:
         $ref: "schemas/error.yaml#/Error"
 
 ServerError:
-  description: Internal server error
+  description: An internal server error response.
   content:
     application/problem+json:
       schema:
         $ref: "schemas/error.yaml#/Error"
 
 RateLimited:
-  description: Too many requests
+  description: A too many requests error response.
   content:
     application/problem+json:
       schema:
         $ref: "schemas/error.yaml#/Error"
 
 Conflict:
-  description: Conflict
+  description: A conflict error response.
   content:
     application/problem+json:
       schema:
