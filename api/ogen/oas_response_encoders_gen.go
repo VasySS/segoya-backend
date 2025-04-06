@@ -396,6 +396,20 @@ func encodeEndSingleplayerRoundResponse(response EndSingleplayerRoundRes, w http
 	}
 }
 
+func encodeGetHealthResponse(response *GetHealthOK, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Content-Type", "application/vnd.health+json")
+	w.WriteHeader(200)
+	span.SetStatus(codes.Ok, http.StatusText(200))
+
+	e := new(jx.Encoder)
+	response.Encode(e)
+	if _, err := e.WriteTo(w); err != nil {
+		return errors.Wrap(err, "write")
+	}
+
+	return nil
+}
+
 func encodeGetLobbiesResponse(response GetLobbiesRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *LobbiesResponse:
@@ -775,6 +789,29 @@ func encodeGetPublicProfileResponse(response GetPublicProfileRes, w http.Respons
 	default:
 		return errors.Errorf("unexpected response type: %T", response)
 	}
+}
+
+func encodeGetRootResponse(response *GetRootFound, w http.ResponseWriter, span trace.Span) error {
+	// Encoding response headers.
+	{
+		h := uri.NewHeaderEncoder(w.Header())
+		// Encode "Location" header.
+		{
+			cfg := uri.HeaderParameterEncodingConfig{
+				Name:    "Location",
+				Explode: false,
+			}
+			if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+				return e.EncodeValue(conv.StringToString(response.Location))
+			}); err != nil {
+				return errors.Wrap(err, "encode Location header")
+			}
+		}
+	}
+	w.WriteHeader(302)
+	span.SetStatus(codes.Ok, http.StatusText(302))
+
+	return nil
 }
 
 func encodeGetSingleplayerGameResponse(response GetSingleplayerGameRes, w http.ResponseWriter, span trace.Span) error {

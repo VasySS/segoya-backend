@@ -2,6 +2,7 @@
 package http
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -47,6 +48,16 @@ func newAPIHandler(
 	}
 }
 
+// GetRoot redirects to the documentation page from the root endpoint.
+func (h *APIHandler) GetRoot(_ context.Context) (*api.GetRootFound, error) {
+	return &api.GetRootFound{Location: "/docs"}, nil
+}
+
+// GetHealth returns the health status of the API.
+func (h *APIHandler) GetHealth(_ context.Context) (*api.GetHealthOK, error) {
+	return &api.GetHealthOK{Status: "OK"}, nil
+}
+
 // NewRouter initializes a new http router and registers all handlers.
 func NewRouter(
 	conf config.Config,
@@ -67,7 +78,6 @@ func NewRouter(
 		chiMiddleware.RequestID,
 		middleware.Logger,
 		chiMiddleware.Recoverer,
-		chiMiddleware.Heartbeat("/health"),
 		middleware.CORS(conf.ENV.FrontendURL.String()),
 		chiMiddleware.CleanPath,
 		chiMiddleware.StripSlashes,
@@ -92,14 +102,11 @@ func NewRouter(
 		log.Fatalf("failed to create ogen server: %v", err)
 	}
 
-	mux.Route("/v1", func(r chi.Router) {
-		r.Mount("/", ogenServer)
-		r.With(authMW.HandleWS).HandleFunc("/lobbies/{id}/ws", lh.HandleWS)
-		r.With(authMW.HandleWS).HandleFunc("/multiplayer/{id}/ws", mh.HandleWS)
-	})
+	mux.Mount("/", ogenServer)
+	mux.With(authMW.HandleWS).HandleFunc("/v1/lobbies/{id}/ws", lh.HandleWS)
+	mux.With(authMW.HandleWS).HandleFunc("/v1/multiplayer/{id}/ws", mh.HandleWS)
 
 	mux.Handle("/openapi/*", http.FileServer(http.FS(apiembed.OpenAPISpec)))
-
 	mux.HandleFunc("/docs", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		_, _ = w.Write(apiembed.OpenAPIDocsHTML)

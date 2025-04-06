@@ -34,6 +34,39 @@ tags:
     description: Multiplayer lobby management
 
 paths:
+  /:
+    get:
+      operationId: getRoot
+      summary: Redirect to documentation
+      security: []
+      responses:
+        "302":
+          description: Redirect to documentation
+          headers:
+            Location:
+              description: Redirect location
+              required: true
+              schema:
+                type: string
+                example: https://segoya-api.vasys.su/docs
+
+  /health:
+    get:
+      operationId: getHealth
+      summary: Check API health
+      security: []
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/vnd.health+json:
+              schema:
+                type: object
+                required: ["status"]
+                properties:
+                  status:
+                    type: string
+
   ##### users #####
 
   /v1/users/me:

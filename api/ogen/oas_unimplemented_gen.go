@@ -76,6 +76,15 @@ func (UnimplementedHandler) EndSingleplayerRound(ctx context.Context, req *Singl
 	return r, ht.ErrNotImplemented
 }
 
+// GetHealth implements getHealth operation.
+//
+// Check API health.
+//
+// GET /health
+func (UnimplementedHandler) GetHealth(ctx context.Context) (r *GetHealthOK, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetLobbies implements getLobbies operation.
 //
 // Get all available lobbies.
@@ -145,6 +154,15 @@ func (UnimplementedHandler) GetPrivateProfile(ctx context.Context) (r GetPrivate
 //
 // GET /v1/users/{id}
 func (UnimplementedHandler) GetPublicProfile(ctx context.Context, params GetPublicProfileParams) (r GetPublicProfileRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetRoot implements getRoot operation.
+//
+// Redirect to documentation.
+//
+// GET /
+func (UnimplementedHandler) GetRoot(ctx context.Context) (r *GetRootFound, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

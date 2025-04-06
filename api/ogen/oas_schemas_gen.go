@@ -267,6 +267,20 @@ func (*Error) getUserSessionsRes()   {}
 func (*Error) newDiscordRes()        {}
 func (*Error) newYandexRes()         {}
 
+type GetHealthOK struct {
+	Status string `json:"status"`
+}
+
+// GetStatus returns the value of Status.
+func (s *GetHealthOK) GetStatus() string {
+	return s.Status
+}
+
+// SetStatus sets the value of Status.
+func (s *GetHealthOK) SetStatus(val string) {
+	s.Status = val
+}
+
 type GetLobbyInternalServerError Error
 
 func (*GetLobbyInternalServerError) getLobbyRes() {}
@@ -338,6 +352,21 @@ func (*GetPublicProfileInternalServerError) getPublicProfileRes() {}
 type GetPublicProfileNotFound Error
 
 func (*GetPublicProfileNotFound) getPublicProfileRes() {}
+
+// GetRootFound is response for GetRoot operation.
+type GetRootFound struct {
+	Location string
+}
+
+// GetLocation returns the value of Location.
+func (s *GetRootFound) GetLocation() string {
+	return s.Location
+}
+
+// SetLocation sets the value of Location.
+func (s *GetRootFound) SetLocation(val string) {
+	s.Location = val
+}
 
 type GetSingleplayerGameForbidden Error
 

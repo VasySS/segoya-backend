@@ -7,3 +7,4 @@ generator:
   convenient_errors: "off"
   content_type_aliases:
     application/problem+json: application/json
+    application/vnd.health+json: application/json

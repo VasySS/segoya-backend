@@ -13,6 +13,18 @@ type Handler interface {
 	MultiplayerHandler
 	SingleplayerHandler
 	UsersHandler
+	// GetHealth implements getHealth operation.
+	//
+	// Check API health.
+	//
+	// GET /health
+	GetHealth(ctx context.Context) (*GetHealthOK, error)
+	// GetRoot implements getRoot operation.
+	//
+	// Redirect to documentation.
+	//
+	// GET /
+	GetRoot(ctx context.Context) (*GetRootFound, error)
 }
 
 // AuthHandler handles operations described by OpenAPI v3 specification.

@@ -49,21 +49,48 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/v1/"
+		case '/': // Prefix: "/"
 
-			if l := len("/v1/"); len(elem) >= l && elem[0:l] == "/v1/" {
+			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
 			if len(elem) == 0 {
-				break
+				switch r.Method {
+				case "GET":
+					s.handleGetRootRequest([0]string{}, elemIsEscaped, w, r)
+				default:
+					s.notAllowed(w, r, "GET")
+				}
+
+				return
 			}
 			switch elem[0] {
-			case 'a': // Prefix: "auth/"
+			case 'h': // Prefix: "health"
 
-				if l := len("auth/"); len(elem) >= l && elem[0:l] == "auth/" {
+				if l := len("health"); len(elem) >= l && elem[0:l] == "health" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleGetHealthRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+
+			case 'v': // Prefix: "v1/"
+
+				if l := len("v1/"); len(elem) >= l && elem[0:l] == "v1/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -73,115 +100,378 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					break
 				}
 				switch elem[0] {
-				case 'd': // Prefix: "discord"
+				case 'a': // Prefix: "auth/"
 
-					if l := len("discord"); len(elem) >= l && elem[0:l] == "discord" {
+					if l := len("auth/"); len(elem) >= l && elem[0:l] == "auth/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch r.Method {
-						case "DELETE":
-							s.handleDeleteDiscordRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "DELETE")
-						}
-
-						return
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'd': // Prefix: "discord"
 
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("discord"); len(elem) >= l && elem[0:l] == "discord" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							break
+							switch r.Method {
+							case "DELETE":
+								s.handleDeleteDiscordRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "DELETE")
+							}
+
+							return
 						}
 						switch elem[0] {
-						case 'l': // Prefix: "login"
+						case '/': // Prefix: "/"
 
-							if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
-								switch r.Method {
-								case "GET":
-									s.handleDiscordLoginRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
+								break
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/callback"
+							case 'l': // Prefix: "login"
 
-								if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+								if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
 								if len(elem) == 0 {
-									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleDiscordLoginCallbackRequest([0]string{}, elemIsEscaped, w, r)
+										s.handleDiscordLoginRequest([0]string{}, elemIsEscaped, w, r)
 									default:
 										s.notAllowed(w, r, "GET")
 									}
 
 									return
 								}
+								switch elem[0] {
+								case '/': // Prefix: "/callback"
+
+									if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleDiscordLoginCallbackRequest([0]string{}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
+
+								}
+
+							case 'n': // Prefix: "new"
+
+								if l := len("new"); len(elem) >= l && elem[0:l] == "new" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "GET":
+										s.handleNewDiscordRequest([0]string{}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/callback"
+
+									if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleNewDiscordCallbackRequest([0]string{}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
+
+								}
 
 							}
 
-						case 'n': // Prefix: "new"
+						}
 
-							if l := len("new"); len(elem) >= l && elem[0:l] == "new" {
+					case 'l': // Prefix: "login"
+
+						if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleLoginRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+					case 'p': // Prefix: "providers"
+
+						if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetOAuthProvidersRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+
+					case 'r': // Prefix: "register"
+
+						if l := len("register"); len(elem) >= l && elem[0:l] == "register" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleRegisterRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+					case 's': // Prefix: "sessions"
+
+						if l := len("sessions"); len(elem) >= l && elem[0:l] == "sessions" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleGetUserSessionsRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "id"
+							// Leaf parameter, slashes are prohibited
+							idx := strings.IndexByte(elem, '/')
+							if idx >= 0 {
+								break
+							}
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "DELETE":
+									s.handleDeleteUserSessionRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "DELETE")
+								}
+
+								return
+							}
+
+						}
+
+					case 't': // Prefix: "tokens/refresh"
+
+						if l := len("tokens/refresh"); len(elem) >= l && elem[0:l] == "tokens/refresh" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "POST":
+								s.handleRefreshTokensRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "POST")
+							}
+
+							return
+						}
+
+					case 'y': // Prefix: "yandex"
+
+						if l := len("yandex"); len(elem) >= l && elem[0:l] == "yandex" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "DELETE":
+								s.handleDeleteYandexRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "DELETE")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
-								switch r.Method {
-								case "GET":
-									s.handleNewDiscordRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
+								break
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/callback"
+							case 'l': // Prefix: "login"
 
-								if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+								if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
 								if len(elem) == 0 {
-									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleNewDiscordCallbackRequest([0]string{}, elemIsEscaped, w, r)
+										s.handleYandexLoginRequest([0]string{}, elemIsEscaped, w, r)
 									default:
 										s.notAllowed(w, r, "GET")
 									}
 
 									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/callback"
+
+									if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleYandexLoginCallbackRequest([0]string{}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
+
+								}
+
+							case 'n': // Prefix: "new"
+
+								if l := len("new"); len(elem) >= l && elem[0:l] == "new" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch r.Method {
+									case "GET":
+										s.handleNewYandexRequest([0]string{}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/callback"
+
+									if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleNewYandexCallbackRequest([0]string{}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
+
 								}
 
 							}
@@ -190,69 +480,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					}
 
-				case 'l': // Prefix: "login"
+				case 'l': // Prefix: "lobbies"
 
-					if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleLoginRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-				case 'p': // Prefix: "providers"
-
-					if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetOAuthProvidersRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-
-				case 'r': // Prefix: "register"
-
-					if l := len("register"); len(elem) >= l && elem[0:l] == "register" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleRegisterRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-				case 's': // Prefix: "sessions"
-
-					if l := len("sessions"); len(elem) >= l && elem[0:l] == "sessions" {
+					if l := len("lobbies"); len(elem) >= l && elem[0:l] == "lobbies" {
 						elem = elem[l:]
 					} else {
 						break
@@ -261,9 +491,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						switch r.Method {
 						case "GET":
-							s.handleGetUserSessionsRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleGetLobbiesRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleNewLobbyRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET")
+							s.notAllowed(w, r, "GET,POST")
 						}
 
 						return
@@ -289,267 +521,8 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						if len(elem) == 0 {
 							// Leaf node.
 							switch r.Method {
-							case "DELETE":
-								s.handleDeleteUserSessionRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "DELETE")
-							}
-
-							return
-						}
-
-					}
-
-				case 't': // Prefix: "tokens/refresh"
-
-					if l := len("tokens/refresh"); len(elem) >= l && elem[0:l] == "tokens/refresh" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "POST":
-							s.handleRefreshTokensRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "POST")
-						}
-
-						return
-					}
-
-				case 'y': // Prefix: "yandex"
-
-					if l := len("yandex"); len(elem) >= l && elem[0:l] == "yandex" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						switch r.Method {
-						case "DELETE":
-							s.handleDeleteYandexRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "DELETE")
-						}
-
-						return
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'l': // Prefix: "login"
-
-							if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch r.Method {
-								case "GET":
-									s.handleYandexLoginRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/callback"
-
-								if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleYandexLoginCallbackRequest([0]string{}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
-
-							}
-
-						case 'n': // Prefix: "new"
-
-							if l := len("new"); len(elem) >= l && elem[0:l] == "new" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch r.Method {
-								case "GET":
-									s.handleNewYandexRequest([0]string{}, elemIsEscaped, w, r)
-								default:
-									s.notAllowed(w, r, "GET")
-								}
-
-								return
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/callback"
-
-								if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleNewYandexCallbackRequest([0]string{}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
-
-							}
-
-						}
-
-					}
-
-				}
-
-			case 'l': // Prefix: "lobbies"
-
-				if l := len("lobbies"); len(elem) >= l && elem[0:l] == "lobbies" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleGetLobbiesRequest([0]string{}, elemIsEscaped, w, r)
-					case "POST":
-						s.handleNewLobbyRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET,POST")
-					}
-
-					return
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "id"
-					// Leaf parameter, slashes are prohibited
-					idx := strings.IndexByte(elem, '/')
-					if idx >= 0 {
-						break
-					}
-					args[0] = elem
-					elem = ""
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "GET":
-							s.handleGetLobbyRequest([1]string{
-								args[0],
-							}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "GET")
-						}
-
-						return
-					}
-
-				}
-
-			case 'm': // Prefix: "multiplayer/"
-
-				if l := len("multiplayer/"); len(elem) >= l && elem[0:l] == "multiplayer/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				// Param: "id"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleGetMultiplayerGameRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'g': // Prefix: "guesses"
-
-						if l := len("guesses"); len(elem) >= l && elem[0:l] == "guesses" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
 							case "GET":
-								s.handleGetMultiplayerGameGuessesRequest([1]string{
+								s.handleGetLobbyRequest([1]string{
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
@@ -559,60 +532,11 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							return
 						}
 
-					case 'r': // Prefix: "round"
-
-						if l := len("round"); len(elem) >= l && elem[0:l] == "round" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch r.Method {
-							case "GET":
-								s.handleGetMultiplayerRoundRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							case "POST":
-								s.handleNewMultiplayerRoundRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET,POST")
-							}
-
-							return
-						}
-
 					}
 
-				}
+				case 'm': // Prefix: "multiplayer/"
 
-			case 's': // Prefix: "singleplayer"
-
-				if l := len("singleplayer"); len(elem) >= l && elem[0:l] == "singleplayer" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					switch r.Method {
-					case "GET":
-						s.handleGetSingleplayerGamesRequest([0]string{}, elemIsEscaped, w, r)
-					case "POST":
-						s.handleNewSingleplayerGameRequest([0]string{}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET,POST")
-					}
-
-					return
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("multiplayer/"); len(elem) >= l && elem[0:l] == "multiplayer/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -630,7 +554,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					if len(elem) == 0 {
 						switch r.Method {
 						case "GET":
-							s.handleGetSingleplayerGameRequest([1]string{
+							s.handleGetMultiplayerGameRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
@@ -652,9 +576,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
-						case 'e': // Prefix: "end"
+						case 'g': // Prefix: "guesses"
 
-							if l := len("end"); len(elem) >= l && elem[0:l] == "end" {
+							if l := len("guesses"); len(elem) >= l && elem[0:l] == "guesses" {
 								elem = elem[l:]
 							} else {
 								break
@@ -663,12 +587,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch r.Method {
-								case "POST":
-									s.handleEndSingleplayerGameRequest([1]string{
+								case "GET":
+									s.handleGetMultiplayerGameGuessesRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "POST")
+									s.notAllowed(w, r, "GET")
 								}
 
 								return
@@ -683,13 +607,14 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							}
 
 							if len(elem) == 0 {
+								// Leaf node.
 								switch r.Method {
 								case "GET":
-									s.handleGetSingleplayerRoundRequest([1]string{
+									s.handleGetMultiplayerRoundRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								case "POST":
-									s.handleNewSingleplayerRoundRequest([1]string{
+									s.handleNewMultiplayerRoundRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
@@ -698,10 +623,77 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 								return
 							}
-							switch elem[0] {
-							case '/': // Prefix: "/end"
 
-								if l := len("/end"); len(elem) >= l && elem[0:l] == "/end" {
+						}
+
+					}
+
+				case 's': // Prefix: "singleplayer"
+
+					if l := len("singleplayer"); len(elem) >= l && elem[0:l] == "singleplayer" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch r.Method {
+						case "GET":
+							s.handleGetSingleplayerGamesRequest([0]string{}, elemIsEscaped, w, r)
+						case "POST":
+							s.handleNewSingleplayerGameRequest([0]string{}, elemIsEscaped, w, r)
+						default:
+							s.notAllowed(w, r, "GET,POST")
+						}
+
+						return
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "id"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							switch r.Method {
+							case "GET":
+								s.handleGetSingleplayerGameRequest([1]string{
+									args[0],
+								}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET")
+							}
+
+							return
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'e': // Prefix: "end"
+
+								if l := len("end"); len(elem) >= l && elem[0:l] == "end" {
 									elem = elem[l:]
 								} else {
 									break
@@ -711,7 +703,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									// Leaf node.
 									switch r.Method {
 									case "POST":
-										s.handleEndSingleplayerRoundRequest([1]string{
+										s.handleEndSingleplayerGameRequest([1]string{
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
@@ -721,26 +713,75 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									return
 								}
 
-							case 's': // Prefix: "s"
+							case 'r': // Prefix: "round"
 
-								if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+								if l := len("round"); len(elem) >= l && elem[0:l] == "round" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
 								if len(elem) == 0 {
-									// Leaf node.
 									switch r.Method {
 									case "GET":
-										s.handleGetSingleplayerGameRoundsRequest([1]string{
+										s.handleGetSingleplayerRoundRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									case "POST":
+										s.handleNewSingleplayerRoundRequest([1]string{
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "GET")
+										s.notAllowed(w, r, "GET,POST")
 									}
 
 									return
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/end"
+
+									if l := len("/end"); len(elem) >= l && elem[0:l] == "/end" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "POST":
+											s.handleEndSingleplayerRoundRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "POST")
+										}
+
+										return
+									}
+
+								case 's': // Prefix: "s"
+
+									if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch r.Method {
+										case "GET":
+											s.handleGetSingleplayerGameRoundsRequest([1]string{
+												args[0],
+											}, elemIsEscaped, w, r)
+										default:
+											s.notAllowed(w, r, "GET")
+										}
+
+										return
+									}
+
 								}
 
 							}
@@ -749,86 +790,86 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					}
 
-				}
+				case 'u': // Prefix: "users/"
 
-			case 'u': // Prefix: "users/"
-
-				if l := len("users/"); len(elem) >= l && elem[0:l] == "users/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'a': // Prefix: "avatar"
-					origElem := elem
-					if l := len("avatar"); len(elem) >= l && elem[0:l] == "avatar" {
+					if l := len("users/"); len(elem) >= l && elem[0:l] == "users/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch r.Method {
-						case "PUT":
-							s.handleUpdateUserAvatarRequest([0]string{}, elemIsEscaped, w, r)
-						default:
-							s.notAllowed(w, r, "PUT")
-						}
-
-						return
-					}
-
-					elem = origElem
-				case 'm': // Prefix: "me"
-					origElem := elem
-					if l := len("me"); len(elem) >= l && elem[0:l] == "me" {
-						elem = elem[l:]
-					} else {
 						break
 					}
+					switch elem[0] {
+					case 'a': // Prefix: "avatar"
+						origElem := elem
+						if l := len("avatar"); len(elem) >= l && elem[0:l] == "avatar" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "PUT":
+								s.handleUpdateUserAvatarRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "PUT")
+							}
+
+							return
+						}
+
+						elem = origElem
+					case 'm': // Prefix: "me"
+						origElem := elem
+						if l := len("me"); len(elem) >= l && elem[0:l] == "me" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch r.Method {
+							case "GET":
+								s.handleGetPrivateProfileRequest([0]string{}, elemIsEscaped, w, r)
+							case "PATCH":
+								s.handleUpdateUserRequest([0]string{}, elemIsEscaped, w, r)
+							default:
+								s.notAllowed(w, r, "GET,PATCH")
+							}
+
+							return
+						}
+
+						elem = origElem
+					}
+					// Param: "id"
+					// Leaf parameter, slashes are prohibited
+					idx := strings.IndexByte(elem, '/')
+					if idx >= 0 {
+						break
+					}
+					args[0] = elem
+					elem = ""
 
 					if len(elem) == 0 {
 						// Leaf node.
 						switch r.Method {
 						case "GET":
-							s.handleGetPrivateProfileRequest([0]string{}, elemIsEscaped, w, r)
-						case "PATCH":
-							s.handleUpdateUserRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleGetPublicProfileRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET,PATCH")
+							s.notAllowed(w, r, "GET")
 						}
 
 						return
 					}
 
-					elem = origElem
-				}
-				// Param: "id"
-				// Leaf parameter, slashes are prohibited
-				idx := strings.IndexByte(elem, '/')
-				if idx >= 0 {
-					break
-				}
-				args[0] = elem
-				elem = ""
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch r.Method {
-					case "GET":
-						s.handleGetPublicProfileRequest([1]string{
-							args[0],
-						}, elemIsEscaped, w, r)
-					default:
-						s.notAllowed(w, r, "GET")
-					}
-
-					return
 				}
 
 			}
@@ -913,21 +954,56 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 			break
 		}
 		switch elem[0] {
-		case '/': // Prefix: "/v1/"
+		case '/': // Prefix: "/"
 
-			if l := len("/v1/"); len(elem) >= l && elem[0:l] == "/v1/" {
+			if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 				elem = elem[l:]
 			} else {
 				break
 			}
 
 			if len(elem) == 0 {
-				break
+				switch method {
+				case "GET":
+					r.name = GetRootOperation
+					r.summary = "Redirect to documentation"
+					r.operationID = "getRoot"
+					r.pathPattern = "/"
+					r.args = args
+					r.count = 0
+					return r, true
+				default:
+					return
+				}
 			}
 			switch elem[0] {
-			case 'a': // Prefix: "auth/"
+			case 'h': // Prefix: "health"
 
-				if l := len("auth/"); len(elem) >= l && elem[0:l] == "auth/" {
+				if l := len("health"); len(elem) >= l && elem[0:l] == "health" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = GetHealthOperation
+						r.summary = "Check API health"
+						r.operationID = "getHealth"
+						r.pathPattern = "/health"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+
+			case 'v': // Prefix: "v1/"
+
+				if l := len("v1/"); len(elem) >= l && elem[0:l] == "v1/" {
 					elem = elem[l:]
 				} else {
 					break
@@ -937,80 +1013,68 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					break
 				}
 				switch elem[0] {
-				case 'd': // Prefix: "discord"
+				case 'a': // Prefix: "auth/"
 
-					if l := len("discord"); len(elem) >= l && elem[0:l] == "discord" {
+					if l := len("auth/"); len(elem) >= l && elem[0:l] == "auth/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						switch method {
-						case "DELETE":
-							r.name = DeleteDiscordOperation
-							r.summary = "Delete Discord auth"
-							r.operationID = "deleteDiscord"
-							r.pathPattern = "/v1/auth/discord"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
+						break
 					}
 					switch elem[0] {
-					case '/': // Prefix: "/"
+					case 'd': // Prefix: "discord"
 
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+						if l := len("discord"); len(elem) >= l && elem[0:l] == "discord" {
 							elem = elem[l:]
 						} else {
 							break
 						}
 
 						if len(elem) == 0 {
-							break
+							switch method {
+							case "DELETE":
+								r.name = DeleteDiscordOperation
+								r.summary = "Delete Discord auth"
+								r.operationID = "deleteDiscord"
+								r.pathPattern = "/v1/auth/discord"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
 						}
 						switch elem[0] {
-						case 'l': // Prefix: "login"
+						case '/': // Prefix: "/"
 
-							if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									r.name = DiscordLoginOperation
-									r.summary = "Discord login"
-									r.operationID = "discordLogin"
-									r.pathPattern = "/v1/auth/discord/login"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
+								break
 							}
 							switch elem[0] {
-							case '/': // Prefix: "/callback"
+							case 'l': // Prefix: "login"
 
-								if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+								if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
 								if len(elem) == 0 {
-									// Leaf node.
 									switch method {
 									case "GET":
-										r.name = DiscordLoginCallbackOperation
-										r.summary = "Discord login callback"
-										r.operationID = "discordLoginCallback"
-										r.pathPattern = "/v1/auth/discord/login/callback"
+										r.name = DiscordLoginOperation
+										r.summary = "Discord login"
+										r.operationID = "discordLogin"
+										r.pathPattern = "/v1/auth/discord/login"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -1018,48 +1082,48 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										return
 									}
 								}
+								switch elem[0] {
+								case '/': // Prefix: "/callback"
 
-							}
+									if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+										elem = elem[l:]
+									} else {
+										break
+									}
 
-						case 'n': // Prefix: "new"
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = DiscordLoginCallbackOperation
+											r.summary = "Discord login callback"
+											r.operationID = "discordLoginCallback"
+											r.pathPattern = "/v1/auth/discord/login/callback"
+											r.args = args
+											r.count = 0
+											return r, true
+										default:
+											return
+										}
+									}
 
-							if l := len("new"); len(elem) >= l && elem[0:l] == "new" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									r.name = NewDiscordOperation
-									r.summary = "New Discord auth"
-									r.operationID = "newDiscord"
-									r.pathPattern = "/v1/auth/discord/new"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
 								}
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/callback"
 
-								if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+							case 'n': // Prefix: "new"
+
+								if l := len("new"); len(elem) >= l && elem[0:l] == "new" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
 								if len(elem) == 0 {
-									// Leaf node.
 									switch method {
 									case "GET":
-										r.name = NewDiscordCallbackOperation
-										r.summary = "Discord new auth callback"
-										r.operationID = "newDiscordCallback"
-										r.pathPattern = "/v1/auth/discord/new/callback"
+										r.name = NewDiscordOperation
+										r.summary = "New Discord auth"
+										r.operationID = "newDiscord"
+										r.pathPattern = "/v1/auth/discord/new"
 										r.args = args
 										r.count = 0
 										return r, true
@@ -1067,6 +1131,323 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										return
 									}
 								}
+								switch elem[0] {
+								case '/': // Prefix: "/callback"
+
+									if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = NewDiscordCallbackOperation
+											r.summary = "Discord new auth callback"
+											r.operationID = "newDiscordCallback"
+											r.pathPattern = "/v1/auth/discord/new/callback"
+											r.args = args
+											r.count = 0
+											return r, true
+										default:
+											return
+										}
+									}
+
+								}
+
+							}
+
+						}
+
+					case 'l': // Prefix: "login"
+
+						if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = LoginOperation
+								r.summary = "Login user"
+								r.operationID = "login"
+								r.pathPattern = "/v1/auth/login"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 'p': // Prefix: "providers"
+
+						if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = GetOAuthProvidersOperation
+								r.summary = "Get all connected OAuth providers"
+								r.operationID = "getOAuthProviders"
+								r.pathPattern = "/v1/auth/providers"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 'r': // Prefix: "register"
+
+						if l := len("register"); len(elem) >= l && elem[0:l] == "register" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = RegisterOperation
+								r.summary = "Register new user"
+								r.operationID = "register"
+								r.pathPattern = "/v1/auth/register"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 's': // Prefix: "sessions"
+
+						if l := len("sessions"); len(elem) >= l && elem[0:l] == "sessions" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = GetUserSessionsOperation
+								r.summary = "User sessions"
+								r.operationID = "getUserSessions"
+								r.pathPattern = "/v1/auth/sessions"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							// Param: "id"
+							// Leaf parameter, slashes are prohibited
+							idx := strings.IndexByte(elem, '/')
+							if idx >= 0 {
+								break
+							}
+							args[0] = elem
+							elem = ""
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "DELETE":
+									r.name = DeleteUserSessionOperation
+									r.summary = "Delete user session"
+									r.operationID = "deleteUserSession"
+									r.pathPattern = "/v1/auth/sessions/{id}"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+						}
+
+					case 't': // Prefix: "tokens/refresh"
+
+						if l := len("tokens/refresh"); len(elem) >= l && elem[0:l] == "tokens/refresh" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "POST":
+								r.name = RefreshTokensOperation
+								r.summary = "Get new refresh and access tokens"
+								r.operationID = "refreshTokens"
+								r.pathPattern = "/v1/auth/tokens/refresh"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+					case 'y': // Prefix: "yandex"
+
+						if l := len("yandex"); len(elem) >= l && elem[0:l] == "yandex" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							switch method {
+							case "DELETE":
+								r.name = DeleteYandexOperation
+								r.summary = "Delete Yandex auth"
+								r.operationID = "deleteYandex"
+								r.pathPattern = "/v1/auth/yandex"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'l': // Prefix: "login"
+
+								if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										r.name = YandexLoginOperation
+										r.summary = "Yandex login"
+										r.operationID = "yandexLogin"
+										r.pathPattern = "/v1/auth/yandex/login"
+										r.args = args
+										r.count = 0
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/callback"
+
+									if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = YandexLoginCallbackOperation
+											r.summary = "Yandex login callback"
+											r.operationID = "yandexLoginCallback"
+											r.pathPattern = "/v1/auth/yandex/login/callback"
+											r.args = args
+											r.count = 0
+											return r, true
+										default:
+											return
+										}
+									}
+
+								}
+
+							case 'n': // Prefix: "new"
+
+								if l := len("new"); len(elem) >= l && elem[0:l] == "new" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									switch method {
+									case "GET":
+										r.name = NewYandexOperation
+										r.summary = "New Yandex auth"
+										r.operationID = "newYandex"
+										r.pathPattern = "/v1/auth/yandex/new"
+										r.args = args
+										r.count = 0
+										return r, true
+									default:
+										return
+									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/callback"
+
+									if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = NewYandexCallbackOperation
+											r.summary = "New Yandex auth callback"
+											r.operationID = "newYandexCallback"
+											r.pathPattern = "/v1/auth/yandex/new/callback"
+											r.args = args
+											r.count = 0
+											return r, true
+										default:
+											return
+										}
+									}
+
+								}
 
 							}
 
@@ -1074,81 +1455,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 					}
 
-				case 'l': // Prefix: "login"
+				case 'l': // Prefix: "lobbies"
 
-					if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = LoginOperation
-							r.summary = "Login user"
-							r.operationID = "login"
-							r.pathPattern = "/v1/auth/login"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-				case 'p': // Prefix: "providers"
-
-					if l := len("providers"); len(elem) >= l && elem[0:l] == "providers" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = GetOAuthProvidersOperation
-							r.summary = "Get all connected OAuth providers"
-							r.operationID = "getOAuthProviders"
-							r.pathPattern = "/v1/auth/providers"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-				case 'r': // Prefix: "register"
-
-					if l := len("register"); len(elem) >= l && elem[0:l] == "register" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = RegisterOperation
-							r.summary = "Register new user"
-							r.operationID = "register"
-							r.pathPattern = "/v1/auth/register"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-				case 's': // Prefix: "sessions"
-
-					if l := len("sessions"); len(elem) >= l && elem[0:l] == "sessions" {
+					if l := len("lobbies"); len(elem) >= l && elem[0:l] == "lobbies" {
 						elem = elem[l:]
 					} else {
 						break
@@ -1157,10 +1466,18 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							r.name = GetUserSessionsOperation
-							r.summary = "User sessions"
-							r.operationID = "getUserSessions"
-							r.pathPattern = "/v1/auth/sessions"
+							r.name = GetLobbiesOperation
+							r.summary = "Get available lobbies"
+							r.operationID = "getLobbies"
+							r.pathPattern = "/v1/lobbies"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = NewLobbyOperation
+							r.summary = "Create new lobby"
+							r.operationID = "newLobby"
+							r.pathPattern = "/v1/lobbies"
 							r.args = args
 							r.count = 0
 							return r, true
@@ -1189,342 +1506,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						if len(elem) == 0 {
 							// Leaf node.
 							switch method {
-							case "DELETE":
-								r.name = DeleteUserSessionOperation
-								r.summary = "Delete user session"
-								r.operationID = "deleteUserSession"
-								r.pathPattern = "/v1/auth/sessions/{id}"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-
-					}
-
-				case 't': // Prefix: "tokens/refresh"
-
-					if l := len("tokens/refresh"); len(elem) >= l && elem[0:l] == "tokens/refresh" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "POST":
-							r.name = RefreshTokensOperation
-							r.summary = "Get new refresh and access tokens"
-							r.operationID = "refreshTokens"
-							r.pathPattern = "/v1/auth/tokens/refresh"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-				case 'y': // Prefix: "yandex"
-
-					if l := len("yandex"); len(elem) >= l && elem[0:l] == "yandex" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						switch method {
-						case "DELETE":
-							r.name = DeleteYandexOperation
-							r.summary = "Delete Yandex auth"
-							r.operationID = "deleteYandex"
-							r.pathPattern = "/v1/auth/yandex"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-					switch elem[0] {
-					case '/': // Prefix: "/"
-
-						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							break
-						}
-						switch elem[0] {
-						case 'l': // Prefix: "login"
-
-							if l := len("login"); len(elem) >= l && elem[0:l] == "login" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									r.name = YandexLoginOperation
-									r.summary = "Yandex login"
-									r.operationID = "yandexLogin"
-									r.pathPattern = "/v1/auth/yandex/login"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/callback"
-
-								if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "GET":
-										r.name = YandexLoginCallbackOperation
-										r.summary = "Yandex login callback"
-										r.operationID = "yandexLoginCallback"
-										r.pathPattern = "/v1/auth/yandex/login/callback"
-										r.args = args
-										r.count = 0
-										return r, true
-									default:
-										return
-									}
-								}
-
-							}
-
-						case 'n': // Prefix: "new"
-
-							if l := len("new"); len(elem) >= l && elem[0:l] == "new" {
-								elem = elem[l:]
-							} else {
-								break
-							}
-
-							if len(elem) == 0 {
-								switch method {
-								case "GET":
-									r.name = NewYandexOperation
-									r.summary = "New Yandex auth"
-									r.operationID = "newYandex"
-									r.pathPattern = "/v1/auth/yandex/new"
-									r.args = args
-									r.count = 0
-									return r, true
-								default:
-									return
-								}
-							}
-							switch elem[0] {
-							case '/': // Prefix: "/callback"
-
-								if l := len("/callback"); len(elem) >= l && elem[0:l] == "/callback" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "GET":
-										r.name = NewYandexCallbackOperation
-										r.summary = "New Yandex auth callback"
-										r.operationID = "newYandexCallback"
-										r.pathPattern = "/v1/auth/yandex/new/callback"
-										r.args = args
-										r.count = 0
-										return r, true
-									default:
-										return
-									}
-								}
-
-							}
-
-						}
-
-					}
-
-				}
-
-			case 'l': // Prefix: "lobbies"
-
-				if l := len("lobbies"); len(elem) >= l && elem[0:l] == "lobbies" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = GetLobbiesOperation
-						r.summary = "Get available lobbies"
-						r.operationID = "getLobbies"
-						r.pathPattern = "/v1/lobbies"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "POST":
-						r.name = NewLobbyOperation
-						r.summary = "Create new lobby"
-						r.operationID = "newLobby"
-						r.pathPattern = "/v1/lobbies"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					// Param: "id"
-					// Leaf parameter, slashes are prohibited
-					idx := strings.IndexByte(elem, '/')
-					if idx >= 0 {
-						break
-					}
-					args[0] = elem
-					elem = ""
-
-					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "GET":
-							r.name = GetLobbyOperation
-							r.summary = "Get lobby by ID"
-							r.operationID = "getLobby"
-							r.pathPattern = "/v1/lobbies/{id}"
-							r.args = args
-							r.count = 1
-							return r, true
-						default:
-							return
-						}
-					}
-
-				}
-
-			case 'm': // Prefix: "multiplayer/"
-
-				if l := len("multiplayer/"); len(elem) >= l && elem[0:l] == "multiplayer/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				// Param: "id"
-				// Match until "/"
-				idx := strings.IndexByte(elem, '/')
-				if idx < 0 {
-					idx = len(elem)
-				}
-				args[0] = elem[:idx]
-				elem = elem[idx:]
-
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = GetMultiplayerGameOperation
-						r.summary = "Get multiplayer game by ID"
-						r.operationID = "getMultiplayerGame"
-						r.pathPattern = "/v1/multiplayer/{id}"
-						r.args = args
-						r.count = 1
-						return r, true
-					default:
-						return
-					}
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-						elem = elem[l:]
-					} else {
-						break
-					}
-
-					if len(elem) == 0 {
-						break
-					}
-					switch elem[0] {
-					case 'g': // Prefix: "guesses"
-
-						if l := len("guesses"); len(elem) >= l && elem[0:l] == "guesses" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
 							case "GET":
-								r.name = GetMultiplayerGameGuessesOperation
-								r.summary = "Get multiplayer game guesses"
-								r.operationID = "getMultiplayerGameGuesses"
-								r.pathPattern = "/v1/multiplayer/{id}/guesses"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
-						}
-
-					case 'r': // Prefix: "round"
-
-						if l := len("round"); len(elem) >= l && elem[0:l] == "round" {
-							elem = elem[l:]
-						} else {
-							break
-						}
-
-						if len(elem) == 0 {
-							// Leaf node.
-							switch method {
-							case "GET":
-								r.name = GetMultiplayerRoundOperation
-								r.summary = "Get multiplayer game round"
-								r.operationID = "getMultiplayerRound"
-								r.pathPattern = "/v1/multiplayer/{id}/round"
-								r.args = args
-								r.count = 1
-								return r, true
-							case "POST":
-								r.name = NewMultiplayerRoundOperation
-								r.summary = "Get or generate multiplayer game round"
-								r.operationID = "newMultiplayerRound"
-								r.pathPattern = "/v1/multiplayer/{id}/round"
+								r.name = GetLobbyOperation
+								r.summary = "Get lobby by ID"
+								r.operationID = "getLobby"
+								r.pathPattern = "/v1/lobbies/{id}"
 								r.args = args
 								r.count = 1
 								return r, true
@@ -1535,42 +1521,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 					}
 
-				}
+				case 'm': // Prefix: "multiplayer/"
 
-			case 's': // Prefix: "singleplayer"
-
-				if l := len("singleplayer"); len(elem) >= l && elem[0:l] == "singleplayer" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					switch method {
-					case "GET":
-						r.name = GetSingleplayerGamesOperation
-						r.summary = "Get all singleplayer user games"
-						r.operationID = "getSingleplayerGames"
-						r.pathPattern = "/v1/singleplayer"
-						r.args = args
-						r.count = 0
-						return r, true
-					case "POST":
-						r.name = NewSingleplayerGameOperation
-						r.summary = "Create new singleplayer game"
-						r.operationID = "newSingleplayerGame"
-						r.pathPattern = "/v1/singleplayer"
-						r.args = args
-						r.count = 0
-						return r, true
-					default:
-						return
-					}
-				}
-				switch elem[0] {
-				case '/': // Prefix: "/"
-
-					if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+					if l := len("multiplayer/"); len(elem) >= l && elem[0:l] == "multiplayer/" {
 						elem = elem[l:]
 					} else {
 						break
@@ -1588,10 +1541,10 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							r.name = GetSingleplayerGameOperation
-							r.summary = "Get singleplayer game by ID"
-							r.operationID = "getSingleplayerGame"
-							r.pathPattern = "/v1/singleplayer/{id}"
+							r.name = GetMultiplayerGameOperation
+							r.summary = "Get multiplayer game by ID"
+							r.operationID = "getMultiplayerGame"
+							r.pathPattern = "/v1/multiplayer/{id}"
 							r.args = args
 							r.count = 1
 							return r, true
@@ -1612,9 +1565,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
-						case 'e': // Prefix: "end"
+						case 'g': // Prefix: "guesses"
 
-							if l := len("end"); len(elem) >= l && elem[0:l] == "end" {
+							if l := len("guesses"); len(elem) >= l && elem[0:l] == "guesses" {
 								elem = elem[l:]
 							} else {
 								break
@@ -1623,11 +1576,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch method {
-								case "POST":
-									r.name = EndSingleplayerGameOperation
-									r.summary = "End singleplayer game"
-									r.operationID = "endSingleplayerGame"
-									r.pathPattern = "/v1/singleplayer/{id}/end"
+								case "GET":
+									r.name = GetMultiplayerGameGuessesOperation
+									r.summary = "Get multiplayer game guesses"
+									r.operationID = "getMultiplayerGameGuesses"
+									r.pathPattern = "/v1/multiplayer/{id}/guesses"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -1645,20 +1598,21 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							}
 
 							if len(elem) == 0 {
+								// Leaf node.
 								switch method {
 								case "GET":
-									r.name = GetSingleplayerRoundOperation
-									r.summary = "Get singleplayer game round"
-									r.operationID = "getSingleplayerRound"
-									r.pathPattern = "/v1/singleplayer/{id}/round"
+									r.name = GetMultiplayerRoundOperation
+									r.summary = "Get multiplayer game round"
+									r.operationID = "getMultiplayerRound"
+									r.pathPattern = "/v1/multiplayer/{id}/round"
 									r.args = args
 									r.count = 1
 									return r, true
 								case "POST":
-									r.name = NewSingleplayerRoundOperation
-									r.summary = "Create singleplayer game round"
-									r.operationID = "newSingleplayerRound"
-									r.pathPattern = "/v1/singleplayer/{id}/round"
+									r.name = NewMultiplayerRoundOperation
+									r.summary = "Get or generate multiplayer game round"
+									r.operationID = "newMultiplayerRound"
+									r.pathPattern = "/v1/multiplayer/{id}/round"
 									r.args = args
 									r.count = 1
 									return r, true
@@ -1666,10 +1620,89 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									return
 								}
 							}
-							switch elem[0] {
-							case '/': // Prefix: "/end"
 
-								if l := len("/end"); len(elem) >= l && elem[0:l] == "/end" {
+						}
+
+					}
+
+				case 's': // Prefix: "singleplayer"
+
+					if l := len("singleplayer"); len(elem) >= l && elem[0:l] == "singleplayer" {
+						elem = elem[l:]
+					} else {
+						break
+					}
+
+					if len(elem) == 0 {
+						switch method {
+						case "GET":
+							r.name = GetSingleplayerGamesOperation
+							r.summary = "Get all singleplayer user games"
+							r.operationID = "getSingleplayerGames"
+							r.pathPattern = "/v1/singleplayer"
+							r.args = args
+							r.count = 0
+							return r, true
+						case "POST":
+							r.name = NewSingleplayerGameOperation
+							r.summary = "Create new singleplayer game"
+							r.operationID = "newSingleplayerGame"
+							r.pathPattern = "/v1/singleplayer"
+							r.args = args
+							r.count = 0
+							return r, true
+						default:
+							return
+						}
+					}
+					switch elem[0] {
+					case '/': // Prefix: "/"
+
+						if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						// Param: "id"
+						// Match until "/"
+						idx := strings.IndexByte(elem, '/')
+						if idx < 0 {
+							idx = len(elem)
+						}
+						args[0] = elem[:idx]
+						elem = elem[idx:]
+
+						if len(elem) == 0 {
+							switch method {
+							case "GET":
+								r.name = GetSingleplayerGameOperation
+								r.summary = "Get singleplayer game by ID"
+								r.operationID = "getSingleplayerGame"
+								r.pathPattern = "/v1/singleplayer/{id}"
+								r.args = args
+								r.count = 1
+								return r, true
+							default:
+								return
+							}
+						}
+						switch elem[0] {
+						case '/': // Prefix: "/"
+
+							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								break
+							}
+							switch elem[0] {
+							case 'e': // Prefix: "end"
+
+								if l := len("end"); len(elem) >= l && elem[0:l] == "end" {
 									elem = elem[l:]
 								} else {
 									break
@@ -1679,10 +1712,10 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									// Leaf node.
 									switch method {
 									case "POST":
-										r.name = EndSingleplayerRoundOperation
-										r.summary = "End singleplayer game round"
-										r.operationID = "endSingleplayerRound"
-										r.pathPattern = "/v1/singleplayer/{id}/round/end"
+										r.name = EndSingleplayerGameOperation
+										r.summary = "End singleplayer game"
+										r.operationID = "endSingleplayerGame"
+										r.pathPattern = "/v1/singleplayer/{id}/end"
 										r.args = args
 										r.count = 1
 										return r, true
@@ -1691,28 +1724,85 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									}
 								}
 
-							case 's': // Prefix: "s"
+							case 'r': // Prefix: "round"
 
-								if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+								if l := len("round"); len(elem) >= l && elem[0:l] == "round" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
 								if len(elem) == 0 {
-									// Leaf node.
 									switch method {
 									case "GET":
-										r.name = GetSingleplayerGameRoundsOperation
-										r.summary = "Get singleplayer game rounds"
-										r.operationID = "getSingleplayerGameRounds"
-										r.pathPattern = "/v1/singleplayer/{id}/rounds"
+										r.name = GetSingleplayerRoundOperation
+										r.summary = "Get singleplayer game round"
+										r.operationID = "getSingleplayerRound"
+										r.pathPattern = "/v1/singleplayer/{id}/round"
+										r.args = args
+										r.count = 1
+										return r, true
+									case "POST":
+										r.name = NewSingleplayerRoundOperation
+										r.summary = "Create singleplayer game round"
+										r.operationID = "newSingleplayerRound"
+										r.pathPattern = "/v1/singleplayer/{id}/round"
 										r.args = args
 										r.count = 1
 										return r, true
 									default:
 										return
 									}
+								}
+								switch elem[0] {
+								case '/': // Prefix: "/end"
+
+									if l := len("/end"); len(elem) >= l && elem[0:l] == "/end" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "POST":
+											r.name = EndSingleplayerRoundOperation
+											r.summary = "End singleplayer game round"
+											r.operationID = "endSingleplayerRound"
+											r.pathPattern = "/v1/singleplayer/{id}/round/end"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+
+								case 's': // Prefix: "s"
+
+									if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+										elem = elem[l:]
+									} else {
+										break
+									}
+
+									if len(elem) == 0 {
+										// Leaf node.
+										switch method {
+										case "GET":
+											r.name = GetSingleplayerGameRoundsOperation
+											r.summary = "Get singleplayer game rounds"
+											r.operationID = "getSingleplayerGameRounds"
+											r.pathPattern = "/v1/singleplayer/{id}/rounds"
+											r.args = args
+											r.count = 1
+											return r, true
+										default:
+											return
+										}
+									}
+
 								}
 
 							}
@@ -1721,102 +1811,102 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 					}
 
-				}
+				case 'u': // Prefix: "users/"
 
-			case 'u': // Prefix: "users/"
-
-				if l := len("users/"); len(elem) >= l && elem[0:l] == "users/" {
-					elem = elem[l:]
-				} else {
-					break
-				}
-
-				if len(elem) == 0 {
-					break
-				}
-				switch elem[0] {
-				case 'a': // Prefix: "avatar"
-					origElem := elem
-					if l := len("avatar"); len(elem) >= l && elem[0:l] == "avatar" {
+					if l := len("users/"); len(elem) >= l && elem[0:l] == "users/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
 					if len(elem) == 0 {
-						// Leaf node.
-						switch method {
-						case "PUT":
-							r.name = UpdateUserAvatarOperation
-							r.summary = "Update user avatar"
-							r.operationID = "updateUserAvatar"
-							r.pathPattern = "/v1/users/avatar"
-							r.args = args
-							r.count = 0
-							return r, true
-						default:
-							return
-						}
-					}
-
-					elem = origElem
-				case 'm': // Prefix: "me"
-					origElem := elem
-					if l := len("me"); len(elem) >= l && elem[0:l] == "me" {
-						elem = elem[l:]
-					} else {
 						break
 					}
+					switch elem[0] {
+					case 'a': // Prefix: "avatar"
+						origElem := elem
+						if l := len("avatar"); len(elem) >= l && elem[0:l] == "avatar" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "PUT":
+								r.name = UpdateUserAvatarOperation
+								r.summary = "Update user avatar"
+								r.operationID = "updateUserAvatar"
+								r.pathPattern = "/v1/users/avatar"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					case 'm': // Prefix: "me"
+						origElem := elem
+						if l := len("me"); len(elem) >= l && elem[0:l] == "me" {
+							elem = elem[l:]
+						} else {
+							break
+						}
+
+						if len(elem) == 0 {
+							// Leaf node.
+							switch method {
+							case "GET":
+								r.name = GetPrivateProfileOperation
+								r.summary = "Get current user profile"
+								r.operationID = "getPrivateProfile"
+								r.pathPattern = "/v1/users/me"
+								r.args = args
+								r.count = 0
+								return r, true
+							case "PATCH":
+								r.name = UpdateUserOperation
+								r.summary = "Update user"
+								r.operationID = "updateUser"
+								r.pathPattern = "/v1/users/me"
+								r.args = args
+								r.count = 0
+								return r, true
+							default:
+								return
+							}
+						}
+
+						elem = origElem
+					}
+					// Param: "id"
+					// Leaf parameter, slashes are prohibited
+					idx := strings.IndexByte(elem, '/')
+					if idx >= 0 {
+						break
+					}
+					args[0] = elem
+					elem = ""
 
 					if len(elem) == 0 {
 						// Leaf node.
 						switch method {
 						case "GET":
-							r.name = GetPrivateProfileOperation
-							r.summary = "Get current user profile"
-							r.operationID = "getPrivateProfile"
-							r.pathPattern = "/v1/users/me"
+							r.name = GetPublicProfileOperation
+							r.summary = "Get user by ID"
+							r.operationID = "getPublicProfile"
+							r.pathPattern = "/v1/users/{id}"
 							r.args = args
-							r.count = 0
-							return r, true
-						case "PATCH":
-							r.name = UpdateUserOperation
-							r.summary = "Update user"
-							r.operationID = "updateUser"
-							r.pathPattern = "/v1/users/me"
-							r.args = args
-							r.count = 0
+							r.count = 1
 							return r, true
 						default:
 							return
 						}
 					}
 
-					elem = origElem
-				}
-				// Param: "id"
-				// Leaf parameter, slashes are prohibited
-				idx := strings.IndexByte(elem, '/')
-				if idx >= 0 {
-					break
-				}
-				args[0] = elem
-				elem = ""
-
-				if len(elem) == 0 {
-					// Leaf node.
-					switch method {
-					case "GET":
-						r.name = GetPublicProfileOperation
-						r.summary = "Get user by ID"
-						r.operationID = "getPublicProfile"
-						r.pathPattern = "/v1/users/{id}"
-						r.args = args
-						r.count = 1
-						return r, true
-					default:
-						return
-					}
 				}
 
 			}
