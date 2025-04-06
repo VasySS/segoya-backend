@@ -19,7 +19,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: "../../components/schemas/singleplayer.yaml#/EndSingleplayerRoundResp"
+            $ref: "../../components/schemas/singleplayer.yaml#/EndSingleplayerRoundResponse"
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
     "401":

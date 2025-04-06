@@ -15,7 +15,7 @@ import (
 // NewSingleplayerGame creates new singleplayer game.
 func (h Handler) NewSingleplayerGame(
 	ctx context.Context,
-	req *api.NewSingleplayerGameReq,
+	req *api.NewSingleplayerGameRequest,
 ) (api.NewSingleplayerGameRes, error) {
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {

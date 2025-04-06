@@ -790,7 +790,7 @@ func decodeEndSingleplayerRoundResponse(resp *http.Response) (res EndSingleplaye
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response EndSingleplayerRoundResp
+			var response EndSingleplayerRoundResponse
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2859,7 +2859,7 @@ func decodeGetSingleplayerRoundResponse(resp *http.Response) (res GetSingleplaye
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response SingleplayerRoundResp
+			var response SingleplayerRound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -4176,7 +4176,7 @@ func decodeNewSingleplayerRoundResponse(resp *http.Response) (res NewSingleplaye
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response SingleplayerRoundResp
+			var response SingleplayerRound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

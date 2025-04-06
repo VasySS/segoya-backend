@@ -65,7 +65,7 @@ func (h *Handler) GetPublicProfile(
 // UpdateUser handles HTTP requests to update user information.
 func (h *Handler) UpdateUser(
 	ctx context.Context,
-	req *api.UserUpdate,
+	req *api.UserUpdateRequest,
 ) (api.UpdateUserRes, error) {
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {

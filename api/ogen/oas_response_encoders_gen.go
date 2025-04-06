@@ -313,7 +313,7 @@ func encodeEndSingleplayerGameResponse(response EndSingleplayerGameRes, w http.R
 
 func encodeEndSingleplayerRoundResponse(response EndSingleplayerRoundRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *EndSingleplayerRoundResp:
+	case *EndSingleplayerRoundResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
@@ -995,7 +995,7 @@ func encodeGetSingleplayerGamesResponse(response GetSingleplayerGamesRes, w http
 
 func encodeGetSingleplayerRoundResponse(response GetSingleplayerRoundRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *SingleplayerRoundResp:
+	case *SingleplayerRound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
@@ -1467,7 +1467,7 @@ func encodeNewSingleplayerGameResponse(response NewSingleplayerGameRes, w http.R
 
 func encodeNewSingleplayerRoundResponse(response NewSingleplayerRoundRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *SingleplayerRoundResp:
+	case *SingleplayerRound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))

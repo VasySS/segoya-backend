@@ -735,14 +735,14 @@ func (s *EndSingleplayerRoundNotFound) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *EndSingleplayerRoundResp) Encode(e *jx.Encoder) {
+func (s *EndSingleplayerRoundResponse) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *EndSingleplayerRoundResp) encodeFields(e *jx.Encoder) {
+func (s *EndSingleplayerRoundResponse) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("score")
 		e.Int(s.Score)
@@ -753,15 +753,15 @@ func (s *EndSingleplayerRoundResp) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfEndSingleplayerRoundResp = [2]string{
+var jsonFieldsNameOfEndSingleplayerRoundResponse = [2]string{
 	0: "score",
 	1: "distance",
 }
 
-// Decode decodes EndSingleplayerRoundResp from json.
-func (s *EndSingleplayerRoundResp) Decode(d *jx.Decoder) error {
+// Decode decodes EndSingleplayerRoundResponse from json.
+func (s *EndSingleplayerRoundResponse) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode EndSingleplayerRoundResp to nil")
+		return errors.New("invalid: unable to decode EndSingleplayerRoundResponse to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -796,7 +796,7 @@ func (s *EndSingleplayerRoundResp) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode EndSingleplayerRoundResp")
+		return errors.Wrap(err, "decode EndSingleplayerRoundResponse")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -813,8 +813,8 @@ func (s *EndSingleplayerRoundResp) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfEndSingleplayerRoundResp) {
-					name = jsonFieldsNameOfEndSingleplayerRoundResp[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfEndSingleplayerRoundResponse) {
+					name = jsonFieldsNameOfEndSingleplayerRoundResponse[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -835,14 +835,14 @@ func (s *EndSingleplayerRoundResp) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *EndSingleplayerRoundResp) MarshalJSON() ([]byte, error) {
+func (s *EndSingleplayerRoundResponse) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *EndSingleplayerRoundResp) UnmarshalJSON(data []byte) error {
+func (s *EndSingleplayerRoundResponse) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -3177,14 +3177,14 @@ func (s *LoginInternalServerError) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *LoginReq) Encode(e *jx.Encoder) {
+func (s *LoginRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *LoginReq) encodeFields(e *jx.Encoder) {
+func (s *LoginRequest) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("username")
 		e.Str(s.Username)
@@ -3195,15 +3195,15 @@ func (s *LoginReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfLoginReq = [2]string{
+var jsonFieldsNameOfLoginRequest = [2]string{
 	0: "username",
 	1: "password",
 }
 
-// Decode decodes LoginReq from json.
-func (s *LoginReq) Decode(d *jx.Decoder) error {
+// Decode decodes LoginRequest from json.
+func (s *LoginRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode LoginReq to nil")
+		return errors.New("invalid: unable to decode LoginRequest to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -3238,7 +3238,7 @@ func (s *LoginReq) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode LoginReq")
+		return errors.Wrap(err, "decode LoginRequest")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -3255,8 +3255,8 @@ func (s *LoginReq) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfLoginReq) {
-					name = jsonFieldsNameOfLoginReq[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfLoginRequest) {
+					name = jsonFieldsNameOfLoginRequest[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -3277,14 +3277,14 @@ func (s *LoginReq) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *LoginReq) MarshalJSON() ([]byte, error) {
+func (s *LoginRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *LoginReq) UnmarshalJSON(data []byte) error {
+func (s *LoginRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -4826,14 +4826,14 @@ func (s *NewSingleplayerGameInternalServerError) UnmarshalJSON(data []byte) erro
 }
 
 // Encode implements json.Marshaler.
-func (s *NewSingleplayerGameReq) Encode(e *jx.Encoder) {
+func (s *NewSingleplayerGameRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *NewSingleplayerGameReq) encodeFields(e *jx.Encoder) {
+func (s *NewSingleplayerGameRequest) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("rounds")
 		e.Int(s.Rounds)
@@ -4854,17 +4854,17 @@ func (s *NewSingleplayerGameReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfNewSingleplayerGameReq = [4]string{
+var jsonFieldsNameOfNewSingleplayerGameRequest = [4]string{
 	0: "rounds",
 	1: "timerSeconds",
 	2: "movementAllowed",
 	3: "provider",
 }
 
-// Decode decodes NewSingleplayerGameReq from json.
-func (s *NewSingleplayerGameReq) Decode(d *jx.Decoder) error {
+// Decode decodes NewSingleplayerGameRequest from json.
+func (s *NewSingleplayerGameRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode NewSingleplayerGameReq to nil")
+		return errors.New("invalid: unable to decode NewSingleplayerGameRequest to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -4919,7 +4919,7 @@ func (s *NewSingleplayerGameReq) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode NewSingleplayerGameReq")
+		return errors.Wrap(err, "decode NewSingleplayerGameRequest")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -4936,8 +4936,8 @@ func (s *NewSingleplayerGameReq) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfNewSingleplayerGameReq) {
-					name = jsonFieldsNameOfNewSingleplayerGameReq[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfNewSingleplayerGameRequest) {
+					name = jsonFieldsNameOfNewSingleplayerGameRequest[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -4958,14 +4958,14 @@ func (s *NewSingleplayerGameReq) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *NewSingleplayerGameReq) MarshalJSON() ([]byte, error) {
+func (s *NewSingleplayerGameRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *NewSingleplayerGameReq) UnmarshalJSON(data []byte) error {
+func (s *NewSingleplayerGameRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -5713,14 +5713,14 @@ func (s *RegisterInternalServerError) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *RegisterReq) Encode(e *jx.Encoder) {
+func (s *RegisterRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *RegisterReq) encodeFields(e *jx.Encoder) {
+func (s *RegisterRequest) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("username")
 		e.Str(s.Username)
@@ -5737,16 +5737,16 @@ func (s *RegisterReq) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfRegisterReq = [3]string{
+var jsonFieldsNameOfRegisterRequest = [3]string{
 	0: "username",
 	1: "password",
 	2: "name",
 }
 
-// Decode decodes RegisterReq from json.
-func (s *RegisterReq) Decode(d *jx.Decoder) error {
+// Decode decodes RegisterRequest from json.
+func (s *RegisterRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode RegisterReq to nil")
+		return errors.New("invalid: unable to decode RegisterRequest to nil")
 	}
 	var requiredBitSet [1]uint8
 
@@ -5791,7 +5791,7 @@ func (s *RegisterReq) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode RegisterReq")
+		return errors.Wrap(err, "decode RegisterRequest")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -5808,8 +5808,8 @@ func (s *RegisterReq) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfRegisterReq) {
-					name = jsonFieldsNameOfRegisterReq[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfRegisterRequest) {
+					name = jsonFieldsNameOfRegisterRequest[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -5830,14 +5830,14 @@ func (s *RegisterReq) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *RegisterReq) MarshalJSON() ([]byte, error) {
+func (s *RegisterRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *RegisterReq) UnmarshalJSON(data []byte) error {
+func (s *RegisterRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -6214,108 +6214,14 @@ func (s *SingleplayerGames) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *SingleplayerRoundGuess) Encode(e *jx.Encoder) {
+func (s *SingleplayerRound) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *SingleplayerRoundGuess) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("guess")
-		s.Guess.Encode(e)
-	}
-}
-
-var jsonFieldsNameOfSingleplayerRoundGuess = [1]string{
-	0: "guess",
-}
-
-// Decode decodes SingleplayerRoundGuess from json.
-func (s *SingleplayerRoundGuess) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode SingleplayerRoundGuess to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "guess":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				if err := s.Guess.Decode(d); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"guess\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode SingleplayerRoundGuess")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000001,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfSingleplayerRoundGuess) {
-					name = jsonFieldsNameOfSingleplayerRoundGuess[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *SingleplayerRoundGuess) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *SingleplayerRoundGuess) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *SingleplayerRoundResp) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *SingleplayerRoundResp) encodeFields(e *jx.Encoder) {
+func (s *SingleplayerRound) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
 		e.Int(s.ID)
@@ -6358,7 +6264,7 @@ func (s *SingleplayerRoundResp) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSingleplayerRoundResp = [10]string{
+var jsonFieldsNameOfSingleplayerRound = [10]string{
 	0: "id",
 	1: "gameID",
 	2: "streetviewID",
@@ -6371,10 +6277,10 @@ var jsonFieldsNameOfSingleplayerRoundResp = [10]string{
 	9: "startedAt",
 }
 
-// Decode decodes SingleplayerRoundResp from json.
-func (s *SingleplayerRoundResp) Decode(d *jx.Decoder) error {
+// Decode decodes SingleplayerRound from json.
+func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode SingleplayerRoundResp to nil")
+		return errors.New("invalid: unable to decode SingleplayerRound to nil")
 	}
 	var requiredBitSet [2]uint8
 
@@ -6505,7 +6411,7 @@ func (s *SingleplayerRoundResp) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode SingleplayerRoundResp")
+		return errors.Wrap(err, "decode SingleplayerRound")
 	}
 	// Validate required fields.
 	var failures []validate.FieldError
@@ -6523,8 +6429,8 @@ func (s *SingleplayerRoundResp) Decode(d *jx.Decoder) error {
 				bitIdx := bits.TrailingZeros8(result)
 				fieldIdx := i*8 + bitIdx
 				var name string
-				if fieldIdx < len(jsonFieldsNameOfSingleplayerRoundResp) {
-					name = jsonFieldsNameOfSingleplayerRoundResp[fieldIdx]
+				if fieldIdx < len(jsonFieldsNameOfSingleplayerRound) {
+					name = jsonFieldsNameOfSingleplayerRound[fieldIdx]
 				} else {
 					name = strconv.Itoa(fieldIdx)
 				}
@@ -6545,14 +6451,108 @@ func (s *SingleplayerRoundResp) Decode(d *jx.Decoder) error {
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *SingleplayerRoundResp) MarshalJSON() ([]byte, error) {
+func (s *SingleplayerRound) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *SingleplayerRoundResp) UnmarshalJSON(data []byte) error {
+func (s *SingleplayerRound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SingleplayerRoundGuess) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SingleplayerRoundGuess) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("guess")
+		s.Guess.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfSingleplayerRoundGuess = [1]string{
+	0: "guess",
+}
+
+// Decode decodes SingleplayerRoundGuess from json.
+func (s *SingleplayerRoundGuess) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SingleplayerRoundGuess to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "guess":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Guess.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"guess\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SingleplayerRoundGuess")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSingleplayerRoundGuess) {
+					name = jsonFieldsNameOfSingleplayerRoundGuess[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SingleplayerRoundGuess) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SingleplayerRoundGuess) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -7346,14 +7346,14 @@ func (s *UserPublicProfile) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *UserUpdate) Encode(e *jx.Encoder) {
+func (s *UserUpdateRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *UserUpdate) encodeFields(e *jx.Encoder) {
+func (s *UserUpdateRequest) encodeFields(e *jx.Encoder) {
 	{
 		if s.Name.Set {
 			e.FieldStart("name")
@@ -7362,14 +7362,14 @@ func (s *UserUpdate) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfUserUpdate = [1]string{
+var jsonFieldsNameOfUserUpdateRequest = [1]string{
 	0: "name",
 }
 
-// Decode decodes UserUpdate from json.
-func (s *UserUpdate) Decode(d *jx.Decoder) error {
+// Decode decodes UserUpdateRequest from json.
+func (s *UserUpdateRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode UserUpdate to nil")
+		return errors.New("invalid: unable to decode UserUpdateRequest to nil")
 	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -7389,21 +7389,21 @@ func (s *UserUpdate) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode UserUpdate")
+		return errors.Wrap(err, "decode UserUpdateRequest")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *UserUpdate) MarshalJSON() ([]byte, error) {
+func (s *UserUpdateRequest) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *UserUpdate) UnmarshalJSON(data []byte) error {
+func (s *UserUpdateRequest) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

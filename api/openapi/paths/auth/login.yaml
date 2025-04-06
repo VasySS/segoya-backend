@@ -21,7 +21,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: "../../components/schemas/auth.yaml#/LoginReq"
+          $ref: "../../components/schemas/auth.yaml#/LoginRequest"
   responses:
     "204":
       description: OK

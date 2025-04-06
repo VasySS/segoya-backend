@@ -30,7 +30,7 @@ func encodeEndSingleplayerRoundRequest(
 }
 
 func encodeLoginRequest(
-	req *LoginReq,
+	req *LoginRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -58,7 +58,7 @@ func encodeNewLobbyRequest(
 }
 
 func encodeNewSingleplayerGameRequest(
-	req *NewSingleplayerGameReq,
+	req *NewSingleplayerGameRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -86,7 +86,7 @@ func encodeRefreshTokensRequest(
 }
 
 func encodeRegisterRequest(
-	req *RegisterReq,
+	req *RegisterRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"
@@ -100,7 +100,7 @@ func encodeRegisterRequest(
 }
 
 func encodeUpdateUserRequest(
-	req *UserUpdate,
+	req *UserUpdateRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

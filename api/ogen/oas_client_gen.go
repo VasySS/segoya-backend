@@ -87,7 +87,7 @@ type AuthInvoker interface {
 	// Login user.
 	//
 	// POST /v1/auth/login
-	Login(ctx context.Context, request *LoginReq, params LoginParams) (LoginRes, error)
+	Login(ctx context.Context, request *LoginRequest, params LoginParams) (LoginRes, error)
 	// NewDiscord invokes newDiscord operation.
 	//
 	// Create Discord OAuth connection.
@@ -123,7 +123,7 @@ type AuthInvoker interface {
 	// Register new user.
 	//
 	// POST /v1/auth/register
-	Register(ctx context.Context, request *RegisterReq, params RegisterParams) (RegisterRes, error)
+	Register(ctx context.Context, request *RegisterRequest, params RegisterParams) (RegisterRes, error)
 	// YandexLogin invokes yandexLogin operation.
 	//
 	// Log in using Yandex OAuth.
@@ -237,7 +237,7 @@ type SingleplayerInvoker interface {
 	// Create new singleplayer game.
 	//
 	// POST /v1/singleplayer
-	NewSingleplayerGame(ctx context.Context, request *NewSingleplayerGameReq) (NewSingleplayerGameRes, error)
+	NewSingleplayerGame(ctx context.Context, request *NewSingleplayerGameRequest) (NewSingleplayerGameRes, error)
 	// NewSingleplayerRound invokes newSingleplayerRound operation.
 	//
 	// Create singleplayer game round.
@@ -267,7 +267,7 @@ type UsersInvoker interface {
 	// Update authenticated user's profile information.
 	//
 	// PATCH /v1/users/me
-	UpdateUser(ctx context.Context, request *UserUpdate) (UpdateUserRes, error)
+	UpdateUser(ctx context.Context, request *UserUpdateRequest) (UpdateUserRes, error)
 	// UpdateUserAvatar invokes updateUserAvatar operation.
 	//
 	// Upload a new avatar image (max 2MB).
@@ -2677,12 +2677,12 @@ func (c *Client) sendGetUserSessions(ctx context.Context) (res GetUserSessionsRe
 // Login user.
 //
 // POST /v1/auth/login
-func (c *Client) Login(ctx context.Context, request *LoginReq, params LoginParams) (LoginRes, error) {
+func (c *Client) Login(ctx context.Context, request *LoginRequest, params LoginParams) (LoginRes, error) {
 	res, err := c.sendLogin(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendLogin(ctx context.Context, request *LoginReq, params LoginParams) (res LoginRes, err error) {
+func (c *Client) sendLogin(ctx context.Context, request *LoginRequest, params LoginParams) (res LoginRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("login"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -3235,12 +3235,12 @@ func (c *Client) sendNewMultiplayerRound(ctx context.Context, params NewMultipla
 // Create new singleplayer game.
 //
 // POST /v1/singleplayer
-func (c *Client) NewSingleplayerGame(ctx context.Context, request *NewSingleplayerGameReq) (NewSingleplayerGameRes, error) {
+func (c *Client) NewSingleplayerGame(ctx context.Context, request *NewSingleplayerGameRequest) (NewSingleplayerGameRes, error) {
 	res, err := c.sendNewSingleplayerGame(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendNewSingleplayerGame(ctx context.Context, request *NewSingleplayerGameReq) (res NewSingleplayerGameRes, err error) {
+func (c *Client) sendNewSingleplayerGame(ctx context.Context, request *NewSingleplayerGameRequest) (res NewSingleplayerGameRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newSingleplayerGame"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -3765,12 +3765,12 @@ func (c *Client) sendRefreshTokens(ctx context.Context, request *RefreshTokensRe
 // Register new user.
 //
 // POST /v1/auth/register
-func (c *Client) Register(ctx context.Context, request *RegisterReq, params RegisterParams) (RegisterRes, error) {
+func (c *Client) Register(ctx context.Context, request *RegisterRequest, params RegisterParams) (RegisterRes, error) {
 	res, err := c.sendRegister(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendRegister(ctx context.Context, request *RegisterReq, params RegisterParams) (res RegisterRes, err error) {
+func (c *Client) sendRegister(ctx context.Context, request *RegisterRequest, params RegisterParams) (res RegisterRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("register"),
 		semconv.HTTPRequestMethodKey.String("POST"),
@@ -3857,12 +3857,12 @@ func (c *Client) sendRegister(ctx context.Context, request *RegisterReq, params 
 // Update authenticated user's profile information.
 //
 // PATCH /v1/users/me
-func (c *Client) UpdateUser(ctx context.Context, request *UserUpdate) (UpdateUserRes, error) {
+func (c *Client) UpdateUser(ctx context.Context, request *UserUpdateRequest) (UpdateUserRes, error) {
 	res, err := c.sendUpdateUser(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendUpdateUser(ctx context.Context, request *UserUpdate) (res UpdateUserRes, err error) {
+func (c *Client) sendUpdateUser(ctx context.Context, request *UserUpdateRequest) (res UpdateUserRes, err error) {
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateUser"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),

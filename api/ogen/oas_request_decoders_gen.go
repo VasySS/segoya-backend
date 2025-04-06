@@ -89,7 +89,7 @@ func (s *Server) decodeEndSingleplayerRoundRequest(r *http.Request) (
 }
 
 func (s *Server) decodeLoginRequest(r *http.Request) (
-	req *LoginReq,
+	req *LoginRequest,
 	close func() error,
 	rerr error,
 ) {
@@ -128,7 +128,7 @@ func (s *Server) decodeLoginRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request LoginReq
+		var request LoginRequest
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -231,7 +231,7 @@ func (s *Server) decodeNewLobbyRequest(r *http.Request) (
 }
 
 func (s *Server) decodeNewSingleplayerGameRequest(r *http.Request) (
-	req *NewSingleplayerGameReq,
+	req *NewSingleplayerGameRequest,
 	close func() error,
 	rerr error,
 ) {
@@ -270,7 +270,7 @@ func (s *Server) decodeNewSingleplayerGameRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request NewSingleplayerGameReq
+		var request NewSingleplayerGameRequest
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -365,7 +365,7 @@ func (s *Server) decodeRefreshTokensRequest(r *http.Request) (
 }
 
 func (s *Server) decodeRegisterRequest(r *http.Request) (
-	req *RegisterReq,
+	req *RegisterRequest,
 	close func() error,
 	rerr error,
 ) {
@@ -404,7 +404,7 @@ func (s *Server) decodeRegisterRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request RegisterReq
+		var request RegisterRequest
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err
@@ -436,7 +436,7 @@ func (s *Server) decodeRegisterRequest(r *http.Request) (
 }
 
 func (s *Server) decodeUpdateUserRequest(r *http.Request) (
-	req *UserUpdate,
+	req *UserUpdateRequest,
 	close func() error,
 	rerr error,
 ) {
@@ -475,7 +475,7 @@ func (s *Server) decodeUpdateUserRequest(r *http.Request) (
 
 		d := jx.DecodeBytes(buf)
 
-		var request UserUpdate
+		var request UserUpdateRequest
 		if err := func() error {
 			if err := request.Decode(d); err != nil {
 				return err

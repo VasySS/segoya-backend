@@ -32,7 +32,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: "../../components/schemas/singleplayer.yaml#/NewSingleplayerGameReq"
+          $ref: "../../components/schemas/singleplayer.yaml#/NewSingleplayerGameRequest"
   responses:
     "201":
       description: OK

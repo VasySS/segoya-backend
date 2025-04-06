@@ -639,7 +639,7 @@ func (s *LoginInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *LoginReq) Validate() error {
+func (s *LoginRequest) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -980,7 +980,7 @@ func (s *NewSingleplayerGameInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *NewSingleplayerGameReq) Validate() error {
+func (s *NewSingleplayerGameRequest) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -1177,7 +1177,7 @@ func (s *RegisterInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *RegisterReq) Validate() error {
+func (s *RegisterRequest) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -1316,30 +1316,7 @@ func (s *SingleplayerGames) Validate() error {
 	return nil
 }
 
-func (s *SingleplayerRoundGuess) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := s.Guess.Validate(); err != nil {
-			return err
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "guess",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *SingleplayerRoundResp) Validate() error {
+func (s *SingleplayerRound) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -1364,6 +1341,29 @@ func (s *SingleplayerRoundResp) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "lng",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *SingleplayerRoundGuess) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Guess.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "guess",
 			Error: err,
 		})
 	}
@@ -1477,7 +1477,7 @@ func (s *UpdateUserUnauthorized) Validate() error {
 	return nil
 }
 
-func (s *UserUpdate) Validate() error {
+func (s *UserUpdateRequest) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}

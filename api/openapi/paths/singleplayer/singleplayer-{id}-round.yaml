@@ -12,7 +12,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerRoundResp"
+            $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerRound"
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
     "401":
@@ -38,7 +38,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerRoundResp"
+            $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerRound"
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
     "401":

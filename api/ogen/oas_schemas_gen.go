@@ -188,33 +188,33 @@ type EndSingleplayerRoundNotFound Error
 
 func (*EndSingleplayerRoundNotFound) endSingleplayerRoundRes() {}
 
-// Ref: #/EndSingleplayerRoundResp
-type EndSingleplayerRoundResp struct {
+// Ref: #/EndSingleplayerRoundResponse
+type EndSingleplayerRoundResponse struct {
 	Score    int `json:"score"`
 	Distance int `json:"distance"`
 }
 
 // GetScore returns the value of Score.
-func (s *EndSingleplayerRoundResp) GetScore() int {
+func (s *EndSingleplayerRoundResponse) GetScore() int {
 	return s.Score
 }
 
 // GetDistance returns the value of Distance.
-func (s *EndSingleplayerRoundResp) GetDistance() int {
+func (s *EndSingleplayerRoundResponse) GetDistance() int {
 	return s.Distance
 }
 
 // SetScore sets the value of Score.
-func (s *EndSingleplayerRoundResp) SetScore(val int) {
+func (s *EndSingleplayerRoundResponse) SetScore(val int) {
 	s.Score = val
 }
 
 // SetDistance sets the value of Distance.
-func (s *EndSingleplayerRoundResp) SetDistance(val int) {
+func (s *EndSingleplayerRoundResponse) SetDistance(val int) {
 	s.Distance = val
 }
 
-func (*EndSingleplayerRoundResp) endSingleplayerRoundRes() {}
+func (*EndSingleplayerRoundResponse) endSingleplayerRoundRes() {}
 
 type EndSingleplayerRoundUnauthorized Error
 
@@ -657,29 +657,29 @@ func (s *LoginNoContent) SetSetCookie(val string) {
 
 func (*LoginNoContent) loginRes() {}
 
-// Ref: #/LoginReq
-type LoginReq struct {
+// Ref: #/LoginRequest
+type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 // GetUsername returns the value of Username.
-func (s *LoginReq) GetUsername() string {
+func (s *LoginRequest) GetUsername() string {
 	return s.Username
 }
 
 // GetPassword returns the value of Password.
-func (s *LoginReq) GetPassword() string {
+func (s *LoginRequest) GetPassword() string {
 	return s.Password
 }
 
 // SetUsername sets the value of Username.
-func (s *LoginReq) SetUsername(val string) {
+func (s *LoginRequest) SetUsername(val string) {
 	s.Username = val
 }
 
 // SetPassword sets the value of Password.
-func (s *LoginReq) SetPassword(val string) {
+func (s *LoginRequest) SetPassword(val string) {
 	s.Password = val
 }
 
@@ -1221,8 +1221,8 @@ type NewSingleplayerGameInternalServerError Error
 
 func (*NewSingleplayerGameInternalServerError) newSingleplayerGameRes() {}
 
-// Ref: #/NewSingleplayerGameReq
-type NewSingleplayerGameReq struct {
+// Ref: #/NewSingleplayerGameRequest
+type NewSingleplayerGameRequest struct {
 	Rounds          int      `json:"rounds"`
 	TimerSeconds    OptInt   `json:"timerSeconds"`
 	MovementAllowed bool     `json:"movementAllowed"`
@@ -1230,42 +1230,42 @@ type NewSingleplayerGameReq struct {
 }
 
 // GetRounds returns the value of Rounds.
-func (s *NewSingleplayerGameReq) GetRounds() int {
+func (s *NewSingleplayerGameRequest) GetRounds() int {
 	return s.Rounds
 }
 
 // GetTimerSeconds returns the value of TimerSeconds.
-func (s *NewSingleplayerGameReq) GetTimerSeconds() OptInt {
+func (s *NewSingleplayerGameRequest) GetTimerSeconds() OptInt {
 	return s.TimerSeconds
 }
 
 // GetMovementAllowed returns the value of MovementAllowed.
-func (s *NewSingleplayerGameReq) GetMovementAllowed() bool {
+func (s *NewSingleplayerGameRequest) GetMovementAllowed() bool {
 	return s.MovementAllowed
 }
 
 // GetProvider returns the value of Provider.
-func (s *NewSingleplayerGameReq) GetProvider() Provider {
+func (s *NewSingleplayerGameRequest) GetProvider() Provider {
 	return s.Provider
 }
 
 // SetRounds sets the value of Rounds.
-func (s *NewSingleplayerGameReq) SetRounds(val int) {
+func (s *NewSingleplayerGameRequest) SetRounds(val int) {
 	s.Rounds = val
 }
 
 // SetTimerSeconds sets the value of TimerSeconds.
-func (s *NewSingleplayerGameReq) SetTimerSeconds(val OptInt) {
+func (s *NewSingleplayerGameRequest) SetTimerSeconds(val OptInt) {
 	s.TimerSeconds = val
 }
 
 // SetMovementAllowed sets the value of MovementAllowed.
-func (s *NewSingleplayerGameReq) SetMovementAllowed(val bool) {
+func (s *NewSingleplayerGameRequest) SetMovementAllowed(val bool) {
 	s.MovementAllowed = val
 }
 
 // SetProvider sets the value of Provider.
-func (s *NewSingleplayerGameReq) SetProvider(val Provider) {
+func (s *NewSingleplayerGameRequest) SetProvider(val Provider) {
 	s.Provider = val
 }
 
@@ -1554,40 +1554,40 @@ type RegisterInternalServerError Error
 
 func (*RegisterInternalServerError) registerRes() {}
 
-// Ref: #/RegisterReq
-type RegisterReq struct {
+// Ref: #/RegisterRequest
+type RegisterRequest struct {
 	Username string    `json:"username"`
 	Password string    `json:"password"`
 	Name     OptString `json:"name"`
 }
 
 // GetUsername returns the value of Username.
-func (s *RegisterReq) GetUsername() string {
+func (s *RegisterRequest) GetUsername() string {
 	return s.Username
 }
 
 // GetPassword returns the value of Password.
-func (s *RegisterReq) GetPassword() string {
+func (s *RegisterRequest) GetPassword() string {
 	return s.Password
 }
 
 // GetName returns the value of Name.
-func (s *RegisterReq) GetName() OptString {
+func (s *RegisterRequest) GetName() OptString {
 	return s.Name
 }
 
 // SetUsername sets the value of Username.
-func (s *RegisterReq) SetUsername(val string) {
+func (s *RegisterRequest) SetUsername(val string) {
 	s.Username = val
 }
 
 // SetPassword sets the value of Password.
-func (s *RegisterReq) SetPassword(val string) {
+func (s *RegisterRequest) SetPassword(val string) {
 	s.Password = val
 }
 
 // SetName sets the value of Name.
-func (s *RegisterReq) SetName(val OptString) {
+func (s *RegisterRequest) SetName(val OptString) {
 	s.Name = val
 }
 
@@ -1735,6 +1735,123 @@ func (s *SingleplayerGames) SetGames(val []SingleplayerGame) {
 
 func (*SingleplayerGames) getSingleplayerGamesRes() {}
 
+// Ref: #/SingleplayerRound
+type SingleplayerRound struct {
+	ID           int       `json:"id"`
+	GameID       int       `json:"gameID"`
+	StreetviewID string    `json:"streetviewID"`
+	RoundNum     int       `json:"roundNum"`
+	Lat          float64   `json:"lat"`
+	Lng          float64   `json:"lng"`
+	PanoramaURL  string    `json:"panoramaURL"`
+	Finished     bool      `json:"finished"`
+	CreatedAt    time.Time `json:"createdAt"`
+	StartedAt    time.Time `json:"startedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *SingleplayerRound) GetID() int {
+	return s.ID
+}
+
+// GetGameID returns the value of GameID.
+func (s *SingleplayerRound) GetGameID() int {
+	return s.GameID
+}
+
+// GetStreetviewID returns the value of StreetviewID.
+func (s *SingleplayerRound) GetStreetviewID() string {
+	return s.StreetviewID
+}
+
+// GetRoundNum returns the value of RoundNum.
+func (s *SingleplayerRound) GetRoundNum() int {
+	return s.RoundNum
+}
+
+// GetLat returns the value of Lat.
+func (s *SingleplayerRound) GetLat() float64 {
+	return s.Lat
+}
+
+// GetLng returns the value of Lng.
+func (s *SingleplayerRound) GetLng() float64 {
+	return s.Lng
+}
+
+// GetPanoramaURL returns the value of PanoramaURL.
+func (s *SingleplayerRound) GetPanoramaURL() string {
+	return s.PanoramaURL
+}
+
+// GetFinished returns the value of Finished.
+func (s *SingleplayerRound) GetFinished() bool {
+	return s.Finished
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *SingleplayerRound) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetStartedAt returns the value of StartedAt.
+func (s *SingleplayerRound) GetStartedAt() time.Time {
+	return s.StartedAt
+}
+
+// SetID sets the value of ID.
+func (s *SingleplayerRound) SetID(val int) {
+	s.ID = val
+}
+
+// SetGameID sets the value of GameID.
+func (s *SingleplayerRound) SetGameID(val int) {
+	s.GameID = val
+}
+
+// SetStreetviewID sets the value of StreetviewID.
+func (s *SingleplayerRound) SetStreetviewID(val string) {
+	s.StreetviewID = val
+}
+
+// SetRoundNum sets the value of RoundNum.
+func (s *SingleplayerRound) SetRoundNum(val int) {
+	s.RoundNum = val
+}
+
+// SetLat sets the value of Lat.
+func (s *SingleplayerRound) SetLat(val float64) {
+	s.Lat = val
+}
+
+// SetLng sets the value of Lng.
+func (s *SingleplayerRound) SetLng(val float64) {
+	s.Lng = val
+}
+
+// SetPanoramaURL sets the value of PanoramaURL.
+func (s *SingleplayerRound) SetPanoramaURL(val string) {
+	s.PanoramaURL = val
+}
+
+// SetFinished sets the value of Finished.
+func (s *SingleplayerRound) SetFinished(val bool) {
+	s.Finished = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *SingleplayerRound) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetStartedAt sets the value of StartedAt.
+func (s *SingleplayerRound) SetStartedAt(val time.Time) {
+	s.StartedAt = val
+}
+
+func (*SingleplayerRound) getSingleplayerRoundRes() {}
+func (*SingleplayerRound) newSingleplayerRoundRes() {}
+
 // Ref: #/SingleplayerRoundGuess
 type SingleplayerRoundGuess struct {
 	Guess LatLng `json:"guess"`
@@ -1749,123 +1866,6 @@ func (s *SingleplayerRoundGuess) GetGuess() LatLng {
 func (s *SingleplayerRoundGuess) SetGuess(val LatLng) {
 	s.Guess = val
 }
-
-// Ref: #/SingleplayerRoundResp
-type SingleplayerRoundResp struct {
-	ID           int       `json:"id"`
-	GameID       int       `json:"gameID"`
-	StreetviewID string    `json:"streetviewID"`
-	RoundNum     int       `json:"roundNum"`
-	Lat          float64   `json:"lat"`
-	Lng          float64   `json:"lng"`
-	PanoramaURL  string    `json:"panoramaURL"`
-	Finished     bool      `json:"finished"`
-	CreatedAt    time.Time `json:"createdAt"`
-	StartedAt    time.Time `json:"startedAt"`
-}
-
-// GetID returns the value of ID.
-func (s *SingleplayerRoundResp) GetID() int {
-	return s.ID
-}
-
-// GetGameID returns the value of GameID.
-func (s *SingleplayerRoundResp) GetGameID() int {
-	return s.GameID
-}
-
-// GetStreetviewID returns the value of StreetviewID.
-func (s *SingleplayerRoundResp) GetStreetviewID() string {
-	return s.StreetviewID
-}
-
-// GetRoundNum returns the value of RoundNum.
-func (s *SingleplayerRoundResp) GetRoundNum() int {
-	return s.RoundNum
-}
-
-// GetLat returns the value of Lat.
-func (s *SingleplayerRoundResp) GetLat() float64 {
-	return s.Lat
-}
-
-// GetLng returns the value of Lng.
-func (s *SingleplayerRoundResp) GetLng() float64 {
-	return s.Lng
-}
-
-// GetPanoramaURL returns the value of PanoramaURL.
-func (s *SingleplayerRoundResp) GetPanoramaURL() string {
-	return s.PanoramaURL
-}
-
-// GetFinished returns the value of Finished.
-func (s *SingleplayerRoundResp) GetFinished() bool {
-	return s.Finished
-}
-
-// GetCreatedAt returns the value of CreatedAt.
-func (s *SingleplayerRoundResp) GetCreatedAt() time.Time {
-	return s.CreatedAt
-}
-
-// GetStartedAt returns the value of StartedAt.
-func (s *SingleplayerRoundResp) GetStartedAt() time.Time {
-	return s.StartedAt
-}
-
-// SetID sets the value of ID.
-func (s *SingleplayerRoundResp) SetID(val int) {
-	s.ID = val
-}
-
-// SetGameID sets the value of GameID.
-func (s *SingleplayerRoundResp) SetGameID(val int) {
-	s.GameID = val
-}
-
-// SetStreetviewID sets the value of StreetviewID.
-func (s *SingleplayerRoundResp) SetStreetviewID(val string) {
-	s.StreetviewID = val
-}
-
-// SetRoundNum sets the value of RoundNum.
-func (s *SingleplayerRoundResp) SetRoundNum(val int) {
-	s.RoundNum = val
-}
-
-// SetLat sets the value of Lat.
-func (s *SingleplayerRoundResp) SetLat(val float64) {
-	s.Lat = val
-}
-
-// SetLng sets the value of Lng.
-func (s *SingleplayerRoundResp) SetLng(val float64) {
-	s.Lng = val
-}
-
-// SetPanoramaURL sets the value of PanoramaURL.
-func (s *SingleplayerRoundResp) SetPanoramaURL(val string) {
-	s.PanoramaURL = val
-}
-
-// SetFinished sets the value of Finished.
-func (s *SingleplayerRoundResp) SetFinished(val bool) {
-	s.Finished = val
-}
-
-// SetCreatedAt sets the value of CreatedAt.
-func (s *SingleplayerRoundResp) SetCreatedAt(val time.Time) {
-	s.CreatedAt = val
-}
-
-// SetStartedAt sets the value of StartedAt.
-func (s *SingleplayerRoundResp) SetStartedAt(val time.Time) {
-	s.StartedAt = val
-}
-
-func (*SingleplayerRoundResp) getSingleplayerRoundRes() {}
-func (*SingleplayerRoundResp) newSingleplayerRoundRes() {}
 
 // Ref: #/SingleplayerRoundsWithGuess
 type SingleplayerRoundsWithGuess struct {
@@ -2141,18 +2141,18 @@ func (s *UserPublicProfile) SetRegisterDate(val time.Time) {
 
 func (*UserPublicProfile) getPublicProfileRes() {}
 
-// Ref: #/UserUpdate
-type UserUpdate struct {
+// Ref: #/UserUpdateRequest
+type UserUpdateRequest struct {
 	Name OptString `json:"name"`
 }
 
 // GetName returns the value of Name.
-func (s *UserUpdate) GetName() OptString {
+func (s *UserUpdateRequest) GetName() OptString {
 	return s.Name
 }
 
 // SetName sets the value of Name.
-func (s *UserUpdate) SetName(val OptString) {
+func (s *UserUpdateRequest) SetName(val OptString) {
 	s.Name = val
 }
 

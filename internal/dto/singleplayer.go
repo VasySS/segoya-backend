@@ -25,8 +25,8 @@ func SingleplayerGameToAPI(g singleplayer.Game) *api.SingleplayerGame {
 }
 
 // SingleplayerRoundToAPI converts a singleplayer round entity to the API model.
-func SingleplayerRoundToAPI(r singleplayer.Round) *api.SingleplayerRoundResp {
-	return &api.SingleplayerRoundResp{
+func SingleplayerRoundToAPI(r singleplayer.Round) *api.SingleplayerRound {
+	return &api.SingleplayerRound{
 		ID:           r.ID,
 		GameID:       r.GameID,
 		StreetviewID: r.StreetviewID,
@@ -40,8 +40,8 @@ func SingleplayerRoundToAPI(r singleplayer.Round) *api.SingleplayerRoundResp {
 }
 
 // SingleplayerRoundResultToAPI converts a singleplayer round result entity to the API model.
-func SingleplayerRoundResultToAPI(r EndCurrentRoundResponse) *api.EndSingleplayerRoundResp {
-	return &api.EndSingleplayerRoundResp{
+func SingleplayerRoundResultToAPI(r EndCurrentRoundResponse) *api.EndSingleplayerRoundResponse {
+	return &api.EndSingleplayerRoundResponse{
 		Score:    r.Score,
 		Distance: r.Distance,
 	}

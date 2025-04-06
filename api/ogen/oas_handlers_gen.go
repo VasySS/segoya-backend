@@ -3641,7 +3641,7 @@ func (s *Server) handleLoginRequest(args [0]string, argsEscaped bool, w http.Res
 		}
 
 		type (
-			Request  = *LoginReq
+			Request  = *LoginRequest
 			Params   = LoginParams
 			Response = LoginRes
 		)
@@ -4500,7 +4500,7 @@ func (s *Server) handleNewSingleplayerGameRequest(args [0]string, argsEscaped bo
 		}
 
 		type (
-			Request  = *NewSingleplayerGameReq
+			Request  = *NewSingleplayerGameRequest
 			Params   = struct{}
 			Response = NewSingleplayerGameRes
 		)
@@ -5286,7 +5286,7 @@ func (s *Server) handleRegisterRequest(args [0]string, argsEscaped bool, w http.
 		}
 
 		type (
-			Request  = *RegisterReq
+			Request  = *RegisterRequest
 			Params   = RegisterParams
 			Response = RegisterRes
 		)
@@ -5468,7 +5468,7 @@ func (s *Server) handleUpdateUserRequest(args [0]string, argsEscaped bool, w htt
 		}
 
 		type (
-			Request  = *UserUpdate
+			Request  = *UserUpdateRequest
 			Params   = struct{}
 			Response = UpdateUserRes
 		)

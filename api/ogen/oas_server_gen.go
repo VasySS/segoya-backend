@@ -66,7 +66,7 @@ type AuthHandler interface {
 	// Login user.
 	//
 	// POST /v1/auth/login
-	Login(ctx context.Context, req *LoginReq, params LoginParams) (LoginRes, error)
+	Login(ctx context.Context, req *LoginRequest, params LoginParams) (LoginRes, error)
 	// NewDiscord implements newDiscord operation.
 	//
 	// Create Discord OAuth connection.
@@ -102,7 +102,7 @@ type AuthHandler interface {
 	// Register new user.
 	//
 	// POST /v1/auth/register
-	Register(ctx context.Context, req *RegisterReq, params RegisterParams) (RegisterRes, error)
+	Register(ctx context.Context, req *RegisterRequest, params RegisterParams) (RegisterRes, error)
 	// YandexLogin implements yandexLogin operation.
 	//
 	// Log in using Yandex OAuth.
@@ -216,7 +216,7 @@ type SingleplayerHandler interface {
 	// Create new singleplayer game.
 	//
 	// POST /v1/singleplayer
-	NewSingleplayerGame(ctx context.Context, req *NewSingleplayerGameReq) (NewSingleplayerGameRes, error)
+	NewSingleplayerGame(ctx context.Context, req *NewSingleplayerGameRequest) (NewSingleplayerGameRes, error)
 	// NewSingleplayerRound implements newSingleplayerRound operation.
 	//
 	// Create singleplayer game round.
@@ -246,7 +246,7 @@ type UsersHandler interface {
 	// Update authenticated user's profile information.
 	//
 	// PATCH /v1/users/me
-	UpdateUser(ctx context.Context, req *UserUpdate) (UpdateUserRes, error)
+	UpdateUser(ctx context.Context, req *UserUpdateRequest) (UpdateUserRes, error)
 	// UpdateUserAvatar implements updateUserAvatar operation.
 	//
 	// Upload a new avatar image (max 2MB).

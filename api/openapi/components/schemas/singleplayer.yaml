@@ -1,4 +1,4 @@
-NewSingleplayerGameReq:
+NewSingleplayerGameRequest:
   type: object
   properties:
     rounds:
@@ -64,7 +64,7 @@ SingleplayerGames:
         $ref: "#/SingleplayerGame"
   required: [total, games]
 
-SingleplayerRoundResp:
+SingleplayerRound:
   type: object
   properties:
     id:
@@ -130,7 +130,7 @@ SingleplayerRoundsWithGuess:
   required:
     [roundNum, roundLat, roundLng, guessLat, guessLng, score, missDistance]
 
-EndSingleplayerRoundResp:
+EndSingleplayerRoundResponse:
   type: object
   properties:
     score:

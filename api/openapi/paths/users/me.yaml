@@ -27,7 +27,7 @@ patch:
     content:
       application/json:
         schema:
-          $ref: "../../components/schemas/user.yaml#/UserUpdate"
+          $ref: "../../components/schemas/user.yaml#/UserUpdateRequest"
   responses:
     "204":
       description: Profile updated successfully

@@ -16,7 +16,7 @@ import (
 // and generates a new access and refresh token pair if successful.
 func (h Handler) Login(
 	ctx context.Context,
-	req *api.LoginReq,
+	req *api.LoginRequest,
 	params api.LoginParams,
 ) (api.LoginRes, error) {
 	if err := h.cs.IsTokenValid(ctx, params.XCaptchaToken.Value); err != nil {
@@ -57,7 +57,7 @@ func (h Handler) Login(
 // Register validates the captcha token, creates a new user account.
 func (h Handler) Register(
 	ctx context.Context,
-	req *api.RegisterReq,
+	req *api.RegisterRequest,
 	params api.RegisterParams,
 ) (api.RegisterRes, error) {
 	if err := h.cs.IsTokenValid(ctx, params.XCaptchaToken.Value); err != nil {

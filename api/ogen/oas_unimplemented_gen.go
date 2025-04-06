@@ -198,7 +198,7 @@ func (UnimplementedHandler) GetUserSessions(ctx context.Context) (r GetUserSessi
 // Login user.
 //
 // POST /v1/auth/login
-func (UnimplementedHandler) Login(ctx context.Context, req *LoginReq, params LoginParams) (r LoginRes, _ error) {
+func (UnimplementedHandler) Login(ctx context.Context, req *LoginRequest, params LoginParams) (r LoginRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -243,7 +243,7 @@ func (UnimplementedHandler) NewMultiplayerRound(ctx context.Context, params NewM
 // Create new singleplayer game.
 //
 // POST /v1/singleplayer
-func (UnimplementedHandler) NewSingleplayerGame(ctx context.Context, req *NewSingleplayerGameReq) (r NewSingleplayerGameRes, _ error) {
+func (UnimplementedHandler) NewSingleplayerGame(ctx context.Context, req *NewSingleplayerGameRequest) (r NewSingleplayerGameRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -288,7 +288,7 @@ func (UnimplementedHandler) RefreshTokens(ctx context.Context, req *RefreshToken
 // Register new user.
 //
 // POST /v1/auth/register
-func (UnimplementedHandler) Register(ctx context.Context, req *RegisterReq, params RegisterParams) (r RegisterRes, _ error) {
+func (UnimplementedHandler) Register(ctx context.Context, req *RegisterRequest, params RegisterParams) (r RegisterRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -297,7 +297,7 @@ func (UnimplementedHandler) Register(ctx context.Context, req *RegisterReq, para
 // Update authenticated user's profile information.
 //
 // PATCH /v1/users/me
-func (UnimplementedHandler) UpdateUser(ctx context.Context, req *UserUpdate) (r UpdateUserRes, _ error) {
+func (UnimplementedHandler) UpdateUser(ctx context.Context, req *UserUpdateRequest) (r UpdateUserRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

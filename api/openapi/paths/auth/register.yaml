@@ -16,7 +16,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: "../../components/schemas/auth.yaml#/RegisterReq"
+          $ref: "../../components/schemas/auth.yaml#/RegisterRequest"
   responses:
     "201":
       description: User created successfully

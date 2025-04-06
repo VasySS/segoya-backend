@@ -43,7 +43,7 @@ UserPrivateProfile:
       discordConnected,
     ]
 
-UserUpdate:
+UserUpdateRequest:
   type: object
   properties:
     name:

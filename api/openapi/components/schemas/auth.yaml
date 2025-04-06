@@ -24,7 +24,7 @@ AuthProvider:
       format: date-time
   required: [provider, createdAt]
 
-LoginReq:
+LoginRequest:
   type: object
   properties:
     username:
@@ -37,7 +37,7 @@ LoginReq:
       maxLength: 20
   required: [username, password]
 
-RegisterReq:
+RegisterRequest:
   type: object
   properties:
     username:
