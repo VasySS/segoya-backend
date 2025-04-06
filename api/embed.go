@@ -2,13 +2,13 @@
 package apiembed
 
 import (
-	"embed"
+	_ "embed"
 )
 
 var (
-	// OpenAPISpec is an embedded OpenAPI v3.1 specification folder.
-	//go:embed openapi/*
-	OpenAPISpec embed.FS
+	// OpenAPISpec is an embedded OpenAPI v3.1 yaml specification with all references inlined.
+	//go:embed openapi/bundled.yaml
+	OpenAPISpec []byte
 	// OpenAPIDocsHTML is an embedded HTML index.html stoplight docs.
 	//go:embed index.html
 	OpenAPIDocsHTML []byte

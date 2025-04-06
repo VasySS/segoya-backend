@@ -106,7 +106,11 @@ func NewRouter(
 	mux.With(authMW.HandleWS).HandleFunc("/v1/lobbies/{id}/ws", lh.HandleWS)
 	mux.With(authMW.HandleWS).HandleFunc("/v1/multiplayer/{id}/ws", mh.HandleWS)
 
-	mux.Handle("/openapi/*", http.FileServer(http.FS(apiembed.OpenAPISpec)))
+	mux.HandleFunc("/openapi/bundled.yaml", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/yaml")
+		_, _ = w.Write(apiembed.OpenAPISpec)
+	})
+
 	mux.HandleFunc("/docs", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		_, _ = w.Write(apiembed.OpenAPIDocsHTML)

@@ -14,8 +14,10 @@ test:
 	go install gotest.tools/gotestsum@latest
 	gotestsum --format-hide-empty-pkg --format-icons hivis
 
+# npm install -g @redocly/cli
 .PHONY: ogen
 ogen:
+	redocly bundle ./api/openapi/openapi.yaml -o ./api/openapi/bundled.yaml
 	go tool ogen \
 		-config ./api/ogen.yaml \
 		--target ./api/ogen \
