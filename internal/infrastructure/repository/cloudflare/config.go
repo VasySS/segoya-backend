@@ -15,9 +15,9 @@ type Config struct {
 // NewConfig returns a new Cloudflare repository configuration from general config.
 func NewConfig(conf config.Config) Config {
 	return Config{
-		accessKey:        conf.ENV.CloudflareBucketsAccessKey,
-		secretKey:        conf.ENV.CloudflareBucketsSecretKey,
-		accountID:        conf.ENV.CloudflareAccountID,
-		avatarBucketName: conf.ENV.CloudflareAvatarBucket,
+		accessKey:        conf.ENV.Cloudflare.BucketsAccessKey,
+		secretKey:        conf.ENV.Cloudflare.BucketsSecretKey,
+		accountID:        conf.ENV.Cloudflare.AccountID,
+		avatarBucketName: conf.ENV.Cloudflare.AvatarBucket,
 	}
 }

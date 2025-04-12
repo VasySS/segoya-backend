@@ -49,10 +49,10 @@ func Run(ctx context.Context, conf config.Config) error {
 
 	pgConnectionURL := fmt.Sprintf(
 		"postgres://%s:%s@%s/%s",
-		conf.ENV.PostgresUser,
-		conf.ENV.PostgresPassword,
-		conf.ENV.PostgresHost,
-		conf.ENV.PostgresDatabase,
+		conf.ENV.Postgres.User,
+		conf.ENV.Postgres.Password,
+		conf.ENV.Postgres.Host,
+		conf.ENV.Postgres.Database,
 	)
 
 	pgRepo, err := newPgRepo(ctx, closer, pgConnectionURL)

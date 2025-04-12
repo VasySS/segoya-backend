@@ -27,7 +27,7 @@ func NewConfig(conf config.Config) Config {
 		DiscordNew:      conf.OAuth.DiscordNew,
 		YandexLogin:     conf.OAuth.YandexLogin,
 		YandexNew:       conf.OAuth.YandexNew,
-		YandexSecretKey: conf.ENV.YandexSecretKey,
+		YandexSecretKey: conf.ENV.YandexOAuth.ClientSecret,
 		RefreshTokenTTL: conf.Limits.RefreshTokenTTL,
 	}
 }

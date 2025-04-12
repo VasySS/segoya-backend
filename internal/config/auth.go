@@ -22,20 +22,24 @@ const (
 	discordHandlerPath = "/v1/auth/discord"
 )
 
-func newOAuthConfig(backendURL url.URL, conf Config) OAuth {
+func newOAuthConfig(conf Config) OAuth {
+	newRedirectURL := func(backendURL url.URL, path string) string {
+		return backendURL.ResolveReference(&url.URL{Path: path}).String()
+	}
+
 	createConfig := func(base oauth2.Config, redirectPath string) oauth2.Config {
 		return oauth2.Config{
 			ClientID:     base.ClientID,
 			ClientSecret: base.ClientSecret,
-			RedirectURL:  redirectPath,
+			RedirectURL:  newRedirectURL(conf.ENV.BackendURL, redirectPath),
 			Scopes:       base.Scopes,
 			Endpoint:     base.Endpoint,
 		}
 	}
 
 	discordBase := oauth2.Config{
-		ClientID:     conf.ENV.DiscordAccountID,
-		ClientSecret: conf.ENV.DiscordSecretKey,
+		ClientID:     conf.ENV.DiscordOAuth.ClientID,
+		ClientSecret: conf.ENV.DiscordOAuth.ClientSecret,
 		Scopes:       []string{"openid"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
@@ -44,8 +48,8 @@ func newOAuthConfig(backendURL url.URL, conf Config) OAuth {
 	}
 
 	yandexBase := oauth2.Config{
-		ClientID:     conf.ENV.YandexAccountID,
-		ClientSecret: conf.ENV.YandexSecretKey,
+		ClientID:     conf.ENV.YandexOAuth.ClientID,
+		ClientSecret: conf.ENV.YandexOAuth.ClientSecret,
 		Scopes:       []string{"login:email"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://oauth.yandex.ru/authorize",
@@ -56,9 +60,9 @@ func newOAuthConfig(backendURL url.URL, conf Config) OAuth {
 	return OAuth{
 		CookieTTL:    10 * time.Minute,
 		StateLen:     32,
-		DiscordLogin: createConfig(discordBase, backendURL.String()+discordHandlerPath+"/login/callback"),
-		DiscordNew:   createConfig(discordBase, backendURL.String()+discordHandlerPath+"/new/callback"),
-		YandexLogin:  createConfig(yandexBase, backendURL.String()+yandexHandlerPath+"/login/callback"),
-		YandexNew:    createConfig(yandexBase, backendURL.String()+yandexHandlerPath+"/new/callback"),
+		DiscordLogin: createConfig(discordBase, discordHandlerPath+"/login/callback"),
+		DiscordNew:   createConfig(discordBase, discordHandlerPath+"/new/callback"),
+		YandexLogin:  createConfig(yandexBase, yandexHandlerPath+"/login/callback"),
+		YandexNew:    createConfig(yandexBase, yandexHandlerPath+"/new/callback"),
 	}
 }
