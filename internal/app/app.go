@@ -173,7 +173,7 @@ func newValkeyRepo(ctx context.Context, closer *Closer, valkeyURL string) (*valk
 	slog.Info("valkey connected")
 	closer.Add(valkeyClient.Close)
 
-	return valkeyRepo.New(valkeyClient), nil
+	return valkeyRepo.New(ctx, valkeyClient), nil
 }
 
 func setGlobalTracer(ctx context.Context, jaegerURL string) error {

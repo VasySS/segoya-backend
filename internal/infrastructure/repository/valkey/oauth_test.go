@@ -35,7 +35,7 @@ func (s *OAuthTestSuite) SetupSuite() {
 	valkeyClient, err := valkey.NewClient(valkey.MustParseURL(valkeyContainer.ConnectionString))
 	s.Require().NoError(err)
 
-	repo := valkeyRepo.New(valkeyClient)
+	repo := valkeyRepo.New(s.ctx, valkeyClient)
 
 	s.valkeyContainer = valkeyContainer
 	s.valkeyRepo = repo

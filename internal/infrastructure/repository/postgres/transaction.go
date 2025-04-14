@@ -88,7 +88,9 @@ func (tm *TxManager) RunSerializable(ctx context.Context, fn repository.TxFunc) 
 }
 
 // GetQueryEngine returns the query engine (tx or pool) for the current transaction from context.
-func (tm *TxManager) GetQueryEngine(ctx context.Context) QueryEngine { //nolint:ireturn
+//
+//nolint:ireturn
+func (tm *TxManager) GetQueryEngine(ctx context.Context) QueryEngine {
 	tx, ok := ctx.Value(txManagerKey{}).(pgx.Tx)
 	if ok && tx != nil {
 		return tx

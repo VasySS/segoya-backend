@@ -113,16 +113,21 @@ func (r *Repository) DecrementLobbyPlayers(ctx context.Context, id string) error
 	return nil
 }
 
-// DeleteLobby deletes lobby from the database.
+// DeleteLobby deletes lobby from the database (key and from sorted set).
 func (r *Repository) DeleteLobby(ctx context.Context, id string) error {
 	ctx, span := r.tracer.Start(ctx, "DeleteLobby")
 	defer span.End()
 
 	key := lobbyPrefix + id
-	cmd := r.valkey.B().Del().Key(key).Build()
+	keyRemoveCmd := r.valkey.B().Del().Key(key).Build()
 
-	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
+	if err := r.valkey.Do(ctx, keyRemoveCmd).Error(); err != nil {
 		return fmt.Errorf("failed to delete lobby: %w", err)
+	}
+
+	sortedSetRemoveCmd := r.valkey.B().Zrem().Key(lobbiesPrefix).Member(id).Build()
+	if err := r.valkey.Do(ctx, sortedSetRemoveCmd).Error(); err != nil {
+		return fmt.Errorf("failed to remove lobby from sorted set: %w", err)
 	}
 
 	return nil
@@ -134,9 +139,9 @@ func (r *Repository) AddLobbyExpiration(ctx context.Context, id string, ttl time
 	defer span.End()
 
 	key := lobbyPrefix + id
-	cmd := r.valkey.B().Expire().Key(key).Seconds(int64(ttl.Seconds())).Build()
+	keyCmd := r.valkey.B().Expire().Key(key).Seconds(int64(ttl.Seconds())).Build()
 
-	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
+	if err := r.valkey.Do(ctx, keyCmd).Error(); err != nil {
 		return fmt.Errorf("failed to set lobby expiration: %w", err)
 	}
 
@@ -196,16 +201,10 @@ func (r *Repository) GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) 
 
 	for i, result := range results {
 		resp, err := result.AsStrMap()
-		if err != nil {
+		if err != nil || len(resp) == 0 {
 			slog.Debug("error getting lobby map",
 				slog.String("lobbyID", lobbyIDs[i]),
 				slog.Any("error", err))
-
-			continue
-		}
-
-		if len(resp) == 0 {
-			slog.Debug("empty lobby data", slog.String("lobbyID", lobbyIDs[i]))
 
 			continue
 		}
