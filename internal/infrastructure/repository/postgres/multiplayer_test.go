@@ -137,7 +137,7 @@ func (s *MultiplayerTestSuite) newTestGuess(
 	req := dto.NewMultiplayerRoundGuessRequestDB{
 		RequestTime: time.Now().UTC(),
 		UserID:      user.ID,
-		RoundID:     round.RoundNum,
+		RoundID:     round.ID,
 		Lat:         gofakeit.Latitude(),
 		Lng:         gofakeit.Longitude(),
 		Score:       gofakeit.Number(0, 5000),
@@ -275,16 +275,32 @@ func (s *MultiplayerTestSuite) TestMultiplayerGameUsers() {
 		userFirstPlayer.PublicProfile,
 	}
 
-	newGame, _ := s.newTestGame(userCreator.ID, gameUsers)
-	_, _ = s.newTestRound(newGame.ID, 1)
+	for i := 1; i <= 3; i++ {
+		testGame, _ := s.newTestGame(userCreator.ID, gameUsers)
 
-	users, err := s.postgresRepo.GetMultiplayerGameUsers(s.ctx, newGame.ID)
-	s.Require().NoError(err)
+		creatorScore := 0
+		firstPlayerScore := 0
 
-	s.Len(users, 2)
-	s.ElementsMatch(gameUsers,
-		[]user.PublicProfile{users[0].PublicProfile, users[1].PublicProfile},
-	)
+		for roundNum := 1; roundNum <= testGame.Rounds; roundNum++ {
+			newRound, _ := s.newTestRound(testGame.ID, roundNum)
+
+			creatorGuess := s.newTestGuess(userCreator, newRound)
+			firstPlayerGuess := s.newTestGuess(userFirstPlayer, newRound)
+
+			creatorScore += creatorGuess.Score
+			firstPlayerScore += firstPlayerGuess.Score
+		}
+
+		users, err := s.postgresRepo.GetMultiplayerGameUsers(s.ctx, testGame.ID)
+		s.Require().NoError(err)
+
+		s.Len(users, 2)
+		s.ElementsMatch(gameUsers,
+			[]user.PublicProfile{users[0].PublicProfile, users[1].PublicProfile},
+		)
+		s.Equal(creatorScore, users[0].Score)
+		s.Equal(firstPlayerScore, users[1].Score)
+	}
 }
 
 func (s *MultiplayerTestSuite) TestSetMultiplayerUserGuess() {

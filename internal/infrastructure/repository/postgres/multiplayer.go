@@ -198,10 +198,12 @@ func (r *Repository) GetMultiplayerGameUsers(ctx context.Context, gameID int) ([
 			COALESCE(u.avatar_hash, '') AS avatar_hash,
 			SUM(COALESCE(mru.score, 0)) AS score
 		FROM multiplayer_game_user AS mgu
+		JOIN multiplayer_round AS mr
+			ON mr.game_id = mgu.game_id
 		JOIN user_info AS u
 			ON u.id = mgu.user_id
 		LEFT JOIN multiplayer_round_user AS mru 
-			ON mru.user_id = mgu.user_id
+			ON mru.user_id = mgu.user_id AND mru.round_id = mr.id
 		WHERE mgu.game_id = @game_id
 		GROUP BY u.id
 	`
