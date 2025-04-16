@@ -324,20 +324,21 @@ func (s *MultiplayerTestSuite) TestMultiplayerRoundGuesses() {
 		userFirstPlayer.PublicProfile,
 	})
 
-	roundNum := 1
-	newRound, _ := s.newTestRound(newGame.ID, roundNum)
+	for i := 1; i <= 2; i++ {
+		newRound, _ := s.newTestRound(newGame.ID, i)
 
-	creatorGuess := s.newTestGuess(userCreator, newRound)
-	guesses, err := s.postgresRepo.GetMultiplayerRoundGuesses(s.ctx, newRound.ID)
-	s.Require().NoError(err)
-	s.ElementsMatch([]multiplayer.Guess{creatorGuess}, guesses)
+		creatorGuess := s.newTestGuess(userCreator, newRound)
+		guesses, err := s.postgresRepo.GetMultiplayerRoundGuesses(s.ctx, newRound.ID)
+		s.Require().NoError(err)
+		s.ElementsMatch([]multiplayer.Guess{creatorGuess}, guesses)
 
-	firstUserGuess := s.newTestGuess(userFirstPlayer, newRound)
-	guesses, err = s.postgresRepo.GetMultiplayerRoundGuesses(s.ctx, newRound.ID)
-	s.Require().NoError(err)
-	s.ElementsMatch([]multiplayer.Guess{creatorGuess, firstUserGuess}, guesses)
+		firstUserGuess := s.newTestGuess(userFirstPlayer, newRound)
+		guesses, err = s.postgresRepo.GetMultiplayerRoundGuesses(s.ctx, newRound.ID)
+		s.Require().NoError(err)
+		s.ElementsMatch([]multiplayer.Guess{creatorGuess, firstUserGuess}, guesses)
+	}
 
-	updatedRound, err := s.postgresRepo.GetMultiplayerRound(s.ctx, newGame.ID, roundNum)
+	updatedRound, err := s.postgresRepo.GetMultiplayerRound(s.ctx, newGame.ID, 2)
 	s.Require().NoError(err)
 	s.Equal(2, updatedRound.GuessesCount)
 }

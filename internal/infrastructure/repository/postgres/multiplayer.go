@@ -417,7 +417,7 @@ func (r *Repository) GetMultiplayerRoundGuesses(ctx context.Context, roundID int
 		JOIN multiplayer_game_user AS mgu
 			ON mgu.game_id = mr.game_id
 		JOIN multiplayer_round_user AS mru
-			ON mru.user_id = mgu.user_id
+			ON mru.user_id = mgu.user_id AND mru.round_id = mr.id
 		JOIN user_info AS u 
 			ON u.id = mru.user_id
 		WHERE mr.id = @round_id
