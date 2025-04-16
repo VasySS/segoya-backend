@@ -31,7 +31,7 @@ func TestUsecase_NewYandexAirview(t *testing.T) {
 	}
 
 	type fields struct {
-		repo *mocks.PanoramaRepository
+		repo *mocks.Repository
 	}
 
 	type args struct{}
@@ -69,7 +69,7 @@ func TestUsecase_NewYandexAirview(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			repo := mocks.NewPanoramaRepository(t)
+			repo := mocks.NewRepository(t)
 			fs := fields{repo: repo}
 			uc := panorama.NewUsecase(panorama.Config{}, repo)
 
@@ -102,7 +102,7 @@ func TestUsecase_GetYandexAirview(t *testing.T) {
 	}
 
 	type fields struct {
-		repo *mocks.PanoramaRepository
+		repo *mocks.Repository
 	}
 
 	type args struct {
@@ -142,7 +142,7 @@ func TestUsecase_GetYandexAirview(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			repo := mocks.NewPanoramaRepository(t)
+			repo := mocks.NewRepository(t)
 			fs := fields{repo: repo}
 			uc := panorama.NewUsecase(panorama.Config{}, repo)
 
@@ -173,7 +173,7 @@ func TestUsecase_NewYandexStreetview(t *testing.T) {
 	}
 
 	type fields struct {
-		repo *mocks.PanoramaRepository
+		repo *mocks.Repository
 	}
 
 	type args struct{}
@@ -211,7 +211,7 @@ func TestUsecase_NewYandexStreetview(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			repo := mocks.NewPanoramaRepository(t)
+			repo := mocks.NewRepository(t)
 			fs := fields{repo: repo}
 			uc := panorama.NewUsecase(panorama.Config{}, repo)
 
@@ -242,7 +242,7 @@ func TestUsecase_GetYandexStreetview(t *testing.T) {
 	}
 
 	type fields struct {
-		repo *mocks.PanoramaRepository
+		repo *mocks.Repository
 	}
 
 	type args struct {
@@ -282,7 +282,7 @@ func TestUsecase_GetYandexStreetview(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			repo := mocks.NewPanoramaRepository(t)
+			repo := mocks.NewRepository(t)
 			fs := fields{repo: repo}
 			uc := panorama.NewUsecase(panorama.Config{}, repo)
 

@@ -29,7 +29,7 @@ func TestUsecase_NewGoogleStreetview(t *testing.T) {
 	}
 
 	type fields struct {
-		repo *mocks.PanoramaRepository
+		repo *mocks.Repository
 	}
 
 	type args struct{}
@@ -67,7 +67,7 @@ func TestUsecase_NewGoogleStreetview(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			repo := mocks.NewPanoramaRepository(t)
+			repo := mocks.NewRepository(t)
 			fs := fields{repo: repo}
 			uc := panorama.NewUsecase(panorama.Config{}, repo)
 
@@ -98,7 +98,7 @@ func TestUsecase_GetGoogleStreetview(t *testing.T) {
 	}
 
 	type fields struct {
-		repo *mocks.PanoramaRepository
+		repo *mocks.Repository
 	}
 
 	type args struct {
@@ -138,7 +138,7 @@ func TestUsecase_GetGoogleStreetview(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			repo := mocks.NewPanoramaRepository(t)
+			repo := mocks.NewRepository(t)
 			fs := fields{repo: repo}
 			uc := panorama.NewUsecase(panorama.Config{}, repo)
 
