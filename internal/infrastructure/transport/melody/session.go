@@ -41,6 +41,16 @@ func (s *Session) ID() string {
 	return newID
 }
 
+// Close closes the WebSocket session.
+func (s *Session) Close() error {
+	err := s.ms.Close()
+	if err != nil {
+		return fmt.Errorf("failed to close melody session: %w", err)
+	}
+
+	return nil
+}
+
 // Set stores a key-value pair in the session.
 func (s *Session) Set(key string, value any) {
 	s.ms.Set(key, value)

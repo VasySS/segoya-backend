@@ -45,7 +45,9 @@ func (ws *WebSocketService) Sessions() []transport.WebSocketSession {
 	}
 
 	for _, session := range sessions {
-		res = append(res, NewSession(session))
+		if !session.IsClosed() {
+			res = append(res, NewSession(session))
+		}
 	}
 
 	return res

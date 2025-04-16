@@ -26,6 +26,7 @@ type (
 	// WebSocketSession is a session between client and server.
 	WebSocketSession interface {
 		ID() string
+		Close() error
 		Request() *http.Request
 		Get(key string) (any, bool)
 		GetBroadcastID() (string, bool)

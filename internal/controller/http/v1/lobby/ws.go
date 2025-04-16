@@ -27,7 +27,7 @@ func getUser(s transport.WebSocketSession) (user.PublicProfile, bool) {
 	return u, true
 }
 
-// getLobbyUsers returns all connected users in the lobby.
+// getLobbyUsers returns all connected users in the lobby using broadcast id (lobby id).
 func (h Handler) getLobbyUsers(lobbyID string) []user.PublicProfile {
 	sessions := h.ws.Sessions()
 	users := make([]user.PublicProfile, 0)
@@ -69,6 +69,18 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		return
 	}
 
+	lobbyUsers := h.getLobbyUsers(lobbyID)
+
+	// prevent duplicate connections for the same user
+	for _, u := range lobbyUsers {
+		if u.Username == claims.Username {
+			session.SendError("a connection to this lobby already exists for user")
+			_ = session.Close()
+
+			return
+		}
+	}
+
 	userProfile, err := h.uc.ConnectLobbyUser(ctx, lobbyID, claims.UserID)
 	if err != nil {
 		slog.Error("error connecting user to lobby", slog.Any("error", err))
@@ -80,11 +92,9 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 	session.SetBroadcastID(lobbyID)
 	session.Set(dto.LobbyUserProfileKey, userProfile)
 
-	users := h.getLobbyUsers(lobbyID)
-
 	if err := session.SendMessage(
 		dto.LobbyMessageConnectedUsers,
-		map[string]any{"users": users},
+		map[string]any{"users": lobbyUsers},
 	); err != nil {
 		slog.Error("error sending connected users", slog.Any("error", err))
 		session.SendError("error connecting to lobby")
@@ -92,7 +102,7 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		return
 	}
 
-	_ = h.ws.BroadcastOthers(lobbyID, session, transport.WebSocketMessageOutput{
+	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
 		Type:    dto.LobbyMessageUserConnected,
 		Payload: map[string]any{"user": userProfile},
 	})
@@ -132,6 +142,7 @@ func (h Handler) handleWSDisconnect(session transport.WebSocketSession) {
 	req := session.Request()
 	ctx := req.Context()
 
+	// most of the time this will return ok==false if user tried to create a duplicate connection
 	lobbyID, ok := session.GetBroadcastID()
 	if !ok {
 		slog.Debug("error in lobby disconnect: lobby id not found in session")
