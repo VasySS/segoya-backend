@@ -157,18 +157,18 @@ type LobbiesHandler interface {
 //
 // x-ogen-operation-group: Multiplayer
 type MultiplayerHandler interface {
+	// EndMultiplayerGame implements endMultiplayerGame operation.
+	//
+	// Ends a multiplayer game and returns all user guesses.
+	//
+	// POST /v1/multiplayer/{id}/end
+	EndMultiplayerGame(ctx context.Context, params EndMultiplayerGameParams) (EndMultiplayerGameRes, error)
 	// GetMultiplayerGame implements getMultiplayerGame operation.
 	//
 	// Get multiplayer game information by ID.
 	//
 	// GET /v1/multiplayer/{id}
 	GetMultiplayerGame(ctx context.Context, params GetMultiplayerGameParams) (GetMultiplayerGameRes, error)
-	// GetMultiplayerGameGuesses implements getMultiplayerGameGuesses operation.
-	//
-	// Get multiplayer game user guesses.
-	//
-	// GET /v1/multiplayer/{id}/guesses
-	GetMultiplayerGameGuesses(ctx context.Context, params GetMultiplayerGameGuessesParams) (GetMultiplayerGameGuessesRes, error)
 	// GetMultiplayerRound implements getMultiplayerRound operation.
 	//
 	// Get multiplayer game round.

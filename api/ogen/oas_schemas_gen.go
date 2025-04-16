@@ -147,6 +147,22 @@ func (s *DiscordLoginTemporaryRedirect) SetSetCookie(val string) {
 	s.SetCookie = val
 }
 
+type EndMultiplayerGameBadRequest Error
+
+func (*EndMultiplayerGameBadRequest) endMultiplayerGameRes() {}
+
+type EndMultiplayerGameInternalServerError Error
+
+func (*EndMultiplayerGameInternalServerError) endMultiplayerGameRes() {}
+
+type EndMultiplayerGameOKApplicationJSON []MultiplayerGuess
+
+func (*EndMultiplayerGameOKApplicationJSON) endMultiplayerGameRes() {}
+
+type EndMultiplayerGameUnauthorized Error
+
+func (*EndMultiplayerGameUnauthorized) endMultiplayerGameRes() {}
+
 type EndSingleplayerGameBadRequest Error
 
 func (*EndSingleplayerGameBadRequest) endSingleplayerGameRes() {}
@@ -288,18 +304,6 @@ func (*GetLobbyInternalServerError) getLobbyRes() {}
 type GetLobbyNotFound Error
 
 func (*GetLobbyNotFound) getLobbyRes() {}
-
-type GetMultiplayerGameGuessesBadRequest Error
-
-func (*GetMultiplayerGameGuessesBadRequest) getMultiplayerGameGuessesRes() {}
-
-type GetMultiplayerGameGuessesInternalServerError Error
-
-func (*GetMultiplayerGameGuessesInternalServerError) getMultiplayerGameGuessesRes() {}
-
-type GetMultiplayerGameGuessesOKApplicationJSON []MultiplayerGuess
-
-func (*GetMultiplayerGameGuessesOKApplicationJSON) getMultiplayerGameGuessesRes() {}
 
 type GetMultiplayerGameInternalServerError Error
 

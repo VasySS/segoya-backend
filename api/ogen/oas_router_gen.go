@@ -576,9 +576,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 						switch elem[0] {
-						case 'g': // Prefix: "guesses"
+						case 'e': // Prefix: "end"
 
-							if l := len("guesses"); len(elem) >= l && elem[0:l] == "guesses" {
+							if l := len("end"); len(elem) >= l && elem[0:l] == "end" {
 								elem = elem[l:]
 							} else {
 								break
@@ -587,12 +587,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch r.Method {
-								case "GET":
-									s.handleGetMultiplayerGameGuessesRequest([1]string{
+								case "POST":
+									s.handleEndMultiplayerGameRequest([1]string{
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "GET")
+									s.notAllowed(w, r, "POST")
 								}
 
 								return
@@ -1565,9 +1565,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 						switch elem[0] {
-						case 'g': // Prefix: "guesses"
+						case 'e': // Prefix: "end"
 
-							if l := len("guesses"); len(elem) >= l && elem[0:l] == "guesses" {
+							if l := len("end"); len(elem) >= l && elem[0:l] == "end" {
 								elem = elem[l:]
 							} else {
 								break
@@ -1576,11 +1576,11 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							if len(elem) == 0 {
 								// Leaf node.
 								switch method {
-								case "GET":
-									r.name = GetMultiplayerGameGuessesOperation
-									r.summary = "Get multiplayer game guesses"
-									r.operationID = "getMultiplayerGameGuesses"
-									r.pathPattern = "/v1/multiplayer/{id}/guesses"
+								case "POST":
+									r.name = EndMultiplayerGameOperation
+									r.summary = "Ends a multiplayer game."
+									r.operationID = "endMultiplayerGame"
+									r.pathPattern = "/v1/multiplayer/{id}/end"
 									r.args = args
 									r.count = 1
 									return r, true

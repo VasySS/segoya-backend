@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"time"
 
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/dto"
@@ -45,16 +46,29 @@ func (h Handler) GetMultiplayerGame(
 	return dto.MultiplayerGameToAPI(game), nil
 }
 
-// GetMultiplayerGameGuesses retrieves all user guesses made in a specific multiplayer game.
-func (h Handler) GetMultiplayerGameGuesses(
+// EndMultiplayerGame ends a multiplayer game and retrieves all user guesses made.
+func (h Handler) EndMultiplayerGame(
 	ctx context.Context,
-	params api.GetMultiplayerGameGuessesParams,
-) (api.GetMultiplayerGameGuessesRes, error) {
-	guesses, err := h.uc.GetGameGuesses(ctx, params.ID)
+	params api.EndMultiplayerGameParams,
+) (api.EndMultiplayerGameRes, error) {
+	claims, ok := h.ts.FromContext(ctx)
+	if !ok {
+		return &api.EndMultiplayerGameUnauthorized{
+			Title:  "Error authorizing user",
+			Status: http.StatusInternalServerError,
+			Detail: "An error occurred while authorizing user",
+		}, nil
+	}
+
+	guesses, err := h.uc.EndGame(ctx, dto.EndMultiplayerGameRequest{
+		RequestTime: time.Now().UTC(),
+		GameID:      params.ID,
+		UserID:      claims.UserID,
+	})
 	if err != nil {
 		slog.Error("error getting multiplayer game guesses", slog.Any("error", err))
 
-		return &api.GetMultiplayerGameGuessesInternalServerError{
+		return &api.EndMultiplayerGameInternalServerError{
 			Title:  "Error getting guesses",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while getting guesses",

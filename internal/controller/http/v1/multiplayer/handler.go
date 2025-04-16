@@ -24,7 +24,6 @@ type Usecase interface {
 	GetRound(ctx context.Context, req dto.GetMultiplayerRoundRequest) (multiplayer.Round, error)
 	EndRound(ctx context.Context, req dto.EndMultiplayerRoundRequest) ([]multiplayer.Guess, error)
 	NewRoundGuess(ctx context.Context, req dto.NewMultiplayerRoundGuessRequest) error
-	GetGameGuesses(ctx context.Context, gameID int) ([]multiplayer.Guess, error)
 	GetGameUser(ctx context.Context, userID, gameID int) (user.MultiplayerUser, error)
 	GetGameUsers(ctx context.Context, gameID int) ([]user.MultiplayerUser, error)
 }

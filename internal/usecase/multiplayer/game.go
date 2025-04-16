@@ -102,9 +102,9 @@ func (uc Usecase) EndGame(ctx context.Context, req dto.EndMultiplayerGameRequest
 			return multiplayer.ErrGameIsStillActive
 		}
 
-		gs, err := uc.GetGameGuesses(ctx, req.GameID)
+		gs, err := uc.repo.GetMultiplayerGameGuesses(ctx, req.GameID)
 		if err != nil {
-			return fmt.Errorf("failed to get game guesses: %w", err)
+			return fmt.Errorf("failed to get multiplayer game guesses: %w", err)
 		}
 
 		if game.Finished {
@@ -129,20 +129,6 @@ func (uc Usecase) EndGame(ctx context.Context, req dto.EndMultiplayerGameRequest
 	}
 
 	return response, nil
-}
-
-// GetGameGuesses returns all guesses made during a game.
-func (uc Usecase) GetGameGuesses(ctx context.Context, gameID int) ([]multiplayer.Guess, error) {
-	ctx, span := uc.tracer.Start(ctx, "GetGameGuesses")
-	defer span.End()
-
-	guesses, err := uc.repo.GetMultiplayerGameGuesses(ctx, gameID)
-	if err != nil {
-		span.RecordError(err)
-		return nil, fmt.Errorf("failed to get multiplayer game guesses: %w", err)
-	}
-
-	return guesses, nil
 }
 
 // GetGameUsers returns all users info in a game (including those, who left).

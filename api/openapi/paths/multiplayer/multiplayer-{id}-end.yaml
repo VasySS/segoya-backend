@@ -1,7 +1,7 @@
-get:
-  operationId: getMultiplayerGameGuesses
-  summary: Get multiplayer game guesses
-  description: Get multiplayer game user guesses.
+post:
+  operationId: endMultiplayerGame
+  summary: Ends a multiplayer game.
+  description: Ends a multiplayer game and returns all user guesses.
   tags: ["multiplayer"]
   x-ogen-operation-group: Multiplayer
   parameters:
@@ -17,5 +17,7 @@ get:
               $ref: "../../components/schemas/multiplayer.yaml#/MultiplayerGuess"
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
     "500":
       $ref: "../../components/responses.yaml#/ServerError"

@@ -946,6 +946,31 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+  /v1/multiplayer/{id}/end:
+    post:
+      operationId: endMultiplayerGame
+      summary: Ends a multiplayer game.
+      description: Ends a multiplayer game and returns all user guesses.
+      tags:
+        - multiplayer
+      x-ogen-operation-group: Multiplayer
+      parameters:
+        - $ref: '#/components/parameters/idInt'
+      responses:
+        '200':
+          description: List of multiplayer game guesses.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MultiplayerGuess'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /v1/multiplayer/{id}/round:
     get:
       operationId: getMultiplayerRound
@@ -989,29 +1014,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-  /v1/multiplayer/{id}/guesses:
-    get:
-      operationId: getMultiplayerGameGuesses
-      summary: Get multiplayer game guesses
-      description: Get multiplayer game user guesses.
-      tags:
-        - multiplayer
-      x-ogen-operation-group: Multiplayer
-      parameters:
-        - $ref: '#/components/parameters/idInt'
-      responses:
-        '200':
-          description: List of multiplayer game guesses.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/MultiplayerGuess'
-        '400':
-          $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/ServerError'
 components:
@@ -1427,6 +1429,34 @@ components:
         - provider
         - finished
         - createdAt
+    MultiplayerGuess:
+      type: object
+      properties:
+        username:
+          type: string
+        avatarHash:
+          type: string
+        roundNum:
+          type: integer
+        roundLat:
+          type: number
+        roundLng:
+          type: number
+        lat:
+          type: number
+        lng:
+          type: number
+        score:
+          type: integer
+      required:
+        - username
+        - avatarHash
+        - roundNum
+        - roundLat
+        - roundLng
+        - lat
+        - lng
+        - score
     MultiplayerRound:
       type: object
       properties:
@@ -1467,34 +1497,6 @@ components:
         - createdAt
         - startedAt
         - endedAt
-    MultiplayerGuess:
-      type: object
-      properties:
-        username:
-          type: string
-        avatarHash:
-          type: string
-        roundNum:
-          type: integer
-        roundLat:
-          type: number
-        roundLng:
-          type: number
-        lat:
-          type: number
-        lng:
-          type: number
-        score:
-          type: integer
-      required:
-        - username
-        - avatarHash
-        - roundNum
-        - roundLat
-        - roundLng
-        - lat
-        - lng
-        - score
   responses:
     Unauthorized:
       description: An unauthorized request error response.
