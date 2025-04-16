@@ -932,7 +932,6 @@ type MultiplayerRound struct {
 	RoundNum     int       `json:"roundNum"`
 	Lat          float64   `json:"lat"`
 	Lng          float64   `json:"lng"`
-	PanoramaURL  string    `json:"panoramaURL"`
 	GuessesCount int       `json:"guessesCount"`
 	Finished     bool      `json:"finished"`
 	CreatedAt    time.Time `json:"createdAt"`
@@ -968,11 +967,6 @@ func (s *MultiplayerRound) GetLat() float64 {
 // GetLng returns the value of Lng.
 func (s *MultiplayerRound) GetLng() float64 {
 	return s.Lng
-}
-
-// GetPanoramaURL returns the value of PanoramaURL.
-func (s *MultiplayerRound) GetPanoramaURL() string {
-	return s.PanoramaURL
 }
 
 // GetGuessesCount returns the value of GuessesCount.
@@ -1028,11 +1022,6 @@ func (s *MultiplayerRound) SetLat(val float64) {
 // SetLng sets the value of Lng.
 func (s *MultiplayerRound) SetLng(val float64) {
 	s.Lng = val
-}
-
-// SetPanoramaURL sets the value of PanoramaURL.
-func (s *MultiplayerRound) SetPanoramaURL(val string) {
-	s.PanoramaURL = val
 }
 
 // SetGuessesCount sets the value of GuessesCount.
@@ -1772,7 +1761,6 @@ type SingleplayerRound struct {
 	RoundNum     int       `json:"roundNum"`
 	Lat          float64   `json:"lat"`
 	Lng          float64   `json:"lng"`
-	PanoramaURL  string    `json:"panoramaURL"`
 	Finished     bool      `json:"finished"`
 	CreatedAt    time.Time `json:"createdAt"`
 	StartedAt    time.Time `json:"startedAt"`
@@ -1806,11 +1794,6 @@ func (s *SingleplayerRound) GetLat() float64 {
 // GetLng returns the value of Lng.
 func (s *SingleplayerRound) GetLng() float64 {
 	return s.Lng
-}
-
-// GetPanoramaURL returns the value of PanoramaURL.
-func (s *SingleplayerRound) GetPanoramaURL() string {
-	return s.PanoramaURL
 }
 
 // GetFinished returns the value of Finished.
@@ -1856,11 +1839,6 @@ func (s *SingleplayerRound) SetLat(val float64) {
 // SetLng sets the value of Lng.
 func (s *SingleplayerRound) SetLng(val float64) {
 	s.Lng = val
-}
-
-// SetPanoramaURL sets the value of PanoramaURL.
-func (s *SingleplayerRound) SetPanoramaURL(val string) {
-	s.PanoramaURL = val
 }
 
 // SetFinished sets the value of Finished.

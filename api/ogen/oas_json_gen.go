@@ -3920,10 +3920,6 @@ func (s *MultiplayerRound) encodeFields(e *jx.Encoder) {
 		e.Float64(s.Lng)
 	}
 	{
-		e.FieldStart("panoramaURL")
-		e.Str(s.PanoramaURL)
-	}
-	{
 		e.FieldStart("guessesCount")
 		e.Int(s.GuessesCount)
 	}
@@ -3945,19 +3941,18 @@ func (s *MultiplayerRound) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfMultiplayerRound = [12]string{
+var jsonFieldsNameOfMultiplayerRound = [11]string{
 	0:  "id",
 	1:  "gameID",
 	2:  "streetviewID",
 	3:  "roundNum",
 	4:  "lat",
 	5:  "lng",
-	6:  "panoramaURL",
-	7:  "guessesCount",
-	8:  "finished",
-	9:  "createdAt",
-	10: "startedAt",
-	11: "endedAt",
+	6:  "guessesCount",
+	7:  "finished",
+	8:  "createdAt",
+	9:  "startedAt",
+	10: "endedAt",
 }
 
 // Decode decodes MultiplayerRound from json.
@@ -4041,20 +4036,8 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"lng\"")
 			}
-		case "panoramaURL":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				v, err := d.Str()
-				s.PanoramaURL = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"panoramaURL\"")
-			}
 		case "guessesCount":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Int()
 				s.GuessesCount = int(v)
@@ -4066,7 +4049,7 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"guessesCount\"")
 			}
 		case "finished":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Bool()
 				s.Finished = bool(v)
@@ -4078,7 +4061,7 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"finished\"")
 			}
 		case "createdAt":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -4090,7 +4073,7 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"createdAt\"")
 			}
 		case "startedAt":
-			requiredBitSet[1] |= 1 << 2
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.StartedAt = v
@@ -4102,7 +4085,7 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"startedAt\"")
 			}
 		case "endedAt":
-			requiredBitSet[1] |= 1 << 3
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.EndedAt = v
@@ -4124,7 +4107,7 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00001111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -6343,10 +6326,6 @@ func (s *SingleplayerRound) encodeFields(e *jx.Encoder) {
 		e.Float64(s.Lng)
 	}
 	{
-		e.FieldStart("panoramaURL")
-		e.Str(s.PanoramaURL)
-	}
-	{
 		e.FieldStart("finished")
 		e.Bool(s.Finished)
 	}
@@ -6360,17 +6339,16 @@ func (s *SingleplayerRound) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSingleplayerRound = [10]string{
+var jsonFieldsNameOfSingleplayerRound = [9]string{
 	0: "id",
 	1: "gameID",
 	2: "streetviewID",
 	3: "roundNum",
 	4: "lat",
 	5: "lng",
-	6: "panoramaURL",
-	7: "finished",
-	8: "createdAt",
-	9: "startedAt",
+	6: "finished",
+	7: "createdAt",
+	8: "startedAt",
 }
 
 // Decode decodes SingleplayerRound from json.
@@ -6454,20 +6432,8 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"lng\"")
 			}
-		case "panoramaURL":
-			requiredBitSet[0] |= 1 << 6
-			if err := func() error {
-				v, err := d.Str()
-				s.PanoramaURL = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"panoramaURL\"")
-			}
 		case "finished":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.Finished = bool(v)
@@ -6479,7 +6445,7 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"finished\"")
 			}
 		case "createdAt":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -6491,7 +6457,7 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"createdAt\"")
 			}
 		case "startedAt":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.StartedAt = v
@@ -6513,7 +6479,7 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00000011,
+		0b00000001,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

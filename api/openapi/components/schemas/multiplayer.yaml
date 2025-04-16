@@ -51,8 +51,6 @@ MultiplayerRound:
       type: number
     lng:
       type: number
-    panoramaURL:
-      type: string
     guessesCount:
       type: integer
     finished:
@@ -74,7 +72,6 @@ MultiplayerRound:
       roundNum,
       lat,
       lng,
-      panoramaURL,
       guessesCount,
       finished,
       createdAt,

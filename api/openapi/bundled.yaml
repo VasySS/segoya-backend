@@ -1318,8 +1318,6 @@ components:
           type: number
         lng:
           type: number
-        panoramaURL:
-          type: string
         finished:
           type: boolean
         createdAt:
@@ -1335,7 +1333,6 @@ components:
         - roundNum
         - lat
         - lng
-        - panoramaURL
         - finished
         - createdAt
         - startedAt
@@ -1445,8 +1442,6 @@ components:
           type: number
         lng:
           type: number
-        panoramaURL:
-          type: string
         guessesCount:
           type: integer
         finished:
@@ -1467,7 +1462,6 @@ components:
         - roundNum
         - lat
         - lng
-        - panoramaURL
         - guessesCount
         - finished
         - createdAt

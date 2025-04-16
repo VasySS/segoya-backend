@@ -79,8 +79,6 @@ SingleplayerRound:
       type: number
     lng:
       type: number
-    panoramaURL:
-      type: string
     finished:
       type: boolean
     createdAt:
@@ -97,7 +95,6 @@ SingleplayerRound:
       roundNum,
       lat,
       lng,
-      panoramaURL,
       finished,
       createdAt,
       startedAt,
