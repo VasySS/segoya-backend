@@ -78,12 +78,30 @@ func (h Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 	req := session.Request()
 	ctx := req.Context()
+
 	gameID := chi.URLParam(req, "id")
+	session.SetBroadcastID(gameID)
 
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {
 		session.SendError("error authorizing user")
 		return
+	}
+
+	gameUsers, err := h.getGameUsers(session)
+	if err != nil {
+		session.SendError("error getting game users")
+		return
+	}
+
+	// prevent duplicate connections for the same user
+	for _, u := range gameUsers {
+		if u.Username == claims.Username && u.Connected {
+			session.SendError("a connection to this game already exists for user")
+			_ = session.Close()
+
+			return
+		}
 	}
 
 	gameIDInt, err := strconv.Atoi(gameID)
@@ -98,14 +116,7 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		return
 	}
 
-	session.SetBroadcastID(gameID)
 	session.Set(dto.MultiplayerUserProfileKey, userProfile)
-
-	gameUsers, err := h.getGameUsers(session)
-	if err != nil {
-		session.SendError("error getting game users")
-		return
-	}
 
 	err = session.SendMessage(dto.MultiplayerMessageConnectedUsers, map[string]any{"users": gameUsers})
 	if err != nil {
@@ -113,7 +124,7 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		return
 	}
 
-	_ = h.ws.BroadcastOthers(gameID, session, transport.WebSocketMessageOutput{
+	_ = h.ws.Broadcast(gameID, transport.WebSocketMessageOutput{
 		Type:    dto.MultiplayerMessageUserConnected,
 		Payload: map[string]any{"user": userProfile},
 	})

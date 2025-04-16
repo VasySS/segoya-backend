@@ -61,7 +61,9 @@ func (h Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 	req := session.Request()
 	ctx := req.Context()
+
 	lobbyID := chi.URLParam(req, "id")
+	session.SetBroadcastID(lobbyID)
 
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {
@@ -89,7 +91,6 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		return
 	}
 
-	session.SetBroadcastID(lobbyID)
 	session.Set(dto.LobbyUserProfileKey, userProfile)
 
 	if err := session.SendMessage(

@@ -13,7 +13,9 @@ import (
 )
 
 // https://stackoverflow.com/questions/61850992/jwt-validation-with-jwks-golang
-func (uc Usecase) newJWKSet(ctx context.Context, jwkURL string) jwk.Set { //nolint:ireturn
+//
+//nolint:ireturn
+func (uc Usecase) newJWKSet(ctx context.Context, jwkURL string) jwk.Set {
 	jwkCache := jwk.NewCache(ctx)
 
 	// register a minimum refresh interval for this URL.
