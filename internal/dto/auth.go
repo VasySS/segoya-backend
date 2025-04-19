@@ -12,7 +12,7 @@ func SessionsToAPI(us []user.Session) *api.GetUserSessionsOKApplicationJSON {
 	resp := make(api.GetUserSessionsOKApplicationJSON, 0, len(us))
 
 	for _, session := range us {
-		resp = append(resp, api.GetUserSessionsOKItem{
+		resp = append(resp, api.UserSession{
 			SessionID:    session.SessionID,
 			UserID:       session.UserID,
 			RefreshToken: session.RefreshToken,

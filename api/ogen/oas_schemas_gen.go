@@ -444,67 +444,9 @@ type GetSingleplayerRoundUnauthorized Error
 
 func (*GetSingleplayerRoundUnauthorized) getSingleplayerRoundRes() {}
 
-type GetUserSessionsOKApplicationJSON []GetUserSessionsOKItem
+type GetUserSessionsOKApplicationJSON []UserSession
 
 func (*GetUserSessionsOKApplicationJSON) getUserSessionsRes() {}
-
-type GetUserSessionsOKItem struct {
-	SessionID    string    `json:"sessionID"`
-	UserID       int       `json:"userID"`
-	RefreshToken string    `json:"refreshToken"`
-	Ua           string    `json:"ua"`
-	LastActive   time.Time `json:"lastActive"`
-}
-
-// GetSessionID returns the value of SessionID.
-func (s *GetUserSessionsOKItem) GetSessionID() string {
-	return s.SessionID
-}
-
-// GetUserID returns the value of UserID.
-func (s *GetUserSessionsOKItem) GetUserID() int {
-	return s.UserID
-}
-
-// GetRefreshToken returns the value of RefreshToken.
-func (s *GetUserSessionsOKItem) GetRefreshToken() string {
-	return s.RefreshToken
-}
-
-// GetUa returns the value of Ua.
-func (s *GetUserSessionsOKItem) GetUa() string {
-	return s.Ua
-}
-
-// GetLastActive returns the value of LastActive.
-func (s *GetUserSessionsOKItem) GetLastActive() time.Time {
-	return s.LastActive
-}
-
-// SetSessionID sets the value of SessionID.
-func (s *GetUserSessionsOKItem) SetSessionID(val string) {
-	s.SessionID = val
-}
-
-// SetUserID sets the value of UserID.
-func (s *GetUserSessionsOKItem) SetUserID(val int) {
-	s.UserID = val
-}
-
-// SetRefreshToken sets the value of RefreshToken.
-func (s *GetUserSessionsOKItem) SetRefreshToken(val string) {
-	s.RefreshToken = val
-}
-
-// SetUa sets the value of Ua.
-func (s *GetUserSessionsOKItem) SetUa(val string) {
-	s.Ua = val
-}
-
-// SetLastActive sets the value of LastActive.
-func (s *GetUserSessionsOKItem) SetLastActive(val time.Time) {
-	s.LastActive = val
-}
 
 // Ref: #/LatLng
 type LatLng struct {
@@ -2151,6 +2093,65 @@ func (s *UserPublicProfile) SetRegisterDate(val time.Time) {
 }
 
 func (*UserPublicProfile) getPublicProfileRes() {}
+
+// Ref: #/UserSession
+type UserSession struct {
+	SessionID    string    `json:"sessionID"`
+	UserID       int       `json:"userID"`
+	RefreshToken string    `json:"refreshToken"`
+	Ua           string    `json:"ua"`
+	LastActive   time.Time `json:"lastActive"`
+}
+
+// GetSessionID returns the value of SessionID.
+func (s *UserSession) GetSessionID() string {
+	return s.SessionID
+}
+
+// GetUserID returns the value of UserID.
+func (s *UserSession) GetUserID() int {
+	return s.UserID
+}
+
+// GetRefreshToken returns the value of RefreshToken.
+func (s *UserSession) GetRefreshToken() string {
+	return s.RefreshToken
+}
+
+// GetUa returns the value of Ua.
+func (s *UserSession) GetUa() string {
+	return s.Ua
+}
+
+// GetLastActive returns the value of LastActive.
+func (s *UserSession) GetLastActive() time.Time {
+	return s.LastActive
+}
+
+// SetSessionID sets the value of SessionID.
+func (s *UserSession) SetSessionID(val string) {
+	s.SessionID = val
+}
+
+// SetUserID sets the value of UserID.
+func (s *UserSession) SetUserID(val int) {
+	s.UserID = val
+}
+
+// SetRefreshToken sets the value of RefreshToken.
+func (s *UserSession) SetRefreshToken(val string) {
+	s.RefreshToken = val
+}
+
+// SetUa sets the value of Ua.
+func (s *UserSession) SetUa(val string) {
+	s.Ua = val
+}
+
+// SetLastActive sets the value of LastActive.
+func (s *UserSession) SetLastActive(val time.Time) {
+	s.LastActive = val
+}
 
 // Ref: #/UserUpdateRequest
 type UserUpdateRequest struct {

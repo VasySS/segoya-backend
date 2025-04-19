@@ -509,7 +509,7 @@ func (s *GetSingleplayerRoundUnauthorized) Validate() error {
 }
 
 func (s GetUserSessionsOKApplicationJSON) Validate() error {
-	alias := ([]GetUserSessionsOKItem)(s)
+	alias := ([]UserSession)(s)
 	if alias == nil {
 		return errors.New("nil is invalid value")
 	}
