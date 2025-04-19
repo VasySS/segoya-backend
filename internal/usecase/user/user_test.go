@@ -9,13 +9,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	userEntity "github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 	"github.com/VasySS/segoya-backend/internal/usecase/user"
 	"github.com/VasySS/segoya-backend/internal/usecase/user/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestUsecase_GetPrivateProfile(t *testing.T) {

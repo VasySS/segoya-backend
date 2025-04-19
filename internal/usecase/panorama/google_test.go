@@ -4,11 +4,12 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/usecase/panorama"
 	"github.com/VasySS/segoya-backend/internal/usecase/panorama/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestUsecase_NewGoogleStreetview(t *testing.T) {

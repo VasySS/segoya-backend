@@ -9,11 +9,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
-	"github.com/go-chi/chi/v5"
 )
 
 // getUser retrieves the multiplayer user profile from the websocket session.

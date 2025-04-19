@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/VasySS/segoya-backend/internal/dto"
-	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
 // LockSingleplayerGame locks singleplayer game by id exclusively.

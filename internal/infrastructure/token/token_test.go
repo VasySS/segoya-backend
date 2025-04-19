@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VasySS/segoya-backend/internal/entity/user"
-	"github.com/VasySS/segoya-backend/internal/infrastructure/token"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/VasySS/segoya-backend/internal/entity/user"
+	"github.com/VasySS/segoya-backend/internal/infrastructure/token"
 )
 
 func setupService(ctx context.Context, jwtSecret []byte, accessTokenTTL, refreshTokenTTL time.Duration) *token.Service {

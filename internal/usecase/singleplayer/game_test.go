@@ -6,14 +6,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	singleplayerEntity "github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 	"github.com/VasySS/segoya-backend/internal/usecase/singleplayer"
 	"github.com/VasySS/segoya-backend/internal/usecase/singleplayer/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestUsecase_NewGame(t *testing.T) {

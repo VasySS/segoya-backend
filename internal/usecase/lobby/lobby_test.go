@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	lobbyEntity "github.com/VasySS/segoya-backend/internal/entity/lobby"
 	"github.com/VasySS/segoya-backend/internal/usecase/lobby"
 	"github.com/VasySS/segoya-backend/internal/usecase/lobby/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestUsecase_NewLobby(t *testing.T) {

@@ -19,6 +19,15 @@ formatters:
     - gci
     - gofumpt
     - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/VasySS/segoya-backend
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/VasySS/segoya-backend)
 
 linters:
   exclusions:

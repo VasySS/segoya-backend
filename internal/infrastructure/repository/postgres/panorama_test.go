@@ -4,12 +4,13 @@ import (
 	"context"
 	"testing"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stretchr/testify/suite"
+
 	postgresRepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/postgres"
 	"github.com/VasySS/segoya-backend/migrations/data"
 	"github.com/VasySS/segoya-backend/migrations/tables"
 	"github.com/VasySS/segoya-backend/tests/containers"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/stretchr/testify/suite"
 )
 
 func TestPanoramaTestSuite(t *testing.T) {

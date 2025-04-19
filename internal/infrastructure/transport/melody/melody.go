@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 	"github.com/olahol/melody"
+
+	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 )
 
 var _ transport.WebSocketService = (*WebSocketService)(nil)

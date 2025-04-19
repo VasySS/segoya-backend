@@ -6,11 +6,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/VasySS/segoya-backend/internal/dto"
-	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/oauth2"
+
+	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
 // UserRepository defines methods for interacting with user data in the storage layer.

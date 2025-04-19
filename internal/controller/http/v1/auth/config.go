@@ -4,8 +4,9 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/VasySS/segoya-backend/internal/config"
 	"golang.org/x/oauth2"
+
+	"github.com/VasySS/segoya-backend/internal/config"
 )
 
 type oauthConfig struct {

@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 )
 
 var _ repository.TxManager = (*TxManager)(nil)

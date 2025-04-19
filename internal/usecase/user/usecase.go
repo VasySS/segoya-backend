@@ -5,11 +5,12 @@ import (
 	"context"
 	"io"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // S3Repository provides access to S3 storage.

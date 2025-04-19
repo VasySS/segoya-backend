@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VasySS/segoya-backend/internal/dto"
-	valkeyRepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/valkey"
-	"github.com/VasySS/segoya-backend/tests/containers"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/suite"
 	"github.com/valkey-io/valkey-go"
+
+	"github.com/VasySS/segoya-backend/internal/dto"
+	valkeyRepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/valkey"
+	"github.com/VasySS/segoya-backend/tests/containers"
 )
 
 func TestOAuthTestSuite(t *testing.T) {

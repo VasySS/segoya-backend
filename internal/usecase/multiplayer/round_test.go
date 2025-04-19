@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	multiplayerEntity "github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
@@ -12,8 +15,6 @@ import (
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 	"github.com/VasySS/segoya-backend/internal/usecase/multiplayer"
 	"github.com/VasySS/segoya-backend/internal/usecase/multiplayer/mocks"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
 
 func TestUsecase_NewRound(t *testing.T) {

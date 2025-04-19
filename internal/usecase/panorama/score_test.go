@@ -3,9 +3,10 @@ package panorama_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/usecase/panorama"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestUsecase_CalculateScoreAndDistance(t *testing.T) {

@@ -7,9 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/valkey-io/valkey-go"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
-	"github.com/valkey-io/valkey-go"
 )
 
 const (

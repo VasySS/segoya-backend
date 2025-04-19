@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/VasySS/segoya-backend/internal/dto"
-	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+
+	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
 // NewOAuth creates new oauth connection for user.

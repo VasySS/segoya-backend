@@ -3,8 +3,9 @@ package auth
 import (
 	"time"
 
-	"github.com/VasySS/segoya-backend/internal/config"
 	"golang.org/x/oauth2"
+
+	"github.com/VasySS/segoya-backend/internal/config"
 )
 
 // Config contains configuration for auth usecase.

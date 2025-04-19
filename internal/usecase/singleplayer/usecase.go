@@ -5,12 +5,13 @@ package singleplayer
 import (
 	"context"
 
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/trace"
 )
 
 // GameRepo defines methods for accessing and modifying singleplayer game data.

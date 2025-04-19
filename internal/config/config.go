@@ -7,8 +7,9 @@ import (
 	"net/url"
 	"os"
 
-	httpPkg "github.com/VasySS/segoya-backend/pkg/http"
 	"github.com/ilyakaznacheev/cleanenv"
+
+	httpPkg "github.com/VasySS/segoya-backend/pkg/http"
 )
 
 // Proxy contains proxy settings.

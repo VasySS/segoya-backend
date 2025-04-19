@@ -8,10 +8,11 @@ import (
 	"log/slog"
 	"os"
 
-	dataMigrations "github.com/VasySS/segoya-backend/migrations/data"
-	"github.com/VasySS/segoya-backend/migrations/tables"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	dataMigrations "github.com/VasySS/segoya-backend/migrations/data"
+	"github.com/VasySS/segoya-backend/migrations/tables"
 )
 
 type env struct {

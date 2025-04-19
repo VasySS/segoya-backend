@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
 // RandomGoogleStreetview gets a random Google streetview from the database.

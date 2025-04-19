@@ -10,6 +10,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/valkey-io/valkey-go"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+
 	"github.com/VasySS/segoya-backend/internal/config"
 	httpController "github.com/VasySS/segoya-backend/internal/controller/http"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository/cloudflare"
@@ -25,13 +33,6 @@ import (
 	"github.com/VasySS/segoya-backend/internal/usecase/user"
 	"github.com/VasySS/segoya-backend/pkg/captcha"
 	"github.com/VasySS/segoya-backend/pkg/crypto"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/valkey-io/valkey-go"
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 )
 
 // Run creates all needed usecases and starts the application.

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 	"github.com/google/uuid"
 	"github.com/olahol/melody"
+
+	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 )
 
 const (

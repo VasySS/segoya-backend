@@ -5,6 +5,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
@@ -13,9 +17,6 @@ import (
 	"github.com/VasySS/segoya-backend/migrations/data"
 	"github.com/VasySS/segoya-backend/migrations/tables"
 	"github.com/VasySS/segoya-backend/tests/containers"
-	"github.com/brianvoe/gofakeit/v7"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/stretchr/testify/suite"
 )
 
 func TestSingleplayerTestSuite(t *testing.T) {

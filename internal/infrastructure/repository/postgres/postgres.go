@@ -4,9 +4,10 @@ package postgres
 import (
 	"context"
 
-	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
+
+	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 )
 
 // Repository is a Postgres repository wrapper.

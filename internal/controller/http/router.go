@@ -6,6 +6,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+
 	apiembed "github.com/VasySS/segoya-backend/api"
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/config"
@@ -19,8 +22,6 @@ import (
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 	"github.com/VasySS/segoya-backend/pkg/captcha"
 	"github.com/VasySS/segoya-backend/pkg/crypto"
-	"github.com/go-chi/chi/v5"
-	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 )
 
 // APIHandler is a wrapper for all API handlers to implement ogen's api.Handler interface.

@@ -5,13 +5,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/stretchr/testify/suite"
+	"github.com/valkey-io/valkey-go"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 	valkeyRepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/valkey"
 	"github.com/VasySS/segoya-backend/tests/containers"
-	"github.com/brianvoe/gofakeit/v7"
-	"github.com/stretchr/testify/suite"
-	"github.com/valkey-io/valkey-go"
 )
 
 func TestLobbyTestSuite(t *testing.T) {
