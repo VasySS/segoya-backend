@@ -175,11 +175,7 @@ paths:
         - auth
       x-ogen-operation-group: Auth
       parameters:
-        - in: header
-          name: X-Captcha-Token
-          description: Captcha token, required only for production environment.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/captchaHeader'
       requestBody:
         required: true
         content:
@@ -211,11 +207,7 @@ paths:
           required: true
           schema:
             type: string
-        - in: header
-          name: X-Captcha-Token
-          description: Captcha token, required only for production environment.
-          schema:
-            type: string
+        - $ref: '#/components/parameters/captchaHeader'
       requestBody:
         required: true
         content:
@@ -1548,6 +1540,12 @@ components:
       required: true
       schema:
         type: integer
+    captchaHeader:
+      name: Frontend-Captcha-Token
+      in: header
+      description: Captcha token, required only for production environment.
+      schema:
+        type: string
     idStr:
       name: id
       description: String ID of the resource in path.

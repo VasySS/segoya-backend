@@ -19,7 +19,7 @@ func (h Handler) Login(
 	req *api.LoginRequest,
 	params api.LoginParams,
 ) (api.LoginRes, error) {
-	if err := h.cs.IsTokenValid(ctx, params.XCaptchaToken.Value); err != nil {
+	if err := h.cs.IsTokenValid(ctx, params.FrontendCaptchaToken.Value); err != nil {
 		return &api.LoginBadRequest{
 			Title:  "Captcha validation failed",
 			Status: http.StatusBadRequest,
@@ -60,7 +60,7 @@ func (h Handler) Register(
 	req *api.RegisterRequest,
 	params api.RegisterParams,
 ) (api.RegisterRes, error) {
-	if err := h.cs.IsTokenValid(ctx, params.XCaptchaToken.Value); err != nil {
+	if err := h.cs.IsTokenValid(ctx, params.FrontendCaptchaToken.Value); err != nil {
 		return &api.RegisterBadRequest{
 			Title:  "Captcha validation failed",
 			Status: http.StatusBadRequest,

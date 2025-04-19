@@ -3871,9 +3871,9 @@ func (s *Server) handleLoginRequest(args [0]string, argsEscaped bool, w http.Res
 					In:   "header",
 				}: params.UserAgent,
 				{
-					Name: "X-Captcha-Token",
+					Name: "Frontend-Captcha-Token",
 					In:   "header",
-				}: params.XCaptchaToken,
+				}: params.FrontendCaptchaToken,
 			},
 			Raw: r,
 		}
@@ -5516,9 +5516,9 @@ func (s *Server) handleRegisterRequest(args [0]string, argsEscaped bool, w http.
 			Body:             request,
 			Params: middleware.Parameters{
 				{
-					Name: "X-Captcha-Token",
+					Name: "Frontend-Captcha-Token",
 					In:   "header",
-				}: params.XCaptchaToken,
+				}: params.FrontendCaptchaToken,
 			},
 			Raw: r,
 		}

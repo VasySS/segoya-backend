@@ -12,11 +12,7 @@ post:
       required: true
       schema:
         type: string
-    - in: header
-      name: X-Captcha-Token
-      description: Captcha token, required only for production environment.
-      schema:
-        type: string
+    - $ref: "../../components/parameters.yaml#/captchaHeader"
   requestBody:
     required: true
     content:

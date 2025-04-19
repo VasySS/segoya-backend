@@ -1167,7 +1167,7 @@ type LoginParams struct {
 	// User agent is required to store sessions.
 	UserAgent string
 	// Captcha token, required only for production environment.
-	XCaptchaToken OptString
+	FrontendCaptchaToken OptString
 }
 
 func unpackLoginParams(packed middleware.Parameters) (params LoginParams) {
@@ -1180,11 +1180,11 @@ func unpackLoginParams(packed middleware.Parameters) (params LoginParams) {
 	}
 	{
 		key := middleware.ParameterKey{
-			Name: "X-Captcha-Token",
+			Name: "Frontend-Captcha-Token",
 			In:   "header",
 		}
 		if v, ok := packed[key]; ok {
-			params.XCaptchaToken = v.(OptString)
+			params.FrontendCaptchaToken = v.(OptString)
 		}
 	}
 	return params
@@ -1226,15 +1226,15 @@ func decodeLoginParams(args [0]string, argsEscaped bool, r *http.Request) (param
 			Err:  err,
 		}
 	}
-	// Decode header: X-Captcha-Token.
+	// Decode header: Frontend-Captcha-Token.
 	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "X-Captcha-Token",
+			Name:    "Frontend-Captcha-Token",
 			Explode: false,
 		}
 		if err := h.HasParam(cfg); err == nil {
 			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotXCaptchaTokenVal string
+				var paramsDotFrontendCaptchaTokenVal string
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -1246,12 +1246,12 @@ func decodeLoginParams(args [0]string, argsEscaped bool, r *http.Request) (param
 						return err
 					}
 
-					paramsDotXCaptchaTokenVal = c
+					paramsDotFrontendCaptchaTokenVal = c
 					return nil
 				}(); err != nil {
 					return err
 				}
-				params.XCaptchaToken.SetTo(paramsDotXCaptchaTokenVal)
+				params.FrontendCaptchaToken.SetTo(paramsDotFrontendCaptchaTokenVal)
 				return nil
 			}); err != nil {
 				return err
@@ -1260,7 +1260,7 @@ func decodeLoginParams(args [0]string, argsEscaped bool, r *http.Request) (param
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "X-Captcha-Token",
+			Name: "Frontend-Captcha-Token",
 			In:   "header",
 			Err:  err,
 		}
@@ -1697,17 +1697,17 @@ func decodeNewYandexCallbackParams(args [0]string, argsEscaped bool, r *http.Req
 // RegisterParams is parameters of register operation.
 type RegisterParams struct {
 	// Captcha token, required only for production environment.
-	XCaptchaToken OptString
+	FrontendCaptchaToken OptString
 }
 
 func unpackRegisterParams(packed middleware.Parameters) (params RegisterParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "X-Captcha-Token",
+			Name: "Frontend-Captcha-Token",
 			In:   "header",
 		}
 		if v, ok := packed[key]; ok {
-			params.XCaptchaToken = v.(OptString)
+			params.FrontendCaptchaToken = v.(OptString)
 		}
 	}
 	return params
@@ -1715,15 +1715,15 @@ func unpackRegisterParams(packed middleware.Parameters) (params RegisterParams) 
 
 func decodeRegisterParams(args [0]string, argsEscaped bool, r *http.Request) (params RegisterParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
-	// Decode header: X-Captcha-Token.
+	// Decode header: Frontend-Captcha-Token.
 	if err := func() error {
 		cfg := uri.HeaderParameterDecodingConfig{
-			Name:    "X-Captcha-Token",
+			Name:    "Frontend-Captcha-Token",
 			Explode: false,
 		}
 		if err := h.HasParam(cfg); err == nil {
 			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
-				var paramsDotXCaptchaTokenVal string
+				var paramsDotFrontendCaptchaTokenVal string
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -1735,12 +1735,12 @@ func decodeRegisterParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 						return err
 					}
 
-					paramsDotXCaptchaTokenVal = c
+					paramsDotFrontendCaptchaTokenVal = c
 					return nil
 				}(); err != nil {
 					return err
 				}
-				params.XCaptchaToken.SetTo(paramsDotXCaptchaTokenVal)
+				params.FrontendCaptchaToken.SetTo(paramsDotFrontendCaptchaTokenVal)
 				return nil
 			}); err != nil {
 				return err
@@ -1749,7 +1749,7 @@ func decodeRegisterParams(args [0]string, argsEscaped bool, r *http.Request) (pa
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "X-Captcha-Token",
+			Name: "Frontend-Captcha-Token",
 			In:   "header",
 			Err:  err,
 		}

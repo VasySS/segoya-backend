@@ -31,3 +31,10 @@ pageSizeQuery:
     type: integer
     minimum: 1
     maximum: 50
+
+captchaHeader:
+  name: Frontend-Captcha-Token
+  in: header
+  description: Captcha token, required only for production environment.
+  schema:
+    type: string

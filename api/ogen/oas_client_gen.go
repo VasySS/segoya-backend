@@ -2902,11 +2902,11 @@ func (c *Client) sendLogin(ctx context.Context, request *LoginRequest, params Lo
 	}
 	{
 		cfg := uri.HeaderParameterEncodingConfig{
-			Name:    "X-Captcha-Token",
+			Name:    "Frontend-Captcha-Token",
 			Explode: false,
 		}
 		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.XCaptchaToken.Get(); ok {
+			if val, ok := params.FrontendCaptchaToken.Get(); ok {
 				return e.EncodeValue(conv.StringToString(val))
 			}
 			return nil
@@ -3979,11 +3979,11 @@ func (c *Client) sendRegister(ctx context.Context, request *RegisterRequest, par
 	h := uri.NewHeaderEncoder(r.Header)
 	{
 		cfg := uri.HeaderParameterEncodingConfig{
-			Name:    "X-Captcha-Token",
+			Name:    "Frontend-Captcha-Token",
 			Explode: false,
 		}
 		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
-			if val, ok := params.XCaptchaToken.Get(); ok {
+			if val, ok := params.FrontendCaptchaToken.Get(); ok {
 				return e.EncodeValue(conv.StringToString(val))
 			}
 			return nil
