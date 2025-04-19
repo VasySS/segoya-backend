@@ -21,9 +21,11 @@ func NewPostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 	postgresContainer, err := postgres.Run(ctx,
 		"postgres:17-alpine3.21",
 		postgres.WithDatabase("segoya"),
+		postgres.WithSQLDriver("pgx"),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).WithStartupTimeout(5*time.Second)),
+				WithOccurrence(2).WithStartupTimeout(10*time.Second),
+		),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to run postgres container: %w", err)
