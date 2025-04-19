@@ -70,23 +70,6 @@ func (s *OAuthTestSuite) SetupTest() {
 	s.postgresRepo = repo
 }
 
-func (s *OAuthTestSuite) newTestUser() (dto.RegisterRequestDB, user.PrivateProfile) {
-	newUserReq := dto.RegisterRequestDB{
-		RequestTime: time.Now().UTC(),
-		Username:    gofakeit.Username(),
-		Name:        gofakeit.Name(),
-		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
-	}
-
-	err := s.postgresRepo.NewUser(s.ctx, newUserReq)
-	s.Require().NoError(err)
-
-	newUser, err := s.postgresRepo.GetUserByUsername(s.ctx, newUserReq.Username)
-	s.Require().NoError(err)
-
-	return newUserReq, newUser
-}
-
 func (s *OAuthTestSuite) TestNewOAuth() {
 	_, testUser := s.newTestUser()
 
@@ -189,4 +172,21 @@ func (s *OAuthTestSuite) TestUserByOAuthIssuer() {
 	s.Equal(testUser.Name, u.Name)
 	s.Equal(testUser.Password, u.Password)
 	s.WithinDuration(testUserReq.RequestTime, u.RegisterDate, 5*time.Millisecond)
+}
+
+func (s *OAuthTestSuite) newTestUser() (dto.RegisterRequestDB, user.PrivateProfile) {
+	newUserReq := dto.RegisterRequestDB{
+		RequestTime: time.Now().UTC(),
+		Username:    gofakeit.Username(),
+		Name:        gofakeit.Name(),
+		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
+	}
+
+	err := s.postgresRepo.NewUser(s.ctx, newUserReq)
+	s.Require().NoError(err)
+
+	newUser, err := s.postgresRepo.GetUserByUsername(s.ctx, newUserReq.Username)
+	s.Require().NoError(err)
+
+	return newUserReq, newUser
 }

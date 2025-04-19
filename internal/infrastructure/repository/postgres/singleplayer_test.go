@@ -76,59 +76,6 @@ func (s *SingleplayerTestSuite) SetupTest() {
 	s.postgresRepo = repo
 }
 
-func (s *SingleplayerTestSuite) newTestUser() user.PrivateProfile {
-	newUserReq := dto.RegisterRequestDB{
-		RequestTime: time.Now().UTC(),
-		Username:    gofakeit.Username(),
-		Name:        gofakeit.Name(),
-		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
-	}
-
-	err := s.postgresRepo.NewUser(s.ctx, newUserReq)
-	s.Require().NoError(err)
-
-	newUser, err := s.postgresRepo.GetUserByUsername(s.ctx, newUserReq.Username)
-	s.Require().NoError(err)
-
-	return newUser
-}
-
-func (s *SingleplayerTestSuite) newTestGame(userID int) (singleplayer.Game, dto.NewSingleplayerGameRequest) {
-	gameReq := dto.NewSingleplayerGameRequest{
-		RequestTime:     time.Now().UTC(),
-		UserID:          userID,
-		Rounds:          gofakeit.Number(2, 10),
-		TimerSeconds:    gofakeit.Number(10, 600),
-		Provider:        gofakeit.RandomString([]string{"seznam", "yandex", "yandex_air", "google"}),
-		MovementAllowed: gofakeit.Bool(),
-	}
-
-	gameID, err := s.postgresRepo.NewSingleplayerGame(s.ctx, gameReq)
-	s.Require().NoError(err)
-
-	newGame, err := s.postgresRepo.GetSingleplayerGame(s.ctx, gameID)
-	s.Require().NoError(err)
-
-	return newGame, gameReq
-}
-
-func (s *SingleplayerTestSuite) newTestRound(
-	gameID, roundNum int,
-) (singleplayer.Round, dto.NewSingleplayerRoundDBRequest) {
-	roundReq := dto.NewSingleplayerRoundDBRequest{
-		CreatedAt:  time.Now().UTC(),
-		StartedAt:  time.Now().UTC().Add(time.Second * 10),
-		GameID:     gameID,
-		LocationID: gofakeit.Number(1, 100),
-		RoundNum:   roundNum,
-	}
-
-	round, err := s.postgresRepo.NewSingleplayerRound(s.ctx, roundReq)
-	s.Require().NoError(err)
-
-	return round, roundReq
-}
-
 func (s *SingleplayerTestSuite) TestNewSingleplayerGame() {
 	newUser := s.newTestUser()
 	newTestGame, gameReq := s.newTestGame(newUser.ID)
@@ -319,4 +266,57 @@ func (s *SingleplayerTestSuite) TestSingleplayerRoundsWithGuesses() {
 
 	s.Equal(gameScore, updatedGame.Score)
 	s.Equal(updatedGame.Rounds, updatedGame.RoundCurrent)
+}
+
+func (s *SingleplayerTestSuite) newTestUser() user.PrivateProfile {
+	newUserReq := dto.RegisterRequestDB{
+		RequestTime: time.Now().UTC(),
+		Username:    gofakeit.Username(),
+		Name:        gofakeit.Name(),
+		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
+	}
+
+	err := s.postgresRepo.NewUser(s.ctx, newUserReq)
+	s.Require().NoError(err)
+
+	newUser, err := s.postgresRepo.GetUserByUsername(s.ctx, newUserReq.Username)
+	s.Require().NoError(err)
+
+	return newUser
+}
+
+func (s *SingleplayerTestSuite) newTestGame(userID int) (singleplayer.Game, dto.NewSingleplayerGameRequest) {
+	gameReq := dto.NewSingleplayerGameRequest{
+		RequestTime:     time.Now().UTC(),
+		UserID:          userID,
+		Rounds:          gofakeit.Number(2, 10),
+		TimerSeconds:    gofakeit.Number(10, 600),
+		Provider:        gofakeit.RandomString([]string{"seznam", "yandex", "yandex_air", "google"}),
+		MovementAllowed: gofakeit.Bool(),
+	}
+
+	gameID, err := s.postgresRepo.NewSingleplayerGame(s.ctx, gameReq)
+	s.Require().NoError(err)
+
+	newGame, err := s.postgresRepo.GetSingleplayerGame(s.ctx, gameID)
+	s.Require().NoError(err)
+
+	return newGame, gameReq
+}
+
+func (s *SingleplayerTestSuite) newTestRound(
+	gameID, roundNum int,
+) (singleplayer.Round, dto.NewSingleplayerRoundDBRequest) {
+	roundReq := dto.NewSingleplayerRoundDBRequest{
+		CreatedAt:  time.Now().UTC(),
+		StartedAt:  time.Now().UTC().Add(time.Second * 10),
+		GameID:     gameID,
+		LocationID: gofakeit.Number(1, 100),
+		RoundNum:   roundNum,
+	}
+
+	round, err := s.postgresRepo.NewSingleplayerRound(s.ctx, roundReq)
+	s.Require().NoError(err)
+
+	return round, roundReq
 }

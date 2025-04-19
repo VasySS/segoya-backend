@@ -75,93 +75,6 @@ func (s *MultiplayerTestSuite) SetupTest() {
 	s.postgresRepo = repo
 }
 
-func (s *MultiplayerTestSuite) newTestUser() user.PrivateProfile {
-	newUserReq := dto.RegisterRequestDB{
-		RequestTime: time.Now().UTC(),
-		Username:    gofakeit.Username(),
-		Name:        gofakeit.Name(),
-		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
-	}
-
-	err := s.postgresRepo.NewUser(s.ctx, newUserReq)
-	s.Require().NoError(err)
-
-	newUser, err := s.postgresRepo.GetUserByUsername(s.ctx, newUserReq.Username)
-	s.Require().NoError(err)
-
-	return newUser
-}
-
-func (s *MultiplayerTestSuite) newTestGame(
-	userID int,
-	connectedPlayers []user.PublicProfile,
-) (multiplayer.Game, dto.NewMultiplayerGameRequest) {
-	gameReq := dto.NewMultiplayerGameRequest{
-		RequestTime:      time.Now().UTC(),
-		CreatorID:        userID,
-		ConnectedPlayers: connectedPlayers,
-		Rounds:           gofakeit.Number(2, 10),
-		TimerSeconds:     gofakeit.Number(10, 600),
-		Provider:         gofakeit.RandomString([]string{"seznam", "yandex", "yandex_air", "google"}),
-		MovementAllowed:  gofakeit.Bool(),
-	}
-
-	gameID, err := s.postgresRepo.NewMultiplayerGame(s.ctx, gameReq)
-	s.Require().NoError(err)
-
-	newGame, err := s.postgresRepo.GetMultiplayerGame(s.ctx, gameID)
-	s.Require().NoError(err)
-
-	return newGame, gameReq
-}
-
-func (s *MultiplayerTestSuite) newTestRound(
-	gameID, roundNum int,
-) (multiplayer.Round, dto.NewMultiplayerRoundRequestDB) {
-	roundReq := dto.NewMultiplayerRoundRequestDB{
-		CreatedAt:  time.Now().UTC(),
-		StartedAt:  time.Now().UTC().Add(time.Second * 10),
-		GameID:     gameID,
-		LocationID: gofakeit.Number(1, 100),
-		RoundNum:   roundNum,
-	}
-
-	round, err := s.postgresRepo.NewMultiplayerRound(s.ctx, roundReq)
-	s.Require().NoError(err)
-
-	return round, roundReq
-}
-
-func (s *MultiplayerTestSuite) newTestGuess(
-	user user.PrivateProfile, round multiplayer.Round,
-) multiplayer.Guess {
-	req := dto.NewMultiplayerRoundGuessRequestDB{
-		RequestTime: time.Now().UTC(),
-		UserID:      user.ID,
-		RoundID:     round.ID,
-		Lat:         gofakeit.Latitude(),
-		Lng:         gofakeit.Longitude(),
-		Score:       gofakeit.Number(0, 5000),
-		Distance:    gofakeit.Number(0, 5000),
-	}
-
-	multiplayerGuess := multiplayer.Guess{
-		Username:   user.Username,
-		AvatarHash: user.AvatarHash,
-		RoundNum:   round.RoundNum,
-		RoundLat:   round.Lat,
-		RoundLng:   round.Lng,
-		Lat:        req.Lat,
-		Lng:        req.Lng,
-		Score:      req.Score,
-	}
-
-	err := s.postgresRepo.NewMultiplayerRoundGuess(s.ctx, req)
-	s.Require().NoError(err)
-
-	return multiplayerGuess
-}
-
 func (s *MultiplayerTestSuite) TestNewMultiplayerGame() {
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
@@ -438,4 +351,91 @@ func (s *MultiplayerTestSuite) TestMultiplayerGameEnd() {
 
 	s.True(updatedGame.Finished)
 	s.WithinDuration(endGameReq.RequestTime, updatedGame.EndedAt, 5*time.Millisecond)
+}
+
+func (s *MultiplayerTestSuite) newTestUser() user.PrivateProfile {
+	newUserReq := dto.RegisterRequestDB{
+		RequestTime: time.Now().UTC(),
+		Username:    gofakeit.Username(),
+		Name:        gofakeit.Name(),
+		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
+	}
+
+	err := s.postgresRepo.NewUser(s.ctx, newUserReq)
+	s.Require().NoError(err)
+
+	newUser, err := s.postgresRepo.GetUserByUsername(s.ctx, newUserReq.Username)
+	s.Require().NoError(err)
+
+	return newUser
+}
+
+func (s *MultiplayerTestSuite) newTestGame(
+	userID int,
+	connectedPlayers []user.PublicProfile,
+) (multiplayer.Game, dto.NewMultiplayerGameRequest) {
+	gameReq := dto.NewMultiplayerGameRequest{
+		RequestTime:      time.Now().UTC(),
+		CreatorID:        userID,
+		ConnectedPlayers: connectedPlayers,
+		Rounds:           gofakeit.Number(2, 10),
+		TimerSeconds:     gofakeit.Number(10, 600),
+		Provider:         gofakeit.RandomString([]string{"seznam", "yandex", "yandex_air", "google"}),
+		MovementAllowed:  gofakeit.Bool(),
+	}
+
+	gameID, err := s.postgresRepo.NewMultiplayerGame(s.ctx, gameReq)
+	s.Require().NoError(err)
+
+	newGame, err := s.postgresRepo.GetMultiplayerGame(s.ctx, gameID)
+	s.Require().NoError(err)
+
+	return newGame, gameReq
+}
+
+func (s *MultiplayerTestSuite) newTestRound(
+	gameID, roundNum int,
+) (multiplayer.Round, dto.NewMultiplayerRoundRequestDB) {
+	roundReq := dto.NewMultiplayerRoundRequestDB{
+		CreatedAt:  time.Now().UTC(),
+		StartedAt:  time.Now().UTC().Add(time.Second * 10),
+		GameID:     gameID,
+		LocationID: gofakeit.Number(1, 100),
+		RoundNum:   roundNum,
+	}
+
+	round, err := s.postgresRepo.NewMultiplayerRound(s.ctx, roundReq)
+	s.Require().NoError(err)
+
+	return round, roundReq
+}
+
+func (s *MultiplayerTestSuite) newTestGuess(
+	user user.PrivateProfile, round multiplayer.Round,
+) multiplayer.Guess {
+	req := dto.NewMultiplayerRoundGuessRequestDB{
+		RequestTime: time.Now().UTC(),
+		UserID:      user.ID,
+		RoundID:     round.ID,
+		Lat:         gofakeit.Latitude(),
+		Lng:         gofakeit.Longitude(),
+		Score:       gofakeit.Number(0, 5000),
+		Distance:    gofakeit.Number(0, 5000),
+	}
+
+	multiplayerGuess := multiplayer.Guess{
+		Username:   user.Username,
+		AvatarHash: user.AvatarHash,
+		RoundNum:   round.RoundNum,
+		RoundLat:   round.Lat,
+		RoundLng:   round.Lng,
+		Lat:        req.Lat,
+		Lng:        req.Lng,
+		Score:      req.Score,
+	}
+
+	err := s.postgresRepo.NewMultiplayerRoundGuess(s.ctx, req)
+	s.Require().NoError(err)
+
+	return multiplayerGuess
 }
