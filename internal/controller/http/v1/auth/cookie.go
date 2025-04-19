@@ -8,8 +8,8 @@ import (
 	"slices"
 )
 
-// ErrCookieParsing is returned when an error occurs while parsing a cookie.
-var ErrCookieParsing = errors.New("error parsing cookie")
+// ErrCookieNotFound is returned when an error occurs while parsing a cookie.
+var ErrCookieNotFound = errors.New("cookie was not found")
 
 const (
 	accessCookieName  = "accessToken"
@@ -78,7 +78,7 @@ func (h Handler) parseCookieState(cookie string) (string, error) {
 	})
 
 	if cookieIdx == -1 {
-		return "", ErrCookieParsing
+		return "", ErrCookieNotFound
 	}
 
 	stateCookieValue, err := url.QueryUnescape(cookies[cookieIdx].Value)

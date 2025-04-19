@@ -5,20 +5,26 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/VasySS/segoya-backend/internal/entity/user"
-	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/lestrrat-go/jwx/v3/jwa"
+	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
-// ErrNoPrivateClaims is returned when there are no private claims in the token.
-var ErrNoPrivateClaims = errors.New("no private claims in token")
+var (
+	// ErrNoPrivateClaims is returned when there are no private claims in the token.
+	ErrNoPrivateClaims = errors.New("no private claims in token")
+	// SignatureMethod is a default signature method used to sign tokens.
+	//nolint:gochecknoglobals
+	SignatureMethod = jwa.HS256()
+)
 
 const (
-	// SignatureMethod is a default signature method used to sign tokens.
-	SignatureMethod       = jwa.HS256
 	parsingAcceptableSkew = 3 * time.Minute
+	discordOAuthKeysURL   = "https://discord.com/api/oauth2/keys"
 )
 
 type tokenCtxKey struct{}
@@ -28,17 +34,28 @@ type Service struct {
 	jwtSecret       []byte
 	accessTokenTTL  time.Duration
 	refreshTokenTTL time.Duration
+	httpClient      *http.Client
+	yandexSecretKey string
+	jwkSet          jwk.Set
 }
 
 // NewService creates new token service.
 func NewService(
+	ctx context.Context,
 	jwtSecret string,
 	accessTokenTTL, refreshTokenTTL time.Duration,
+	yandexSecretKey string,
+	httpClient *http.Client,
 ) *Service {
+	jwkSet := newCachedJWKSet(ctx, discordOAuthKeysURL, httpClient)
+
 	return &Service{
 		jwtSecret:       []byte(jwtSecret),
 		accessTokenTTL:  accessTokenTTL,
 		refreshTokenTTL: refreshTokenTTL,
+		httpClient:      httpClient,
+		yandexSecretKey: yandexSecretKey,
+		jwkSet:          jwkSet,
 	}
 }
 
@@ -101,12 +118,7 @@ func (s *Service) ParseAccessToken(token string) (user.AccessTokenClaims, error)
 		return user.AccessTokenClaims{}, fmt.Errorf("error parsing access token: %w", err)
 	}
 
-	claims := accessToken.PrivateClaims()
-	if claims == nil {
-		return user.AccessTokenClaims{}, ErrNoPrivateClaims
-	}
-
-	tokenType, err := GetType(claims)
+	tokenType, err := GetType(accessToken)
 	if err != nil {
 		return user.AccessTokenClaims{}, err
 	}
@@ -115,22 +127,22 @@ func (s *Service) ParseAccessToken(token string) (user.AccessTokenClaims, error)
 		return user.AccessTokenClaims{}, user.ErrWrongTokenType
 	}
 
-	sessionID, err := GetSessionID(claims)
+	sessionID, err := GetSessionID(accessToken)
 	if err != nil {
 		return user.AccessTokenClaims{}, err
 	}
 
-	userID, err := GetUserID(claims)
+	userID, err := GetUserID(accessToken)
 	if err != nil {
 		return user.AccessTokenClaims{}, err
 	}
 
-	username, err := GetUsername(claims)
+	username, err := GetUsername(accessToken)
 	if err != nil {
 		return user.AccessTokenClaims{}, err
 	}
 
-	name, err := GetName(claims)
+	name, err := GetName(accessToken)
 	if err != nil {
 		return user.AccessTokenClaims{}, err
 	}
@@ -153,12 +165,7 @@ func (s *Service) ParseRefreshToken(token string) (user.RefreshTokenClaims, erro
 		return user.RefreshTokenClaims{}, fmt.Errorf("error parsing refresh token: %w", err)
 	}
 
-	claims := refreshToken.PrivateClaims()
-	if claims == nil {
-		return user.RefreshTokenClaims{}, ErrNoPrivateClaims
-	}
-
-	tokenType, err := GetType(claims)
+	tokenType, err := GetType(refreshToken)
 	if err != nil {
 		return user.RefreshTokenClaims{}, err
 	}
@@ -167,17 +174,17 @@ func (s *Service) ParseRefreshToken(token string) (user.RefreshTokenClaims, erro
 		return user.RefreshTokenClaims{}, user.ErrWrongTokenType
 	}
 
-	sessionID, err := GetSessionID(claims)
+	sessionID, err := GetSessionID(refreshToken)
 	if err != nil {
 		return user.RefreshTokenClaims{}, err
 	}
 
-	userID, err := GetUserID(claims)
+	userID, err := GetUserID(refreshToken)
 	if err != nil {
 		return user.RefreshTokenClaims{}, err
 	}
 
-	username, err := GetUsername(claims)
+	username, err := GetUsername(refreshToken)
 	if err != nil {
 		return user.RefreshTokenClaims{}, err
 	}

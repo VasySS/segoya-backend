@@ -71,10 +71,12 @@ func Run(ctx context.Context, conf config.Config) error {
 		conf.ENV.FrontendURL.String(),
 		conf.ENV.CaptchaSecretKey,
 	)
-	tokenService := token.NewService(
+	tokenService := token.NewService(ctx,
 		conf.ENV.JWTSecretKey,
 		conf.Limits.AccessTokenTTL,
 		conf.Limits.RefreshTokenTTL,
+		conf.ENV.YandexOAuth.ClientSecret,
+		conf.HTTPClient,
 	)
 
 	lobbyWebSocketService := melody.NewWebSocketService()

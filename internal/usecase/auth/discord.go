@@ -3,60 +3,10 @@ package auth
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
-	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/lestrrat-go/jwx/v2/jwt"
-	"golang.org/x/oauth2"
 )
-
-// https://stackoverflow.com/questions/61850992/jwt-validation-with-jwks-golang
-//
-//nolint:ireturn
-func (uc Usecase) newJWKSet(ctx context.Context, jwkURL string) jwk.Set {
-	jwkCache := jwk.NewCache(ctx)
-
-	// register a minimum refresh interval for this URL.
-	// when not specified, defaults to Cache-Control and similar resp headers
-	err := jwkCache.Register(jwkURL,
-		jwk.WithMinRefreshInterval(10*time.Minute),
-		jwk.WithHTTPClient(uc.conf.HTTPClientProxy),
-	)
-	if err != nil {
-		panic("failed to register jwk location: " + err.Error())
-	}
-
-	// fetch once on application startup to check that url is valid
-	_, err = jwkCache.Refresh(ctx, jwkURL)
-	if err != nil {
-		panic("error refreshing jwk: " + err.Error())
-	}
-
-	return jwk.NewCachedSet(jwkCache, jwkURL)
-}
-
-func (uc Usecase) discordExchangeCodeForID(ctx context.Context, config oauth2.Config, code string) (string, error) {
-	token, err := config.Exchange(ctx, code)
-	if err != nil {
-		return "", fmt.Errorf("failed to exchange code: %w", err)
-	}
-
-	idToken, ok := token.Extra("id_token").(string)
-	if !ok {
-		return "", fmt.Errorf("failed to get id token: %w", err)
-	}
-
-	jwt, err := jwt.ParseString(idToken, jwt.WithKeySet(
-		uc.newJWKSet(ctx, "https://discord.com/api/oauth2/keys"),
-	))
-	if err != nil {
-		return "", fmt.Errorf("failed to validate token: %w", err)
-	}
-
-	return jwt.Subject(), nil
-}
 
 // NewDiscord saves state and userID associated with it in db.
 func (uc Usecase) NewDiscord(ctx context.Context, req dto.NewOAuthRequest) error {
@@ -80,7 +30,7 @@ func (uc Usecase) NewDiscordCallback(ctx context.Context, req dto.NewOAuthCallba
 		return fmt.Errorf("failed to get user id: %w", err)
 	}
 
-	discordID, err := uc.discordExchangeCodeForID(ctx, uc.conf.DiscordNew, req.Code)
+	discordID, err := uc.tokenService.ExchangeDiscordCodeForID(ctx, uc.conf.DiscordNew, req.Code)
 	if err != nil {
 		return fmt.Errorf("failed to exchange code for id: %w", err)
 	}
@@ -104,7 +54,7 @@ func (uc Usecase) LoginDiscordCallback(ctx context.Context, req dto.OAuthLoginCa
 	ctx, span := uc.tracer.Start(ctx, "LoginDiscordCallback")
 	defer span.End()
 
-	discordID, err := uc.discordExchangeCodeForID(ctx, uc.conf.DiscordLogin, req.Code)
+	discordID, err := uc.tokenService.ExchangeDiscordCodeForID(ctx, uc.conf.DiscordLogin, req.Code)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to exchange code for id: %w", err)
 	}

@@ -1,7 +1,9 @@
 package token
 
 import (
-	"errors"
+	"fmt"
+
+	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
 // Type is a type of token (access or refresh).
@@ -23,64 +25,56 @@ const (
 	ClaimsTokenTypeKey string = "type"
 )
 
-var (
-	// ErrClaimsUserIDNotFound is returned when the userID claim is not found in the claims.
-	ErrClaimsUserIDNotFound = errors.New("userID claim not found")
-	// ErrClaimsUsernameNotFound is returned when the username claim is not found in the claims.
-	ErrClaimsUsernameNotFound = errors.New("username claim not found")
-	// ErrClaimsNameNotFound is returned when the name claim is not found in the claims.
-	ErrClaimsNameNotFound = errors.New("name claim not found")
-	// ErrClaimsTypeNotFound is returned when the type claim is not found in the claims.
-	ErrClaimsTypeNotFound = errors.New("type claim not found")
-	// ErrClaimsSessionIDNotFound is returned when the sessionID claim is not found in the claims.
-	ErrClaimsSessionIDNotFound = errors.New("sessionID claim not found")
-)
-
 // GetUserID returns the user ID from the claims.
-func GetUserID(claims map[string]any) (int, error) {
-	id, ok := claims[ClaimsUserIDKey].(float64)
-	if !ok {
-		return 0, ErrClaimsUserIDNotFound
+func GetUserID(token jwt.Token) (int, error) {
+	var userID float64
+
+	if err := token.Get(ClaimsUserIDKey, &userID); err != nil {
+		return 0, fmt.Errorf("error getting userID from claims: %w", err)
 	}
 
-	return int(id), nil
+	return int(userID), nil
 }
 
 // GetUsername returns the username from the claims.
-func GetUsername(claims map[string]any) (string, error) {
-	username, ok := claims[ClaimsUsernameKey].(string)
-	if !ok {
-		return "", ErrClaimsUsernameNotFound
+func GetUsername(token jwt.Token) (string, error) {
+	var username string
+
+	if err := token.Get(ClaimsUsernameKey, &username); err != nil {
+		return "", fmt.Errorf("error getting username from claims: %w", err)
 	}
 
 	return username, nil
 }
 
 // GetName returns the name from the claims.
-func GetName(claims map[string]any) (string, error) {
-	name, ok := claims[ClaimsNameKey].(string)
-	if !ok {
-		return "", ErrClaimsNameNotFound
+func GetName(token jwt.Token) (string, error) {
+	var name string
+
+	if err := token.Get(ClaimsNameKey, &name); err != nil {
+		return "", fmt.Errorf("error getting name from claims: %w", err)
 	}
 
 	return name, nil
 }
 
 // GetType returns the token type from the claims.
-func GetType(claims map[string]any) (Type, error) {
-	typ, ok := claims[ClaimsTokenTypeKey].(string)
-	if !ok {
-		return "", ErrClaimsTypeNotFound
+func GetType(token jwt.Token) (Type, error) {
+	var typ string
+
+	if err := token.Get(ClaimsTokenTypeKey, &typ); err != nil {
+		return "", fmt.Errorf("error getting type from claims: %w", err)
 	}
 
 	return Type(typ), nil
 }
 
 // GetSessionID returns the session ID from the claims.
-func GetSessionID(claims map[string]any) (string, error) {
-	sessionID, ok := claims[ClaimsSessionIDKey].(string)
-	if !ok {
-		return "", ErrClaimsSessionIDNotFound
+func GetSessionID(token jwt.Token) (string, error) {
+	var sessionID string
+
+	if err := token.Get(ClaimsSessionIDKey, &sessionID); err != nil {
+		return "", fmt.Errorf("error getting sessionID from claims: %w", err)
 	}
 
 	return sessionID, nil

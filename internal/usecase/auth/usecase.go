@@ -10,6 +10,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
+	"golang.org/x/oauth2"
 )
 
 // UserRepository defines methods for interacting with user data in the storage layer.
@@ -54,6 +55,8 @@ type TokenService interface {
 	NewRefreshToken(current time.Time, req user.RefreshTokenClaims) (string, error)
 	ParseAccessToken(token string) (user.AccessTokenClaims, error)
 	ParseRefreshToken(token string) (user.RefreshTokenClaims, error)
+	ExchangeDiscordCodeForID(ctx context.Context, config oauth2.Config, code string) (string, error)
+	ExchangeYandexCodeForID(ctx context.Context, config oauth2.Config, code string) (string, error)
 }
 
 // Usecase contains authentication business logic and dependencies.

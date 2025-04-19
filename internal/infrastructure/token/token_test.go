@@ -1,18 +1,20 @@
 package token_test
 
 import (
+	"context"
+	"net/http"
 	"testing"
 	"time"
 
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/token"
-	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/lestrrat-go/jwx/v3/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func setupService(jwtSecret []byte, accessTokenTTL, refreshTokenTTL time.Duration) *token.Service {
-	return token.NewService(string(jwtSecret), accessTokenTTL, refreshTokenTTL)
+func setupService(ctx context.Context, jwtSecret []byte, accessTokenTTL, refreshTokenTTL time.Duration) *token.Service {
+	return token.NewService(ctx, string(jwtSecret), accessTokenTTL, refreshTokenTTL, "", &http.Client{})
 }
 
 func TestNewAccessToken(t *testing.T) {
@@ -24,7 +26,7 @@ func TestNewAccessToken(t *testing.T) {
 		refreshTokenTTL = 31 * 24 * time.Hour
 	)
 
-	service := setupService(jwtSecret, accessTokenTTL, refreshTokenTTL)
+	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 	currentTime := time.Now().UTC()
 
 	claims := user.AccessTokenClaims{
@@ -56,7 +58,7 @@ func TestNewRefreshToken(t *testing.T) {
 		refreshTokenTTL = 31 * 24 * time.Hour
 	)
 
-	service := setupService(jwtSecret, accessTokenTTL, refreshTokenTTL)
+	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 	currentTime := time.Now()
 
 	claims := user.RefreshTokenClaims{
@@ -87,7 +89,7 @@ func TestParseAccessToken(t *testing.T) {
 		refreshTokenTTL = 31 * 24 * time.Hour
 	)
 
-	service := setupService(jwtSecret, accessTokenTTL, refreshTokenTTL)
+	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 	now := time.Now().UTC()
 
 	claims := user.AccessTokenClaims{
@@ -184,7 +186,7 @@ func TestParseRefreshToken(t *testing.T) {
 		refreshTokenTTL = 31 * 24 * time.Hour
 	)
 
-	service := setupService(jwtSecret, accessTokenTTL, refreshTokenTTL)
+	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 	now := time.Now().UTC()
 
 	claims := user.RefreshTokenClaims{
@@ -278,7 +280,7 @@ func TestContext(t *testing.T) {
 		refreshTokenTTL = 31 * 24 * time.Hour
 	)
 
-	service := setupService(jwtSecret, accessTokenTTL, refreshTokenTTL)
+	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 
 	claims := user.AccessTokenClaims{
 		SessionID: "session-123",
