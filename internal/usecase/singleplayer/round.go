@@ -38,31 +38,9 @@ func (uc Usecase) NewRound(
 			return singleplayer.ErrRoundMaxAmount
 		}
 
-		if existingRound, err := uc.repo.GetSingleplayerRound(ctx, game.ID, game.RoundCurrent); err == nil {
-			if !existingRound.Finished {
-				response = existingRound
-				return nil
-			}
-		} else if !errors.Is(err, singleplayer.ErrRoundNotFound) {
-			return fmt.Errorf("failed to get current round: %w", err)
-		}
-
-		pano, err := uc.pano.NewStreetview(ctx, game.Provider)
+		round, err := uc.getOrGenerateRound(ctx, game, req.RequestTime)
 		if err != nil {
-			return fmt.Errorf("failed to create panorama: %w", err)
-		}
-
-		dbReq := dto.NewSingleplayerRoundDBRequest{
-			GameID:     game.ID,
-			LocationID: pano.ID,
-			RoundNum:   game.RoundCurrent + 1,
-			CreatedAt:  req.RequestTime,
-			StartedAt:  req.RequestTime.Add(uc.cfg.RoundStartDelay),
-		}
-
-		round, err := uc.repo.NewSingleplayerRound(ctx, dbReq)
-		if err != nil {
-			return fmt.Errorf("error creating singleplayer round: %w", err)
+			return err
 		}
 
 		response = round
@@ -75,6 +53,40 @@ func (uc Usecase) NewRound(
 	}
 
 	return response, nil
+}
+
+func (uc Usecase) getOrGenerateRound(
+	ctx context.Context,
+	game singleplayer.Game,
+	requestTime time.Time,
+) (singleplayer.Round, error) {
+	if existingRound, err := uc.repo.GetSingleplayerRound(ctx, game.ID, game.RoundCurrent); err == nil {
+		if !existingRound.Finished {
+			return existingRound, nil
+		}
+	} else if !errors.Is(err, singleplayer.ErrRoundNotFound) {
+		return singleplayer.Round{}, fmt.Errorf("failed to get current round: %w", err)
+	}
+
+	pano, err := uc.pano.NewStreetview(ctx, game.Provider)
+	if err != nil {
+		return singleplayer.Round{}, fmt.Errorf("failed to create panorama: %w", err)
+	}
+
+	dbReq := dto.NewSingleplayerRoundDBRequest{
+		GameID:     game.ID,
+		LocationID: pano.ID,
+		RoundNum:   game.RoundCurrent + 1,
+		CreatedAt:  requestTime,
+		StartedAt:  requestTime.Add(uc.cfg.RoundStartDelay),
+	}
+
+	round, err := uc.repo.NewSingleplayerRound(ctx, dbReq)
+	if err != nil {
+		return singleplayer.Round{}, fmt.Errorf("error creating singleplayer round: %w", err)
+	}
+
+	return round, nil
 }
 
 // GetRound returns current singleplayer game round by game ID.

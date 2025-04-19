@@ -17,6 +17,9 @@ import (
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 )
 
+// ErrGameIDNotFound is returned when the game id is not found in the session.
+var ErrGameIDNotFound = errors.New("game id not found in session")
+
 // getUser retrieves the multiplayer user profile from the websocket session.
 func getUser(s transport.WebSocketSession) (user.MultiplayerUser, bool) {
 	userProfile, ok := s.Get(dto.MultiplayerUserProfileKey)
@@ -38,7 +41,7 @@ func (h Handler) getGameUsers(s transport.WebSocketSession) ([]user.MultiplayerU
 
 	gameID, ok := s.GetBroadcastID()
 	if !ok {
-		return nil, errors.New("game id not found in session")
+		return nil, ErrGameIDNotFound
 	}
 
 	gameIDInt, _ := strconv.Atoi(gameID)

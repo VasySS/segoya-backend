@@ -81,41 +81,31 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 			return err
 		}
 
-		g, err := uc.repo.GetMultiplayerGame(ctx, req.GameID)
+		game, round, guesses, err := uc.getGameData(ctx, req.GameID, req.UserID)
 		if err != nil {
-			return fmt.Errorf("failed to get game: %w", err)
-		}
-
-		r, err := uc.repo.GetMultiplayerRound(ctx, g.ID, g.RoundCurrent)
-		if err != nil {
-			return fmt.Errorf("failed to get current round: %w", err)
-		}
-
-		gs, err := uc.repo.GetMultiplayerRoundGuesses(ctx, r.ID)
-		if err != nil {
-			return fmt.Errorf("failed to get rounds: %w", err)
+			return fmt.Errorf("failed to get game data: %w", err)
 		}
 
 		// if round is already finished, just return guesses
-		if r.Finished {
-			response = gs
+		if round.Finished {
+			response = guesses
 			return nil
 		}
 
-		timerEndTime := r.StartedAt.Add(time.Second * time.Duration(g.TimerSeconds))
-		if g.TimerSeconds != 0 && req.RequestTime.Before(timerEndTime) && r.GuessesCount != g.Players {
+		timerEndTime := round.StartedAt.Add(time.Second * time.Duration(game.TimerSeconds))
+		if game.TimerSeconds != 0 && req.RequestTime.Before(timerEndTime) && round.GuessesCount != game.Players {
 			return multiplayer.ErrRoundIsStillActive
 		}
 
 		req := dto.EndMultiplayerRoundRequestDB{
 			RequestTime: req.RequestTime,
-			RoundID:     r.ID,
+			RoundID:     round.ID,
 		}
 		if err := uc.repo.EndMultiplayerRound(ctx, req); err != nil {
 			return fmt.Errorf("failed to update round end in repo: %w", err)
 		}
 
-		response = gs
+		response = guesses
 
 		return nil
 	})
@@ -125,4 +115,33 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 	}
 
 	return response, nil
+}
+
+func (uc Usecase) getGameData(ctx context.Context, gameID, userID int) (
+	multiplayer.Game, multiplayer.Round, []multiplayer.Guess, error,
+) {
+	if err := uc.repo.LockMultiplayerGame(ctx, gameID); err != nil {
+		return multiplayer.Game{}, multiplayer.Round{}, nil, fmt.Errorf("failed to lock game: %w", err)
+	}
+
+	if err := uc.isUserInGame(ctx, userID, gameID); err != nil {
+		return multiplayer.Game{}, multiplayer.Round{}, nil, err
+	}
+
+	g, err := uc.repo.GetMultiplayerGame(ctx, gameID)
+	if err != nil {
+		return multiplayer.Game{}, multiplayer.Round{}, nil, fmt.Errorf("failed to get game: %w", err)
+	}
+
+	r, err := uc.repo.GetMultiplayerRound(ctx, g.ID, g.RoundCurrent)
+	if err != nil {
+		return multiplayer.Game{}, multiplayer.Round{}, nil, fmt.Errorf("failed to get current round: %w", err)
+	}
+
+	gs, err := uc.repo.GetMultiplayerRoundGuesses(ctx, r.ID)
+	if err != nil {
+		return multiplayer.Game{}, multiplayer.Round{}, nil, fmt.Errorf("failed to get guesses: %w", err)
+	}
+
+	return g, r, gs, nil
 }

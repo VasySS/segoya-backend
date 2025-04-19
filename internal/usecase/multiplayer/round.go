@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
@@ -33,37 +34,9 @@ func (uc Usecase) NewRound(
 			return fmt.Errorf("failed to get multiplayer game: %w", err)
 		}
 
-		if existingRound, err := uc.repo.GetMultiplayerRound(ctx, game.ID, game.RoundCurrent); err == nil {
-			newRoundDelayEnd := existingRound.EndedAt.Add(uc.cfg.RoundEndDelay)
-
-			if !existingRound.Finished || req.RequestTime.Before(newRoundDelayEnd) {
-				response = existingRound
-				return nil
-			}
-		} else if !errors.Is(err, multiplayer.ErrRoundNotFound) {
-			return fmt.Errorf("failed to get current round: %w", err)
-		}
-
-		if game.RoundCurrent != 0 && game.RoundCurrent == game.Rounds {
-			return multiplayer.ErrRoundMaxAmount
-		}
-
-		pano, err := uc.pano.NewStreetview(ctx, game.Provider)
+		round, err := uc.getOrGenerateRound(ctx, game, req.RequestTime)
 		if err != nil {
-			return fmt.Errorf("failed to create panorama: %w", err)
-		}
-
-		dbReq := dto.NewMultiplayerRoundRequestDB{
-			GameID:     game.ID,
-			LocationID: pano.ID,
-			RoundNum:   game.RoundCurrent + 1,
-			CreatedAt:  req.RequestTime,
-			StartedAt:  req.RequestTime.Add(uc.cfg.RoundStartDelay),
-		}
-
-		round, err := uc.repo.NewMultiplayerRound(ctx, dbReq)
-		if err != nil {
-			return fmt.Errorf("failed to create round: %w", err)
+			return err
 		}
 
 		response = round
@@ -76,6 +49,46 @@ func (uc Usecase) NewRound(
 	}
 
 	return response, nil
+}
+
+func (uc Usecase) getOrGenerateRound(
+	ctx context.Context,
+	game multiplayer.Game,
+	requestTime time.Time,
+) (multiplayer.Round, error) {
+	if existingRound, err := uc.repo.GetMultiplayerRound(ctx, game.ID, game.RoundCurrent); err == nil {
+		newRoundDelayEnd := existingRound.EndedAt.Add(uc.cfg.RoundEndDelay)
+
+		if !existingRound.Finished || requestTime.Before(newRoundDelayEnd) {
+			return existingRound, nil
+		}
+	} else if !errors.Is(err, multiplayer.ErrRoundNotFound) {
+		return multiplayer.Round{}, fmt.Errorf("failed to get current round: %w", err)
+	}
+
+	if game.RoundCurrent != 0 && game.RoundCurrent == game.Rounds {
+		return multiplayer.Round{}, multiplayer.ErrRoundMaxAmount
+	}
+
+	pano, err := uc.pano.NewStreetview(ctx, game.Provider)
+	if err != nil {
+		return multiplayer.Round{}, fmt.Errorf("failed to create panorama: %w", err)
+	}
+
+	dbReq := dto.NewMultiplayerRoundRequestDB{
+		GameID:     game.ID,
+		LocationID: pano.ID,
+		RoundNum:   game.RoundCurrent + 1,
+		CreatedAt:  requestTime,
+		StartedAt:  requestTime.Add(uc.cfg.RoundStartDelay),
+	}
+
+	round, err := uc.repo.NewMultiplayerRound(ctx, dbReq)
+	if err != nil {
+		return multiplayer.Round{}, fmt.Errorf("failed to create round: %w", err)
+	}
+
+	return round, nil
 }
 
 // GetRound returns current multiplayer game round by game ID.
