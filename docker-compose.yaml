@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: segoya-postgres
-    image: postgres:17-alpine3.21
+    image: postgres:17-alpine3.21@sha256:7062a2109c4b51f3c792c7ea01e83ed12ef9a980886e3b3d380a7d2e5f6ce3f5
     environment:
       POSTGRES_USER: ${PG_USER}
       POSTGRES_PASSWORD: ${PG_PASS}
@@ -35,7 +35,7 @@ services:
 
   valkey:
     container_name: segoya-valkey
-    image: valkey/valkey:8.0.2
+    image: valkey/valkey:8.1.1@sha256:c855f98e09d558a0d7cc1a4e56473231206a4c54c0114ada9c485b47aeb92ec8
     ports:
       - "6379:6379"
     command: "valkey-server --save 30 1 --loglevel warning"
@@ -48,7 +48,7 @@ services:
 
   jaeger:
     container_name: segoya-jaeger
-    image: jaegertracing/jaeger:2.4.0
+    image: jaegertracing/jaeger:2.5.0@sha256:20d715ade1cf32e8c2be1a288317c2126376ce60811be71f0856793d7f849127
     ports:
       - "4317:4317"
       - "4318:4318"
