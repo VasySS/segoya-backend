@@ -73,11 +73,7 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 	var response []multiplayer.Guess
 
 	err := uc.repo.RunTx(ctx, func(ctx context.Context) error {
-		if err := uc.repo.LockMultiplayerGame(ctx, req.GameID); err != nil {
-			return fmt.Errorf("failed to lock game: %w", err)
-		}
-
-		game, round, guesses, err := uc.getGameData(ctx, req.GameID, req.UserID)
+		game, round, guesses, err := uc.lockGameAndGetData(ctx, req.GameID, req.UserID)
 		if err != nil {
 			return fmt.Errorf("failed to get game data: %w", err)
 		}
@@ -121,9 +117,13 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 	return response, nil
 }
 
-func (uc Usecase) getGameData(ctx context.Context, gameID, userID int) (
+func (uc Usecase) lockGameAndGetData(ctx context.Context, gameID, userID int) (
 	multiplayer.Game, multiplayer.Round, []multiplayer.Guess, error,
 ) {
+	if err := uc.repo.LockMultiplayerGame(ctx, gameID); err != nil {
+		return multiplayer.Game{}, multiplayer.Round{}, nil, fmt.Errorf("failed to lock game: %w", err)
+	}
+
 	if err := uc.isUserInGame(ctx, userID, gameID); err != nil {
 		return multiplayer.Game{}, multiplayer.Round{}, nil, err
 	}
