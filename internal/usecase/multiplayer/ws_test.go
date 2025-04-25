@@ -172,7 +172,7 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 func TestUsecase_EndRound(t *testing.T) {
 	t.Parallel()
 
-	endRoundReq := dto.EndMultiplayerRoundRequest{
+	endRoundRequest := dto.EndMultiplayerRoundRequest{
 		RequestTime: time.Now().UTC(),
 		GameID:      1,
 		UserID:      1,
@@ -191,6 +191,11 @@ func TestUsecase_EndRound(t *testing.T) {
 		},
 	}
 
+	mockUsers := []user.MultiplayerUser{
+		{PublicProfile: user.PublicProfile{ID: 1, Username: "username1"}, Connected: true},
+		{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}, Connected: true},
+	}
+
 	type fields struct {
 		repo *mocks.Repository
 		pano *mocks.PanoramaUsecase
@@ -198,6 +203,17 @@ func TestUsecase_EndRound(t *testing.T) {
 
 	type args struct {
 		req dto.EndMultiplayerRoundRequest
+	}
+
+	setupCommonMocks := func(fs fields, args args, round multiplayerEntity.Round, game multiplayerEntity.Game) {
+		fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+			Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) })
+
+		fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).Return(nil)
+		fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).Return(mockUsers, nil)
+		fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).Return(game, nil)
+		fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, round.RoundNum).Return(round, nil)
+		fs.repo.On("GetMultiplayerRoundGuesses", mock.Anything, round.ID).Return(endRoundResponse, nil)
 	}
 
 	tests := []struct {
@@ -210,49 +226,26 @@ func TestUsecase_EndRound(t *testing.T) {
 		{
 			name: "successfully end round",
 			args: args{
-				req: endRoundReq,
+				req: endRoundRequest,
 			},
 			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
+				mockGame := multiplayerEntity.Game{
+					ID:           args.req.GameID,
+					RoundCurrent: 1,
+					TimerSeconds: 30,
+					Players:      2,
+					Provider:     "google",
+				}
 
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
+				mockRound := multiplayerEntity.Round{
+					ID:           1,
+					RoundNum:     1,
+					GuessesCount: 2,
+					Finished:     false,
+					StartedAt:    args.req.RequestTime.Add(-31 * time.Second),
+				}
 
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           args.req.GameID,
-						RoundCurrent: 1,
-						TimerSeconds: 30,
-						Players:      2,
-						Provider:     "google",
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 1).
-					Return(multiplayerEntity.Round{
-						ID:           1,
-						RoundNum:     1,
-						GuessesCount: 2,
-						Finished:     false,
-						StartedAt:    args.req.RequestTime.Add(-31 * time.Second),
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRoundGuesses", mock.Anything, 1).
-					Return(endRoundResponse, nil)
+				setupCommonMocks(fs, args, mockRound, mockGame)
 
 				fs.repo.On("EndMultiplayerRound", mock.Anything, dto.EndMultiplayerRoundRequestDB{
 					RequestTime: args.req.RequestTime,
@@ -265,50 +258,27 @@ func TestUsecase_EndRound(t *testing.T) {
 		{
 			name: "successfully end round and game",
 			args: args{
-				req: endRoundReq,
+				req: endRoundRequest,
 			},
 			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
+				mockGame := multiplayerEntity.Game{
+					ID:           args.req.GameID,
+					RoundCurrent: 5,
+					Rounds:       5,
+					TimerSeconds: 30,
+					Players:      2,
+					Provider:     "google",
+				}
 
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
+				mockRound := multiplayerEntity.Round{
+					ID:           1,
+					RoundNum:     5,
+					GuessesCount: 2,
+					Finished:     false,
+					StartedAt:    args.req.RequestTime.Add(-31 * time.Second),
+				}
 
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           args.req.GameID,
-						RoundCurrent: 5,
-						Rounds:       5,
-						TimerSeconds: 30,
-						Players:      2,
-						Provider:     "google",
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 5).
-					Return(multiplayerEntity.Round{
-						ID:           1,
-						RoundNum:     5,
-						GuessesCount: 2,
-						Finished:     false,
-						StartedAt:    args.req.RequestTime.Add(-31 * time.Second),
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRoundGuesses", mock.Anything, 1).
-					Return(endRoundResponse, nil)
+				setupCommonMocks(fs, args, mockRound, mockGame)
 
 				fs.repo.On("EndMultiplayerRound", mock.Anything, dto.EndMultiplayerRoundRequestDB{
 					RequestTime: args.req.RequestTime,
@@ -326,49 +296,26 @@ func TestUsecase_EndRound(t *testing.T) {
 		{
 			name: "trying to end round that is already finished",
 			args: args{
-				req: endRoundReq,
+				req: endRoundRequest,
 			},
 			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
+				mockGame := multiplayerEntity.Game{
+					ID:           args.req.GameID,
+					RoundCurrent: 1,
+					TimerSeconds: 30,
+					Players:      2,
+					Provider:     "google",
+				}
 
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
+				mockRound := multiplayerEntity.Round{
+					ID:           1,
+					RoundNum:     1,
+					GuessesCount: 2,
+					Finished:     true,
+					StartedAt:    args.req.RequestTime.Add(-31 * time.Second),
+				}
 
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           args.req.GameID,
-						RoundCurrent: 1,
-						TimerSeconds: 30,
-						Players:      2,
-						Provider:     "google",
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 1).
-					Return(multiplayerEntity.Round{
-						ID:           1,
-						RoundNum:     1,
-						GuessesCount: 2,
-						Finished:     true,
-						StartedAt:    args.req.RequestTime.Add(-31 * time.Second),
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRoundGuesses", mock.Anything, 1).
-					Return(endRoundResponse, nil)
+				setupCommonMocks(fs, args, mockRound, mockGame)
 			},
 			want:    endRoundResponse,
 			wantErr: assert.NoError,
@@ -376,49 +323,26 @@ func TestUsecase_EndRound(t *testing.T) {
 		{
 			name: "trying to end round before timer has finished",
 			args: args{
-				req: endRoundReq,
+				req: endRoundRequest,
 			},
 			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
+				mockGame := multiplayerEntity.Game{
+					ID:           args.req.GameID,
+					RoundCurrent: 1,
+					TimerSeconds: 30,
+					Players:      2,
+					Provider:     "google",
+				}
 
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
+				mockRound := multiplayerEntity.Round{
+					ID:           1,
+					RoundNum:     1,
+					GuessesCount: 1,
+					Finished:     false,
+					StartedAt:    args.req.RequestTime.Add(-29 * time.Second),
+				}
 
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           args.req.GameID,
-						RoundCurrent: 1,
-						TimerSeconds: 30,
-						Players:      2,
-						Provider:     "google",
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 1).
-					Return(multiplayerEntity.Round{
-						ID:           1,
-						RoundNum:     1,
-						GuessesCount: 1,
-						Finished:     false,
-						StartedAt:    args.req.RequestTime.Add(-29 * time.Second),
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRoundGuesses", mock.Anything, 1).
-					Return(endRoundResponse, nil)
+				setupCommonMocks(fs, args, mockRound, mockGame)
 			},
 			want: nil,
 			wantErr: func(t assert.TestingT, err error, _ ...any) bool {

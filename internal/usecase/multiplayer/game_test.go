@@ -372,10 +372,9 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 						Rounds:       5,
 						Finished:     false,
 					}, nil)
-
 			},
 			want: nil,
-			wantErr: func(tt assert.TestingT, err error, i ...any) bool {
+			wantErr: func(_ assert.TestingT, err error, _ ...any) bool {
 				return errors.Is(err, multiplayerEntity.ErrGameIsStillActive)
 			},
 		},

@@ -46,7 +46,7 @@ func (h Handler) GetMultiplayerGame(
 	return dto.MultiplayerGameToAPI(game), nil
 }
 
-// GetGameGuesses ends a multiplayer game and retrieves all user guesses made.
+// GetMultiplayerGameGuesses retrieves all user guesses made.
 func (h Handler) GetMultiplayerGameGuesses(
 	ctx context.Context,
 	params api.GetMultiplayerGameGuessesParams,
