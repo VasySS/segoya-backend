@@ -20,8 +20,8 @@ import (
 // ErrGameIDNotFound is returned when the game id is not found in the session.
 var ErrGameIDNotFound = errors.New("game id not found in session")
 
-// getUser retrieves the multiplayer user profile from the websocket session.
-func getUser(s transport.WebSocketSession) (user.MultiplayerUser, bool) {
+// getGameUser retrieves the multiplayer user profile from the websocket session.
+func getGameUser(s transport.WebSocketSession) (user.MultiplayerUser, bool) {
 	userProfile, ok := s.Get(dto.MultiplayerUserProfileKey)
 	if !ok {
 		return user.MultiplayerUser{}, false
@@ -60,7 +60,7 @@ func (h Handler) getGameUsers(s transport.WebSocketSession) ([]user.MultiplayerU
 		}
 
 		for i, u := range users {
-			userInfo, ok := getUser(session)
+			userInfo, ok := getGameUser(session)
 			if ok && userInfo.ID == u.ID {
 				users[i].Connected = true
 			}
@@ -169,7 +169,7 @@ func (h Handler) handleWSDisconnect(session transport.WebSocketSession) {
 		return
 	}
 
-	userProfile, ok := getUser(session)
+	userProfile, ok := getGameUser(session)
 	if !ok {
 		slog.Debug("error in game disconnect: user not found in session")
 		return
@@ -190,7 +190,7 @@ func (h Handler) processUserGuess(
 	ctx := session.Request().Context()
 	gameIDInt, _ := strconv.Atoi(gameID)
 
-	userProfile, ok := getUser(session)
+	userProfile, ok := getGameUser(session)
 	if !ok {
 		session.SendError("error getting user profile")
 		return
@@ -226,7 +226,7 @@ func (h Handler) processRoundEnd(
 ) {
 	ctx := session.Request().Context()
 
-	userProfile, ok := getUser(session)
+	userProfile, ok := getGameUser(session)
 	if !ok {
 		session.SendError("error getting user profile")
 		return
