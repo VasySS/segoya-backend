@@ -1,7 +1,7 @@
-post:
-  operationId: endMultiplayerGame
-  summary: Ends a multiplayer game.
-  description: Ends a multiplayer game and returns all user guesses.
+get:
+  operationId: getMultiplayerGameGuesses
+  summary: Gets multiplayer game guesses
+  description: Returns all user guesses made during a multiplayer game.
   tags: ["multiplayer"]
   x-ogen-operation-group: Multiplayer
   parameters:

@@ -20,7 +20,6 @@ const (
 	MultiplayerMessageUserDisconnected transport.WebSocketMessageOutputType = "userDisconnected"
 	MultiplayerMessageConnectedUsers   transport.WebSocketMessageOutputType = "usersConnected"
 	MultiplayerMessageUserGuessed      transport.WebSocketMessageOutputType = "userGuessed"
-	MultiplayerMessageGameFinished     transport.WebSocketMessageOutputType = "gameFinished"
 	MultiplayerMessageRoundFinished    transport.WebSocketMessageOutputType = "roundFinished"
 )
 
@@ -69,8 +68,8 @@ func MultiplayerRoundToAPI(r multiplayer.Round) *api.MultiplayerRound {
 }
 
 // MultiplayerGameGuessesToAPI converts a slice of multiplayer guess entities to the API model.
-func MultiplayerGameGuessesToAPI(guesses []multiplayer.Guess) *api.EndMultiplayerGameOKApplicationJSON {
-	resp := make(api.EndMultiplayerGameOKApplicationJSON, 0, len(guesses))
+func MultiplayerGameGuessesToAPI(guesses []multiplayer.Guess) *api.GetMultiplayerGameGuessesOKApplicationJSON {
+	resp := make(api.GetMultiplayerGameGuessesOKApplicationJSON, 0, len(guesses))
 
 	for _, g := range guesses {
 		resp = append(resp, api.MultiplayerGuess{

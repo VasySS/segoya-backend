@@ -78,8 +78,8 @@ func (uc Usecase) GetGame(ctx context.Context, gameID, userID int) (multiplayer.
 
 // EndGame ends a multiplayer game (if it's not finished already) and
 // returns all guesses made during it.
-func (uc Usecase) EndGame(ctx context.Context, req dto.EndMultiplayerGameRequest) ([]multiplayer.Guess, error) {
-	ctx, span := uc.tracer.Start(ctx, "EndGame")
+func (uc Usecase) GetGameGuesses(ctx context.Context, req dto.EndMultiplayerGameRequest) ([]multiplayer.Guess, error) {
+	ctx, span := uc.tracer.Start(ctx, "GetGameGuesses")
 	defer span.End()
 
 	var response []multiplayer.Guess
@@ -98,25 +98,13 @@ func (uc Usecase) EndGame(ctx context.Context, req dto.EndMultiplayerGameRequest
 			return fmt.Errorf("failed to get game from repo: %w", err)
 		}
 
-		if game.RoundCurrent < game.Rounds {
+		if game.RoundCurrent < game.Rounds || !game.Finished {
 			return multiplayer.ErrGameIsStillActive
 		}
 
 		gs, err := uc.repo.GetMultiplayerGameGuesses(ctx, req.GameID)
 		if err != nil {
 			return fmt.Errorf("failed to get multiplayer game guesses: %w", err)
-		}
-
-		if game.Finished {
-			response = gs
-			return nil
-		}
-
-		if err := uc.repo.EndMultiplayerGame(ctx, dto.EndMultiplayerGameRequestDB{
-			RequestTime: req.RequestTime,
-			GameID:      req.GameID,
-		}); err != nil {
-			return fmt.Errorf("failed to update game end in repo: %w", err)
 		}
 
 		response = gs

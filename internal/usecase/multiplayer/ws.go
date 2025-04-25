@@ -77,10 +77,6 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 			return fmt.Errorf("failed to lock game: %w", err)
 		}
 
-		if err := uc.isUserInGame(ctx, req.UserID, req.GameID); err != nil {
-			return err
-		}
-
 		game, round, guesses, err := uc.getGameData(ctx, req.GameID, req.UserID)
 		if err != nil {
 			return fmt.Errorf("failed to get game data: %w", err)
@@ -97,12 +93,20 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 			return multiplayer.ErrRoundIsStillActive
 		}
 
-		req := dto.EndMultiplayerRoundRequestDB{
+		if err := uc.repo.EndMultiplayerRound(ctx, dto.EndMultiplayerRoundRequestDB{
 			RequestTime: req.RequestTime,
 			RoundID:     round.ID,
-		}
-		if err := uc.repo.EndMultiplayerRound(ctx, req); err != nil {
+		}); err != nil {
 			return fmt.Errorf("failed to update round end in repo: %w", err)
+		}
+
+		if round.RoundNum == game.Rounds {
+			if err := uc.repo.EndMultiplayerGame(ctx, dto.EndMultiplayerGameRequestDB{
+				RequestTime: req.RequestTime,
+				GameID:      req.GameID,
+			}); err != nil {
+				return fmt.Errorf("failed to update game end in repo: %w", err)
+			}
 		}
 
 		response = guesses
@@ -120,10 +124,6 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 func (uc Usecase) getGameData(ctx context.Context, gameID, userID int) (
 	multiplayer.Game, multiplayer.Round, []multiplayer.Guess, error,
 ) {
-	if err := uc.repo.LockMultiplayerGame(ctx, gameID); err != nil {
-		return multiplayer.Game{}, multiplayer.Round{}, nil, fmt.Errorf("failed to lock game: %w", err)
-	}
-
 	if err := uc.isUserInGame(ctx, userID, gameID); err != nil {
 		return multiplayer.Game{}, multiplayer.Round{}, nil, err
 	}

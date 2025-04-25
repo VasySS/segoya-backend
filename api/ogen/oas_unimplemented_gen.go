@@ -58,15 +58,6 @@ func (UnimplementedHandler) DiscordLoginCallback(ctx context.Context, params Dis
 	return r, ht.ErrNotImplemented
 }
 
-// EndMultiplayerGame implements endMultiplayerGame operation.
-//
-// Ends a multiplayer game and returns all user guesses.
-//
-// POST /v1/multiplayer/{id}/end
-func (UnimplementedHandler) EndMultiplayerGame(ctx context.Context, params EndMultiplayerGameParams) (r EndMultiplayerGameRes, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // EndSingleplayerGame implements endSingleplayerGame operation.
 //
 // End singleplayer game.
@@ -118,6 +109,15 @@ func (UnimplementedHandler) GetLobby(ctx context.Context, params GetLobbyParams)
 //
 // GET /v1/multiplayer/{id}
 func (UnimplementedHandler) GetMultiplayerGame(ctx context.Context, params GetMultiplayerGameParams) (r GetMultiplayerGameRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetMultiplayerGameGuesses implements getMultiplayerGameGuesses operation.
+//
+// Returns all user guesses made during a multiplayer game.
+//
+// GET /v1/multiplayer/{id}/guesses
+func (UnimplementedHandler) GetMultiplayerGameGuesses(ctx context.Context, params GetMultiplayerGameGuessesParams) (r GetMultiplayerGameGuessesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

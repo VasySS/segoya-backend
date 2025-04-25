@@ -228,72 +228,6 @@ func decodeDiscordLoginCallbackParams(args [0]string, argsEscaped bool, r *http.
 	return params, nil
 }
 
-// EndMultiplayerGameParams is parameters of endMultiplayerGame operation.
-type EndMultiplayerGameParams struct {
-	// Numeric ID of the resource in path.
-	ID int
-}
-
-func unpackEndMultiplayerGameParams(packed middleware.Parameters) (params EndMultiplayerGameParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "id",
-			In:   "path",
-		}
-		params.ID = packed[key].(int)
-	}
-	return params
-}
-
-func decodeEndMultiplayerGameParams(args [1]string, argsEscaped bool, r *http.Request) (params EndMultiplayerGameParams, _ error) {
-	// Decode path: id.
-	if err := func() error {
-		param := args[0]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "id",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				val, err := d.DecodeValue()
-				if err != nil {
-					return err
-				}
-
-				c, err := conv.ToInt(val)
-				if err != nil {
-					return err
-				}
-
-				params.ID = c
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "id",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	return params, nil
-}
-
 // EndSingleplayerGameParams is parameters of endSingleplayerGame operation.
 type EndSingleplayerGameParams struct {
 	// Numeric ID of the resource in path.
@@ -647,6 +581,72 @@ func unpackGetMultiplayerGameParams(packed middleware.Parameters) (params GetMul
 }
 
 func decodeGetMultiplayerGameParams(args [1]string, argsEscaped bool, r *http.Request) (params GetMultiplayerGameParams, _ error) {
+	// Decode path: id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToInt(val)
+				if err != nil {
+					return err
+				}
+
+				params.ID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// GetMultiplayerGameGuessesParams is parameters of getMultiplayerGameGuesses operation.
+type GetMultiplayerGameGuessesParams struct {
+	// Numeric ID of the resource in path.
+	ID int
+}
+
+func unpackGetMultiplayerGameGuessesParams(packed middleware.Parameters) (params GetMultiplayerGameGuessesParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "id",
+			In:   "path",
+		}
+		params.ID = packed[key].(int)
+	}
+	return params
+}
+
+func decodeGetMultiplayerGameGuessesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetMultiplayerGameGuessesParams, _ error) {
 	// Decode path: id.
 	if err := func() error {
 		param := args[0]

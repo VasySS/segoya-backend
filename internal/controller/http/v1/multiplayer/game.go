@@ -46,21 +46,21 @@ func (h Handler) GetMultiplayerGame(
 	return dto.MultiplayerGameToAPI(game), nil
 }
 
-// EndMultiplayerGame ends a multiplayer game and retrieves all user guesses made.
-func (h Handler) EndMultiplayerGame(
+// GetGameGuesses ends a multiplayer game and retrieves all user guesses made.
+func (h Handler) GetMultiplayerGameGuesses(
 	ctx context.Context,
-	params api.EndMultiplayerGameParams,
-) (api.EndMultiplayerGameRes, error) {
+	params api.GetMultiplayerGameGuessesParams,
+) (api.GetMultiplayerGameGuessesRes, error) {
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {
-		return &api.EndMultiplayerGameUnauthorized{
+		return &api.GetMultiplayerGameGuessesUnauthorized{
 			Title:  "Error authorizing user",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while authorizing user",
 		}, nil
 	}
 
-	guesses, err := h.uc.EndGame(ctx, dto.EndMultiplayerGameRequest{
+	guesses, err := h.uc.GetGameGuesses(ctx, dto.EndMultiplayerGameRequest{
 		RequestTime: time.Now().UTC(),
 		GameID:      params.ID,
 		UserID:      claims.UserID,
@@ -68,7 +68,7 @@ func (h Handler) EndMultiplayerGame(
 	if err != nil {
 		slog.Error("error getting multiplayer game guesses", slog.Any("error", err))
 
-		return &api.EndMultiplayerGameInternalServerError{
+		return &api.GetMultiplayerGameGuessesInternalServerError{
 			Title:  "Error getting guesses",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while getting guesses",

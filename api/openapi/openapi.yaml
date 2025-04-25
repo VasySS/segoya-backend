@@ -168,8 +168,8 @@ paths:
   /v1/multiplayer/{id}:
     $ref: "paths/multiplayer/multiplayer-{id}.yaml"
 
-  /v1/multiplayer/{id}/end:
-    $ref: "paths/multiplayer/multiplayer-{id}-end.yaml"
+  /v1/multiplayer/{id}/guesses:
+    $ref: "paths/multiplayer/multiplayer-{id}-guesses.yaml"
 
   /v1/multiplayer/{id}/round:
     $ref: "paths/multiplayer/multiplayer-{id}-round.yaml"

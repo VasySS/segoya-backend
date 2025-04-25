@@ -17,10 +17,6 @@ type DiscordLoginCallbackRes interface {
 	discordLoginCallbackRes()
 }
 
-type EndMultiplayerGameRes interface {
-	endMultiplayerGameRes()
-}
-
 type EndSingleplayerGameRes interface {
 	endSingleplayerGameRes()
 }
@@ -35,6 +31,10 @@ type GetLobbiesRes interface {
 
 type GetLobbyRes interface {
 	getLobbyRes()
+}
+
+type GetMultiplayerGameGuessesRes interface {
+	getMultiplayerGameGuessesRes()
 }
 
 type GetMultiplayerGameRes interface {
