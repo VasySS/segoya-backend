@@ -159,8 +159,8 @@ type EndMultiplayerRoundRequestDB struct {
 	RoundID     int
 }
 
-// EndMultiplayerGameRequest is a request to end a multiplayer game.
-type EndMultiplayerGameRequest struct {
+// GetGameGuessesRequest is a request to end a multiplayer game.
+type GetGameGuessesRequest struct {
 	RequestTime time.Time
 	GameID      int
 	UserID      int

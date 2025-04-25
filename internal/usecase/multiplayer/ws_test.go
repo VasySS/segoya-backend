@@ -263,6 +263,67 @@ func TestUsecase_EndRound(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
+			name: "successfully end round and game",
+			args: args{
+				req: endRoundReq,
+			},
+			setup: func(fs fields, args args) {
+				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+					Return(func(ctx context.Context, fn repository.TxFunc) error {
+						return fn(ctx)
+					})
+
+				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
+					Return(nil)
+
+				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
+					Return([]user.MultiplayerUser{
+						{
+							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							Connected:     true,
+						},
+						{
+							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
+							Connected:     true,
+						},
+					}, nil)
+
+				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
+					Return(multiplayerEntity.Game{
+						ID:           args.req.GameID,
+						RoundCurrent: 5,
+						Rounds:       5,
+						TimerSeconds: 30,
+						Players:      2,
+						Provider:     "google",
+					}, nil)
+
+				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 5).
+					Return(multiplayerEntity.Round{
+						ID:           1,
+						RoundNum:     5,
+						GuessesCount: 2,
+						Finished:     false,
+						StartedAt:    args.req.RequestTime.Add(-31 * time.Second),
+					}, nil)
+
+				fs.repo.On("GetMultiplayerRoundGuesses", mock.Anything, 1).
+					Return(endRoundResponse, nil)
+
+				fs.repo.On("EndMultiplayerRound", mock.Anything, dto.EndMultiplayerRoundRequestDB{
+					RequestTime: args.req.RequestTime,
+					RoundID:     1,
+				}).Return(nil)
+
+				fs.repo.On("EndMultiplayerGame", mock.Anything, dto.EndMultiplayerGameRequestDB{
+					RequestTime: args.req.RequestTime,
+					GameID:      args.req.GameID,
+				}).Return(nil)
+			},
+			want:    endRoundResponse,
+			wantErr: assert.NoError,
+		},
+		{
 			name: "trying to end round that is already finished",
 			args: args{
 				req: endRoundReq,

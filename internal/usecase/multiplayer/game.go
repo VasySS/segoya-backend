@@ -78,7 +78,7 @@ func (uc Usecase) GetGame(ctx context.Context, gameID, userID int) (multiplayer.
 
 // EndGame ends a multiplayer game (if it's not finished already) and
 // returns all guesses made during it.
-func (uc Usecase) GetGameGuesses(ctx context.Context, req dto.EndMultiplayerGameRequest) ([]multiplayer.Guess, error) {
+func (uc Usecase) GetGameGuesses(ctx context.Context, req dto.GetGameGuessesRequest) ([]multiplayer.Guess, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGameGuesses")
 	defer span.End()
 

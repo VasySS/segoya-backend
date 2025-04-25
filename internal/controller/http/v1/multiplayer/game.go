@@ -60,7 +60,7 @@ func (h Handler) GetMultiplayerGameGuesses(
 		}, nil
 	}
 
-	guesses, err := h.uc.GetGameGuesses(ctx, dto.EndMultiplayerGameRequest{
+	guesses, err := h.uc.GetGameGuesses(ctx, dto.GetGameGuessesRequest{
 		RequestTime: time.Now().UTC(),
 		GameID:      params.ID,
 		UserID:      claims.UserID,

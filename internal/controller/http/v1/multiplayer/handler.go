@@ -19,7 +19,7 @@ type TokenService interface {
 // Usecase defines methods for managing multiplayer game operations.
 type Usecase interface {
 	GetGame(ctx context.Context, gameID, userID int) (multiplayer.Game, error)
-	GetGameGuesses(ctx context.Context, req dto.EndMultiplayerGameRequest) ([]multiplayer.Guess, error)
+	GetGameGuesses(ctx context.Context, req dto.GetGameGuessesRequest) ([]multiplayer.Guess, error)
 	NewRound(ctx context.Context, req dto.NewMultiplayerRoundRequest) (multiplayer.Round, error)
 	GetRound(ctx context.Context, req dto.GetMultiplayerRoundRequest) (multiplayer.Round, error)
 	EndRound(ctx context.Context, req dto.EndMultiplayerRoundRequest) ([]multiplayer.Guess, error)

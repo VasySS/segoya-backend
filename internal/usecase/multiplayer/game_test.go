@@ -269,10 +269,10 @@ func TestUsecase_GetGame(t *testing.T) {
 	}
 }
 
-func TestUsecase_EndGame(t *testing.T) {
+func TestUsecase_GetGameGuesses(t *testing.T) {
 	t.Parallel()
 
-	endGameReq := dto.EndMultiplayerGameRequest{
+	endGameReq := dto.GetGameGuessesRequest{
 		RequestTime: time.Now().UTC(),
 		GameID:      1,
 		UserID:      1,
@@ -299,7 +299,7 @@ func TestUsecase_EndGame(t *testing.T) {
 	}
 
 	type args struct {
-		req dto.EndMultiplayerGameRequest
+		req dto.GetGameGuessesRequest
 	}
 
 	tests := []struct {
@@ -310,7 +310,7 @@ func TestUsecase_EndGame(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			name: "successfully end game",
+			name: "successfully get game guesses",
 			args: args{
 				req: endGameReq,
 			},
@@ -334,48 +334,8 @@ func TestUsecase_EndGame(t *testing.T) {
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
 					Return(multiplayerEntity.Game{
 						ID:           createdGameID,
-						Rounds:       2,
-						RoundCurrent: 2,
-						Finished:     false,
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGameGuesses", mock.Anything, args.req.GameID).
-					Return(gameGuesses, nil)
-
-				fs.repo.On("EndMultiplayerGame", mock.Anything, dto.EndMultiplayerGameRequestDB{
-					RequestTime: args.req.RequestTime,
-					GameID:      createdGameID,
-				}).
-					Return(nil)
-			},
-			want:    gameGuesses,
-			wantErr: assert.NoError,
-		},
-		{
-			name: "trying to end game that is already finished",
-			args: args{
-				req: endGameReq,
-			},
-			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
-
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
-
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{PublicProfile: user.PublicProfile{ID: 1, Username: "username1"}},
-						{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           1,
-						RoundCurrent: 2,
-						Rounds:       2,
+						Rounds:       5,
+						RoundCurrent: 5,
 						Finished:     true,
 					}, nil)
 
@@ -386,7 +346,7 @@ func TestUsecase_EndGame(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "trying to end game that is still active",
+			name: "trying to get guesses for a game that is still active (current round < total rounds)",
 			args: args{
 				req: endGameReq,
 			},
@@ -408,12 +368,46 @@ func TestUsecase_EndGame(t *testing.T) {
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
 					Return(multiplayerEntity.Game{
 						ID:           1,
-						RoundCurrent: 1,
-						Rounds:       2,
+						RoundCurrent: 4,
+						Rounds:       5,
+						Finished:     false,
+					}, nil)
+
+			},
+			want: nil,
+			wantErr: func(tt assert.TestingT, err error, i ...any) bool {
+				return errors.Is(err, multiplayerEntity.ErrGameIsStillActive)
+			},
+		},
+		{
+			name: "trying to get guesses for a game that is still active (last round not finished yet)",
+			args: args{
+				req: endGameReq,
+			},
+			setup: func(fs fields, args args) {
+				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+					Return(func(ctx context.Context, fn repository.TxFunc) error {
+						return fn(ctx)
+					})
+
+				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
+					Return(nil)
+
+				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
+					Return([]user.MultiplayerUser{
+						{PublicProfile: user.PublicProfile{ID: 1, Username: "username1"}},
+						{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}},
+					}, nil)
+
+				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
+					Return(multiplayerEntity.Game{
+						ID:           1,
+						RoundCurrent: 5,
+						Rounds:       5,
 						Finished:     false,
 					}, nil)
 			},
-			want: []multiplayerEntity.Guess(nil),
+			want: nil,
 			wantErr: func(t assert.TestingT, err error, _ ...any) bool {
 				return assert.ErrorIs(t, err, multiplayerEntity.ErrGameIsStillActive)
 			},
@@ -434,7 +428,7 @@ func TestUsecase_EndGame(t *testing.T) {
 
 			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano)
 
-			guesses, err := uc.EndGame(t.Context(), tt.args.req)
+			guesses, err := uc.GetGameGuesses(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, guesses)
 		})
