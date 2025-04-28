@@ -16,7 +16,7 @@ type ValkeyContainer struct {
 // NewValkeyContainer creates a new valkey test container.
 func NewValkeyContainer(ctx context.Context) (*ValkeyContainer, error) {
 	valkeyContainer, err := valkey.Run(ctx,
-		"valkey/valkey:8.0.2",
+		"valkey/valkey:8.1.1",
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to run valkey container: %w", err)
