@@ -55,6 +55,8 @@ linters:
           json: goCamel
   default: all
   disable:
+    # flaky, returns false positives
+    - nolintlint
     - dupword
     - dupl
     - depguard

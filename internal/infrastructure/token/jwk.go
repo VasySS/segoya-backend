@@ -12,7 +12,7 @@ import (
 )
 
 // https://stackoverflow.com/questions/61850992/jwt-validation-with-jwks-golang
-
+//
 //nolint:ireturn
 func newCachedJWKSet(ctx context.Context, jwkURL string, httpClient *http.Client) jwk.Set {
 	jwkCache, err := jwk.NewCache(ctx, httprc.NewClient())
