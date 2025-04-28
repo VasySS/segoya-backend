@@ -14,8 +14,12 @@ import (
 
 const cloudflareCaptchaURL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
-// ErrTokenIsNotProvided is returned when the token is not provided.
-var ErrTokenIsNotProvided = errors.New("token is not provided")
+var (
+	// ErrTokenIsNotProvided is returned when the token is not provided.
+	ErrTokenIsNotProvided = errors.New("token is not provided")
+	// ErrVerificationFailed is returned when the token did not pass verification on Cloudflare's side.
+	ErrVerificationFailed = errors.New("token did not pass cloudflare's verification")
+)
 
 // CloudflareService is a captcha checker service.
 type CloudflareService struct {
@@ -79,6 +83,10 @@ func (c *CloudflareService) IsTokenValid(ctx context.Context, token string) erro
 	var respBody captchaResponse
 	if err := json.Unmarshal(body, &respBody); err != nil {
 		return fmt.Errorf("error unmarshalling captcha response from cloudflare: %w", err)
+	}
+
+	if !respBody.Success {
+		return ErrVerificationFailed
 	}
 
 	return nil
