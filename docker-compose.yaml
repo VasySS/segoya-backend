@@ -35,7 +35,7 @@ services:
 
   valkey:
     container_name: segoya-valkey
-    image: valkey/valkey:8.1.1@sha256:c855f98e09d558a0d7cc1a4e56473231206a4c54c0114ada9c485b47aeb92ec8
+    image: valkey/valkey:8.1.1-alpine3.21@sha256:f3959d30d4aa6df4fe7468c6b17d103e56f0fc7a4246f32d8106991b3665cdb9
     ports:
       - "6379:6379"
     command: "valkey-server --save 30 1 --loglevel warning"

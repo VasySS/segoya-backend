@@ -20,7 +20,20 @@ permissions:
   security-events: write
 
 jobs:
+  verify-versions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Go version consistency
+        run: bash scripts/check-go-version.sh
+
+      - name: Check docker image versions consistency
+        run: bash scripts/check-docker-images.sh
+
   test:
+    needs: verify-versions
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -43,6 +56,7 @@ jobs:
           git diff --exit-code go.mod go.sum
 
   lint:
+    needs: verify-versions
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -58,6 +72,7 @@ jobs:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
 
   security:
+    needs: verify-versions
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
