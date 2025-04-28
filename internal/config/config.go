@@ -12,7 +12,7 @@ import (
 	httpPkg "github.com/VasySS/segoya-backend/pkg/http"
 )
 
-// Proxy contains proxy settings.
+// Proxy contains SOCKS5 proxy settings.
 type Proxy struct {
 	Address  string `env:"PROXY_ADDR"`
 	Username string `env:"PROXY_USERNAME"`
@@ -96,7 +96,7 @@ func MustInit() Config {
 	conf.Limits = newLimits()
 
 	if conf.ENV.Proxy.Address != "" {
-		proxyClient, err := httpPkg.NewClientWithProxy(
+		proxyClient, err := httpPkg.NewClientWithSOCKS5(
 			conf.ENV.Proxy.Address,
 			conf.ENV.Proxy.Username,
 			conf.ENV.Proxy.Password,

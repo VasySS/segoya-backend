@@ -22,8 +22,8 @@ func NewClient() *http.Client {
 	}
 }
 
-// NewClientWithProxy creates a new http client with a proxy.
-func NewClientWithProxy(address, login, password string) (*http.Client, error) {
+// NewClientWithSOCKS5 creates a new http client with a proxy.
+func NewClientWithSOCKS5(address, login, password string) (*http.Client, error) {
 	if address == "" || login == "" || password == "" {
 		return nil, ErrWrongCredentials
 	}
