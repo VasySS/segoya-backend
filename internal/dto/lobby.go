@@ -39,8 +39,9 @@ type LobbyChatInputMessage struct {
 
 // LobbyChatMessage is a content of a chat message.
 type LobbyChatMessage struct {
-	Username string `json:"username"`
-	Text     string `json:"text"`
+	Time     time.Time `json:"time"`
+	Username string    `json:"username"`
+	Text     string    `json:"text"`
 }
 
 // LobbyToAPI converts a lobby entity to its API representation.

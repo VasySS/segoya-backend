@@ -129,7 +129,7 @@ func (h Handler) handleWSMessage(
 			return
 		}
 
-		h.processChatMsg(session, lobbyID, chatInput.Message)
+		h.processChatMsg(lobbyID, chatInput.Message)
 	case dto.LobbyMessageGameStart:
 		h.processGameStart(session, lobbyID)
 	case dto.LobbyMessageSettingsChanged:
@@ -170,11 +170,12 @@ func (h Handler) handleWSDisconnect(session transport.WebSocketSession) {
 
 // processChatMsg handles incoming chat messages from users in the lobby.
 func (h Handler) processChatMsg(
-	session transport.WebSocketSession,
 	lobbyID string,
 	message dto.LobbyChatMessage,
 ) {
-	_ = h.ws.BroadcastOthers(lobbyID, session, transport.WebSocketMessageOutput{
+	message.Time = time.Now().UTC()
+
+	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
 		Type:    dto.LobbyMessageChatOutput,
 		Payload: map[string]any{"message": message},
 	})
