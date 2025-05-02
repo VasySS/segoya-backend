@@ -109,6 +109,56 @@ func (s *LobbyTestSuite) TestGetLobby() {
 	s.Equal(lobby.ErrNotFound, err)
 }
 
+func (s *LobbyTestSuite) TestUpdateLobby() {
+	req := dto.NewLobbyRequestDB{
+		ID:              gofakeit.UUID(),
+		CreatorID:       gofakeit.IntRange(1, 100),
+		RequestTime:     time.Now().UTC(),
+		Rounds:          gofakeit.IntRange(1, 10),
+		Provider:        "google",
+		TimerSeconds:    gofakeit.IntRange(10, 60),
+		MovementAllowed: true,
+		MaxPlayers:      gofakeit.IntRange(2, 10),
+	}
+
+	err := s.valkeyRepo.NewLobby(s.ctx, req)
+	s.Require().NoError(err)
+
+	oldLobby, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+	s.Require().NoError(err)
+
+	newProvider := gofakeit.LetterN(5)
+	newRounds := gofakeit.IntRange(1, 10)
+	newTimerSeconds := gofakeit.IntRange(10, 60)
+	newMovementAllowed := gofakeit.Bool()
+
+	err = s.valkeyRepo.UpdateLobby(s.ctx, lobby.Lobby{
+		ID:              oldLobby.ID,
+		CreatorID:       oldLobby.CreatorID,
+		CreatedAt:       oldLobby.CreatedAt,
+		Rounds:          newRounds,
+		Provider:        newProvider,
+		TimerSeconds:    newTimerSeconds,
+		MovementAllowed: newMovementAllowed,
+		MaxPlayers:      oldLobby.MaxPlayers,
+		CurrentPlayers:  oldLobby.CurrentPlayers,
+	})
+	s.Require().NoError(err)
+
+	updatedLobby, err := s.valkeyRepo.GetLobby(s.ctx, oldLobby.ID)
+	s.Require().NoError(err)
+	s.Equal(oldLobby.ID, updatedLobby.ID)
+	s.Equal(oldLobby.CreatorID, updatedLobby.CreatorID)
+	s.Equal(oldLobby.CreatedAt, updatedLobby.CreatedAt)
+	s.Equal(oldLobby.MaxPlayers, updatedLobby.MaxPlayers)
+	s.Equal(oldLobby.CurrentPlayers, updatedLobby.CurrentPlayers)
+
+	s.Equal(newRounds, updatedLobby.Rounds)
+	s.Equal(newProvider, updatedLobby.Provider)
+	s.Equal(newTimerSeconds, updatedLobby.TimerSeconds)
+	s.Equal(newMovementAllowed, updatedLobby.MovementAllowed)
+}
+
 func (s *LobbyTestSuite) TestGetLobbies() {
 	newLobbyIDs := make([]string, 0, 3)
 

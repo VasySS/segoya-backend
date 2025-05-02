@@ -22,6 +22,7 @@ import (
 type Repository interface {
 	NewLobby(ctx context.Context, req dto.NewLobbyRequestDB) error
 	GetLobby(ctx context.Context, id string) (lobby.Lobby, error)
+	UpdateLobby(ctx context.Context, lobbyInfo lobby.Lobby) error
 	DeleteLobby(ctx context.Context, id string) error
 	GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) ([]lobby.Lobby, int, error)
 	IncrementLobbyPlayers(ctx context.Context, id string) error

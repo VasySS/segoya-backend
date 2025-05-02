@@ -291,3 +291,115 @@ func TestUsecase_LobbyGameStart(t *testing.T) {
 		})
 	}
 }
+
+func TestUsecase_UpdateLobbySettings(t *testing.T) {
+	t.Parallel()
+
+	type args struct {
+		req dto.UpdateLobbySettingsRequest
+	}
+
+	type fields struct {
+		lobbyRepo *mocks.Repository
+	}
+
+	tests := []struct {
+		name    string
+		args    args
+		setup   func(fields, args)
+		wantErr assert.ErrorAssertionFunc
+	}{
+		{
+			name: "successfully update lobby settings",
+			args: args{
+				req: dto.UpdateLobbySettingsRequest{
+					RequestTime: time.Now().UTC(),
+					LobbyID:     "1234567890",
+					Creator: user.PublicProfile{
+						ID: 1,
+					},
+					Settings: dto.LobbySettingsMessage{
+						Provider:        "google",
+						MovementAllowed: true,
+						Rounds:          10,
+						TimerSeconds:    60,
+					},
+				},
+			},
+			setup: func(fs fields, args args) {
+				fs.lobbyRepo.On("GetLobby", mock.Anything, args.req.LobbyID).
+					Return(lobbyEntity.Lobby{
+						ID:              args.req.LobbyID,
+						CreatorID:       args.req.Creator.ID,
+						CurrentPlayers:  2,
+						MaxPlayers:      5,
+						Rounds:          5,
+						TimerSeconds:    30,
+						MovementAllowed: false,
+						Provider:        "yandex",
+					}, nil)
+
+				fs.lobbyRepo.On("UpdateLobby", mock.Anything, lobbyEntity.Lobby{
+					ID:              args.req.LobbyID,
+					CreatorID:       args.req.Creator.ID,
+					CurrentPlayers:  2,
+					MaxPlayers:      5,
+					Rounds:          10,
+					TimerSeconds:    60,
+					MovementAllowed: true,
+					Provider:        "google",
+				}).Return(nil)
+			},
+			wantErr: assert.NoError,
+		},
+		{
+			name: "trying to update settings as not creator",
+			args: args{
+				req: dto.UpdateLobbySettingsRequest{
+					RequestTime: time.Now().UTC(),
+					LobbyID:     "1234567890",
+					Creator: user.PublicProfile{
+						ID: 777,
+					},
+					Settings: dto.LobbySettingsMessage{
+						Provider:        "google",
+						MovementAllowed: true,
+						Rounds:          10,
+						TimerSeconds:    60,
+					},
+				},
+			},
+			setup: func(fs fields, args args) {
+				fs.lobbyRepo.On("GetLobby", mock.Anything, args.req.LobbyID).
+					Return(lobbyEntity.Lobby{
+						ID:              args.req.LobbyID,
+						CreatorID:       888,
+						CurrentPlayers:  2,
+						MaxPlayers:      5,
+						Rounds:          5,
+						TimerSeconds:    30,
+						MovementAllowed: false,
+						Provider:        "yandex",
+					}, nil)
+			},
+			wantErr: assert.Error,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			lobbyRepo := mocks.NewRepository(t)
+			fs := fields{
+				lobbyRepo: lobbyRepo,
+			}
+			tt.setup(fs, tt.args)
+
+			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil)
+
+			err := uc.UpdateLobbySettings(t.Context(), tt.args.req)
+			tt.wantErr(t, err)
+		})
+	}
+}

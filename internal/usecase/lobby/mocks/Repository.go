@@ -191,6 +191,24 @@ func (_m *Repository) NewLobby(ctx context.Context, req dto.NewLobbyRequestDB) e
 	return r0
 }
 
+// UpdateLobby provides a mock function with given fields: ctx, lobbyInfo
+func (_m *Repository) UpdateLobby(ctx context.Context, lobbyInfo entitylobby.Lobby) error {
+	ret := _m.Called(ctx, lobbyInfo)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateLobby")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, entitylobby.Lobby) error); ok {
+		r0 = rf(ctx, lobbyInfo)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // NewRepository creates a new instance of Repository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewRepository(t interface {

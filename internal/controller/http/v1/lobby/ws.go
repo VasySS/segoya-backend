@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 )
@@ -125,15 +126,21 @@ func (h Handler) handleWSMessage(
 	case dto.LobbyMessageTypeChatInput:
 		var chatInput dto.LobbyChatInputMessage
 		if err := json.Unmarshal(message.Payload, &chatInput); err != nil {
-			session.SendError("error unmarshalling msg")
+			session.SendError("error unmarshalling chat message")
 			return
 		}
 
 		h.processChatMsg(lobbyID, chatInput.Message)
 	case dto.LobbyMessageTypeGameStart:
 		h.processGameStart(session, lobbyID)
-	case dto.LobbyMessageTypeSettingsChanged:
-	// h.processSettingsChanged(s, lobbyID)
+	case dto.LobbyMessageTypeSettingsNew:
+		var settingsInput dto.LobbyNewSettingsMessage
+		if err := json.Unmarshal(message.Payload, &settingsInput); err != nil {
+			session.SendError("error unmarshalling settings message")
+			return
+		}
+
+		h.processSettingsNew(session, lobbyID, settingsInput.Settings)
 	default:
 		slog.Debug("got unknown message type", slog.Any("type", message.Type))
 	}
@@ -211,5 +218,52 @@ func (h Handler) processGameStart(
 	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
 		Type:    dto.LobbyMessageTypeGameRedirect,
 		Payload: map[string]any{"gameID": gameID},
+	})
+}
+
+// processSettingsNew handles incoming settings change messages from lobby creator.
+func (h Handler) processSettingsNew(
+	session transport.WebSocketSession,
+	lobbyID string,
+	settings dto.LobbySettingsMessage,
+) {
+	ctx := session.Request().Context()
+
+	creatorProfile, ok := getUser(session)
+	if !ok {
+		session.SendError("error getting user profile")
+		return
+	}
+
+	if !game.IsSupportedProvider(settings.Provider) {
+		session.SendError("provider field is set wrong")
+		return
+	}
+
+	if settings.Rounds < 1 || settings.Rounds > 10 {
+		session.SendError("rounds must be between 1 and 10")
+		return
+	}
+
+	if settings.TimerSeconds != 0 && (settings.TimerSeconds < 10 || settings.TimerSeconds > 600) {
+		session.SendError("timer must be between 10 and 600")
+		return
+	}
+
+	if err := h.uc.UpdateLobbySettings(ctx, dto.UpdateLobbySettingsRequest{
+		RequestTime: time.Now().UTC(),
+		LobbyID:     lobbyID,
+		Creator:     creatorProfile,
+		Settings:    settings,
+	}); err != nil {
+		slog.Error("error updating lobby settings", slog.Any("error", err))
+		session.SendError("error updating lobby settings")
+
+		return
+	}
+
+	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
+		Type:    dto.LobbyMessageTypeSettingsChanged,
+		Payload: map[string]any{"settings": settings},
 	})
 }

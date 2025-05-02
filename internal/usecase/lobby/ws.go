@@ -107,3 +107,42 @@ func (uc Usecase) StartLobbyGame(
 
 	return gameID, nil
 }
+
+func (uc Usecase) UpdateLobbySettings(
+	ctx context.Context,
+	req dto.UpdateLobbySettingsRequest,
+) error {
+	ctx, span := uc.tracer.Start(ctx, "UpdateLobbySettings")
+	defer span.End()
+
+	lobbyInfo, err := uc.lobbyRepo.GetLobby(ctx, req.LobbyID)
+	if err != nil {
+		return fmt.Errorf("error getting lobby from db: %w", err)
+	}
+
+	if lobbyInfo.CreatorID != req.Creator.ID {
+		return lobby.ErrOnlyCreatorCanUpdateSettings
+	}
+
+	if req.Settings.Provider != lobbyInfo.Provider {
+		lobbyInfo.Provider = req.Settings.Provider
+	}
+
+	if req.Settings.MovementAllowed != lobbyInfo.MovementAllowed {
+		lobbyInfo.MovementAllowed = req.Settings.MovementAllowed
+	}
+
+	if req.Settings.Rounds != lobbyInfo.Rounds {
+		lobbyInfo.Rounds = req.Settings.Rounds
+	}
+
+	if req.Settings.TimerSeconds != lobbyInfo.TimerSeconds {
+		lobbyInfo.TimerSeconds = req.Settings.TimerSeconds
+	}
+
+	if err := uc.lobbyRepo.UpdateLobby(ctx, lobbyInfo); err != nil {
+		return fmt.Errorf("error updating lobby settings: %w", err)
+	}
+
+	return nil
+}

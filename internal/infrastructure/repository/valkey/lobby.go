@@ -84,6 +84,31 @@ func (r *Repository) GetLobby(ctx context.Context, id string) (lobby.Lobby, erro
 	return parseLobbyData(id, resp)
 }
 
+// UpdateLobby updates lobby in the database.
+func (r *Repository) UpdateLobby(ctx context.Context, lobbyInfo lobby.Lobby) error {
+	ctx, span := r.tracer.Start(ctx, "UpdateLobby")
+	defer span.End()
+
+	key := lobbyPrefix + lobbyInfo.ID
+	fields := map[string]string{
+		lobbyRoundsField:          strconv.Itoa(lobbyInfo.Rounds),
+		lobbyProviderField:        lobbyInfo.Provider,
+		lobbyTimerSecondsField:    strconv.Itoa(lobbyInfo.TimerSeconds),
+		lobbyMovementAllowedField: strconv.FormatBool(lobbyInfo.MovementAllowed),
+	}
+
+	cmd := r.valkey.B().Hset().Key(key).FieldValue()
+	for field, value := range fields {
+		cmd = cmd.FieldValue(field, value)
+	}
+
+	if err := r.valkey.Do(ctx, cmd.Build()).Error(); err != nil {
+		return fmt.Errorf("failed to update lobby: %w", err)
+	}
+
+	return nil
+}
+
 // IncrementLobbyPlayers increments current amount of players in the lobby.
 func (r *Repository) IncrementLobbyPlayers(ctx context.Context, id string) error {
 	ctx, span := r.tracer.Start(ctx, "LobbyIncrementPlayers")

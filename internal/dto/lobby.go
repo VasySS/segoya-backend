@@ -33,9 +33,6 @@ const (
 	LobbyMessageTypeError transport.WebSocketMessageOutputType = "error"
 )
 
-// LobbyGameStartMessage is a message to initiate the start of the game in the lobby.
-type LobbyGameStartMessage struct{}
-
 // LobbyChatInputMessage is an incoming chat message from a user.
 type LobbyChatInputMessage struct {
 	Message LobbyChatMessage `json:"message"`
@@ -46,6 +43,19 @@ type LobbyChatMessage struct {
 	Time     time.Time `json:"time"`
 	Username string    `json:"username"`
 	Text     string    `json:"text"`
+}
+
+// LobbyNewSettingsMessage is an incoming settings change message from lobby creator.
+type LobbyNewSettingsMessage struct {
+	Settings LobbySettingsMessage `json:"settings"`
+}
+
+// LobbySettingsMessage contains settings for a lobby.
+type LobbySettingsMessage struct {
+	Provider        string `json:"provider"`
+	MovementAllowed bool   `json:"movementAllowed"`
+	Rounds          int    `json:"rounds"`
+	TimerSeconds    int    `json:"timerSeconds"`
 }
 
 // LobbyToAPI converts a lobby entity to its API representation.
@@ -112,4 +122,11 @@ type StartLobbyGameRequest struct {
 	LobbyID          string
 	Creator          user.PublicProfile
 	ConnectedPlayers []user.PublicProfile
+}
+
+type UpdateLobbySettingsRequest struct {
+	RequestTime time.Time
+	LobbyID     string
+	Creator     user.PublicProfile
+	Settings    LobbySettingsMessage
 }

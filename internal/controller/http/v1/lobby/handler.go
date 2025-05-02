@@ -20,6 +20,7 @@ type TokenService interface {
 type Usecase interface {
 	NewLobby(ctx context.Context, req dto.NewLobbyRequest) (string, error)
 	GetLobby(ctx context.Context, id string) (lobby.Lobby, error)
+	UpdateLobbySettings(ctx context.Context, req dto.UpdateLobbySettingsRequest) error
 	DeleteLobby(ctx context.Context, id string) error
 	GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) ([]lobby.Lobby, int, error)
 	ConnectLobbyUser(ctx context.Context, lobbyID string, userID int) (user.PublicProfile, error)

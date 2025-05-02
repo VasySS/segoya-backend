@@ -11,6 +11,16 @@ const (
 	SeznamProvider    PanoramaProvider = "seznam"
 )
 
+// IsSupportedProvider returns true if the provider is supported.
+func IsSupportedProvider(p string) bool {
+	switch PanoramaProvider(p) {
+	case GoogleProvider, YandexProvider, YandexAirProvider, SeznamProvider:
+		return true
+	default:
+		return false
+	}
+}
+
 // PanoramaMetadata contains general streetview metadata.
 type PanoramaMetadata struct {
 	LatLng
