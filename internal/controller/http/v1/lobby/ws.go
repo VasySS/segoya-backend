@@ -95,7 +95,7 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 	session.Set(dto.LobbyUserProfileKey, userProfile)
 
 	if err := session.SendMessage(
-		dto.LobbyMessageConnectedUsers,
+		dto.LobbyMessageTypeConnectedUsers,
 		map[string]any{"users": lobbyUsers},
 	); err != nil {
 		slog.Error("error sending connected users", slog.Any("error", err))
@@ -105,7 +105,7 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 	}
 
 	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
-		Type:    dto.LobbyMessageUserConnected,
+		Type:    dto.LobbyMessageTypeUserConnected,
 		Payload: map[string]any{"user": userProfile},
 	})
 }
@@ -122,7 +122,7 @@ func (h Handler) handleWSMessage(
 	}
 
 	switch message.Type {
-	case dto.LobbyMessageChatInput:
+	case dto.LobbyMessageTypeChatInput:
 		var chatInput dto.LobbyChatInputMessage
 		if err := json.Unmarshal(message.Payload, &chatInput); err != nil {
 			session.SendError("error unmarshalling msg")
@@ -130,9 +130,9 @@ func (h Handler) handleWSMessage(
 		}
 
 		h.processChatMsg(lobbyID, chatInput.Message)
-	case dto.LobbyMessageGameStart:
+	case dto.LobbyMessageTypeGameStart:
 		h.processGameStart(session, lobbyID)
-	case dto.LobbyMessageSettingsChanged:
+	case dto.LobbyMessageTypeSettingsChanged:
 	// h.processSettingsChanged(s, lobbyID)
 	default:
 		slog.Debug("got unknown message type", slog.Any("type", message.Type))
@@ -163,7 +163,7 @@ func (h Handler) handleWSDisconnect(session transport.WebSocketSession) {
 	}
 
 	_ = h.ws.BroadcastOthers(lobbyID, session, transport.WebSocketMessageOutput{
-		Type:    dto.LobbyMessageUserDisconnected,
+		Type:    dto.LobbyMessageTypeUserDisconnected,
 		Payload: map[string]any{"username": userProfile.Username},
 	})
 }
@@ -176,7 +176,7 @@ func (h Handler) processChatMsg(
 	message.Time = time.Now().UTC()
 
 	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
-		Type:    dto.LobbyMessageChatOutput,
+		Type:    dto.LobbyMessageTypeChatOutput,
 		Payload: map[string]any{"message": message},
 	})
 }
@@ -209,7 +209,7 @@ func (h Handler) processGameStart(
 	}
 
 	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
-		Type:    dto.LobbyMessageGameRedirect,
+		Type:    dto.LobbyMessageTypeGameRedirect,
 		Payload: map[string]any{"gameID": gameID},
 	})
 }

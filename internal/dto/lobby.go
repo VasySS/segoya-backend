@@ -12,21 +12,25 @@ import (
 // LobbyUserProfileKey is the key for the user profile in the WebSocket session.
 const LobbyUserProfileKey string = "userProfile"
 
-// Message types for outgoing lobby messages.
 const (
-	LobbyMessageError            transport.WebSocketMessageOutputType = "error"
-	LobbyMessageGameRedirect     transport.WebSocketMessageOutputType = "gameRedirect"
-	LobbyMessageUserConnected    transport.WebSocketMessageOutputType = "userConnected"
-	LobbyMessageUserDisconnected transport.WebSocketMessageOutputType = "userDisconnected"
-	LobbyMessageConnectedUsers   transport.WebSocketMessageOutputType = "usersConnected"
-	LobbyMessageChatOutput       transport.WebSocketMessageOutputType = "chatMessage"
-)
+	// Chat messages
+	LobbyMessageTypeChatInput  transport.WebSocketMessageInputType  = "chatInput"
+	LobbyMessageTypeChatOutput transport.WebSocketMessageOutputType = "chatOutput"
 
-// Message types for incoming lobby messages.
-const (
-	LobbyMessageChatInput       transport.WebSocketMessageInputType = "postChatMessage"
-	LobbyMessageGameStart       transport.WebSocketMessageInputType = "gameStart"
-	LobbyMessageSettingsChanged transport.WebSocketMessageInputType = "settingsChanged"
+	// Game control
+	LobbyMessageTypeGameStart    transport.WebSocketMessageInputType  = "gameStart"
+	LobbyMessageTypeGameRedirect transport.WebSocketMessageOutputType = "gameRedirect"
+
+	// Settings
+	LobbyMessageTypeSettingsNew     transport.WebSocketMessageInputType  = "settingsNew"
+	LobbyMessageTypeSettingsChanged transport.WebSocketMessageOutputType = "settingsChanged"
+
+	// User events
+	LobbyMessageTypeUserConnected    transport.WebSocketMessageOutputType = "userConnected"
+	LobbyMessageTypeUserDisconnected transport.WebSocketMessageOutputType = "userDisconnected"
+	LobbyMessageTypeConnectedUsers   transport.WebSocketMessageOutputType = "connectedUsers"
+
+	LobbyMessageTypeError transport.WebSocketMessageOutputType = "error"
 )
 
 // LobbyGameStartMessage is a message to initiate the start of the game in the lobby.
