@@ -108,6 +108,7 @@ func (uc Usecase) StartLobbyGame(
 	return gameID, nil
 }
 
+// UpdateLobbySettings updates the settings of a lobby.
 func (uc Usecase) UpdateLobbySettings(
 	ctx context.Context,
 	req dto.UpdateLobbySettingsRequest,

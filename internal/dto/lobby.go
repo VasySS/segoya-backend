@@ -12,20 +12,25 @@ import (
 // LobbyUserProfileKey is the key for the user profile in the WebSocket session.
 const LobbyUserProfileKey string = "userProfile"
 
+// Message types for WebSocket messages.
 const (
-	// Chat messages
+	// Chat messages.
+
 	LobbyMessageTypeChatInput  transport.WebSocketMessageInputType  = "chatInput"
 	LobbyMessageTypeChatOutput transport.WebSocketMessageOutputType = "chatOutput"
 
-	// Game control
+	// Game control.
+
 	LobbyMessageTypeGameStart    transport.WebSocketMessageInputType  = "gameStart"
 	LobbyMessageTypeGameRedirect transport.WebSocketMessageOutputType = "gameRedirect"
 
-	// Settings
+	// Settings.
+
 	LobbyMessageTypeSettingsNew     transport.WebSocketMessageInputType  = "settingsNew"
 	LobbyMessageTypeSettingsChanged transport.WebSocketMessageOutputType = "settingsChanged"
 
-	// User events
+	// User events.
+
 	LobbyMessageTypeUserConnected    transport.WebSocketMessageOutputType = "userConnected"
 	LobbyMessageTypeUserDisconnected transport.WebSocketMessageOutputType = "userDisconnected"
 	LobbyMessageTypeConnectedUsers   transport.WebSocketMessageOutputType = "connectedUsers"
@@ -124,6 +129,7 @@ type StartLobbyGameRequest struct {
 	ConnectedPlayers []user.PublicProfile
 }
 
+// UpdateLobbySettingsRequest is a request to update the settings of a lobby.
 type UpdateLobbySettingsRequest struct {
 	RequestTime time.Time
 	LobbyID     string
