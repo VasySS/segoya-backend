@@ -17,7 +17,7 @@ import (
 func TestUsecase_NewLobby(t *testing.T) {
 	t.Parallel()
 
-	newLobbyReq := dto.NewLobbyRequest{
+	newPublicLobbyReq := dto.NewLobbyRequest{
 		RequestTime:     time.Now().UTC(),
 		MaxPlayers:      10,
 		CreatorID:       1,
@@ -25,6 +25,18 @@ func TestUsecase_NewLobby(t *testing.T) {
 		Provider:        "google",
 		TimerSeconds:    30,
 		MovementAllowed: true,
+		Private:         false,
+	}
+
+	newPrivateLobbyReq := dto.NewLobbyRequest{
+		RequestTime:     time.Now().UTC(),
+		MaxPlayers:      10,
+		CreatorID:       2,
+		Rounds:          10,
+		Provider:        "yandex",
+		TimerSeconds:    60,
+		MovementAllowed: true,
+		Private:         true,
 	}
 
 	type fields struct {
@@ -45,9 +57,9 @@ func TestUsecase_NewLobby(t *testing.T) {
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
-			name: "successfully create lobby",
+			name: "successfully create public lobby",
 			args: args{
-				req: newLobbyReq,
+				req: newPublicLobbyReq,
 			},
 			setup: func(fs fields, args args) {
 				lobbyID := "1234567890"
@@ -73,9 +85,37 @@ func TestUsecase_NewLobby(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
+			name: "successfully create private lobby",
+			args: args{
+				req: newPrivateLobbyReq,
+			},
+			setup: func(fs fields, args args) {
+				lobbyID := "112233"
+
+				fs.rnd.On("NewRandomHexString", fs.conf.LobbyIDLength).
+					Return(lobbyID)
+
+				fs.lobbyRepo.On("NewPrivateLobby", mock.Anything, dto.NewLobbyRequestDB{
+					ID:              lobbyID,
+					CreatorID:       args.req.CreatorID,
+					RequestTime:     args.req.RequestTime,
+					Rounds:          args.req.Rounds,
+					MaxPlayers:      args.req.MaxPlayers,
+					Provider:        args.req.Provider,
+					TimerSeconds:    args.req.TimerSeconds,
+					MovementAllowed: args.req.MovementAllowed,
+				}).Return(nil)
+
+				fs.lobbyRepo.On("AddLobbyExpiration", mock.Anything, lobbyID, mock.AnythingOfType("time.Duration")).
+					Return(nil)
+			},
+			want:    "112233",
+			wantErr: assert.NoError,
+		},
+		{
 			name: "failed to create lobby",
 			args: args{
-				req: newLobbyReq,
+				req: newPublicLobbyReq,
 			},
 			setup: func(fs fields, _ args) {
 				fs.rnd.On("NewRandomHexString", fs.conf.LobbyIDLength).
@@ -171,65 +211,6 @@ func TestUsecase_GetLobby(t *testing.T) {
 			got, err := uc.GetLobby(t.Context(), tt.args.id)
 			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func TestUsecase_DeleteLobby(t *testing.T) {
-	t.Parallel()
-
-	type fields struct {
-		lobbyRepo *mocks.Repository
-	}
-
-	type args struct {
-		id string
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successfully delete lobby",
-			args: args{
-				id: "1234567890",
-			},
-			setup: func(fs fields, args args) {
-				fs.lobbyRepo.On("DeleteLobby", mock.Anything, args.id).
-					Return(nil)
-			},
-			wantErr: assert.NoError,
-		},
-		{
-			name: "failed to delete lobby",
-			args: args{
-				id: "1234567890",
-			},
-			setup: func(fs fields, args args) {
-				fs.lobbyRepo.On("DeleteLobby", mock.Anything, args.id).
-					Return(errors.New("some db error"))
-			},
-			wantErr: assert.Error,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			lobbyRepo := mocks.NewRepository(t)
-			fs := fields{
-				lobbyRepo: lobbyRepo,
-			}
-			tt.setup(fs, tt.args)
-
-			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil)
-
-			err := uc.DeleteLobby(t.Context(), tt.args.id)
-			tt.wantErr(t, err)
 		})
 	}
 }

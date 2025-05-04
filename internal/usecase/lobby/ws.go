@@ -52,13 +52,13 @@ func (uc Usecase) DisconnectLobbyUser(
 	ctx, span := uc.tracer.Start(ctx, "DisconnectLobbyUser")
 	defer span.End()
 
-	lobby, err := uc.lobbyRepo.GetLobby(ctx, lobbyID)
+	lobbyRepo, err := uc.lobbyRepo.GetLobby(ctx, lobbyID)
 	if err != nil {
 		return fmt.Errorf("error getting lobby from db: %w", err)
 	}
 
 	// delete lobby if it is empty for some time
-	if lobby.CurrentPlayers == 1 {
+	if lobbyRepo.CurrentPlayers == 1 {
 		if err := uc.lobbyRepo.AddLobbyExpiration(ctx, lobbyID, uc.conf.LobbyExpiration); err != nil {
 			return fmt.Errorf("error deleting lobby: %w", err)
 		}
@@ -101,8 +101,8 @@ func (uc Usecase) StartLobbyGame(
 		return 0, fmt.Errorf("error starting game: %w", err)
 	}
 
-	if err := uc.DeleteLobby(ctx, req.LobbyID); err != nil {
-		return 0, fmt.Errorf("error deleting lobby: %w", err)
+	if err := uc.lobbyRepo.DeleteLobby(ctx, req.LobbyID); err != nil {
+		return 0, fmt.Errorf("failed to delete lobby: %w", err)
 	}
 
 	return gameID, nil

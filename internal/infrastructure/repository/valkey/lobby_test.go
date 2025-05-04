@@ -74,6 +74,36 @@ func (s *LobbyTestSuite) TestNewLobby() {
 	s.Equal(req.MovementAllowed, l.MovementAllowed)
 	s.Equal(req.MaxPlayers, l.MaxPlayers)
 	s.Equal(0, l.CurrentPlayers)
+	s.Equal(false, l.Private)
+}
+
+func (s *LobbyTestSuite) TestNewPrivateLobby() {
+	req := dto.NewLobbyRequestDB{
+		ID:              gofakeit.UUID(),
+		CreatorID:       gofakeit.IntRange(1, 100),
+		RequestTime:     time.Now().UTC(),
+		Rounds:          gofakeit.IntRange(1, 10),
+		Provider:        "yandex",
+		TimerSeconds:    gofakeit.IntRange(10, 60),
+		MovementAllowed: false,
+		MaxPlayers:      gofakeit.IntRange(2, 10),
+	}
+
+	err := s.valkeyRepo.NewPrivateLobby(s.ctx, req)
+	s.Require().NoError(err)
+
+	l, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+	s.Require().NoError(err)
+	s.Equal(req.ID, l.ID)
+	s.Equal(req.CreatorID, l.CreatorID)
+	s.WithinDuration(req.RequestTime, l.CreatedAt, 1*time.Second)
+	s.Equal(req.Rounds, l.Rounds)
+	s.Equal(req.Provider, l.Provider)
+	s.Equal(req.TimerSeconds, l.TimerSeconds)
+	s.Equal(req.MovementAllowed, l.MovementAllowed)
+	s.Equal(req.MaxPlayers, l.MaxPlayers)
+	s.Equal(0, l.CurrentPlayers)
+	s.Equal(true, l.Private)
 }
 
 func (s *LobbyTestSuite) TestGetLobby() {
@@ -191,6 +221,9 @@ func (s *LobbyTestSuite) TestGetLobbies() {
 	gotLobbyIDs := make([]string, len(lobbies))
 	for i, l := range lobbies {
 		gotLobbyIDs[i] = l.ID
+
+		// all lobbies should be public in pagination
+		s.Equal(false, l.Private)
 	}
 
 	for _, id := range newLobbyIDs {

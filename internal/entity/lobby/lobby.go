@@ -16,4 +16,5 @@ type Lobby struct {
 	TimerSeconds    int       `json:"timerSeconds"`
 	CurrentPlayers  int       `json:"currentPlayers"`
 	MaxPlayers      int       `json:"maxPlayers"`
+	Private         bool      `json:"private"`
 }

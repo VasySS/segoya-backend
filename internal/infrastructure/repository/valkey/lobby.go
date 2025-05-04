@@ -15,8 +15,10 @@ import (
 
 const (
 	lobbyPrefix               = "lobby:"
+	lobbyPrivatePrefix        = "lobby:private:" // different prefix to exclude private lobbies from GetLobbies pagination
 	lobbiesPrefix             = "lobbies:sorted"
 	lobbyIDField              = "id"
+	lobbyPrivateField         = "private"
 	lobbyCreatorIDField       = "creatorID"
 	lobbyCreatedAtField       = "createdAt"
 	lobbyRoundsField          = "rounds"
@@ -43,6 +45,7 @@ func (r *Repository) NewLobby(ctx context.Context, req dto.NewLobbyRequestDB) er
 		lobbyMovementAllowedField: strconv.FormatBool(req.MovementAllowed),
 		lobbyMaxPlayersField:      strconv.Itoa(req.MaxPlayers),
 		lobbyCurrentPlayersField:  "0",
+		lobbyPrivateField:         "false",
 	}
 
 	cmd := r.valkey.B().Hset().Key(key).FieldValue()
@@ -64,12 +67,47 @@ func (r *Repository) NewLobby(ctx context.Context, req dto.NewLobbyRequestDB) er
 	return nil
 }
 
-// GetLobby gets lobby from the database.
-func (r *Repository) GetLobby(ctx context.Context, id string) (lobby.Lobby, error) {
-	ctx, span := r.tracer.Start(ctx, "Lobby")
+// NewPrivateLobby creates new private lobby in the database (excluded from GetLobbies pagination).
+func (r *Repository) NewPrivateLobby(ctx context.Context, req dto.NewLobbyRequestDB) error {
+	ctx, span := r.tracer.Start(ctx, "NewPrivateLobby")
 	defer span.End()
 
-	key := lobbyPrefix + id
+	key := lobbyPrivatePrefix + req.ID
+	fields := map[string]string{
+		lobbyIDField:              req.ID,
+		lobbyCreatorIDField:       strconv.Itoa(req.CreatorID),
+		lobbyCreatedAtField:       req.RequestTime.Format(time.RFC3339),
+		lobbyRoundsField:          strconv.Itoa(req.Rounds),
+		lobbyProviderField:        req.Provider,
+		lobbyTimerSecondsField:    strconv.Itoa(req.TimerSeconds),
+		lobbyMovementAllowedField: strconv.FormatBool(req.MovementAllowed),
+		lobbyMaxPlayersField:      strconv.Itoa(req.MaxPlayers),
+		lobbyCurrentPlayersField:  "0",
+		lobbyPrivateField:         "true",
+	}
+
+	cmd := r.valkey.B().Hset().Key(key).FieldValue()
+	for field, value := range fields {
+		cmd = cmd.FieldValue(field, value)
+	}
+
+	if err := r.valkey.Do(ctx, cmd.Build()).Error(); err != nil {
+		return fmt.Errorf("failed to create private lobby: %w", err)
+	}
+
+	return nil
+}
+
+// GetLobby gets lobby from the database (public or private).
+func (r *Repository) GetLobby(ctx context.Context, id string) (lobby.Lobby, error) {
+	ctx, span := r.tracer.Start(ctx, "GetLobby")
+	defer span.End()
+
+	key, err := r.getLobbyKey(ctx, id)
+	if err != nil {
+		return lobby.Lobby{}, err
+	}
+
 	cmd := r.valkey.B().Hgetall().Key(key).Build()
 
 	resp, err := r.valkey.Do(ctx, cmd).AsStrMap()
@@ -89,7 +127,11 @@ func (r *Repository) UpdateLobby(ctx context.Context, lobbyInfo lobby.Lobby) err
 	ctx, span := r.tracer.Start(ctx, "UpdateLobby")
 	defer span.End()
 
-	key := lobbyPrefix + lobbyInfo.ID
+	key, err := r.getLobbyKey(ctx, lobbyInfo.ID)
+	if err != nil {
+		return err
+	}
+
 	fields := map[string]string{
 		lobbyRoundsField:          strconv.Itoa(lobbyInfo.Rounds),
 		lobbyProviderField:        lobbyInfo.Provider,
@@ -111,10 +153,14 @@ func (r *Repository) UpdateLobby(ctx context.Context, lobbyInfo lobby.Lobby) err
 
 // IncrementLobbyPlayers increments current amount of players in the lobby.
 func (r *Repository) IncrementLobbyPlayers(ctx context.Context, id string) error {
-	ctx, span := r.tracer.Start(ctx, "LobbyIncrementPlayers")
+	ctx, span := r.tracer.Start(ctx, "IncrementLobbyPlayers")
 	defer span.End()
 
-	key := lobbyPrefix + id
+	key, err := r.getLobbyKey(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	cmd := r.valkey.B().Hincrby().Key(key).Field(lobbyCurrentPlayersField).Increment(1).Build()
 
 	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
@@ -126,10 +172,14 @@ func (r *Repository) IncrementLobbyPlayers(ctx context.Context, id string) error
 
 // DecrementLobbyPlayers decrements current amount of players in the lobby.
 func (r *Repository) DecrementLobbyPlayers(ctx context.Context, id string) error {
-	ctx, span := r.tracer.Start(ctx, "LobbyDecrementPlayers")
+	ctx, span := r.tracer.Start(ctx, "DecrementLobbyPlayers")
 	defer span.End()
 
-	key := lobbyPrefix + id
+	key, err := r.getLobbyKey(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	cmd := r.valkey.B().Hincrby().Key(key).Field(lobbyCurrentPlayersField).Increment(-1).Build()
 
 	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
@@ -144,7 +194,11 @@ func (r *Repository) DeleteLobby(ctx context.Context, id string) error {
 	ctx, span := r.tracer.Start(ctx, "DeleteLobby")
 	defer span.End()
 
-	key := lobbyPrefix + id
+	key, err := r.getLobbyKey(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	keyRemoveCmd := r.valkey.B().Del().Key(key).Build()
 
 	if err := r.valkey.Do(ctx, keyRemoveCmd).Error(); err != nil {
@@ -164,7 +218,11 @@ func (r *Repository) AddLobbyExpiration(ctx context.Context, id string, ttl time
 	ctx, span := r.tracer.Start(ctx, "AddLobbyExpiration")
 	defer span.End()
 
-	key := lobbyPrefix + id
+	key, err := r.getLobbyKey(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	keyCmd := r.valkey.B().Expire().Key(key).Seconds(int64(ttl.Seconds())).Build()
 
 	if err := r.valkey.Do(ctx, keyCmd).Error(); err != nil {
@@ -179,7 +237,11 @@ func (r *Repository) DeleteLobbyExpiration(ctx context.Context, id string) error
 	ctx, span := r.tracer.Start(ctx, "DeleteLobbyExpiration")
 	defer span.End()
 
-	key := lobbyPrefix + id
+	key, err := r.getLobbyKey(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	cmd := r.valkey.B().Persist().Key(key).Build()
 
 	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
@@ -191,7 +253,7 @@ func (r *Repository) DeleteLobbyExpiration(ctx context.Context, id string) error
 
 // GetLobbies gets available lobbies (non-private) from the database using pagination.
 func (r *Repository) GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) ([]lobby.Lobby, int, error) {
-	ctx, span := r.tracer.Start(ctx, "Lobbies")
+	ctx, span := r.tracer.Start(ctx, "GetLobbies")
 	defer span.End()
 
 	start := (req.Page - 1) * req.PageSize
@@ -250,15 +312,33 @@ func (r *Repository) GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) 
 	return lobbies, int(total), nil
 }
 
+// getLobbyKey returns the key (public or private) for the lobby based on its ID.
+func (r *Repository) getLobbyKey(ctx context.Context, id string) (string, error) {
+	publicLobbyKey := lobbyPrefix + id
+	privateLobbyKey := lobbyPrivatePrefix + id
+
+	publicExists, err := r.valkey.Do(ctx, r.valkey.B().Exists().Key(publicLobbyKey).Build()).AsBool()
+	if err != nil {
+		return "", fmt.Errorf("failed to check if public lobby exists: %w", err)
+	}
+
+	// check if public lobby exists, if not, it's private
+	if publicExists {
+		return publicLobbyKey, nil
+	}
+
+	return privateLobbyKey, nil
+}
+
 func parseLobbyData(id string, data map[string]string) (lobby.Lobby, error) {
 	creatorID, err := strconv.Atoi(data[lobbyCreatorIDField])
 	if err != nil {
-		return lobby.Lobby{}, fmt.Errorf("invalid creator_id: %w", err)
+		return lobby.Lobby{}, fmt.Errorf("invalid creatorID: %w", err)
 	}
 
 	createdAt, err := time.Parse(time.RFC3339, data[lobbyCreatedAtField])
 	if err != nil {
-		return lobby.Lobby{}, fmt.Errorf("invalid created_at: %w", err)
+		return lobby.Lobby{}, fmt.Errorf("invalid createdAt: %w", err)
 	}
 
 	rounds, err := strconv.Atoi(data[lobbyRoundsField])
@@ -268,22 +348,27 @@ func parseLobbyData(id string, data map[string]string) (lobby.Lobby, error) {
 
 	timerSeconds, err := strconv.Atoi(data[lobbyTimerSecondsField])
 	if err != nil {
-		return lobby.Lobby{}, fmt.Errorf("invalid timer_seconds: %w", err)
+		return lobby.Lobby{}, fmt.Errorf("invalid timerSeconds: %w", err)
 	}
 
 	movementAllowed, err := strconv.ParseBool(data[lobbyMovementAllowedField])
 	if err != nil {
-		return lobby.Lobby{}, fmt.Errorf("invalid movement_allowed: %w", err)
+		return lobby.Lobby{}, fmt.Errorf("invalid movementAllowed: %w", err)
 	}
 
 	currentPlayers, err := strconv.Atoi(data[lobbyCurrentPlayersField])
 	if err != nil {
-		return lobby.Lobby{}, fmt.Errorf("invalid current_players: %w", err)
+		return lobby.Lobby{}, fmt.Errorf("invalid currentPlayers: %w", err)
 	}
 
 	maxPlayers, err := strconv.Atoi(data[lobbyMaxPlayersField])
 	if err != nil {
-		return lobby.Lobby{}, fmt.Errorf("invalid max_players: %w", err)
+		return lobby.Lobby{}, fmt.Errorf("invalid maxPlayers: %w", err)
+	}
+
+	private, err := strconv.ParseBool(data[lobbyPrivateField])
+	if err != nil {
+		return lobby.Lobby{}, fmt.Errorf("invalid private: %w", err)
 	}
 
 	return lobby.Lobby{
@@ -296,5 +381,6 @@ func parseLobbyData(id string, data map[string]string) (lobby.Lobby, error) {
 		MaxPlayers:      maxPlayers,
 		MovementAllowed: movementAllowed,
 		CurrentPlayers:  currentPlayers,
+		Private:         private,
 	}, nil
 }

@@ -191,6 +191,24 @@ func (_m *Repository) NewLobby(ctx context.Context, req dto.NewLobbyRequestDB) e
 	return r0
 }
 
+// NewPrivateLobby provides a mock function with given fields: ctx, req
+func (_m *Repository) NewPrivateLobby(ctx context.Context, req dto.NewLobbyRequestDB) error {
+	ret := _m.Called(ctx, req)
+
+	if len(ret) == 0 {
+		panic("no return value specified for NewPrivateLobby")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, dto.NewLobbyRequestDB) error); ok {
+		r0 = rf(ctx, req)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdateLobby provides a mock function with given fields: ctx, lobbyInfo
 func (_m *Repository) UpdateLobby(ctx context.Context, lobbyInfo entitylobby.Lobby) error {
 	ret := _m.Called(ctx, lobbyInfo)

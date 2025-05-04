@@ -75,6 +75,7 @@ func LobbyToAPI(l lobby.Lobby) *api.Lobby {
 		TimerSeconds:    l.TimerSeconds,
 		CurrentPlayers:  l.CurrentPlayers,
 		MaxPlayers:      l.MaxPlayers,
+		Private:         l.Private,
 	}
 }
 
@@ -101,6 +102,7 @@ type NewLobbyRequest struct {
 	Provider        string
 	TimerSeconds    int
 	MovementAllowed bool
+	Private         bool
 }
 
 // NewLobbyRequestDB is a request to create a new lobby in the database.

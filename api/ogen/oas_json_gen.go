@@ -2884,9 +2884,13 @@ func (s *Lobby) encodeFields(e *jx.Encoder) {
 		e.FieldStart("maxPlayers")
 		e.Int(s.MaxPlayers)
 	}
+	{
+		e.FieldStart("private")
+		e.Bool(s.Private)
+	}
 }
 
-var jsonFieldsNameOfLobby = [9]string{
+var jsonFieldsNameOfLobby = [10]string{
 	0: "id",
 	1: "creatorID",
 	2: "createdAt",
@@ -2896,6 +2900,7 @@ var jsonFieldsNameOfLobby = [9]string{
 	6: "timerSeconds",
 	7: "currentPlayers",
 	8: "maxPlayers",
+	9: "private",
 }
 
 // Decode decodes Lobby from json.
@@ -3013,6 +3018,18 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"maxPlayers\"")
 			}
+		case "private":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := d.Bool()
+				s.Private = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"private\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -3024,7 +3041,7 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -4176,15 +4193,20 @@ func (s *NewLobby) encodeFields(e *jx.Encoder) {
 		e.FieldStart("movementAllowed")
 		e.Bool(s.MovementAllowed)
 	}
+	{
+		e.FieldStart("private")
+		e.Bool(s.Private)
+	}
 }
 
-var jsonFieldsNameOfNewLobby = [6]string{
+var jsonFieldsNameOfNewLobby = [7]string{
 	0: "creatorID",
 	1: "maxPlayers",
 	2: "rounds",
 	3: "provider",
 	4: "timerSeconds",
 	5: "movementAllowed",
+	6: "private",
 }
 
 // Decode decodes NewLobby from json.
@@ -4264,6 +4286,18 @@ func (s *NewLobby) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"movementAllowed\"")
 			}
+		case "private":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Bool()
+				s.Private = bool(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"private\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -4274,7 +4308,7 @@ func (s *NewLobby) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00101111,
+		0b01101111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.

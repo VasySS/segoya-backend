@@ -513,6 +513,7 @@ type Lobby struct {
 	TimerSeconds    int       `json:"timerSeconds"`
 	CurrentPlayers  int       `json:"currentPlayers"`
 	MaxPlayers      int       `json:"maxPlayers"`
+	Private         bool      `json:"private"`
 }
 
 // GetID returns the value of ID.
@@ -560,6 +561,11 @@ func (s *Lobby) GetMaxPlayers() int {
 	return s.MaxPlayers
 }
 
+// GetPrivate returns the value of Private.
+func (s *Lobby) GetPrivate() bool {
+	return s.Private
+}
+
 // SetID sets the value of ID.
 func (s *Lobby) SetID(val string) {
 	s.ID = val
@@ -603,6 +609,11 @@ func (s *Lobby) SetCurrentPlayers(val int) {
 // SetMaxPlayers sets the value of MaxPlayers.
 func (s *Lobby) SetMaxPlayers(val int) {
 	s.MaxPlayers = val
+}
+
+// SetPrivate sets the value of Private.
+func (s *Lobby) SetPrivate(val bool) {
+	s.Private = val
 }
 
 func (*Lobby) getLobbyRes() {}
@@ -1063,6 +1074,7 @@ type NewLobby struct {
 	Provider        Provider `json:"provider"`
 	TimerSeconds    OptInt   `json:"timerSeconds"`
 	MovementAllowed bool     `json:"movementAllowed"`
+	Private         bool     `json:"private"`
 }
 
 // GetCreatorID returns the value of CreatorID.
@@ -1095,6 +1107,11 @@ func (s *NewLobby) GetMovementAllowed() bool {
 	return s.MovementAllowed
 }
 
+// GetPrivate returns the value of Private.
+func (s *NewLobby) GetPrivate() bool {
+	return s.Private
+}
+
 // SetCreatorID sets the value of CreatorID.
 func (s *NewLobby) SetCreatorID(val int) {
 	s.CreatorID = val
@@ -1123,6 +1140,11 @@ func (s *NewLobby) SetTimerSeconds(val OptInt) {
 // SetMovementAllowed sets the value of MovementAllowed.
 func (s *NewLobby) SetMovementAllowed(val bool) {
 	s.MovementAllowed = val
+}
+
+// SetPrivate sets the value of Private.
+func (s *NewLobby) SetPrivate(val bool) {
+	s.Private = val
 }
 
 type NewLobbyBadRequest Error

@@ -27,6 +27,7 @@ func (h Handler) NewLobby(
 		Provider:        string(req.GetProvider()),
 		TimerSeconds:    timerSeconds,
 		MovementAllowed: req.MovementAllowed,
+		Private:         req.Private,
 	})
 	if err != nil {
 		slog.Error("error creating lobby", slog.Any("error", err))

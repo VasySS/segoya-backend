@@ -21,6 +21,7 @@ import (
 //go:generate go tool mockery --name=Repository
 type Repository interface {
 	NewLobby(ctx context.Context, req dto.NewLobbyRequestDB) error
+	NewPrivateLobby(ctx context.Context, req dto.NewLobbyRequestDB) error
 	GetLobby(ctx context.Context, id string) (lobby.Lobby, error)
 	UpdateLobby(ctx context.Context, lobbyInfo lobby.Lobby) error
 	DeleteLobby(ctx context.Context, id string) error

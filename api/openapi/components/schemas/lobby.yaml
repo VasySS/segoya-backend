@@ -19,7 +19,9 @@ NewLobby:
       maximum: 600
     movementAllowed:
       type: boolean
-  required: [creatorID, maxPlayers, rounds, provider, movementAllowed]
+    private:
+      type: boolean
+  required: [creatorID, maxPlayers, rounds, provider, movementAllowed, private]
 
 Lobby:
   type: object
@@ -43,6 +45,8 @@ Lobby:
       type: integer
     maxPlayers:
       type: integer
+    private:
+      type: boolean
   required:
     [
       id,
@@ -54,6 +58,7 @@ Lobby:
       timerSeconds,
       currentPlayers,
       maxPlayers,
+      private,
     ]
 
 LobbiesResponse:

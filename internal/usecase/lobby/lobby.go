@@ -26,8 +26,15 @@ func (uc Usecase) NewLobby(ctx context.Context, req dto.NewLobbyRequest) (string
 		MovementAllowed: req.MovementAllowed,
 	}
 
-	if err := uc.lobbyRepo.NewLobby(ctx, dbReq); err != nil {
-		return "", fmt.Errorf("failed to create lobby: %w", err)
+	if req.Private {
+		if err := uc.lobbyRepo.NewPrivateLobby(ctx, dbReq); err != nil {
+			return "", fmt.Errorf("failed to create private lobby: %w", err)
+		}
+
+	} else {
+		if err := uc.lobbyRepo.NewLobby(ctx, dbReq); err != nil {
+			return "", fmt.Errorf("failed to create lobby: %w", err)
+		}
 	}
 
 	if err := uc.lobbyRepo.AddLobbyExpiration(ctx, id, uc.conf.LobbyExpiration); err != nil {
@@ -48,18 +55,6 @@ func (uc Usecase) GetLobby(ctx context.Context, id string) (lobby.Lobby, error) 
 	}
 
 	return l, nil
-}
-
-// DeleteLobby removes a lobby from the database.
-func (uc Usecase) DeleteLobby(ctx context.Context, id string) error {
-	ctx, span := uc.tracer.Start(ctx, "DeleteLobby")
-	defer span.End()
-
-	if err := uc.lobbyRepo.DeleteLobby(ctx, id); err != nil {
-		return fmt.Errorf("failed to delete lobby: %w", err)
-	}
-
-	return nil
 }
 
 // GetLobbies lists all currently active lobbies.
