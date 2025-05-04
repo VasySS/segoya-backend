@@ -189,7 +189,7 @@ func (r *Repository) DeleteLobbyExpiration(ctx context.Context, id string) error
 	return nil
 }
 
-// GetLobbies gets all lobbies from the database.
+// GetLobbies gets available lobbies (non-private) from the database using pagination.
 func (r *Repository) GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) ([]lobby.Lobby, int, error) {
 	ctx, span := r.tracer.Start(ctx, "Lobbies")
 	defer span.End()
@@ -204,9 +204,6 @@ func (r *Repository) GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) 
 		Stop(int64(end)).
 		Build()
 
-	totalCmd := r.valkey.B().Zcard().Key(lobbiesPrefix).Build()
-	total, _ := r.valkey.Do(ctx, totalCmd).AsInt64()
-
 	lobbyIDs, err := r.valkey.Do(ctx, zrevrangeCmd).AsStrSlice()
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get lobby IDs: %w", err)
@@ -217,15 +214,15 @@ func (r *Repository) GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) 
 	}
 
 	// Pipeline HGETALL commands for all paginated lobbies
-	cmds := make(valkey.Commands, len(lobbyIDs))
+	getLobbyCmds := make(valkey.Commands, len(lobbyIDs))
 	for i, id := range lobbyIDs {
-		cmds[i] = r.valkey.B().Hgetall().Key(lobbyPrefix + id).Build()
+		getLobbyCmds[i] = r.valkey.B().Hgetall().Key(lobbyPrefix + id).Build()
 	}
 
-	results := r.valkey.DoMulti(ctx, cmds...)
-	lobbies := make([]lobby.Lobby, 0, len(results))
+	lobbyResults := r.valkey.DoMulti(ctx, getLobbyCmds...)
+	lobbies := make([]lobby.Lobby, 0, len(lobbyResults))
 
-	for i, result := range results {
+	for i, result := range lobbyResults {
 		resp, err := result.AsStrMap()
 		if err != nil || len(resp) == 0 {
 			slog.Debug("error getting lobby map",
@@ -246,6 +243,9 @@ func (r *Repository) GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) 
 
 		lobbies = append(lobbies, lobby)
 	}
+
+	totalCmd := r.valkey.B().Zcard().Key(lobbiesPrefix).Build()
+	total, _ := r.valkey.Do(ctx, totalCmd).AsInt64()
 
 	return lobbies, int(total), nil
 }
