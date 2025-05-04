@@ -30,7 +30,6 @@ func (uc Usecase) NewLobby(ctx context.Context, req dto.NewLobbyRequest) (string
 		if err := uc.lobbyRepo.NewPrivateLobby(ctx, dbReq); err != nil {
 			return "", fmt.Errorf("failed to create private lobby: %w", err)
 		}
-
 	} else {
 		if err := uc.lobbyRepo.NewLobby(ctx, dbReq); err != nil {
 			return "", fmt.Errorf("failed to create lobby: %w", err)

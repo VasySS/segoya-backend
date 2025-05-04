@@ -74,7 +74,7 @@ func (s *LobbyTestSuite) TestNewLobby() {
 	s.Equal(req.MovementAllowed, l.MovementAllowed)
 	s.Equal(req.MaxPlayers, l.MaxPlayers)
 	s.Equal(0, l.CurrentPlayers)
-	s.Equal(false, l.Private)
+	s.False(l.Private)
 }
 
 func (s *LobbyTestSuite) TestNewPrivateLobby() {
@@ -103,7 +103,7 @@ func (s *LobbyTestSuite) TestNewPrivateLobby() {
 	s.Equal(req.MovementAllowed, l.MovementAllowed)
 	s.Equal(req.MaxPlayers, l.MaxPlayers)
 	s.Equal(0, l.CurrentPlayers)
-	s.Equal(true, l.Private)
+	s.True(l.Private)
 }
 
 func (s *LobbyTestSuite) TestGetLobby() {
@@ -223,7 +223,7 @@ func (s *LobbyTestSuite) TestGetLobbies() {
 		gotLobbyIDs[i] = l.ID
 
 		// all lobbies should be public in pagination
-		s.Equal(false, l.Private)
+		s.False(l.Private)
 	}
 
 	for _, id := range newLobbyIDs {
