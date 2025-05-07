@@ -63,13 +63,13 @@ type Usecase struct {
 	tracer trace.Tracer
 }
 
-// NewUsecase creates and returns a new Usecase instance with the provided dependencies.
+// NewUsecase creates and returns a new singleplayer usecase instance with the provided dependencies.
 //
-// cfg - Configuration settings for the Usecase.
+// cfg - Configuration settings for the usecase.
 //
 // repo - Implementation of the Repository interface for accessing game and round data.
 //
-// pano - Implementation of the PanoramaUsecase interface for handling panoramas and score calculations.
+// pano - Implementation of the PanoramaUsecase interface for working with streetview panoramas.
 func NewUsecase(cfg Config, repo Repository, pano PanoramaUsecase) *Usecase {
 	return &Usecase{
 		cfg:    cfg,

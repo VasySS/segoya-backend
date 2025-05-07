@@ -39,9 +39,9 @@ type Usecase struct {
 	s3     S3Repository
 }
 
-// NewUsecase creates and returns a new Handler instance with the provided dependencies.
+// NewUsecase creates and returns a new user usecase instance with the provided dependencies.
 //
-// cfg - Configuration settings for the Handler.
+// cfg - Configuration settings for the usecase.
 //
 // repo - Implementation of the Repository interface for accessing user data.
 //

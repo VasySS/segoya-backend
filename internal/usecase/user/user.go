@@ -12,7 +12,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-// GetPrivateProfile returns user's private profile.
+// GetPrivateProfile returns user's own profile.
 func (uc Usecase) GetPrivateProfile(ctx context.Context, userID int) (user.PrivateProfile, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetPrivateProfile")
 	defer span.End()
@@ -94,7 +94,7 @@ func (uc Usecase) UpdateAvatar(ctx context.Context, req dto.UpdateAvatarRequest)
 	return nil
 }
 
-// UpdateUser updates user info.
+// UpdateUser updates user information.
 func (uc Usecase) UpdateUser(ctx context.Context, req dto.UpdateUserRequest) error {
 	ctx, span := uc.tracer.Start(ctx, "UpdateUser")
 	defer span.End()
