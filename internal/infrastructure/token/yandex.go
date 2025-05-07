@@ -14,7 +14,7 @@ import (
 )
 
 // ErrYandexNotAvailable is returned when Yandex OAuth provider is not available.
-var ErrYandexNotAvailable = errors.New("yandex is not available")
+var ErrYandexNotAvailable = errors.New("yandex oauth is not available")
 
 // ExchangeYandexCodeForID exchanges code from OAuth callback and gets a user's id in Yandex.
 func (s *Service) ExchangeYandexCodeForID(ctx context.Context, config oauth2.Config, code string) (string, error) {

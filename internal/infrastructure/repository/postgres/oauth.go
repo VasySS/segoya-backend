@@ -13,7 +13,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-// NewOAuth creates new oauth connection for user.
+// NewOAuth creates new OAuth connection for the user.
 func (r *Repository) NewOAuth(ctx context.Context, req dto.NewOAuthRequestDB) error {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -44,7 +44,7 @@ func (r *Repository) NewOAuth(ctx context.Context, req dto.NewOAuthRequestDB) er
 	return nil
 }
 
-// GetOAuth returns all oauth connections for user.
+// GetOAuth returns all OAuth connections for user.
 func (r *Repository) GetOAuth(ctx context.Context, userID int) ([]user.OAuth, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -67,7 +67,7 @@ func (r *Repository) GetOAuth(ctx context.Context, userID int) ([]user.OAuth, er
 	return providers, nil
 }
 
-// DeleteOAuth deletes oauth connection for user.
+// DeleteOAuth deletes OAuth connection for user.
 func (r *Repository) DeleteOAuth(ctx context.Context, req dto.DeleteOAuthRequest) error {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -90,7 +90,7 @@ func (r *Repository) DeleteOAuth(ctx context.Context, req dto.DeleteOAuthRequest
 	return nil
 }
 
-// GetUserByOAuth returns user by oauth id.
+// GetUserByOAuth returns user by OAuth id.
 func (r *Repository) GetUserByOAuth(
 	ctx context.Context,
 	req dto.GetUserByOAuthRequest,

@@ -213,7 +213,7 @@ func (r *Repository) DeleteLobby(ctx context.Context, id string) error {
 	return nil
 }
 
-// AddLobbyExpiration sets expiration for the lobby (to remove empty lobbies).
+// AddLobbyExpiration sets expiration for the lobby.
 func (r *Repository) AddLobbyExpiration(ctx context.Context, id string, ttl time.Duration) error {
 	ctx, span := r.tracer.Start(ctx, "AddLobbyExpiration")
 	defer span.End()
@@ -232,7 +232,7 @@ func (r *Repository) AddLobbyExpiration(ctx context.Context, id string, ttl time
 	return nil
 }
 
-// DeleteLobbyExpiration deletes expiration for the lobby (when someone connects to empty lobby).
+// DeleteLobbyExpiration deletes expiration for the lobby.
 func (r *Repository) DeleteLobbyExpiration(ctx context.Context, id string) error {
 	ctx, span := r.tracer.Start(ctx, "DeleteLobbyExpiration")
 	defer span.End()

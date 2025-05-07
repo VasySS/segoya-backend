@@ -12,7 +12,7 @@ const (
 	oauthPrefix = "oauthState:"
 )
 
-// NewOAuthState stores oauth state and user id that is associated with it for later checks in callback.
+// NewOAuthState stores OAuth state and user id that is associated with it for later usage in a callback.
 func (r *Repository) NewOAuthState(ctx context.Context, req dto.NewOAuthRequest) error {
 	ctx, span := r.tracer.Start(ctx, "NewOAuthState")
 	defer span.End()
@@ -27,7 +27,7 @@ func (r *Repository) NewOAuthState(ctx context.Context, req dto.NewOAuthRequest)
 	return nil
 }
 
-// GetOAuthUserID returns user id associated with oauth state.
+// GetOAuthUserID returns user id associated with OAuth state.
 func (r *Repository) GetOAuthUserID(ctx context.Context, state string) (int, error) {
 	ctx, span := r.tracer.Start(ctx, "GetOAuthUserID")
 	defer span.End()

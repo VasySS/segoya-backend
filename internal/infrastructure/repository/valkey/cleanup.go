@@ -23,8 +23,7 @@ func (r *Repository) StartPeriodicCleanup(ctx context.Context, interval time.Dur
 			case <-ticker.C:
 				slog.Debug("cleaning up orphaned lobbies...")
 
-				err := r.cleanupLobbiesSortedSet(ctx)
-				if err != nil {
+				if err := r.cleanupLobbiesSortedSet(ctx); err != nil {
 					slog.Error("failed to cleanup orphaned lobbies", "error", err)
 				}
 
@@ -70,7 +69,7 @@ func (r *Repository) cleanupLobbiesSortedSet(ctx context.Context) error {
 
 	// 4. Batch remove from sorted set (if any orphans are found)
 	if len(toRemove) > 0 {
-		slog.Debug("found orphaned lobbies", "count", len(toRemove))
+		slog.Debug("found orphaned lobbies, deleting", "count", len(toRemove))
 
 		cmd := r.valkey.B().Zrem().Key(lobbiesPrefix).Member(toRemove...).Build()
 

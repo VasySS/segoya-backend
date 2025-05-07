@@ -76,7 +76,7 @@ func (r *Repository) GetUserByUsername(ctx context.Context, username string) (us
 	return u, nil
 }
 
-// GetUserByID returns user's profile by id.
+// GetUserByID returns user's profile by user id.
 func (r *Repository) GetUserByID(ctx context.Context, userID int) (user.PrivateProfile, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 

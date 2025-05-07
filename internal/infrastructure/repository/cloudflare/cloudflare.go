@@ -34,6 +34,8 @@ func New(
 				"",
 			),
 		),
+		// Client version 1.73.0 introduced a modification to the default checksum behavior from the client
+		// that is currently incompatible with R2 APIs. (https://developers.cloudflare.com/r2/examples/aws/aws-sdk-go/)
 		config.WithRequestChecksumCalculation(0),
 		config.WithResponseChecksumValidation(0),
 	)

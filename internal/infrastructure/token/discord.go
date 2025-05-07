@@ -10,7 +10,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// ErrDiscordNoSubject is returned when there is no subject in the Discord token.
+// ErrDiscordNoSubject is returned when there is no subject field in the Discord token.
 var ErrDiscordNoSubject = errors.New("failed to get subject from token")
 
 // ExchangeDiscordCodeForID exchanges code from OAuth callback and gets a user's id in Discord.

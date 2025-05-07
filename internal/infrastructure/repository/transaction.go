@@ -3,7 +3,7 @@ package repository
 
 import "context"
 
-// TxFunc is a function, inside of which the transaction is executed.
+// TxFunc is a wrapper function, inside of which the transaction is executed.
 type TxFunc func(context.Context) error
 
 // TxManager is a transaction manager for repository.

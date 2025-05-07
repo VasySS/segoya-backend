@@ -4,7 +4,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/config"
 )
 
-// Config is a Cloudflare repository configuration.
+// Config contains configuration for Cloudflare R2 repository.
 type Config struct {
 	accessKey        string
 	secretKey        string
@@ -12,7 +12,7 @@ type Config struct {
 	avatarBucketName string
 }
 
-// NewConfig returns a new Cloudflare repository configuration from general config.
+// NewConfig returns a new local configuration for Cloudflare R2 repository from general config.
 func NewConfig(conf config.Config) Config {
 	return Config{
 		accessKey:        conf.ENV.Cloudflare.BucketsAccessKey,

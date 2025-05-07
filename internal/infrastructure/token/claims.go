@@ -6,7 +6,7 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
-// Type is a type of token (access or refresh).
+// Type is a type of JWT token (access or refresh).
 type Type string
 
 const (

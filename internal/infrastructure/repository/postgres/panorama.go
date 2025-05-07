@@ -38,7 +38,7 @@ func (r *Repository) RandomGoogleStreetview(ctx context.Context) (game.GoogleStr
 	return stv, nil
 }
 
-// GetGoogleStreetview gets a Google streetview by id from the database.
+// GetGoogleStreetview gets a Google streetview by its id from the database.
 func (r *Repository) GetGoogleStreetview(ctx context.Context, id int) (game.GoogleStreetview, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -93,7 +93,7 @@ func (r *Repository) RandomYandexAirview(ctx context.Context) (game.YandexAirvie
 	return airv, nil
 }
 
-// GetYandexAirview gets a Yandex air view by id from the database.
+// GetYandexAirview gets a Yandex air view by its id from the database.
 func (r *Repository) GetYandexAirview(ctx context.Context, id int) (game.YandexAirview, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -148,7 +148,7 @@ func (r *Repository) RandomYandexStreetview(ctx context.Context) (game.YandexStr
 	return stv, nil
 }
 
-// GetYandexStreetview gets a Yandex streetview by id from the database.
+// GetYandexStreetview gets a Yandex streetview by its id from the database.
 func (r *Repository) GetYandexStreetview(ctx context.Context, id int) (game.YandexStreetview, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -202,7 +202,7 @@ func (r *Repository) RandomSeznamStreetview(ctx context.Context) (game.SeznamStr
 	return stv, nil
 }
 
-// GetSeznamStreetview gets a Seznam streetview by id from the database.
+// GetSeznamStreetview gets a Seznam streetview by its id from the database.
 func (r *Repository) GetSeznamStreetview(ctx context.Context, id int) (game.SeznamStreetview, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 

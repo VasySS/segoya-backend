@@ -63,7 +63,7 @@ func (r *Repository) NewSingleplayerGame(
 	return gameID, nil
 }
 
-// GetSingleplayerGame returns singleplayer game by id.
+// GetSingleplayerGame returns singleplayer game by its id.
 func (r *Repository) GetSingleplayerGame(ctx context.Context, gameID int) (singleplayer.Game, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -168,7 +168,7 @@ func (r *Repository) GetSingleplayerGames(
 	return games, totalGames, nil
 }
 
-// EndSingleplayerGame finishes singleplayer game.
+// EndSingleplayerGame end the singleplayer game.
 func (r *Repository) EndSingleplayerGame(ctx context.Context, req dto.EndSingleplayerGameRequestDB) error {
 	tx := r.txManager.GetQueryEngine(ctx)
 

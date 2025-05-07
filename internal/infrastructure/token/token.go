@@ -3,7 +3,6 @@ package token
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -16,8 +15,6 @@ import (
 )
 
 var (
-	// ErrNoPrivateClaims is returned when there are no private claims in the token.
-	ErrNoPrivateClaims = errors.New("no private claims in token")
 	// SignatureMethod is a default signature method used to sign tokens.
 	//nolint:gochecknoglobals
 	SignatureMethod = jwa.HS256()

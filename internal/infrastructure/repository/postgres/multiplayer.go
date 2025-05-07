@@ -12,7 +12,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-// LockMultiplayerGame locks a multiplayer game exclusively.
+// LockMultiplayerGame locks a multiplayer game by id exclusively.
 func (r *Repository) LockMultiplayerGame(ctx context.Context, gameID int) error {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -30,7 +30,7 @@ func (r *Repository) LockMultiplayerGame(ctx context.Context, gameID int) error 
 	return nil
 }
 
-// NewMultiplayerGame creates a new multiplayer game and returns its ID.
+// NewMultiplayerGame creates a new multiplayer game and returns its id.
 func (r *Repository) NewMultiplayerGame(
 	ctx context.Context,
 	req dto.NewMultiplayerGameRequest,
@@ -81,7 +81,7 @@ func (r *Repository) NewMultiplayerGame(
 	return gameID, nil
 }
 
-// GetMultiplayerGame returns a multiplayer game by its ID.
+// GetMultiplayerGame returns a multiplayer game by its id.
 func (r *Repository) GetMultiplayerGame(ctx context.Context, gameID int) (multiplayer.Game, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -146,7 +146,7 @@ func (r *Repository) EndMultiplayerGame(ctx context.Context, req dto.EndMultipla
 	return nil
 }
 
-// GetMultiplayerGameUser returns a multiplayer game user by its ID.
+// GetMultiplayerGameUser returns a multiplayer game user information by using game id and user id.
 func (r *Repository) GetMultiplayerGameUser(ctx context.Context, userID, gameID int) (user.MultiplayerUser, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -183,7 +183,7 @@ func (r *Repository) GetMultiplayerGameUser(ctx context.Context, userID, gameID 
 	return u, nil
 }
 
-// GetMultiplayerGameUsers returns a list of multiplayer game users.
+// GetMultiplayerGameUsers returns a list of multiplayer game users information.
 func (r *Repository) GetMultiplayerGameUsers(ctx context.Context, gameID int) ([]user.MultiplayerUser, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -219,7 +219,7 @@ func (r *Repository) GetMultiplayerGameUsers(ctx context.Context, gameID int) ([
 	return users, nil
 }
 
-// GetMultiplayerGameGuesses returns a list of all multiplayer game guesses.
+// GetMultiplayerGameGuesses returns a list of all multiplayer game guesses by game id.
 func (r *Repository) GetMultiplayerGameGuesses(ctx context.Context, gameID int) ([]multiplayer.Guess, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
