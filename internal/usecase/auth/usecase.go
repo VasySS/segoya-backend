@@ -14,7 +14,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-// UserRepository defines methods for interacting with user data in the storage layer.
+// UserRepository defines methods for retrieving user data from the repository layer.
 //
 //go:generate go tool mockery --name=UserRepository
 type UserRepository interface {
@@ -26,7 +26,7 @@ type UserRepository interface {
 	GetUserByOAuth(ctx context.Context, req dto.GetUserByOAuthRequest) (user.PrivateProfile, error)
 }
 
-// SessionRepository defines methods for interacting with user sessions in the storage layer.
+// SessionRepository defines methods for managing user sessions in the repository layer.
 //
 //go:generate go tool mockery --name=SessionRepository
 type SessionRepository interface {
@@ -39,7 +39,7 @@ type SessionRepository interface {
 	GetOAuthUserID(ctx context.Context, state string) (int, error)
 }
 
-// CryptoService defines methods for cryptographic operations such as password hashing and UUID generation.
+// CryptoService defines methods for working with cryptographic operations.
 //
 //go:generate go tool mockery --name=CryptoService
 type CryptoService interface {
@@ -48,7 +48,7 @@ type CryptoService interface {
 	GenerateHashFromPassword(password string) (string, error)
 }
 
-// TokenService defines methods for generating and parsing access and refresh tokens.
+// TokenService defines methods for working with JWT tokens.
 //
 //go:generate go tool mockery --name=TokenService
 type TokenService interface {
@@ -60,7 +60,7 @@ type TokenService interface {
 	ExchangeYandexCodeForID(ctx context.Context, config oauth2.Config, code string) (string, error)
 }
 
-// Usecase contains authentication business logic and dependencies.
+// Usecase contains authentication business logic and its dependencies.
 type Usecase struct {
 	conf          Config
 	cryptoService CryptoService
@@ -70,15 +70,15 @@ type Usecase struct {
 	tracer        trace.Tracer
 }
 
-// NewUsecase creates and returns a new instance of Usecase with the provided dependencies.
+// NewUsecase creates and returns a new instance of auth usecase with the provided dependencies.
 //
-// conf - Configuration settings for the Usecase.
+// conf - Configuration settings for the usecase.
 //
 // rnd - Instance of CryptoService for cryptographic operations.
 //
-// tokenService - Instance of TokenService for handling tokens.
+// tokenService - Instance of TokenService for JWT tokens handling.
 //
-// userRepo - Instance of UserRepository for interacting with user data.
+// userRepo - Instance of UserRepository for working with user data.
 //
 // sessionRepo - Instance of SessionRepository for managing user sessions.
 func NewUsecase(

@@ -9,7 +9,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-// ConnectLobbyUser handles a user joining a lobby (called from the websocket).
+// ConnectLobbyUser handles a user joining a lobby (called from the websocket) and updates the lobby's state.
 func (uc Usecase) ConnectLobbyUser(
 	ctx context.Context,
 	lobbyID string,
@@ -20,6 +20,7 @@ func (uc Usecase) ConnectLobbyUser(
 
 	lobbyRepo, err := uc.lobbyRepo.GetLobby(ctx, lobbyID)
 	if err != nil {
+		span.RecordError(err)
 		return user.PublicProfile{}, fmt.Errorf("error getting lobby: %w", err)
 	}
 
@@ -28,22 +29,25 @@ func (uc Usecase) ConnectLobbyUser(
 	}
 
 	if err := uc.lobbyRepo.IncrementLobbyPlayers(ctx, lobbyID); err != nil {
+		span.RecordError(err)
 		return user.PublicProfile{}, fmt.Errorf("error incrementing current players: %w", err)
 	}
 
 	if err := uc.lobbyRepo.DeleteLobbyExpiration(ctx, lobbyID); err != nil {
+		span.RecordError(err)
 		return user.PublicProfile{}, fmt.Errorf("error deleting lobby expiration: %w", err)
 	}
 
 	userRepo, err := uc.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
+		span.RecordError(err)
 		return user.PublicProfile{}, fmt.Errorf("error getting user profile: %w", err)
 	}
 
 	return userRepo.ToPublicProfile(), nil
 }
 
-// DisconnectLobbyUser handles a user leaving a lobby (called from the websocket).
+// DisconnectLobbyUser handles a user leaving a lobby (called from the websocket) and updates the lobby's state.
 func (uc Usecase) DisconnectLobbyUser(
 	ctx context.Context,
 	lobbyID string,
@@ -54,24 +58,27 @@ func (uc Usecase) DisconnectLobbyUser(
 
 	lobbyRepo, err := uc.lobbyRepo.GetLobby(ctx, lobbyID)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("error getting lobby from db: %w", err)
 	}
 
-	// delete lobby if it is empty for some time
+	// set the lobby expiration timer if the leaving user is the last one
 	if lobbyRepo.CurrentPlayers == 1 {
 		if err := uc.lobbyRepo.AddLobbyExpiration(ctx, lobbyID, uc.conf.LobbyExpiration); err != nil {
+			span.RecordError(err)
 			return fmt.Errorf("error deleting lobby: %w", err)
 		}
 	}
 
 	if err := uc.lobbyRepo.DecrementLobbyPlayers(ctx, lobbyID); err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("error decrementing current players: %w", err)
 	}
 
 	return nil
 }
 
-// StartLobbyGame initiates a multiplayer game from a lobby (called from the websocket).
+// StartLobbyGame starts a new multiplayer game from a lobby (called from the websocket by the lobby creator).
 func (uc Usecase) StartLobbyGame(
 	ctx context.Context,
 	req dto.StartLobbyGameRequest,
@@ -81,6 +88,7 @@ func (uc Usecase) StartLobbyGame(
 
 	lobbyRepo, err := uc.lobbyRepo.GetLobby(ctx, req.LobbyID)
 	if err != nil {
+		span.RecordError(err)
 		return 0, fmt.Errorf("failed to get lobby from db: %w", err)
 	}
 
@@ -98,17 +106,19 @@ func (uc Usecase) StartLobbyGame(
 		Provider:         lobbyRepo.Provider,
 	})
 	if err != nil {
+		span.RecordError(err)
 		return 0, fmt.Errorf("error starting game: %w", err)
 	}
 
 	if err := uc.lobbyRepo.DeleteLobby(ctx, req.LobbyID); err != nil {
+		span.RecordError(err)
 		return 0, fmt.Errorf("failed to delete lobby: %w", err)
 	}
 
 	return gameID, nil
 }
 
-// UpdateLobbySettings updates the settings of a lobby.
+// UpdateLobbySettings updates the settings of a lobby (called from the websocket by the lobby creator).
 func (uc Usecase) UpdateLobbySettings(
 	ctx context.Context,
 	req dto.UpdateLobbySettingsRequest,
@@ -118,6 +128,7 @@ func (uc Usecase) UpdateLobbySettings(
 
 	lobbyInfo, err := uc.lobbyRepo.GetLobby(ctx, req.LobbyID)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("error getting lobby from db: %w", err)
 	}
 
@@ -142,6 +153,7 @@ func (uc Usecase) UpdateLobbySettings(
 	}
 
 	if err := uc.lobbyRepo.UpdateLobby(ctx, lobbyInfo); err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("error updating lobby settings: %w", err)
 	}
 

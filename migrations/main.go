@@ -36,7 +36,7 @@ Example: migrate up`
 Commands:
 	up                  Migrate the DB to the most recent version available
 	up-to VERSION       Migrate the DB to a specific VERSION
-	up-with-data        Migrate the DB to the most recent version available with data migrations
+	up-with-data        Migrate the DB to the most recent version available and apply data migrations
 	data-only           Run only data migrations
 	down                Roll back the version by 1
 	down-to VERSION     Roll back to the specified VERSION
@@ -72,7 +72,11 @@ func main() {
 	}
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s",
-		parsedENV.PostgresUser, parsedENV.PostgresPassword, parsedENV.PostgresHost, parsedENV.PostgresDatabase)
+		parsedENV.PostgresUser,
+		parsedENV.PostgresPassword,
+		parsedENV.PostgresHost,
+		parsedENV.PostgresDatabase,
+	)
 
 	pool, err := pgxpool.New(ctx, connStr)
 	if err != nil {

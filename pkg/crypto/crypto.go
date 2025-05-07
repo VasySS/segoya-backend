@@ -1,7 +1,7 @@
 // Package crypto contains methods for working with UUIDs, random strings, etc.
 package crypto
 
-// Service is a crypto service for working with UUIDs, random strings, etc.
+// Service is a crypto service that provides methods for working with UUIDs, random strings, etc.
 type Service struct{}
 
 // NewService creates new crypto service.

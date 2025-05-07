@@ -12,7 +12,7 @@ type Config struct {
 	RoundStartDelay time.Duration
 }
 
-// NewConfig returns a new local config from general config.
+// NewConfig returns a new local singleplayer config from general config.
 func NewConfig(cfg config.Config) Config {
 	return Config{
 		RoundStartDelay: cfg.Limits.RoundStartDelay,

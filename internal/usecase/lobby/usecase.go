@@ -32,28 +32,28 @@ type Repository interface {
 	DeleteLobbyExpiration(ctx context.Context, id string) error
 }
 
-// UserRepository provides access to user data.
+// UserRepository defines methods for retrieving user data from the repository layer.
 //
 //go:generate go tool mockery --name=UserRepository
 type UserRepository interface {
 	GetUserByID(ctx context.Context, id int) (user.PrivateProfile, error)
 }
 
-// MultiplayerUsecase provides method for creating multiplayer games.
+// MultiplayerUsecase defines methods for managing multiplayer games.
 //
 //go:generate go tool mockery --name=MultiplayerUsecase
 type MultiplayerUsecase interface {
 	NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest) (int, error)
 }
 
-// RandomGenerator provides cryptographically secure random string generation.
+// RandomGenerator provides methods for working with random strings.
 //
 //go:generate go tool mockery --name=RandomGenerator
 type RandomGenerator interface {
 	NewRandomHexString(length int) string
 }
 
-// Usecase contains business logic for lobby management.
+// Usecase contains lobby management business logic and its dependencies.
 type Usecase struct {
 	conf      Config
 	rnd       RandomGenerator
@@ -63,9 +63,9 @@ type Usecase struct {
 	tracer    trace.Tracer
 }
 
-// NewUsecase creates and returns a new instance of Usecase with the provided dependencies.
+// NewUsecase creates and returns a new instance of lobby usecase with the provided dependencies.
 //
-// conf - Configuration settings for the Usecase.
+// conf - Configuration settings for the usecase.
 //
 // rnd - Instance of RandomGenerator for generating random strings.
 //

@@ -29,7 +29,7 @@ func (uc Usecase) NewStreetview(
 	}
 }
 
-// GetStreetview returns a streetview by ID for provided panorama provider.
+// GetStreetview returns a streetview by id for provided panorama provider.
 func (uc Usecase) GetStreetview(
 	ctx context.Context,
 	provider game.PanoramaProvider,

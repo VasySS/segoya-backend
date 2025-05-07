@@ -17,7 +17,7 @@ type Config struct {
 	RefreshTokenTTL time.Duration
 }
 
-// NewConfig returns a new local config from general config.
+// NewConfig returns a new local auth config from general config.
 func NewConfig(conf config.Config) Config {
 	return Config{
 		DiscordLogin:    conf.OAuth.DiscordLogin,

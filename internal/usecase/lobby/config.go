@@ -6,7 +6,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/config"
 )
 
-// Config contains lobby configuration.
+// Config contains configuration for lobby usecase.
 type Config struct {
 	LobbyExpiration time.Duration
 	LobbyIDLength   int

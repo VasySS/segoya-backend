@@ -8,13 +8,13 @@ import (
 
 // Config contains configuration for multiplayer usecase.
 type Config struct {
-	// Initial delay before round starts on frontend (to allow panorama to load).
+	// Initial delay before round starts on the frontend side (to allow panorama to load).
 	RoundStartDelay time.Duration
-	// Delay after round has ended to start a new round (to allow users to see results).
+	// Delay after round has ended, to allow users to see results on the frontend side.
 	RoundEndDelay time.Duration
 }
 
-// NewConfig returns a new local config from general config.
+// NewConfig returns a new local multiplayer config from general config.
 func NewConfig(cfg config.Config) Config {
 	return Config{
 		RoundStartDelay: cfg.Limits.RoundStartDelay,

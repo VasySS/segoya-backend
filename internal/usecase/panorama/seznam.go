@@ -7,7 +7,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
-// NewSeznamStreetview gets a random streetview from the database.
+// NewSeznamStreetview gets a random Seznam streetview from the database.
 func (uc Usecase) NewSeznamStreetview(ctx context.Context) (game.PanoramaMetadata, error) {
 	ctx, span := uc.tracer.Start(ctx, "NewSeznamStreetView")
 	defer span.End()
@@ -25,7 +25,7 @@ func (uc Usecase) NewSeznamStreetview(ctx context.Context) (game.PanoramaMetadat
 	}, nil
 }
 
-// GetSeznamStreetview gets a streetview by ID from the database.
+// GetSeznamStreetview gets a Seznam streetview from the database by its id.
 func (uc Usecase) GetSeznamStreetview(ctx context.Context, id int) (game.PanoramaMetadata, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetSeznamStreetview")
 	defer span.End()

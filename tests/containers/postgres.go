@@ -33,7 +33,7 @@ func NewPostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 
 	connString, err := postgresContainer.ConnectionString(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get valkey connection string: %w", err)
+		return nil, fmt.Errorf("failed to get postgres connection string: %w", err)
 	}
 
 	return &PostgresContainer{

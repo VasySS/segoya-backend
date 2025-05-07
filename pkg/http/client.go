@@ -12,8 +12,8 @@ import (
 	"golang.org/x/net/proxy"
 )
 
-// ErrWrongCredentials is returned when the credentials for proxy are wrong.
-var ErrWrongCredentials = errors.New("wrong credentials")
+// ErrWrongCredentials is returned when the credentials provided for a proxy are wrong.
+var ErrWrongCredentials = errors.New("wrong credentials provided for proxy")
 
 // NewClient creates a new http client.
 func NewClient() *http.Client {
@@ -22,7 +22,7 @@ func NewClient() *http.Client {
 	}
 }
 
-// NewClientWithSOCKS5 creates a new http client with a proxy.
+// NewClientWithSOCKS5 creates a new http client with a SOCKS5 proxy connection.
 func NewClientWithSOCKS5(address, login, password string) (*http.Client, error) {
 	if address == "" || login == "" || password == "" {
 		return nil, ErrWrongCredentials
@@ -35,7 +35,7 @@ func NewClientWithSOCKS5(address, login, password string) (*http.Client, error) 
 
 	dialer, err := proxy.SOCKS5("tcp", address, proxyAuth, proxy.Direct)
 	if err != nil {
-		return nil, fmt.Errorf("error creating proxy dialer: %w", err)
+		return nil, fmt.Errorf("error creating socks5 proxy dialer: %w", err)
 	}
 
 	return &http.Client{

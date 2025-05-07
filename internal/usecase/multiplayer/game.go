@@ -9,7 +9,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-// NewGame initializes a new multiplayer game and starts the first round.
+// NewGame creates a new multiplayer game and the first round for it, returns the game id.
 func (uc Usecase) NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest) (int, error) {
 	ctx, span := uc.tracer.Start(ctx, "NewGame")
 	defer span.End()
@@ -43,7 +43,7 @@ func (uc Usecase) NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest
 	return response, nil
 }
 
-// GetGame returns a multiplayer game by ID.
+// GetGame returns a multiplayer game by its id.
 func (uc Usecase) GetGame(ctx context.Context, gameID, userID int) (multiplayer.Game, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGame")
 	defer span.End()
@@ -118,7 +118,7 @@ func (uc Usecase) GetGameGuesses(ctx context.Context, req dto.GetGameGuessesRequ
 	return response, nil
 }
 
-// GetGameUsers returns all users info in a game (including those, who left).
+// GetGameUsers returns all users from a multiplayer game (including those, who left after the start of the game).
 func (uc Usecase) GetGameUsers(ctx context.Context, gameID int) ([]user.MultiplayerUser, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGameUsers")
 	defer span.End()
@@ -132,7 +132,7 @@ func (uc Usecase) GetGameUsers(ctx context.Context, gameID int) ([]user.Multipla
 	return users, nil
 }
 
-// GetGameUser returns a user info in a game.
+// GetGameUser returns a user information in a multiplayer game.
 func (uc Usecase) GetGameUser(ctx context.Context, userID, gameID int) (user.MultiplayerUser, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGameUser")
 	defer span.End()

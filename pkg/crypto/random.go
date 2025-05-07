@@ -11,7 +11,7 @@ import (
 
 func newRandomBytesArray(length int) []byte {
 	b := make([]byte, length)
-	_, _ = rand.Read(b)
+	_, _ = rand.Read(b) // never returns an error
 
 	return b
 }

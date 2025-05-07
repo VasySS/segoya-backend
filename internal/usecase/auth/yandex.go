@@ -8,31 +8,35 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-// NewYandex saves state and userID associated with it in db.
+// NewYandex begins a process of connecting a Yandex account to a user.
+// It saves OAuth state and userID associated with it in db for later use in NewYandexCallback.
 func (uc Usecase) NewYandex(ctx context.Context, req dto.NewOAuthRequest) error {
 	ctx, span := uc.tracer.Start(ctx, "NewYandex")
 	defer span.End()
 
 	if err := uc.sessionRepo.NewOAuthState(ctx, req); err != nil {
-		return fmt.Errorf("failed to add oauth info in db: %w", err)
+		span.RecordError(err)
+		return fmt.Errorf("failed to add yandex oauth in db: %w", err)
 	}
 
 	return nil
 }
 
-// NewYandexCallback exchanges code from oauth callback to get oauth id and creates new link in db.
+// NewYandexCallback exchanges the code from Yandex to get OAuth id and creates a new OAuth connection for user in DB.
 func (uc Usecase) NewYandexCallback(ctx context.Context, req dto.NewOAuthCallbackRequest) error {
 	ctx, span := uc.tracer.Start(ctx, "NewYandexCallback")
 	defer span.End()
 
 	userID, err := uc.sessionRepo.GetOAuthUserID(ctx, req.State)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to get user id: %w", err)
 	}
 
 	yandexID, err := uc.tokenService.ExchangeYandexCodeForID(ctx, uc.conf.YandexNew, req.Code)
 	if err != nil {
-		return fmt.Errorf("failed to exchange code: %w", err)
+		span.RecordError(err)
+		return fmt.Errorf("failed to exchange yandex code for id: %w", err)
 	}
 
 	dbReq := dto.NewOAuthRequestDB{
@@ -43,20 +47,22 @@ func (uc Usecase) NewYandexCallback(ctx context.Context, req dto.NewOAuthCallbac
 	}
 
 	if err := uc.userRepo.NewOAuth(ctx, dbReq); err != nil {
-		return fmt.Errorf("failed to add oauth info in db: %w", err)
+		span.RecordError(err)
+		return fmt.Errorf("failed to add yandex oauth in db: %w", err)
 	}
 
 	return nil
 }
 
-// LoginYandexCallback exchanges code from oauth callback for access token and refresh token.
+// LoginYandexCallback exchanges the code from Yandex for application access and refresh tokens.
 func (uc Usecase) LoginYandexCallback(ctx context.Context, req dto.OAuthLoginCallbackRequest) (string, string, error) {
 	ctx, span := uc.tracer.Start(ctx, "LoginYandexCallback")
 	defer span.End()
 
 	yandexID, err := uc.tokenService.ExchangeYandexCodeForID(ctx, uc.conf.YandexLogin, req.Code)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to exchange code for id: %w", err)
+		span.RecordError(err)
+		return "", "", fmt.Errorf("failed to exchange yandex code for id: %w", err)
 	}
 
 	userDB, err := uc.userRepo.GetUserByOAuth(ctx, dto.GetUserByOAuthRequest{
@@ -64,7 +70,8 @@ func (uc Usecase) LoginYandexCallback(ctx context.Context, req dto.OAuthLoginCal
 		Issuer:  user.YandexOAuth,
 	})
 	if err != nil {
-		return "", "", fmt.Errorf("failed to get user: %w", err)
+		span.RecordError(err)
+		return "", "", fmt.Errorf("failed to get user from db: %w", err)
 	}
 
 	sessionID := uc.cryptoService.NewUUID4()
@@ -76,6 +83,7 @@ func (uc Usecase) LoginYandexCallback(ctx context.Context, req dto.OAuthLoginCal
 		Name:      userDB.Name,
 	})
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("failed to create access token: %w", err)
 	}
 
@@ -85,19 +93,21 @@ func (uc Usecase) LoginYandexCallback(ctx context.Context, req dto.OAuthLoginCal
 		Username:  userDB.Username,
 	})
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("failed to create refresh token: %w", err)
 	}
 
 	return accessToken, refreshToken, nil
 }
 
-// DeleteYandex deletes oauth connection for user.
+// DeleteYandex deletes existing Yandex connection for user.
 func (uc Usecase) DeleteYandex(ctx context.Context, req dto.DeleteOAuthRequest) error {
 	ctx, span := uc.tracer.Start(ctx, "DeleteYandex")
 	defer span.End()
 
 	if err := uc.userRepo.DeleteOAuth(ctx, req); err != nil {
-		return fmt.Errorf("failed to delete oauth info in db: %w", err)
+		span.RecordError(err)
+		return fmt.Errorf("failed to delete yandex oauth info from db: %w", err)
 	}
 
 	return nil

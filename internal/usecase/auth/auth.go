@@ -9,17 +9,19 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-// Login authenticates a user and generates new access and refresh tokens.
+// Login authenticates a user and generates a new pair of access and refresh tokens.
 func (uc Usecase) Login(ctx context.Context, req dto.LoginRequest) (string, string, error) {
 	ctx, span := uc.tracer.Start(ctx, "Login")
 	defer span.End()
 
 	userDB, err := uc.userRepo.GetUserByUsername(ctx, req.Username)
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("failed to get user from db: %w", err)
 	}
 
 	if err := uc.cryptoService.CompareHashAndPassword(userDB.Password, req.Password); err != nil {
+		span.RecordError(err)
 		return "", "", user.ErrWrongPassword
 	}
 
@@ -32,6 +34,7 @@ func (uc Usecase) Login(ctx context.Context, req dto.LoginRequest) (string, stri
 		Name:      userDB.Name,
 	})
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error creating access token: %w", err)
 	}
 
@@ -41,6 +44,7 @@ func (uc Usecase) Login(ctx context.Context, req dto.LoginRequest) (string, stri
 		Username:  userDB.Username,
 	})
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error creating refresh token: %w", err)
 	}
 
@@ -52,6 +56,7 @@ func (uc Usecase) Login(ctx context.Context, req dto.LoginRequest) (string, stri
 		UA:           req.UserAgent,
 		Expiration:   uc.conf.RefreshTokenTTL,
 	}); err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error creating user session: %w", err)
 	}
 
@@ -65,11 +70,13 @@ func (uc Usecase) Register(ctx context.Context, req dto.RegisterRequest) error {
 
 	_, err := uc.userRepo.GetUserByUsername(ctx, req.Username)
 	if !errors.Is(err, user.ErrUserNotFound) && err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}
 
 	passwordHash, err := uc.cryptoService.GenerateHashFromPassword(req.Password)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
@@ -79,30 +86,34 @@ func (uc Usecase) Register(ctx context.Context, req dto.RegisterRequest) error {
 		Name:        req.Name,
 		Password:    passwordHash,
 	}); err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to create user in db: %w", err)
 	}
 
 	return nil
 }
 
-// RefreshTokens generates new access and refresh tokens.
-// It checks that a session exists for provided refresh token and updates session expiration.
+// RefreshTokens generates a new pair of access and refresh tokens using a refresh token generated before.
+// It checks that a session still exists for provided refresh token and, if so, updates expiration of the session.
 func (uc Usecase) RefreshTokens(ctx context.Context, req dto.TokensRefreshRequest) (string, string, error) {
 	ctx, span := uc.tracer.Start(ctx, "RefreshTokens")
 	defer span.End()
 
 	tokenClaims, err := uc.tokenService.ParseRefreshToken(req.RefreshToken)
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error parsing refresh token: %w", err)
 	}
 
 	// check that session still exists
 	if _, err := uc.sessionRepo.GetSession(ctx, tokenClaims.UserID, tokenClaims.SessionID); err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error getting user session from db: %w", err)
 	}
 
 	userDB, err := uc.userRepo.GetUserByUsername(ctx, tokenClaims.Username)
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error getting user from db: %w", err)
 	}
 
@@ -113,6 +124,7 @@ func (uc Usecase) RefreshTokens(ctx context.Context, req dto.TokensRefreshReques
 		Name:      userDB.Name,
 	})
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error creating access token: %w", err)
 	}
 
@@ -122,6 +134,7 @@ func (uc Usecase) RefreshTokens(ctx context.Context, req dto.TokensRefreshReques
 		Username:  userDB.Username,
 	})
 	if err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error creating refresh token: %w", err)
 	}
 
@@ -132,19 +145,21 @@ func (uc Usecase) RefreshTokens(ctx context.Context, req dto.TokensRefreshReques
 		RefreshToken: newRefreshToken,
 		Expiration:   uc.conf.RefreshTokenTTL,
 	}); err != nil {
+		span.RecordError(err)
 		return "", "", fmt.Errorf("error refreshing user session: %w", err)
 	}
 
 	return newAccessToken, newRefreshToken, nil
 }
 
-// GetOAuth retrieves all linked OAuth providers for a user.
+// GetOAuth retrieves all connected OAuth providers for a user.
 func (uc Usecase) GetOAuth(ctx context.Context, userID int) ([]user.OAuth, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetOAuth")
 	defer span.End()
 
 	providers, err := uc.userRepo.GetOAuth(ctx, userID)
 	if err != nil {
+		span.RecordError(err)
 		return nil, fmt.Errorf("failed to get oauth info: %w", err)
 	}
 
@@ -158,19 +173,21 @@ func (uc Usecase) GetSessions(ctx context.Context, userID int) ([]user.Session, 
 
 	sessions, err := uc.sessionRepo.GetSessions(ctx, userID)
 	if err != nil {
+		span.RecordError(err)
 		return nil, fmt.Errorf("failed to get user sessions: %w", err)
 	}
 
 	return sessions, nil
 }
 
-// DeleteSession removes a specific authentication session.
+// DeleteSession removes a specific session for a user.
 func (uc Usecase) DeleteSession(ctx context.Context, userID int, sessionID string) error {
 	ctx, span := uc.tracer.Start(ctx, "DeleteSession")
 	defer span.End()
 
 	session, err := uc.sessionRepo.GetSession(ctx, userID, sessionID)
 	if err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to get user session: %w", err)
 	}
 
@@ -179,6 +196,7 @@ func (uc Usecase) DeleteSession(ctx context.Context, userID int, sessionID strin
 	}
 
 	if err := uc.sessionRepo.DeleteSession(ctx, userID, sessionID); err != nil {
+		span.RecordError(err)
 		return fmt.Errorf("failed to delete user session: %w", err)
 	}
 

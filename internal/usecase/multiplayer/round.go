@@ -57,9 +57,10 @@ func (uc Usecase) getOrGenerateRound(
 	requestTime time.Time,
 ) (multiplayer.Round, error) {
 	if existingRound, err := uc.repo.GetMultiplayerRound(ctx, game.ID, game.RoundCurrent); err == nil {
-		newRoundDelayEnd := existingRound.EndedAt.Add(uc.cfg.RoundEndDelay)
+		roundEndDelay := existingRound.EndedAt.Add(uc.cfg.RoundEndDelay)
 
-		if !existingRound.Finished || requestTime.Before(newRoundDelayEnd) {
+		// only return the existing round if it's not finished or if the round end delay didn't pass yet
+		if !existingRound.Finished || requestTime.Before(roundEndDelay) {
 			return existingRound, nil
 		}
 	} else if !errors.Is(err, multiplayer.ErrRoundNotFound) {
@@ -91,7 +92,7 @@ func (uc Usecase) getOrGenerateRound(
 	return round, nil
 }
 
-// GetRound returns current multiplayer game round by game ID.
+// GetRound returns current multiplayer game's round by game id.
 func (uc Usecase) GetRound(
 	ctx context.Context,
 	req dto.GetMultiplayerRoundRequest,

@@ -8,7 +8,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
-// NewGame initializes a new singleplayer game and starts the first round.
+// NewGame creates a new singleplayer game and the first round for it, returns the game id.
 func (uc Usecase) NewGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (int, error) {
 	ctx, span := uc.tracer.Start(ctx, "NewGame")
 	defer span.End()
@@ -42,7 +42,7 @@ func (uc Usecase) NewGame(ctx context.Context, req dto.NewSingleplayerGameReques
 	return response, nil
 }
 
-// GetGame returns a singleplayer game by ID.
+// GetGame returns a singleplayer game by its ID.
 func (uc Usecase) GetGame(ctx context.Context, req dto.GetSingleplayerGameRequest) (singleplayer.Game, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGame")
 	defer span.End()
