@@ -376,6 +376,30 @@ type GetSingleplayerGameForbidden Error
 
 func (*GetSingleplayerGameForbidden) getSingleplayerGameRes() {}
 
+type GetSingleplayerGameGuessesBadRequest Error
+
+func (*GetSingleplayerGameGuessesBadRequest) getSingleplayerGameGuessesRes() {}
+
+type GetSingleplayerGameGuessesForbidden Error
+
+func (*GetSingleplayerGameGuessesForbidden) getSingleplayerGameGuessesRes() {}
+
+type GetSingleplayerGameGuessesInternalServerError Error
+
+func (*GetSingleplayerGameGuessesInternalServerError) getSingleplayerGameGuessesRes() {}
+
+type GetSingleplayerGameGuessesNotFound Error
+
+func (*GetSingleplayerGameGuessesNotFound) getSingleplayerGameGuessesRes() {}
+
+type GetSingleplayerGameGuessesOKApplicationJSON []SingleplayerGuess
+
+func (*GetSingleplayerGameGuessesOKApplicationJSON) getSingleplayerGameGuessesRes() {}
+
+type GetSingleplayerGameGuessesUnauthorized Error
+
+func (*GetSingleplayerGameGuessesUnauthorized) getSingleplayerGameGuessesRes() {}
+
 type GetSingleplayerGameInternalServerError Error
 
 func (*GetSingleplayerGameInternalServerError) getSingleplayerGameRes() {}
@@ -383,30 +407,6 @@ func (*GetSingleplayerGameInternalServerError) getSingleplayerGameRes() {}
 type GetSingleplayerGameNotFound Error
 
 func (*GetSingleplayerGameNotFound) getSingleplayerGameRes() {}
-
-type GetSingleplayerGameRoundsBadRequest Error
-
-func (*GetSingleplayerGameRoundsBadRequest) getSingleplayerGameRoundsRes() {}
-
-type GetSingleplayerGameRoundsForbidden Error
-
-func (*GetSingleplayerGameRoundsForbidden) getSingleplayerGameRoundsRes() {}
-
-type GetSingleplayerGameRoundsInternalServerError Error
-
-func (*GetSingleplayerGameRoundsInternalServerError) getSingleplayerGameRoundsRes() {}
-
-type GetSingleplayerGameRoundsNotFound Error
-
-func (*GetSingleplayerGameRoundsNotFound) getSingleplayerGameRoundsRes() {}
-
-type GetSingleplayerGameRoundsOKApplicationJSON []SingleplayerRoundsWithGuess
-
-func (*GetSingleplayerGameRoundsOKApplicationJSON) getSingleplayerGameRoundsRes() {}
-
-type GetSingleplayerGameRoundsUnauthorized Error
-
-func (*GetSingleplayerGameRoundsUnauthorized) getSingleplayerGameRoundsRes() {}
 
 type GetSingleplayerGameUnauthorized Error
 
@@ -1721,6 +1721,87 @@ func (s *SingleplayerGames) SetGames(val []SingleplayerGame) {
 
 func (*SingleplayerGames) getSingleplayerGamesRes() {}
 
+// Ref: #/SingleplayerGuess
+type SingleplayerGuess struct {
+	RoundNum     int     `json:"roundNum"`
+	RoundLat     float64 `json:"roundLat"`
+	RoundLng     float64 `json:"roundLng"`
+	GuessLat     float64 `json:"guessLat"`
+	GuessLng     float64 `json:"guessLng"`
+	Score        int     `json:"score"`
+	MissDistance int     `json:"missDistance"`
+}
+
+// GetRoundNum returns the value of RoundNum.
+func (s *SingleplayerGuess) GetRoundNum() int {
+	return s.RoundNum
+}
+
+// GetRoundLat returns the value of RoundLat.
+func (s *SingleplayerGuess) GetRoundLat() float64 {
+	return s.RoundLat
+}
+
+// GetRoundLng returns the value of RoundLng.
+func (s *SingleplayerGuess) GetRoundLng() float64 {
+	return s.RoundLng
+}
+
+// GetGuessLat returns the value of GuessLat.
+func (s *SingleplayerGuess) GetGuessLat() float64 {
+	return s.GuessLat
+}
+
+// GetGuessLng returns the value of GuessLng.
+func (s *SingleplayerGuess) GetGuessLng() float64 {
+	return s.GuessLng
+}
+
+// GetScore returns the value of Score.
+func (s *SingleplayerGuess) GetScore() int {
+	return s.Score
+}
+
+// GetMissDistance returns the value of MissDistance.
+func (s *SingleplayerGuess) GetMissDistance() int {
+	return s.MissDistance
+}
+
+// SetRoundNum sets the value of RoundNum.
+func (s *SingleplayerGuess) SetRoundNum(val int) {
+	s.RoundNum = val
+}
+
+// SetRoundLat sets the value of RoundLat.
+func (s *SingleplayerGuess) SetRoundLat(val float64) {
+	s.RoundLat = val
+}
+
+// SetRoundLng sets the value of RoundLng.
+func (s *SingleplayerGuess) SetRoundLng(val float64) {
+	s.RoundLng = val
+}
+
+// SetGuessLat sets the value of GuessLat.
+func (s *SingleplayerGuess) SetGuessLat(val float64) {
+	s.GuessLat = val
+}
+
+// SetGuessLng sets the value of GuessLng.
+func (s *SingleplayerGuess) SetGuessLng(val float64) {
+	s.GuessLng = val
+}
+
+// SetScore sets the value of Score.
+func (s *SingleplayerGuess) SetScore(val int) {
+	s.Score = val
+}
+
+// SetMissDistance sets the value of MissDistance.
+func (s *SingleplayerGuess) SetMissDistance(val int) {
+	s.MissDistance = val
+}
+
 // Ref: #/SingleplayerRound
 type SingleplayerRound struct {
 	ID           int       `json:"id"`
@@ -1840,87 +1921,6 @@ func (s *SingleplayerRoundGuess) GetGuess() LatLng {
 // SetGuess sets the value of Guess.
 func (s *SingleplayerRoundGuess) SetGuess(val LatLng) {
 	s.Guess = val
-}
-
-// Ref: #/SingleplayerRoundsWithGuess
-type SingleplayerRoundsWithGuess struct {
-	RoundNum     int     `json:"roundNum"`
-	RoundLat     float64 `json:"roundLat"`
-	RoundLng     float64 `json:"roundLng"`
-	GuessLat     float64 `json:"guessLat"`
-	GuessLng     float64 `json:"guessLng"`
-	Score        int     `json:"score"`
-	MissDistance int     `json:"missDistance"`
-}
-
-// GetRoundNum returns the value of RoundNum.
-func (s *SingleplayerRoundsWithGuess) GetRoundNum() int {
-	return s.RoundNum
-}
-
-// GetRoundLat returns the value of RoundLat.
-func (s *SingleplayerRoundsWithGuess) GetRoundLat() float64 {
-	return s.RoundLat
-}
-
-// GetRoundLng returns the value of RoundLng.
-func (s *SingleplayerRoundsWithGuess) GetRoundLng() float64 {
-	return s.RoundLng
-}
-
-// GetGuessLat returns the value of GuessLat.
-func (s *SingleplayerRoundsWithGuess) GetGuessLat() float64 {
-	return s.GuessLat
-}
-
-// GetGuessLng returns the value of GuessLng.
-func (s *SingleplayerRoundsWithGuess) GetGuessLng() float64 {
-	return s.GuessLng
-}
-
-// GetScore returns the value of Score.
-func (s *SingleplayerRoundsWithGuess) GetScore() int {
-	return s.Score
-}
-
-// GetMissDistance returns the value of MissDistance.
-func (s *SingleplayerRoundsWithGuess) GetMissDistance() int {
-	return s.MissDistance
-}
-
-// SetRoundNum sets the value of RoundNum.
-func (s *SingleplayerRoundsWithGuess) SetRoundNum(val int) {
-	s.RoundNum = val
-}
-
-// SetRoundLat sets the value of RoundLat.
-func (s *SingleplayerRoundsWithGuess) SetRoundLat(val float64) {
-	s.RoundLat = val
-}
-
-// SetRoundLng sets the value of RoundLng.
-func (s *SingleplayerRoundsWithGuess) SetRoundLng(val float64) {
-	s.RoundLng = val
-}
-
-// SetGuessLat sets the value of GuessLat.
-func (s *SingleplayerRoundsWithGuess) SetGuessLat(val float64) {
-	s.GuessLat = val
-}
-
-// SetGuessLng sets the value of GuessLng.
-func (s *SingleplayerRoundsWithGuess) SetGuessLng(val float64) {
-	s.GuessLng = val
-}
-
-// SetScore sets the value of Score.
-func (s *SingleplayerRoundsWithGuess) SetScore(val int) {
-	s.Score = val
-}
-
-// SetMissDistance sets the value of MissDistance.
-func (s *SingleplayerRoundsWithGuess) SetMissDistance(val int) {
-	s.MissDistance = val
 }
 
 type UpdateUserAvatarInternalServerError Error

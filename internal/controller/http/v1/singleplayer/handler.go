@@ -23,7 +23,7 @@ type Usecase interface {
 	EndGame(ctx context.Context, req dto.EndSingleplayerGameRequest) error
 	NewRound(ctx context.Context, req dto.NewSingleplayerRoundRequest) (singleplayer.Round, error)
 	GetRound(ctx context.Context, req dto.GetSingleplayerRoundRequest) (singleplayer.Round, error)
-	GetGameRounds(ctx context.Context, req dto.GetSingleplayerGameRoundsRequest) ([]singleplayer.Guess, error)
+	GetGameGuesses(ctx context.Context, req dto.GetSingleplayerGameGuessesRequest) ([]singleplayer.Guess, error)
 	EndRound(ctx context.Context, req dto.EndSingleplayerRoundRequest) (dto.EndCurrentRoundResponse, error)
 }
 

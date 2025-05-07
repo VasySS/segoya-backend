@@ -713,6 +713,28 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									return
 								}
 
+							case 'g': // Prefix: "guesses"
+
+								if l := len("guesses"); len(elem) >= l && elem[0:l] == "guesses" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch r.Method {
+									case "GET":
+										s.handleGetSingleplayerGameGuessesRequest([1]string{
+											args[0],
+										}, elemIsEscaped, w, r)
+									default:
+										s.notAllowed(w, r, "GET")
+									}
+
+									return
+								}
+
 							case 'r': // Prefix: "round"
 
 								if l := len("round"); len(elem) >= l && elem[0:l] == "round" {
@@ -755,28 +777,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											}, elemIsEscaped, w, r)
 										default:
 											s.notAllowed(w, r, "POST")
-										}
-
-										return
-									}
-
-								case 's': // Prefix: "s"
-
-									if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
-										elem = elem[l:]
-									} else {
-										break
-									}
-
-									if len(elem) == 0 {
-										// Leaf node.
-										switch r.Method {
-										case "GET":
-											s.handleGetSingleplayerGameRoundsRequest([1]string{
-												args[0],
-											}, elemIsEscaped, w, r)
-										default:
-											s.notAllowed(w, r, "GET")
 										}
 
 										return
@@ -1724,6 +1724,30 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									}
 								}
 
+							case 'g': // Prefix: "guesses"
+
+								if l := len("guesses"); len(elem) >= l && elem[0:l] == "guesses" {
+									elem = elem[l:]
+								} else {
+									break
+								}
+
+								if len(elem) == 0 {
+									// Leaf node.
+									switch method {
+									case "GET":
+										r.name = GetSingleplayerGameGuessesOperation
+										r.summary = "Get singleplayer game guesses"
+										r.operationID = "getSingleplayerGameGuesses"
+										r.pathPattern = "/v1/singleplayer/{id}/guesses"
+										r.args = args
+										r.count = 1
+										return r, true
+									default:
+										return
+									}
+								}
+
 							case 'r': // Prefix: "round"
 
 								if l := len("round"); len(elem) >= l && elem[0:l] == "round" {
@@ -1771,30 +1795,6 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.summary = "End singleplayer game round"
 											r.operationID = "endSingleplayerRound"
 											r.pathPattern = "/v1/singleplayer/{id}/round/end"
-											r.args = args
-											r.count = 1
-											return r, true
-										default:
-											return
-										}
-									}
-
-								case 's': // Prefix: "s"
-
-									if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
-										elem = elem[l:]
-									} else {
-										break
-									}
-
-									if len(elem) == 0 {
-										// Leaf node.
-										switch method {
-										case "GET":
-											r.name = GetSingleplayerGameRoundsOperation
-											r.summary = "Get singleplayer game rounds"
-											r.operationID = "getSingleplayerGameRounds"
-											r.pathPattern = "/v1/singleplayer/{id}/rounds"
 											r.args = args
 											r.count = 1
 											return r, true

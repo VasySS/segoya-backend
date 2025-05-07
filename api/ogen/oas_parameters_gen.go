@@ -893,13 +893,13 @@ func decodeGetSingleplayerGameParams(args [1]string, argsEscaped bool, r *http.R
 	return params, nil
 }
 
-// GetSingleplayerGameRoundsParams is parameters of getSingleplayerGameRounds operation.
-type GetSingleplayerGameRoundsParams struct {
+// GetSingleplayerGameGuessesParams is parameters of getSingleplayerGameGuesses operation.
+type GetSingleplayerGameGuessesParams struct {
 	// Numeric ID of the resource in path.
 	ID int
 }
 
-func unpackGetSingleplayerGameRoundsParams(packed middleware.Parameters) (params GetSingleplayerGameRoundsParams) {
+func unpackGetSingleplayerGameGuessesParams(packed middleware.Parameters) (params GetSingleplayerGameGuessesParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "id",
@@ -910,7 +910,7 @@ func unpackGetSingleplayerGameRoundsParams(packed middleware.Parameters) (params
 	return params
 }
 
-func decodeGetSingleplayerGameRoundsParams(args [1]string, argsEscaped bool, r *http.Request) (params GetSingleplayerGameRoundsParams, _ error) {
+func decodeGetSingleplayerGameGuessesParams(args [1]string, argsEscaped bool, r *http.Request) (params GetSingleplayerGameGuessesParams, _ error) {
 	// Decode path: id.
 	if err := func() error {
 		param := args[0]

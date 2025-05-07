@@ -2519,7 +2519,7 @@ func decodeGetSingleplayerGameResponse(resp *http.Response) (res GetSingleplayer
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeGetSingleplayerGameRoundsResponse(resp *http.Response) (res GetSingleplayerGameRoundsRes, _ error) {
+func decodeGetSingleplayerGameGuessesResponse(resp *http.Response) (res GetSingleplayerGameGuessesRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -2535,7 +2535,7 @@ func decodeGetSingleplayerGameRoundsResponse(resp *http.Response) (res GetSingle
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetSingleplayerGameRoundsOKApplicationJSON
+			var response GetSingleplayerGameGuessesOKApplicationJSON
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2579,7 +2579,7 @@ func decodeGetSingleplayerGameRoundsResponse(resp *http.Response) (res GetSingle
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetSingleplayerGameRoundsBadRequest
+			var response GetSingleplayerGameGuessesBadRequest
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2623,7 +2623,7 @@ func decodeGetSingleplayerGameRoundsResponse(resp *http.Response) (res GetSingle
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetSingleplayerGameRoundsUnauthorized
+			var response GetSingleplayerGameGuessesUnauthorized
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2667,7 +2667,7 @@ func decodeGetSingleplayerGameRoundsResponse(resp *http.Response) (res GetSingle
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetSingleplayerGameRoundsForbidden
+			var response GetSingleplayerGameGuessesForbidden
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2711,7 +2711,7 @@ func decodeGetSingleplayerGameRoundsResponse(resp *http.Response) (res GetSingle
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetSingleplayerGameRoundsNotFound
+			var response GetSingleplayerGameGuessesNotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -2755,7 +2755,7 @@ func decodeGetSingleplayerGameRoundsResponse(resp *http.Response) (res GetSingle
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetSingleplayerGameRoundsInternalServerError
+			var response GetSingleplayerGameGuessesInternalServerError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

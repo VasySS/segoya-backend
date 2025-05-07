@@ -355,7 +355,7 @@ func (s *GetSingleplayerGameForbidden) Validate() error {
 	return nil
 }
 
-func (s *GetSingleplayerGameInternalServerError) Validate() error {
+func (s *GetSingleplayerGameGuessesBadRequest) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -363,7 +363,7 @@ func (s *GetSingleplayerGameInternalServerError) Validate() error {
 	return nil
 }
 
-func (s *GetSingleplayerGameNotFound) Validate() error {
+func (s *GetSingleplayerGameGuessesForbidden) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -371,7 +371,7 @@ func (s *GetSingleplayerGameNotFound) Validate() error {
 	return nil
 }
 
-func (s *GetSingleplayerGameRoundsBadRequest) Validate() error {
+func (s *GetSingleplayerGameGuessesInternalServerError) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -379,7 +379,7 @@ func (s *GetSingleplayerGameRoundsBadRequest) Validate() error {
 	return nil
 }
 
-func (s *GetSingleplayerGameRoundsForbidden) Validate() error {
+func (s *GetSingleplayerGameGuessesNotFound) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -387,24 +387,8 @@ func (s *GetSingleplayerGameRoundsForbidden) Validate() error {
 	return nil
 }
 
-func (s *GetSingleplayerGameRoundsInternalServerError) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *GetSingleplayerGameRoundsNotFound) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s GetSingleplayerGameRoundsOKApplicationJSON) Validate() error {
-	alias := ([]SingleplayerRoundsWithGuess)(s)
+func (s GetSingleplayerGameGuessesOKApplicationJSON) Validate() error {
+	alias := ([]SingleplayerGuess)(s)
 	if alias == nil {
 		return errors.New("nil is invalid value")
 	}
@@ -428,7 +412,23 @@ func (s GetSingleplayerGameRoundsOKApplicationJSON) Validate() error {
 	return nil
 }
 
-func (s *GetSingleplayerGameRoundsUnauthorized) Validate() error {
+func (s *GetSingleplayerGameGuessesUnauthorized) Validate() error {
+	alias := (*Error)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetSingleplayerGameInternalServerError) Validate() error {
+	alias := (*Error)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetSingleplayerGameNotFound) Validate() error {
 	alias := (*Error)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -1324,6 +1324,62 @@ func (s *SingleplayerGames) Validate() error {
 	return nil
 }
 
+func (s *SingleplayerGuess) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.RoundLat)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "roundLat",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.RoundLng)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "roundLng",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.GuessLat)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "guessLat",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := (validate.Float{}).Validate(float64(s.GuessLng)); err != nil {
+			return errors.Wrap(err, "float")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "guessLng",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *SingleplayerRound) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -1372,62 +1428,6 @@ func (s *SingleplayerRoundGuess) Validate() error {
 	}(); err != nil {
 		failures = append(failures, validate.FieldError{
 			Name:  "guess",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *SingleplayerRoundsWithGuess) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if err := (validate.Float{}).Validate(float64(s.RoundLat)); err != nil {
-			return errors.Wrap(err, "float")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "roundLat",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := (validate.Float{}).Validate(float64(s.RoundLng)); err != nil {
-			return errors.Wrap(err, "float")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "roundLng",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := (validate.Float{}).Validate(float64(s.GuessLat)); err != nil {
-			return errors.Wrap(err, "float")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "guessLat",
-			Error: err,
-		})
-	}
-	if err := func() error {
-		if err := (validate.Float{}).Validate(float64(s.GuessLng)); err != nil {
-			return errors.Wrap(err, "float")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "guessLng",
 			Error: err,
 		})
 	}

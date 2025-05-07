@@ -899,9 +899,9 @@ func encodeGetSingleplayerGameResponse(response GetSingleplayerGameRes, w http.R
 	}
 }
 
-func encodeGetSingleplayerGameRoundsResponse(response GetSingleplayerGameRoundsRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetSingleplayerGameGuessesResponse(response GetSingleplayerGameGuessesRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *GetSingleplayerGameRoundsOKApplicationJSON:
+	case *GetSingleplayerGameGuessesOKApplicationJSON:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
 		span.SetStatus(codes.Ok, http.StatusText(200))
@@ -914,7 +914,7 @@ func encodeGetSingleplayerGameRoundsResponse(response GetSingleplayerGameRoundsR
 
 		return nil
 
-	case *GetSingleplayerGameRoundsBadRequest:
+	case *GetSingleplayerGameGuessesBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
 		span.SetStatus(codes.Error, http.StatusText(400))
@@ -927,7 +927,7 @@ func encodeGetSingleplayerGameRoundsResponse(response GetSingleplayerGameRoundsR
 
 		return nil
 
-	case *GetSingleplayerGameRoundsUnauthorized:
+	case *GetSingleplayerGameGuessesUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
 		span.SetStatus(codes.Error, http.StatusText(401))
@@ -940,7 +940,7 @@ func encodeGetSingleplayerGameRoundsResponse(response GetSingleplayerGameRoundsR
 
 		return nil
 
-	case *GetSingleplayerGameRoundsForbidden:
+	case *GetSingleplayerGameGuessesForbidden:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(403)
 		span.SetStatus(codes.Error, http.StatusText(403))
@@ -953,7 +953,7 @@ func encodeGetSingleplayerGameRoundsResponse(response GetSingleplayerGameRoundsR
 
 		return nil
 
-	case *GetSingleplayerGameRoundsNotFound:
+	case *GetSingleplayerGameGuessesNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -966,7 +966,7 @@ func encodeGetSingleplayerGameRoundsResponse(response GetSingleplayerGameRoundsR
 
 		return nil
 
-	case *GetSingleplayerGameRoundsInternalServerError:
+	case *GetSingleplayerGameGuessesInternalServerError:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))

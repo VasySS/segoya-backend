@@ -48,11 +48,11 @@ func SingleplayerRoundResultToAPI(r EndCurrentRoundResponse) *api.EndSingleplaye
 }
 
 // SingleplayerRoundsToAPI converts a slice of singleplayer round entities to the API model.
-func SingleplayerRoundsToAPI(rounds []singleplayer.Guess) *api.GetSingleplayerGameRoundsOKApplicationJSON {
-	resp := make(api.GetSingleplayerGameRoundsOKApplicationJSON, 0, len(rounds))
+func SingleplayerRoundsToAPI(rounds []singleplayer.Guess) *api.GetSingleplayerGameGuessesOKApplicationJSON {
+	resp := make(api.GetSingleplayerGameGuessesOKApplicationJSON, 0, len(rounds))
 
 	for _, r := range rounds {
-		resp = append(resp, api.SingleplayerRoundsWithGuess{
+		resp = append(resp, api.SingleplayerGuess{
 			RoundNum:     r.RoundNum,
 			RoundLat:     r.RoundLat,
 			RoundLng:     r.RoundLng,
@@ -161,8 +161,8 @@ type GetSingleplayerRoundRequest struct {
 	UserID      int
 }
 
-// GetSingleplayerGameRoundsRequest represents a request to get a list of singleplayer game rounds.
-type GetSingleplayerGameRoundsRequest struct {
+// GetSingleplayerGameGuessesRequest represents a request to get a list of singleplayer game rounds.
+type GetSingleplayerGameGuessesRequest struct {
 	RequestTime time.Time
 	GameID      int
 	UserID      int

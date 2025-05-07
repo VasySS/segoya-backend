@@ -89,7 +89,7 @@ func (uc Usecase) getOrGenerateRound(
 	return round, nil
 }
 
-// GetRound returns current singleplayer game round by game ID.
+// GetRound returns current singleplayer game round by game id.
 func (uc Usecase) GetRound(
 	ctx context.Context,
 	req dto.GetSingleplayerRoundRequest,
@@ -130,8 +130,7 @@ func (uc Usecase) GetRound(
 	return response, nil
 }
 
-// EndRound ends a singleplayer game round (if it's not finished already) and
-// returns all guesses made during it.
+// EndRound ends a singleplayer game round with user guess and returns a response with score and distance.
 func (uc Usecase) EndRound(
 	ctx context.Context,
 	req dto.EndSingleplayerRoundRequest,
@@ -197,12 +196,12 @@ func (uc Usecase) EndRound(
 	return response, nil
 }
 
-// GetGameRounds returns all rounds of a singleplayer game with guess results.
-func (uc Usecase) GetGameRounds(
+// GetGameGuesses returns all guesses made during a singleplayer game.
+func (uc Usecase) GetGameGuesses(
 	ctx context.Context,
-	req dto.GetSingleplayerGameRoundsRequest,
+	req dto.GetSingleplayerGameGuessesRequest,
 ) ([]singleplayer.Guess, error) {
-	ctx, span := uc.tracer.Start(ctx, "GetGameRounds")
+	ctx, span := uc.tracer.Start(ctx, "GetGameGuesses")
 	defer span.End()
 
 	var response []singleplayer.Guess

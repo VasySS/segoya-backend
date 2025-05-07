@@ -1,7 +1,7 @@
 get:
-  operationId: getSingleplayerGameRounds
-  summary: Get singleplayer game rounds
-  description: Get singleplayer game rounds.
+  operationId: getSingleplayerGameGuesses
+  summary: Get singleplayer game guesses
+  description: Get a list of all guesses made during a singleplayer game.
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
@@ -14,7 +14,7 @@ get:
           schema:
             type: array
             items:
-              $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerRoundsWithGuess"
+              $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerGuess"
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
     "401":

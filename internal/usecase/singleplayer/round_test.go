@@ -482,10 +482,10 @@ func TestUsecase_EndRound(t *testing.T) {
 	}
 }
 
-func TestUsecase_GetGameRounds(t *testing.T) {
+func TestUsecase_GetGameGuesses(t *testing.T) {
 	t.Parallel()
 
-	getRoundsReq := dto.GetSingleplayerGameRoundsRequest{
+	getRoundsReq := dto.GetSingleplayerGameGuessesRequest{
 		RequestTime: time.Now().UTC(),
 		GameID:      1,
 		UserID:      1,
@@ -510,7 +510,7 @@ func TestUsecase_GetGameRounds(t *testing.T) {
 	}
 
 	type args struct {
-		req dto.GetSingleplayerGameRoundsRequest
+		req dto.GetSingleplayerGameGuessesRequest
 	}
 
 	tests := []struct {
@@ -609,7 +609,7 @@ func TestUsecase_GetGameRounds(t *testing.T) {
 
 			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase)
 
-			got, err := uc.GetGameRounds(t.Context(), tt.args.req)
+			got, err := uc.GetGameGuesses(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
 		})

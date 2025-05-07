@@ -175,12 +175,12 @@ func (UnimplementedHandler) GetSingleplayerGame(ctx context.Context, params GetS
 	return r, ht.ErrNotImplemented
 }
 
-// GetSingleplayerGameRounds implements getSingleplayerGameRounds operation.
+// GetSingleplayerGameGuesses implements getSingleplayerGameGuesses operation.
 //
-// Get singleplayer game rounds.
+// Get a list of all guesses made during a singleplayer game.
 //
-// GET /v1/singleplayer/{id}/rounds
-func (UnimplementedHandler) GetSingleplayerGameRounds(ctx context.Context, params GetSingleplayerGameRoundsParams) (r GetSingleplayerGameRoundsRes, _ error) {
+// GET /v1/singleplayer/{id}/guesses
+func (UnimplementedHandler) GetSingleplayerGameGuesses(ctx context.Context, params GetSingleplayerGameGuessesParams) (r GetSingleplayerGameGuessesRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

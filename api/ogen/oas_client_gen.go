@@ -226,12 +226,12 @@ type SingleplayerInvoker interface {
 	//
 	// GET /v1/singleplayer/{id}
 	GetSingleplayerGame(ctx context.Context, params GetSingleplayerGameParams) (GetSingleplayerGameRes, error)
-	// GetSingleplayerGameRounds invokes getSingleplayerGameRounds operation.
+	// GetSingleplayerGameGuesses invokes getSingleplayerGameGuesses operation.
 	//
-	// Get singleplayer game rounds.
+	// Get a list of all guesses made during a singleplayer game.
 	//
-	// GET /v1/singleplayer/{id}/rounds
-	GetSingleplayerGameRounds(ctx context.Context, params GetSingleplayerGameRoundsParams) (GetSingleplayerGameRoundsRes, error)
+	// GET /v1/singleplayer/{id}/guesses
+	GetSingleplayerGameGuesses(ctx context.Context, params GetSingleplayerGameGuessesParams) (GetSingleplayerGameGuessesRes, error)
 	// GetSingleplayerGames invokes getSingleplayerGames operation.
 	//
 	// Get all singleplayer user games.
@@ -2338,21 +2338,21 @@ func (c *Client) sendGetSingleplayerGame(ctx context.Context, params GetSinglepl
 	return result, nil
 }
 
-// GetSingleplayerGameRounds invokes getSingleplayerGameRounds operation.
+// GetSingleplayerGameGuesses invokes getSingleplayerGameGuesses operation.
 //
-// Get singleplayer game rounds.
+// Get a list of all guesses made during a singleplayer game.
 //
-// GET /v1/singleplayer/{id}/rounds
-func (c *Client) GetSingleplayerGameRounds(ctx context.Context, params GetSingleplayerGameRoundsParams) (GetSingleplayerGameRoundsRes, error) {
-	res, err := c.sendGetSingleplayerGameRounds(ctx, params)
+// GET /v1/singleplayer/{id}/guesses
+func (c *Client) GetSingleplayerGameGuesses(ctx context.Context, params GetSingleplayerGameGuessesParams) (GetSingleplayerGameGuessesRes, error) {
+	res, err := c.sendGetSingleplayerGameGuesses(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetSingleplayerGameRounds(ctx context.Context, params GetSingleplayerGameRoundsParams) (res GetSingleplayerGameRoundsRes, err error) {
+func (c *Client) sendGetSingleplayerGameGuesses(ctx context.Context, params GetSingleplayerGameGuessesParams) (res GetSingleplayerGameGuessesRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getSingleplayerGameRounds"),
+		otelogen.OperationID("getSingleplayerGameGuesses"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/rounds"),
+		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/guesses"),
 	}
 
 	// Run stopwatch.
@@ -2367,7 +2367,7 @@ func (c *Client) sendGetSingleplayerGameRounds(ctx context.Context, params GetSi
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, GetSingleplayerGameRoundsOperation,
+	ctx, span := c.cfg.Tracer.Start(ctx, GetSingleplayerGameGuessesOperation,
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -2404,7 +2404,7 @@ func (c *Client) sendGetSingleplayerGameRounds(ctx context.Context, params GetSi
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/rounds"
+	pathParts[2] = "/guesses"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -2418,7 +2418,7 @@ func (c *Client) sendGetSingleplayerGameRounds(ctx context.Context, params GetSi
 		var satisfied bitset
 		{
 			stage = "Security:Bearer"
-			switch err := c.securityBearer(ctx, GetSingleplayerGameRoundsOperation, r); {
+			switch err := c.securityBearer(ctx, GetSingleplayerGameGuessesOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -2454,7 +2454,7 @@ func (c *Client) sendGetSingleplayerGameRounds(ctx context.Context, params GetSi
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetSingleplayerGameRoundsResponse(resp)
+	result, err := decodeGetSingleplayerGameGuessesResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

@@ -57,12 +57,12 @@ type GetPublicProfileRes interface {
 	getPublicProfileRes()
 }
 
-type GetSingleplayerGameRes interface {
-	getSingleplayerGameRes()
+type GetSingleplayerGameGuessesRes interface {
+	getSingleplayerGameGuessesRes()
 }
 
-type GetSingleplayerGameRoundsRes interface {
-	getSingleplayerGameRoundsRes()
+type GetSingleplayerGameRes interface {
+	getSingleplayerGameRes()
 }
 
 type GetSingleplayerGamesRes interface {

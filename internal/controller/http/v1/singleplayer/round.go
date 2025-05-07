@@ -170,21 +170,21 @@ func (h Handler) EndSingleplayerRound(
 	return dto.SingleplayerRoundResultToAPI(resp), nil
 }
 
-// GetSingleplayerGameRounds returns singleplayer rounds of a finished game.
-func (h Handler) GetSingleplayerGameRounds(
+// GetSingleplayerGameGuesses returns all guesses made during a singleplayer game.
+func (h Handler) GetSingleplayerGameGuesses(
 	ctx context.Context,
-	params api.GetSingleplayerGameRoundsParams,
-) (api.GetSingleplayerGameRoundsRes, error) {
+	params api.GetSingleplayerGameGuessesParams,
+) (api.GetSingleplayerGameGuessesRes, error) {
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {
-		return &api.GetSingleplayerGameRoundsUnauthorized{
+		return &api.GetSingleplayerGameGuessesUnauthorized{
 			Title:  "Error authorizing user",
 			Status: http.StatusUnauthorized,
 			Detail: "An error occurred while authorizing user",
 		}, nil
 	}
 
-	rounds, err := h.uc.GetGameRounds(ctx, dto.GetSingleplayerGameRoundsRequest{
+	rounds, err := h.uc.GetGameGuesses(ctx, dto.GetSingleplayerGameGuessesRequest{
 		RequestTime: time.Now().UTC(),
 		GameID:      params.ID,
 		UserID:      claims.UserID,
@@ -192,21 +192,21 @@ func (h Handler) GetSingleplayerGameRounds(
 
 	switch {
 	case errors.Is(err, singleplayer.ErrGameNotFound):
-		return &api.GetSingleplayerGameRoundsNotFound{
+		return &api.GetSingleplayerGameGuessesNotFound{
 			Title:  "Game not found",
 			Status: http.StatusNotFound,
 			Detail: "The game with the provided ID does not exist",
 		}, nil
 
 	case errors.Is(err, singleplayer.ErrGameWrongUserID):
-		return &api.GetSingleplayerGameRoundsForbidden{
+		return &api.GetSingleplayerGameGuessesForbidden{
 			Title:  "Forbidden",
 			Status: http.StatusForbidden,
 			Detail: "This game does not belong to you",
 		}, nil
 
 	case errors.Is(err, singleplayer.ErrGameIsStillActive):
-		return &api.GetSingleplayerGameRoundsBadRequest{
+		return &api.GetSingleplayerGameGuessesBadRequest{
 			Title:  "Bad request",
 			Status: http.StatusBadRequest,
 			Detail: "The game is still in progress",
@@ -215,7 +215,7 @@ func (h Handler) GetSingleplayerGameRounds(
 	case err != nil:
 		slog.Error("error getting singleplayer game rounds", slog.Any("error", err))
 
-		return &api.GetSingleplayerGameRoundsInternalServerError{
+		return &api.GetSingleplayerGameGuessesInternalServerError{
 			Title:  "Error getting rounds",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while getting rounds",

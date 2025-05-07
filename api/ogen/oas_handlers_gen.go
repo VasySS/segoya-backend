@@ -3040,22 +3040,22 @@ func (s *Server) handleGetSingleplayerGameRequest(args [1]string, argsEscaped bo
 	}
 }
 
-// handleGetSingleplayerGameRoundsRequest handles getSingleplayerGameRounds operation.
+// handleGetSingleplayerGameGuessesRequest handles getSingleplayerGameGuesses operation.
 //
-// Get singleplayer game rounds.
+// Get a list of all guesses made during a singleplayer game.
 //
-// GET /v1/singleplayer/{id}/rounds
-func (s *Server) handleGetSingleplayerGameRoundsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /v1/singleplayer/{id}/guesses
+func (s *Server) handleGetSingleplayerGameGuessesRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getSingleplayerGameRounds"),
+		otelogen.OperationID("getSingleplayerGameGuesses"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/rounds"),
+		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/guesses"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), GetSingleplayerGameRoundsOperation,
+	ctx, span := s.cfg.Tracer.Start(r.Context(), GetSingleplayerGameGuessesOperation,
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -3110,15 +3110,15 @@ func (s *Server) handleGetSingleplayerGameRoundsRequest(args [1]string, argsEsca
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: GetSingleplayerGameRoundsOperation,
-			ID:   "getSingleplayerGameRounds",
+			Name: GetSingleplayerGameGuessesOperation,
+			ID:   "getSingleplayerGameGuesses",
 		}
 	)
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearer(ctx, GetSingleplayerGameRoundsOperation, r)
+			sctx, ok, err := s.securityBearer(ctx, GetSingleplayerGameGuessesOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
@@ -3158,7 +3158,7 @@ func (s *Server) handleGetSingleplayerGameRoundsRequest(args [1]string, argsEsca
 			return
 		}
 	}
-	params, err := decodeGetSingleplayerGameRoundsParams(args, argsEscaped, r)
+	params, err := decodeGetSingleplayerGameGuessesParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -3169,13 +3169,13 @@ func (s *Server) handleGetSingleplayerGameRoundsRequest(args [1]string, argsEsca
 		return
 	}
 
-	var response GetSingleplayerGameRoundsRes
+	var response GetSingleplayerGameGuessesRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    GetSingleplayerGameRoundsOperation,
-			OperationSummary: "Get singleplayer game rounds",
-			OperationID:      "getSingleplayerGameRounds",
+			OperationName:    GetSingleplayerGameGuessesOperation,
+			OperationSummary: "Get singleplayer game guesses",
+			OperationID:      "getSingleplayerGameGuesses",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -3188,8 +3188,8 @@ func (s *Server) handleGetSingleplayerGameRoundsRequest(args [1]string, argsEsca
 
 		type (
 			Request  = struct{}
-			Params   = GetSingleplayerGameRoundsParams
-			Response = GetSingleplayerGameRoundsRes
+			Params   = GetSingleplayerGameGuessesParams
+			Response = GetSingleplayerGameGuessesRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -3198,14 +3198,14 @@ func (s *Server) handleGetSingleplayerGameRoundsRequest(args [1]string, argsEsca
 		](
 			m,
 			mreq,
-			unpackGetSingleplayerGameRoundsParams,
+			unpackGetSingleplayerGameGuessesParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetSingleplayerGameRounds(ctx, params)
+				response, err = s.h.GetSingleplayerGameGuesses(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetSingleplayerGameRounds(ctx, params)
+		response, err = s.h.GetSingleplayerGameGuesses(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -3213,7 +3213,7 @@ func (s *Server) handleGetSingleplayerGameRoundsRequest(args [1]string, argsEsca
 		return
 	}
 
-	if err := encodeGetSingleplayerGameRoundsResponse(response, w, span); err != nil {
+	if err := encodeGetSingleplayerGameGuessesResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

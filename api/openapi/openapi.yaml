@@ -160,8 +160,8 @@ paths:
   /v1/singleplayer/{id}/round/end:
     $ref: "paths/singleplayer/singleplayer-{id}-round-end.yaml"
 
-  /v1/singleplayer/{id}/rounds:
-    $ref: "paths/singleplayer/singleplayer-{id}-rounds.yaml"
+  /v1/singleplayer/{id}/guesses:
+    $ref: "paths/singleplayer/singleplayer-{id}-guesses.yaml"
 
   ##### multiplayer #####
 

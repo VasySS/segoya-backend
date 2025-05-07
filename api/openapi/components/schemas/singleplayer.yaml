@@ -107,7 +107,7 @@ SingleplayerRoundGuess:
       $ref: "panorama.yaml#/LatLng"
   required: [guess]
 
-SingleplayerRoundsWithGuess:
+SingleplayerGuess:
   type: object
   properties:
     roundNum:

@@ -205,12 +205,12 @@ type SingleplayerHandler interface {
 	//
 	// GET /v1/singleplayer/{id}
 	GetSingleplayerGame(ctx context.Context, params GetSingleplayerGameParams) (GetSingleplayerGameRes, error)
-	// GetSingleplayerGameRounds implements getSingleplayerGameRounds operation.
+	// GetSingleplayerGameGuesses implements getSingleplayerGameGuesses operation.
 	//
-	// Get singleplayer game rounds.
+	// Get a list of all guesses made during a singleplayer game.
 	//
-	// GET /v1/singleplayer/{id}/rounds
-	GetSingleplayerGameRounds(ctx context.Context, params GetSingleplayerGameRoundsParams) (GetSingleplayerGameRoundsRes, error)
+	// GET /v1/singleplayer/{id}/guesses
+	GetSingleplayerGameGuesses(ctx context.Context, params GetSingleplayerGameGuessesParams) (GetSingleplayerGameGuessesRes, error)
 	// GetSingleplayerGames implements getSingleplayerGames operation.
 	//
 	// Get all singleplayer user games.
