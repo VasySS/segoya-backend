@@ -14,11 +14,10 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-var (
-	// SignatureMethod is a default signature method used to sign tokens.
-	//nolint:gochecknoglobals
-	SignatureMethod = jwa.HS256()
-)
+// SignatureMethod is a default signature method used to sign tokens.
+//
+//nolint:gochecknoglobals
+var SignatureMethod = jwa.HS256()
 
 const (
 	parsingAcceptableSkew = 3 * time.Minute
