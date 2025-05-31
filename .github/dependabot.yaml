@@ -1,0 +1,32 @@
+version: 2
+
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "VasySS"
+    commit-message:
+      prefix: "chore(deps)"
+
+    groups:
+      testcontainers-go:
+        patterns:
+          - "github.com/testcontainers/testcontainers-go"
+          - "github.com/testcontainers/testcontainers-go/modules/*"
+      opentelemetry-go:
+        patterns:
+          - "go.opentelemetry.io/otel"
+          - "go.opentelemetry.io/otel/*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "VasySS"
+    commit-message:
+      prefix: "chore(github-actions)"
