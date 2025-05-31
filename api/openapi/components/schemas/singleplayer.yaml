@@ -87,6 +87,9 @@ SingleplayerRound:
     startedAt:
       type: string
       format: date-time
+    endedAt:
+      type: string
+      format: date-time
   required:
     [
       id,
@@ -98,6 +101,7 @@ SingleplayerRound:
       finished,
       createdAt,
       startedAt,
+      endedAt,
     ]
 
 SingleplayerRoundGuess:

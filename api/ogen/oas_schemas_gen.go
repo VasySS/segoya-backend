@@ -1813,6 +1813,7 @@ type SingleplayerRound struct {
 	Finished     bool      `json:"finished"`
 	CreatedAt    time.Time `json:"createdAt"`
 	StartedAt    time.Time `json:"startedAt"`
+	EndedAt      time.Time `json:"endedAt"`
 }
 
 // GetID returns the value of ID.
@@ -1860,6 +1861,11 @@ func (s *SingleplayerRound) GetStartedAt() time.Time {
 	return s.StartedAt
 }
 
+// GetEndedAt returns the value of EndedAt.
+func (s *SingleplayerRound) GetEndedAt() time.Time {
+	return s.EndedAt
+}
+
 // SetID sets the value of ID.
 func (s *SingleplayerRound) SetID(val int) {
 	s.ID = val
@@ -1903,6 +1909,11 @@ func (s *SingleplayerRound) SetCreatedAt(val time.Time) {
 // SetStartedAt sets the value of StartedAt.
 func (s *SingleplayerRound) SetStartedAt(val time.Time) {
 	s.StartedAt = val
+}
+
+// SetEndedAt sets the value of EndedAt.
+func (s *SingleplayerRound) SetEndedAt(val time.Time) {
+	s.EndedAt = val
 }
 
 func (*SingleplayerRound) getSingleplayerRoundRes() {}

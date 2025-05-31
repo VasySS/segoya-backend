@@ -36,6 +36,7 @@ func SingleplayerRoundToAPI(r singleplayer.Round) *api.SingleplayerRound {
 		Finished:     r.Finished,
 		CreatedAt:    r.CreatedAt,
 		StartedAt:    r.StartedAt,
+		EndedAt:      r.EndedAt,
 	}
 }
 

@@ -6443,9 +6443,13 @@ func (s *SingleplayerRound) encodeFields(e *jx.Encoder) {
 		e.FieldStart("startedAt")
 		json.EncodeDateTime(e, s.StartedAt)
 	}
+	{
+		e.FieldStart("endedAt")
+		json.EncodeDateTime(e, s.EndedAt)
+	}
 }
 
-var jsonFieldsNameOfSingleplayerRound = [9]string{
+var jsonFieldsNameOfSingleplayerRound = [10]string{
 	0: "id",
 	1: "gameID",
 	2: "streetviewID",
@@ -6455,6 +6459,7 @@ var jsonFieldsNameOfSingleplayerRound = [9]string{
 	6: "finished",
 	7: "createdAt",
 	8: "startedAt",
+	9: "endedAt",
 }
 
 // Decode decodes SingleplayerRound from json.
@@ -6574,6 +6579,18 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"startedAt\"")
 			}
+		case "endedAt":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.EndedAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"endedAt\"")
+			}
 		default:
 			return d.Skip()
 		}
@@ -6585,7 +6602,7 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
 		0b11111111,
-		0b00000001,
+		0b00000011,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
