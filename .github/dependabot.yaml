@@ -6,8 +6,6 @@ updates:
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 3
-    reviewers:
-      - "VasySS"
     commit-message:
       prefix: "chore(deps)"
 
@@ -26,7 +24,5 @@ updates:
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 3
-    reviewers:
-      - "VasySS"
     commit-message:
       prefix: "chore(github-actions)"
