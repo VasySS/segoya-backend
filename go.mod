@@ -20,7 +20,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.7.5
-	github.com/lestrrat-go/httprc/v3 v3.0.0-beta1
+	github.com/lestrrat-go/httprc/v3 v3.0.0-beta2
 	github.com/lestrrat-go/jwx/v3 v3.0.0
 	github.com/ogen-go/ogen v1.12.0
 	github.com/olahol/melody v1.2.1
