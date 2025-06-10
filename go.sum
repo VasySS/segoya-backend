@@ -283,8 +283,8 @@ github.com/tklauser/go-sysconf v0.3.15 h1:VE89k0criAymJ/Os65CSn1IXaol+1wrsFHEB8O
 github.com/tklauser/go-sysconf v0.3.15/go.mod h1:Dmjwr6tYFIseJw7a3dRLJfsHAMXZ3nEnL/aZY+0IuI4=
 github.com/tklauser/numcpus v0.10.0 h1:18njr6LDBk1zuna922MgdjQuJFjrdppsZG60sHGfjso=
 github.com/tklauser/numcpus v0.10.0/go.mod h1:BiTKazU708GQTYF4mB+cmlpT2Is1gLk7XVuEeem8LsQ=
-github.com/valkey-io/valkey-go v1.0.57 h1:rMpREZ7kvWwv9vHkB1WTpI9rX4dQHsvPHimSWenScvI=
-github.com/valkey-io/valkey-go v1.0.57/go.mod h1:sxpCChk8i3oTG+A/lUi9Lj8C/7WI+yhnQCvDJlPVKNM=
+github.com/valkey-io/valkey-go v1.0.60 h1:idh959D20H5n7D/kwEdTKNaMn5+4HpZTn7bLXnAhQIw=
+github.com/valkey-io/valkey-go v1.0.60/go.mod h1:bHmwjIEOrGq/ubOJfh5uMRs7Xj6mV3mQ/ZXUbmqpjqY=
 github.com/vektra/mockery/v2 v2.53.3 h1:yBU8XrzntcZdcNRRv+At0anXgSaFtgkyVUNm3f4an3U=
 github.com/vektra/mockery/v2 v2.53.3/go.mod h1:hIFFb3CvzPdDJJiU7J4zLRblUMv7OuezWsHPmswriwo=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
