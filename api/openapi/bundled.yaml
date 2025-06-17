@@ -116,7 +116,7 @@ paths:
         - users
       x-ogen-operation-group: Users
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: User profile details.
@@ -292,7 +292,7 @@ paths:
         - auth
       x-ogen-operation-group: Auth
       parameters:
-        - $ref: '#/components/parameters/idStr'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '204':
           description: User session deleted successfully.
@@ -759,7 +759,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Singleplayer game details.
@@ -784,7 +784,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '204':
           description: Singleplayer game ended successfully.
@@ -807,7 +807,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Singleplayer game round details.
@@ -833,7 +833,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Singleplayer game round created successfully.
@@ -860,7 +860,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       requestBody:
         required: true
         description: Round guess
@@ -894,7 +894,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: List of singleplayer game rounds.
@@ -924,7 +924,7 @@ paths:
         - multiplayer
       x-ogen-operation-group: Multiplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Multiplayer game details.
@@ -947,7 +947,7 @@ paths:
         - multiplayer
       x-ogen-operation-group: Multiplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: List of multiplayer game guesses.
@@ -972,7 +972,7 @@ paths:
         - multiplayer
       x-ogen-operation-group: Multiplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Multiplayer game round information.
@@ -994,7 +994,7 @@ paths:
         - multiplayer
       x-ogen-operation-group: Multiplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Multiplayer game round information.
@@ -1322,6 +1322,7 @@ components:
           format: uuid
         streetviewID:
           type: string
+          format: uuid
         roundNum:
           type: integer
         lat:
@@ -1482,6 +1483,7 @@ components:
           format: uuid
         streetviewID:
           type: string
+          format: uuid
         roundNum:
           type: integer
         lat:
@@ -1557,24 +1559,18 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
   parameters:
-    idInt:
+    idUUID:
       name: id
-      description: Numeric ID of the resource in path.
+      description: UUID of the resource in path.
       in: path
       required: true
       schema:
-        type: integer
+        type: string
+        format: uuid
     captchaHeader:
       name: Frontend-Captcha-Token
       in: header
       description: Captcha token, required only for production environment.
-      schema:
-        type: string
-    idStr:
-      name: id
-      description: String ID of the resource in path.
-      in: path
-      required: true
       schema:
         type: string
     pageQuery:
@@ -1594,3 +1590,10 @@ components:
         type: integer
         minimum: 1
         maximum: 50
+    idStr:
+      name: id
+      description: String ID of the resource in path.
+      in: path
+      required: true
+      schema:
+        type: string

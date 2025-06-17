@@ -49,6 +49,7 @@ MultiplayerRound:
       format: uuid
     streetviewID:
       type: string
+      format: uuid
     roundNum:
       type: integer
     lat:

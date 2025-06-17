@@ -897,7 +897,7 @@ func (s *MultiplayerGuess) SetScore(val int) {
 type MultiplayerRound struct {
 	ID           uuid.UUID `json:"id"`
 	GameID       uuid.UUID `json:"gameID"`
-	StreetviewID string    `json:"streetviewID"`
+	StreetviewID uuid.UUID `json:"streetviewID"`
 	RoundNum     int       `json:"roundNum"`
 	Lat          float64   `json:"lat"`
 	Lng          float64   `json:"lng"`
@@ -919,7 +919,7 @@ func (s *MultiplayerRound) GetGameID() uuid.UUID {
 }
 
 // GetStreetviewID returns the value of StreetviewID.
-func (s *MultiplayerRound) GetStreetviewID() string {
+func (s *MultiplayerRound) GetStreetviewID() uuid.UUID {
 	return s.StreetviewID
 }
 
@@ -974,7 +974,7 @@ func (s *MultiplayerRound) SetGameID(val uuid.UUID) {
 }
 
 // SetStreetviewID sets the value of StreetviewID.
-func (s *MultiplayerRound) SetStreetviewID(val string) {
+func (s *MultiplayerRound) SetStreetviewID(val uuid.UUID) {
 	s.StreetviewID = val
 }
 
@@ -1818,7 +1818,7 @@ func (s *SingleplayerGuess) SetMissDistance(val int) {
 type SingleplayerRound struct {
 	ID           uuid.UUID `json:"id"`
 	GameID       uuid.UUID `json:"gameID"`
-	StreetviewID string    `json:"streetviewID"`
+	StreetviewID uuid.UUID `json:"streetviewID"`
 	RoundNum     int       `json:"roundNum"`
 	Lat          float64   `json:"lat"`
 	Lng          float64   `json:"lng"`
@@ -1839,7 +1839,7 @@ func (s *SingleplayerRound) GetGameID() uuid.UUID {
 }
 
 // GetStreetviewID returns the value of StreetviewID.
-func (s *SingleplayerRound) GetStreetviewID() string {
+func (s *SingleplayerRound) GetStreetviewID() uuid.UUID {
 	return s.StreetviewID
 }
 
@@ -1889,7 +1889,7 @@ func (s *SingleplayerRound) SetGameID(val uuid.UUID) {
 }
 
 // SetStreetviewID sets the value of StreetviewID.
-func (s *SingleplayerRound) SetStreetviewID(val string) {
+func (s *SingleplayerRound) SetStreetviewID(val uuid.UUID) {
 	s.StreetviewID = val
 }
 

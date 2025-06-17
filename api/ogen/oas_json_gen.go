@@ -3796,7 +3796,7 @@ func (s *MultiplayerRound) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("streetviewID")
-		e.Str(s.StreetviewID)
+		json.EncodeUUID(e, s.StreetviewID)
 	}
 	{
 		e.FieldStart("roundNum")
@@ -3882,8 +3882,8 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 		case "streetviewID":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.StreetviewID = string(v)
+				v, err := json.DecodeUUID(d)
+				s.StreetviewID = v
 				if err != nil {
 					return err
 				}
@@ -6417,7 +6417,7 @@ func (s *SingleplayerRound) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("streetviewID")
-		e.Str(s.StreetviewID)
+		json.EncodeUUID(e, s.StreetviewID)
 	}
 	{
 		e.FieldStart("roundNum")
@@ -6498,8 +6498,8 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 		case "streetviewID":
 			requiredBitSet[0] |= 1 << 2
 			if err := func() error {
-				v, err := d.Str()
-				s.StreetviewID = string(v)
+				v, err := json.DecodeUUID(d)
+				s.StreetviewID = v
 				if err != nil {
 					return err
 				}

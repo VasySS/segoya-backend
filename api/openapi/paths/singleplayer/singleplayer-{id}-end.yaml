@@ -5,7 +5,7 @@ post:
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
-    - $ref: "../../components/parameters.yaml#/idInt"
+    - $ref: "../../components/parameters.yaml#/idUUID"
   responses:
     "204":
       description: Singleplayer game ended successfully.

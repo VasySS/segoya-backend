@@ -5,7 +5,7 @@ get:
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
-    - $ref: "../../components/parameters.yaml#/idInt"
+    - $ref: "../../components/parameters.yaml#/idUUID"
   responses:
     "200":
       description: Singleplayer game details.
