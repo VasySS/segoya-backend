@@ -147,6 +147,12 @@ ALTER TABLE user_oauth RENAME COLUMN new_id TO id;
 ALTER TABLE user_oauth ADD PRIMARY KEY (id);
 
 ALTER TABLE singleplayer_round ADD COLUMN new_id UUID DEFAULT uuidv7();
+ALTER TABLE multiplayer_round ADD COLUMN new_id UUID DEFAULT uuidv7();
+
+ALTER TABLE singleplayer_round_guess ADD COLUMN new_round_id UUID;
+UPDATE singleplayer_round_guess AS srg SET new_round_id = sr.new_id FROM singleplayer_round AS sr WHERE srg.round_id = sr.id;
+ALTER TABLE singleplayer_round_guess DROP COLUMN round_id;
+ALTER TABLE singleplayer_round_guess RENAME COLUMN new_round_id TO round_id;
 
 ALTER TABLE singleplayer_round DROP CONSTRAINT singleplayer_round_pkey CASCADE;
 ALTER TABLE singleplayer_round DROP COLUMN id;
@@ -160,7 +166,10 @@ ALTER TABLE singleplayer_round_guess DROP COLUMN id;
 ALTER TABLE singleplayer_round_guess RENAME COLUMN new_id TO id;
 ALTER TABLE singleplayer_round_guess ADD PRIMARY KEY (id);
 
-ALTER TABLE multiplayer_round ADD COLUMN new_id UUID DEFAULT uuidv7();
+ALTER TABLE multiplayer_round_user ADD COLUMN new_round_id UUID;
+UPDATE multiplayer_round_user AS mru SET new_round_id = mr.new_id FROM multiplayer_round AS mr WHERE mru.round_id = mr.id;
+ALTER TABLE multiplayer_round_user DROP COLUMN round_id;
+ALTER TABLE multiplayer_round_user RENAME COLUMN new_round_id TO round_id;
 
 ALTER TABLE multiplayer_round DROP CONSTRAINT multiplayer_round_pkey CASCADE;
 ALTER TABLE multiplayer_round DROP COLUMN id;
@@ -168,11 +177,16 @@ ALTER TABLE multiplayer_round RENAME COLUMN new_id TO id;
 ALTER TABLE multiplayer_round ADD PRIMARY KEY (id);
 
 ALTER TABLE multiplayer_round_user ADD COLUMN new_id UUID DEFAULT uuidv7();
-
 ALTER TABLE multiplayer_round_user DROP CONSTRAINT multiplayer_round_user_pkey CASCADE;
 ALTER TABLE multiplayer_round_user DROP COLUMN id;
 ALTER TABLE multiplayer_round_user RENAME COLUMN new_id TO id;
 ALTER TABLE multiplayer_round_user ADD PRIMARY KEY (id);
+
+ALTER TABLE multiplayer_game_user ADD COLUMN new_id UUID DEFAULT uuidv7();
+ALTER TABLE multiplayer_game_user DROP CONSTRAINT multiplayer_game_user_pkey CASCADE;
+ALTER TABLE multiplayer_game_user DROP COLUMN id;
+ALTER TABLE multiplayer_game_user RENAME COLUMN new_id TO id;
+ALTER TABLE multiplayer_game_user ADD PRIMARY KEY (id);
 
 -- +goose StatementEnd
 
