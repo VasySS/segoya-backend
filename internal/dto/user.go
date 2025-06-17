@@ -32,14 +32,14 @@ func UserToAPIPrivateUser(u user.PrivateProfile) *api.UserPrivateProfile {
 
 // UpdateUserRequest represents a request to update a user's profile information.
 type UpdateUserRequest struct {
-	UserID int
+	UserID string
 	Name   string
 }
 
 // UpdateAvatarRequest represents a request to update a user's avatar.
 type UpdateAvatarRequest struct {
 	RequestTime time.Time
-	UserID      int
+	UserID      string
 	File        io.Reader
 	MimeType    string
 }
@@ -47,6 +47,6 @@ type UpdateAvatarRequest struct {
 // UpdateAvatarRequestDB represents a request to update a user's avatar hash in the database.
 type UpdateAvatarRequestDB struct {
 	RequestTime time.Time
-	UserID      int
+	UserID      string
 	AvatarHash  string
 }

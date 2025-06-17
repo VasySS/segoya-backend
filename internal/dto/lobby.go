@@ -7,6 +7,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
+	"github.com/google/uuid"
 )
 
 // LobbyUserProfileKey is the key for the user profile in the WebSocket session.
@@ -97,7 +98,7 @@ func LobbiesToAPI(l []lobby.Lobby, total int) *api.LobbiesResponse {
 type NewLobbyRequest struct {
 	RequestTime     time.Time
 	MaxPlayers      int
-	CreatorID       int
+	CreatorID       uuid.UUID
 	Rounds          int
 	Provider        string
 	TimerSeconds    int
@@ -109,7 +110,7 @@ type NewLobbyRequest struct {
 type NewLobbyRequestDB struct {
 	RequestTime     time.Time
 	ID              string
-	CreatorID       int
+	CreatorID       uuid.UUID
 	Rounds          int
 	Provider        string
 	TimerSeconds    int

@@ -3,12 +3,14 @@ package lobby
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Lobby struct contains lobby information, including game details.
 type Lobby struct {
 	ID              string    `json:"id"`
-	CreatorID       int       `json:"creatorID"`
+	CreatorID       uuid.UUID `json:"creatorID"`
 	CreatedAt       time.Time `json:"createdAt"`
 	Rounds          int       `json:"rounds"`
 	Provider        string    `json:"provider"`

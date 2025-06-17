@@ -32,7 +32,7 @@ type NewOAuthRequest struct {
 	RequestTime time.Time
 	StateTTL    time.Duration
 	State       string
-	UserID      int
+	UserID      string
 }
 
 // NewOAuthCallbackRequest represents a request to handle the OAuth callback after authentication.
@@ -46,13 +46,13 @@ type NewOAuthCallbackRequest struct {
 type NewOAuthRequestDB struct {
 	RequestTime time.Time
 	OAuthID     string
-	UserID      int
+	UserID      string
 	Issuer      user.OAuthIssuer
 }
 
 // DeleteOAuthRequest represents a request to delete OAuth connection.
 type DeleteOAuthRequest struct {
-	UserID int
+	UserID string
 	Issuer user.OAuthIssuer
 }
 

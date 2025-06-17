@@ -1,6 +1,10 @@
 package user
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // OAuthIssuer is a type of OAuth provider.
 type OAuthIssuer string
@@ -13,8 +17,8 @@ const (
 
 // OAuth contains user's connected OAuth information.
 type OAuth struct {
-	ID        string
-	UserID    int
+	ID        uuid.UUID
+	UserID    uuid.UUID
 	OAuthID   string `db:"oauth_id"`
 	Issuer    OAuthIssuer
 	CreatedAt time.Time

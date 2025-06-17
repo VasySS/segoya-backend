@@ -5,12 +5,13 @@ import (
 	"time"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/google/uuid"
 )
 
 // Game struct contains singleplayer game information.
 type Game struct {
-	ID              int                   `db:"id"               json:"id"`
-	UserID          int                   `db:"user_id"          json:"userID"`
+	ID              uuid.UUID             `db:"id"               json:"id"`
+	UserID          uuid.UUID             `db:"user_id"          json:"userID"`
 	Rounds          int                   `db:"rounds"           json:"rounds"`
 	RoundCurrent    int                   `db:"round_current"    json:"roundCurrent"`
 	TimerSeconds    int                   `db:"timer_seconds"    json:"timerSeconds"`
@@ -24,9 +25,9 @@ type Game struct {
 
 // Round struct contains singleplayer round information.
 type Round struct {
-	ID           int       `db:"id"            json:"id"`
-	GameID       int       `db:"game_id"       json:"gameID"`
-	StreetviewID string    `db:"streetview_id" json:"streetviewID"`
+	ID           uuid.UUID `db:"id"            json:"id"`
+	GameID       uuid.UUID `db:"game_id"       json:"gameID"`
+	StreetviewID uuid.UUID `db:"streetview_id" json:"streetviewID"`
 	Lat          float64   `db:"lat"           json:"lat"`
 	Lng          float64   `db:"lng"           json:"lng"`
 	RoundNum     int       `db:"round_num"     json:"roundNum"`

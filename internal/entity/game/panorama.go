@@ -1,5 +1,7 @@
 package game
 
+import "github.com/google/uuid"
+
 // PanoramaProvider is a type of panorama provider (who is hosting streetview images).
 type PanoramaProvider string
 
@@ -24,27 +26,27 @@ func IsSupportedProvider(p string) bool {
 // PanoramaMetadata contains general streetview metadata.
 type PanoramaMetadata struct {
 	LatLng
-	ID           int
+	ID           uuid.UUID
 	StreetviewID string
 }
 
 // GoogleStreetview contains Google streetview metadata.
 type GoogleStreetview struct {
-	ID  int
+	ID  uuid.UUID
 	Lat float64
 	Lng float64
 }
 
 // SeznamStreetview contains Seznam streetview metadata.
 type SeznamStreetview struct {
-	ID  int
+	ID  uuid.UUID
 	Lat float64
 	Lng float64
 }
 
 // YandexAirview contains Yandex air view metadata.
 type YandexAirview struct {
-	ID           int
+	ID           uuid.UUID
 	StreetviewID string
 	Lat          float64
 	Lng          float64
@@ -52,7 +54,7 @@ type YandexAirview struct {
 
 // YandexStreetview contains Yandex streetview metadata.
 type YandexStreetview struct {
-	ID  int
+	ID  uuid.UUID
 	Lat float64
 	Lng float64
 }
