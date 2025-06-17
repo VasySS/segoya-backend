@@ -19,9 +19,11 @@ SingleplayerGame:
   type: object
   properties:
     id:
-      type: integer
+      type: string
+      format: uuid
     userID:
-      type: integer
+      type: string
+      format: uuid
     rounds:
       type: integer
     roundCurrent:
@@ -68,9 +70,11 @@ SingleplayerRound:
   type: object
   properties:
     id:
-      type: integer
+      type: string
+      format: uuid
     gameID:
-      type: integer
+      type: string
+      format: uuid
     streetviewID:
       type: string
     roundNum:

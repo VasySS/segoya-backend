@@ -2854,7 +2854,7 @@ func (s *Lobby) encodeFields(e *jx.Encoder) {
 	}
 	{
 		e.FieldStart("creatorID")
-		e.Int(s.CreatorID)
+		json.EncodeUUID(e, s.CreatorID)
 	}
 	{
 		e.FieldStart("createdAt")
@@ -2927,8 +2927,8 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 		case "creatorID":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int()
-				s.CreatorID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.CreatorID = v
 				if err != nil {
 					return err
 				}
@@ -3325,11 +3325,11 @@ func (s *MultiplayerGame) Encode(e *jx.Encoder) {
 func (s *MultiplayerGame) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		e.Int(s.ID)
+		json.EncodeUUID(e, s.ID)
 	}
 	{
 		e.FieldStart("creatorID")
-		e.Int(s.CreatorID)
+		json.EncodeUUID(e, s.CreatorID)
 	}
 	{
 		e.FieldStart("rounds")
@@ -3390,8 +3390,8 @@ func (s *MultiplayerGame) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int()
-				s.ID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.ID = v
 				if err != nil {
 					return err
 				}
@@ -3402,8 +3402,8 @@ func (s *MultiplayerGame) Decode(d *jx.Decoder) error {
 		case "creatorID":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int()
-				s.CreatorID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.CreatorID = v
 				if err != nil {
 					return err
 				}
@@ -3788,11 +3788,11 @@ func (s *MultiplayerRound) Encode(e *jx.Encoder) {
 func (s *MultiplayerRound) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		e.Int(s.ID)
+		json.EncodeUUID(e, s.ID)
 	}
 	{
 		e.FieldStart("gameID")
-		e.Int(s.GameID)
+		json.EncodeUUID(e, s.GameID)
 	}
 	{
 		e.FieldStart("streetviewID")
@@ -3858,8 +3858,8 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int()
-				s.ID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.ID = v
 				if err != nil {
 					return err
 				}
@@ -3870,8 +3870,8 @@ func (s *MultiplayerRound) Decode(d *jx.Decoder) error {
 		case "gameID":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int()
-				s.GameID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.GameID = v
 				if err != nil {
 					return err
 				}
@@ -4169,7 +4169,7 @@ func (s *NewLobby) Encode(e *jx.Encoder) {
 func (s *NewLobby) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("creatorID")
-		e.Int(s.CreatorID)
+		json.EncodeUUID(e, s.CreatorID)
 	}
 	{
 		e.FieldStart("maxPlayers")
@@ -4221,8 +4221,8 @@ func (s *NewLobby) Decode(d *jx.Decoder) error {
 		case "creatorID":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int()
-				s.CreatorID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.CreatorID = v
 				if err != nil {
 					return err
 				}
@@ -5840,11 +5840,11 @@ func (s *SingleplayerGame) Encode(e *jx.Encoder) {
 func (s *SingleplayerGame) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		e.Int(s.ID)
+		json.EncodeUUID(e, s.ID)
 	}
 	{
 		e.FieldStart("userID")
-		e.Int(s.UserID)
+		json.EncodeUUID(e, s.UserID)
 	}
 	{
 		e.FieldStart("rounds")
@@ -5905,8 +5905,8 @@ func (s *SingleplayerGame) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int()
-				s.ID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.ID = v
 				if err != nil {
 					return err
 				}
@@ -5917,8 +5917,8 @@ func (s *SingleplayerGame) Decode(d *jx.Decoder) error {
 		case "userID":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int()
-				s.UserID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.UserID = v
 				if err != nil {
 					return err
 				}
@@ -6409,11 +6409,11 @@ func (s *SingleplayerRound) Encode(e *jx.Encoder) {
 func (s *SingleplayerRound) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		e.Int(s.ID)
+		json.EncodeUUID(e, s.ID)
 	}
 	{
 		e.FieldStart("gameID")
-		e.Int(s.GameID)
+		json.EncodeUUID(e, s.GameID)
 	}
 	{
 		e.FieldStart("streetviewID")
@@ -6474,8 +6474,8 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int()
-				s.ID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.ID = v
 				if err != nil {
 					return err
 				}
@@ -6486,8 +6486,8 @@ func (s *SingleplayerRound) Decode(d *jx.Decoder) error {
 		case "gameID":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int()
-				s.GameID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.GameID = v
 				if err != nil {
 					return err
 				}
@@ -6981,7 +6981,7 @@ func (s *UserPrivateProfile) Encode(e *jx.Encoder) {
 func (s *UserPrivateProfile) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		e.Int(s.ID)
+		json.EncodeUUID(e, s.ID)
 	}
 	{
 		e.FieldStart("username")
@@ -7031,8 +7031,8 @@ func (s *UserPrivateProfile) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int()
-				s.ID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.ID = v
 				if err != nil {
 					return err
 				}
@@ -7179,7 +7179,7 @@ func (s *UserPublicProfile) Encode(e *jx.Encoder) {
 func (s *UserPublicProfile) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		e.Int(s.ID)
+		json.EncodeUUID(e, s.ID)
 	}
 	{
 		e.FieldStart("username")
@@ -7219,8 +7219,8 @@ func (s *UserPublicProfile) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int()
-				s.ID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.ID = v
 				if err != nil {
 					return err
 				}
@@ -7343,11 +7343,11 @@ func (s *UserSession) Encode(e *jx.Encoder) {
 func (s *UserSession) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("sessionID")
-		e.Str(s.SessionID)
+		json.EncodeUUID(e, s.SessionID)
 	}
 	{
 		e.FieldStart("userID")
-		e.Int(s.UserID)
+		json.EncodeUUID(e, s.UserID)
 	}
 	{
 		e.FieldStart("refreshToken")
@@ -7383,8 +7383,8 @@ func (s *UserSession) Decode(d *jx.Decoder) error {
 		case "sessionID":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Str()
-				s.SessionID = string(v)
+				v, err := json.DecodeUUID(d)
+				s.SessionID = v
 				if err != nil {
 					return err
 				}
@@ -7395,8 +7395,8 @@ func (s *UserSession) Decode(d *jx.Decoder) error {
 		case "userID":
 			requiredBitSet[0] |= 1 << 1
 			if err := func() error {
-				v, err := d.Int()
-				s.UserID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.UserID = v
 				if err != nil {
 					return err
 				}

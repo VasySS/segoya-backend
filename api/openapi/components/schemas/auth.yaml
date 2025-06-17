@@ -3,8 +3,10 @@ UserSession:
   properties:
     sessionID:
       type: string
+      format: uuid
     userID:
-      type: integer
+      type: string
+      format: uuid
     refreshToken:
       type: string
     ua:

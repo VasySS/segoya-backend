@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-faster/errors"
+	"github.com/google/uuid"
 
 	ht "github.com/ogen-go/ogen/http"
 )
@@ -38,6 +39,7 @@ func (s *AuthProvider) SetCreatedAt(val time.Time) {
 
 type Bearer struct {
 	Token string
+	Roles []string
 }
 
 // GetToken returns the value of Token.
@@ -45,9 +47,19 @@ func (s *Bearer) GetToken() string {
 	return s.Token
 }
 
+// GetRoles returns the value of Roles.
+func (s *Bearer) GetRoles() []string {
+	return s.Roles
+}
+
 // SetToken sets the value of Token.
 func (s *Bearer) SetToken(val string) {
 	s.Token = val
+}
+
+// SetRoles sets the value of Roles.
+func (s *Bearer) SetRoles(val []string) {
+	s.Roles = val
 }
 
 type DeleteDiscordInternalServerError Error
@@ -505,7 +517,7 @@ func (*LobbiesResponse) getLobbiesRes() {}
 // Ref: #/Lobby
 type Lobby struct {
 	ID              string    `json:"id"`
-	CreatorID       int       `json:"creatorID"`
+	CreatorID       uuid.UUID `json:"creatorID"`
 	CreatedAt       time.Time `json:"createdAt"`
 	Rounds          int       `json:"rounds"`
 	Provider        Provider  `json:"provider"`
@@ -522,7 +534,7 @@ func (s *Lobby) GetID() string {
 }
 
 // GetCreatorID returns the value of CreatorID.
-func (s *Lobby) GetCreatorID() int {
+func (s *Lobby) GetCreatorID() uuid.UUID {
 	return s.CreatorID
 }
 
@@ -572,7 +584,7 @@ func (s *Lobby) SetID(val string) {
 }
 
 // SetCreatorID sets the value of CreatorID.
-func (s *Lobby) SetCreatorID(val int) {
+func (s *Lobby) SetCreatorID(val uuid.UUID) {
 	s.CreatorID = val
 }
 
@@ -675,8 +687,8 @@ func (*LoginUnauthorized) loginRes() {}
 
 // Ref: #/MultiplayerGame
 type MultiplayerGame struct {
-	ID              int       `json:"id"`
-	CreatorID       int       `json:"creatorID"`
+	ID              uuid.UUID `json:"id"`
+	CreatorID       uuid.UUID `json:"creatorID"`
 	Rounds          int       `json:"rounds"`
 	RoundCurrent    int       `json:"roundCurrent"`
 	TimerSeconds    int       `json:"timerSeconds"`
@@ -688,12 +700,12 @@ type MultiplayerGame struct {
 }
 
 // GetID returns the value of ID.
-func (s *MultiplayerGame) GetID() int {
+func (s *MultiplayerGame) GetID() uuid.UUID {
 	return s.ID
 }
 
 // GetCreatorID returns the value of CreatorID.
-func (s *MultiplayerGame) GetCreatorID() int {
+func (s *MultiplayerGame) GetCreatorID() uuid.UUID {
 	return s.CreatorID
 }
 
@@ -738,12 +750,12 @@ func (s *MultiplayerGame) GetCreatedAt() time.Time {
 }
 
 // SetID sets the value of ID.
-func (s *MultiplayerGame) SetID(val int) {
+func (s *MultiplayerGame) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
 // SetCreatorID sets the value of CreatorID.
-func (s *MultiplayerGame) SetCreatorID(val int) {
+func (s *MultiplayerGame) SetCreatorID(val uuid.UUID) {
 	s.CreatorID = val
 }
 
@@ -883,8 +895,8 @@ func (s *MultiplayerGuess) SetScore(val int) {
 
 // Ref: #/MultiplayerRound
 type MultiplayerRound struct {
-	ID           int       `json:"id"`
-	GameID       int       `json:"gameID"`
+	ID           uuid.UUID `json:"id"`
+	GameID       uuid.UUID `json:"gameID"`
 	StreetviewID string    `json:"streetviewID"`
 	RoundNum     int       `json:"roundNum"`
 	Lat          float64   `json:"lat"`
@@ -897,12 +909,12 @@ type MultiplayerRound struct {
 }
 
 // GetID returns the value of ID.
-func (s *MultiplayerRound) GetID() int {
+func (s *MultiplayerRound) GetID() uuid.UUID {
 	return s.ID
 }
 
 // GetGameID returns the value of GameID.
-func (s *MultiplayerRound) GetGameID() int {
+func (s *MultiplayerRound) GetGameID() uuid.UUID {
 	return s.GameID
 }
 
@@ -952,12 +964,12 @@ func (s *MultiplayerRound) GetEndedAt() time.Time {
 }
 
 // SetID sets the value of ID.
-func (s *MultiplayerRound) SetID(val int) {
+func (s *MultiplayerRound) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
 // SetGameID sets the value of GameID.
-func (s *MultiplayerRound) SetGameID(val int) {
+func (s *MultiplayerRound) SetGameID(val uuid.UUID) {
 	s.GameID = val
 }
 
@@ -1068,17 +1080,17 @@ func (*NewDiscordTemporaryRedirect) newDiscordRes() {}
 
 // Ref: #/NewLobby
 type NewLobby struct {
-	CreatorID       int      `json:"creatorID"`
-	MaxPlayers      int      `json:"maxPlayers"`
-	Rounds          int      `json:"rounds"`
-	Provider        Provider `json:"provider"`
-	TimerSeconds    OptInt   `json:"timerSeconds"`
-	MovementAllowed bool     `json:"movementAllowed"`
-	Private         bool     `json:"private"`
+	CreatorID       uuid.UUID `json:"creatorID"`
+	MaxPlayers      int       `json:"maxPlayers"`
+	Rounds          int       `json:"rounds"`
+	Provider        Provider  `json:"provider"`
+	TimerSeconds    OptInt    `json:"timerSeconds"`
+	MovementAllowed bool      `json:"movementAllowed"`
+	Private         bool      `json:"private"`
 }
 
 // GetCreatorID returns the value of CreatorID.
-func (s *NewLobby) GetCreatorID() int {
+func (s *NewLobby) GetCreatorID() uuid.UUID {
 	return s.CreatorID
 }
 
@@ -1113,7 +1125,7 @@ func (s *NewLobby) GetPrivate() bool {
 }
 
 // SetCreatorID sets the value of CreatorID.
-func (s *NewLobby) SetCreatorID(val int) {
+func (s *NewLobby) SetCreatorID(val uuid.UUID) {
 	s.CreatorID = val
 }
 
@@ -1579,8 +1591,8 @@ func (s *RegisterRequest) SetName(val OptString) {
 
 // Ref: #/SingleplayerGame
 type SingleplayerGame struct {
-	ID              int       `json:"id"`
-	UserID          int       `json:"userID"`
+	ID              uuid.UUID `json:"id"`
+	UserID          uuid.UUID `json:"userID"`
 	Rounds          int       `json:"rounds"`
 	RoundCurrent    int       `json:"roundCurrent"`
 	TimerSeconds    int       `json:"timerSeconds"`
@@ -1592,12 +1604,12 @@ type SingleplayerGame struct {
 }
 
 // GetID returns the value of ID.
-func (s *SingleplayerGame) GetID() int {
+func (s *SingleplayerGame) GetID() uuid.UUID {
 	return s.ID
 }
 
 // GetUserID returns the value of UserID.
-func (s *SingleplayerGame) GetUserID() int {
+func (s *SingleplayerGame) GetUserID() uuid.UUID {
 	return s.UserID
 }
 
@@ -1642,12 +1654,12 @@ func (s *SingleplayerGame) GetCreatedAt() time.Time {
 }
 
 // SetID sets the value of ID.
-func (s *SingleplayerGame) SetID(val int) {
+func (s *SingleplayerGame) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
 // SetUserID sets the value of UserID.
-func (s *SingleplayerGame) SetUserID(val int) {
+func (s *SingleplayerGame) SetUserID(val uuid.UUID) {
 	s.UserID = val
 }
 
@@ -1804,8 +1816,8 @@ func (s *SingleplayerGuess) SetMissDistance(val int) {
 
 // Ref: #/SingleplayerRound
 type SingleplayerRound struct {
-	ID           int       `json:"id"`
-	GameID       int       `json:"gameID"`
+	ID           uuid.UUID `json:"id"`
+	GameID       uuid.UUID `json:"gameID"`
 	StreetviewID string    `json:"streetviewID"`
 	RoundNum     int       `json:"roundNum"`
 	Lat          float64   `json:"lat"`
@@ -1817,12 +1829,12 @@ type SingleplayerRound struct {
 }
 
 // GetID returns the value of ID.
-func (s *SingleplayerRound) GetID() int {
+func (s *SingleplayerRound) GetID() uuid.UUID {
 	return s.ID
 }
 
 // GetGameID returns the value of GameID.
-func (s *SingleplayerRound) GetGameID() int {
+func (s *SingleplayerRound) GetGameID() uuid.UUID {
 	return s.GameID
 }
 
@@ -1867,12 +1879,12 @@ func (s *SingleplayerRound) GetEndedAt() time.Time {
 }
 
 // SetID sets the value of ID.
-func (s *SingleplayerRound) SetID(val int) {
+func (s *SingleplayerRound) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
 // SetGameID sets the value of GameID.
-func (s *SingleplayerRound) SetGameID(val int) {
+func (s *SingleplayerRound) SetGameID(val uuid.UUID) {
 	s.GameID = val
 }
 
@@ -1985,7 +1997,7 @@ func (*UpdateUserUnauthorized) updateUserRes() {}
 
 // Ref: #/UserPrivateProfile
 type UserPrivateProfile struct {
-	ID               int       `json:"id"`
+	ID               uuid.UUID `json:"id"`
 	Username         string    `json:"username"`
 	Name             string    `json:"name"`
 	AvatarHash       string    `json:"avatarHash"`
@@ -1995,7 +2007,7 @@ type UserPrivateProfile struct {
 }
 
 // GetID returns the value of ID.
-func (s *UserPrivateProfile) GetID() int {
+func (s *UserPrivateProfile) GetID() uuid.UUID {
 	return s.ID
 }
 
@@ -2030,7 +2042,7 @@ func (s *UserPrivateProfile) GetDiscordConnected() bool {
 }
 
 // SetID sets the value of ID.
-func (s *UserPrivateProfile) SetID(val int) {
+func (s *UserPrivateProfile) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
@@ -2068,7 +2080,7 @@ func (*UserPrivateProfile) getPrivateProfileRes() {}
 
 // Ref: #/UserPublicProfile
 type UserPublicProfile struct {
-	ID           int       `json:"id"`
+	ID           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`
 	Name         string    `json:"name"`
 	AvatarHash   string    `json:"avatarHash"`
@@ -2076,7 +2088,7 @@ type UserPublicProfile struct {
 }
 
 // GetID returns the value of ID.
-func (s *UserPublicProfile) GetID() int {
+func (s *UserPublicProfile) GetID() uuid.UUID {
 	return s.ID
 }
 
@@ -2101,7 +2113,7 @@ func (s *UserPublicProfile) GetRegisterDate() time.Time {
 }
 
 // SetID sets the value of ID.
-func (s *UserPublicProfile) SetID(val int) {
+func (s *UserPublicProfile) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
@@ -2129,20 +2141,20 @@ func (*UserPublicProfile) getPublicProfileRes() {}
 
 // Ref: #/UserSession
 type UserSession struct {
-	SessionID    string    `json:"sessionID"`
-	UserID       int       `json:"userID"`
+	SessionID    uuid.UUID `json:"sessionID"`
+	UserID       uuid.UUID `json:"userID"`
 	RefreshToken string    `json:"refreshToken"`
 	Ua           string    `json:"ua"`
 	LastActive   time.Time `json:"lastActive"`
 }
 
 // GetSessionID returns the value of SessionID.
-func (s *UserSession) GetSessionID() string {
+func (s *UserSession) GetSessionID() uuid.UUID {
 	return s.SessionID
 }
 
 // GetUserID returns the value of UserID.
-func (s *UserSession) GetUserID() int {
+func (s *UserSession) GetUserID() uuid.UUID {
 	return s.UserID
 }
 
@@ -2162,12 +2174,12 @@ func (s *UserSession) GetLastActive() time.Time {
 }
 
 // SetSessionID sets the value of SessionID.
-func (s *UserSession) SetSessionID(val string) {
+func (s *UserSession) SetSessionID(val uuid.UUID) {
 	s.SessionID = val
 }
 
 // SetUserID sets the value of UserID.
-func (s *UserSession) SetUserID(val int) {
+func (s *UserSession) SetUserID(val uuid.UUID) {
 	s.UserID = val
 }
 

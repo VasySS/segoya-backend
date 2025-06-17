@@ -1021,7 +1021,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         username:
           type: string
         name:
@@ -1074,7 +1075,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         username:
           type: string
         name:
@@ -1127,8 +1129,10 @@ components:
       properties:
         sessionID:
           type: string
+          format: uuid
         userID:
-          type: integer
+          type: string
+          format: uuid
         refreshToken:
           type: string
         ua:
@@ -1166,7 +1170,8 @@ components:
         id:
           type: string
         creatorID:
-          type: integer
+          type: string
+          format: uuid
         createdAt:
           type: string
           format: date-time
@@ -1211,7 +1216,8 @@ components:
       type: object
       properties:
         creatorID:
-          type: integer
+          type: string
+          format: uuid
         maxPlayers:
           type: integer
           minimum: 2
@@ -1241,9 +1247,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         userID:
-          type: integer
+          type: string
+          format: uuid
         rounds:
           type: integer
         roundCurrent:
@@ -1307,9 +1315,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         gameID:
-          type: integer
+          type: string
+          format: uuid
         streetviewID:
           type: string
         roundNum:
@@ -1400,9 +1410,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         creatorID:
-          type: integer
+          type: string
+          format: uuid
         rounds:
           type: integer
         roundCurrent:
@@ -1463,9 +1475,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         gameID:
-          type: integer
+          type: string
+          format: uuid
         streetviewID:
           type: string
         roundNum:
