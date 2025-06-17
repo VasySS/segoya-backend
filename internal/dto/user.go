@@ -6,6 +6,7 @@ import (
 
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
+	"github.com/google/uuid"
 )
 
 // UserToAPIPublicUser converts a user profile to a API format.
@@ -32,14 +33,14 @@ func UserToAPIPrivateUser(u user.PrivateProfile) *api.UserPrivateProfile {
 
 // UpdateUserRequest represents a request to update a user's profile information.
 type UpdateUserRequest struct {
-	UserID string
+	UserID uuid.UUID
 	Name   string
 }
 
 // UpdateAvatarRequest represents a request to update a user's avatar.
 type UpdateAvatarRequest struct {
 	RequestTime time.Time
-	UserID      string
+	UserID      uuid.UUID
 	File        io.Reader
 	MimeType    string
 }
@@ -47,6 +48,6 @@ type UpdateAvatarRequest struct {
 // UpdateAvatarRequestDB represents a request to update a user's avatar hash in the database.
 type UpdateAvatarRequestDB struct {
 	RequestTime time.Time
-	UserID      string
+	UserID      uuid.UUID
 	AvatarHash  string
 }

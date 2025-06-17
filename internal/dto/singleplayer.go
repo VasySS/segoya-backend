@@ -6,6 +6,7 @@ import (
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
+	"github.com/google/uuid"
 )
 
 // SingleplayerGameToAPI converts a singleplayer game entity to the API model.
@@ -94,7 +95,7 @@ func SingleplyerGamesToAPI(g []singleplayer.Game, gamesTotal int) *api.Singlepla
 
 // GetSingleplayerGamesRequest represents a request to get a list of singleplayer games.
 type GetSingleplayerGamesRequest struct {
-	UserID   string
+	UserID   uuid.UUID
 	Page     int
 	PageSize int
 }
@@ -103,15 +104,15 @@ type GetSingleplayerGamesRequest struct {
 type NewSingleplayerRoundDBRequest struct {
 	CreatedAt  time.Time
 	StartedAt  time.Time
-	GameID     string
-	LocationID string
+	GameID     uuid.UUID
+	LocationID uuid.UUID
 	RoundNum   int
 }
 
 // NewSingleplayerGameRequest represents a request to create a new singleplayer game.
 type NewSingleplayerGameRequest struct {
 	RequestTime     time.Time
-	UserID          string
+	UserID          uuid.UUID
 	Rounds          int
 	TimerSeconds    int
 	Provider        string
@@ -121,22 +122,22 @@ type NewSingleplayerGameRequest struct {
 // EndSingleplayerGameRequestDB represents a request to end a singleplayer game.
 type EndSingleplayerGameRequestDB struct {
 	RequestTime time.Time
-	GameID      string
+	GameID      uuid.UUID
 }
 
 // EndSingleplayerRoundRequest represents a request to end a singleplayer round.
 type EndSingleplayerRoundRequest struct {
 	RequestTime time.Time
-	GameID      string
-	UserID      string
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 	Guess       game.LatLng
 }
 
 // NewSingleplayerRoundGuessRequest represents a request to create a new singleplayer round guess.
 type NewSingleplayerRoundGuessRequest struct {
 	RequestTime time.Time
-	RoundID     string
-	GameID      string
+	RoundID     uuid.UUID
+	GameID      uuid.UUID
 	Guess       game.LatLng
 	Score       int
 	Distance    int
@@ -151,34 +152,34 @@ type EndCurrentRoundResponse struct {
 // GetSingleplayerGameRequest represents a request to get a singleplayer game.
 type GetSingleplayerGameRequest struct {
 	RequestTime time.Time
-	GameID      string
-	UserID      string
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }
 
 // GetSingleplayerRoundRequest represents a request to get a singleplayer round.
 type GetSingleplayerRoundRequest struct {
 	RequestTime time.Time
-	GameID      string
-	UserID      string
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }
 
 // GetSingleplayerGameGuessesRequest represents a request to get a list of singleplayer game rounds.
 type GetSingleplayerGameGuessesRequest struct {
 	RequestTime time.Time
-	GameID      string
-	UserID      string
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }
 
 // NewSingleplayerRoundRequest represents a request to create a new singleplayer round.
 type NewSingleplayerRoundRequest struct {
 	RequestTime time.Time
-	GameID      string
-	UserID      string
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }
 
 // EndSingleplayerGameRequest represents a request to end a singleplayer game.
 type EndSingleplayerGameRequest struct {
 	RequestTime time.Time
-	GameID      string
-	UserID      string
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }

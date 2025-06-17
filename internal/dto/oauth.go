@@ -5,6 +5,7 @@ import (
 
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
+	"github.com/google/uuid"
 )
 
 // OAuthToAPI converts a slice of OAuth providers information to a format suitable for API responses.
@@ -32,7 +33,7 @@ type NewOAuthRequest struct {
 	RequestTime time.Time
 	StateTTL    time.Duration
 	State       string
-	UserID      string
+	UserID      uuid.UUID
 }
 
 // NewOAuthCallbackRequest represents a request to handle the OAuth callback after authentication.
@@ -46,13 +47,13 @@ type NewOAuthCallbackRequest struct {
 type NewOAuthRequestDB struct {
 	RequestTime time.Time
 	OAuthID     string
-	UserID      string
+	UserID      uuid.UUID
 	Issuer      user.OAuthIssuer
 }
 
 // DeleteOAuthRequest represents a request to delete OAuth connection.
 type DeleteOAuthRequest struct {
-	UserID string
+	UserID uuid.UUID
 	Issuer user.OAuthIssuer
 }
 

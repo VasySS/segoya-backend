@@ -1322,7 +1322,6 @@ components:
           format: uuid
         streetviewID:
           type: string
-          format: uuid
         roundNum:
           type: integer
         lat:
@@ -1483,7 +1482,6 @@ components:
           format: uuid
         streetviewID:
           type: string
-          format: uuid
         roundNum:
           type: integer
         lat:
