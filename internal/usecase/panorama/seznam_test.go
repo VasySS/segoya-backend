@@ -4,6 +4,7 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -16,7 +17,7 @@ func TestUsecase_NewSeznamStreetview(t *testing.T) {
 	t.Parallel()
 
 	seznamMetadata := game.SeznamStreetview{
-		ID:  432432,
+		ID:  uuid.Must(uuid.NewV7()),
 		Lat: 1.1234,
 		Lng: 2.3456,
 	}
@@ -85,7 +86,7 @@ func TestUsecase_GetSeznamStreetview(t *testing.T) {
 	t.Parallel()
 
 	seznamMetadata := game.SeznamStreetview{
-		ID:  432432,
+		ID:  uuid.Must(uuid.NewV7()),
 		Lat: 1.1234,
 		Lng: 2.3456,
 	}
@@ -103,7 +104,7 @@ func TestUsecase_GetSeznamStreetview(t *testing.T) {
 	}
 
 	type args struct {
-		id int
+		id uuid.UUID
 	}
 
 	tests := []struct {

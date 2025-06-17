@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/suite"
 
@@ -93,7 +94,7 @@ func (s *SingleplayerTestSuite) TestNewSingleplayerGame() {
 func (s *SingleplayerTestSuite) TestSingleplayerGameByID() {
 	newUser := s.newTestUser()
 
-	_, err := s.postgresRepo.GetSingleplayerGame(s.ctx, 111)
+	_, err := s.postgresRepo.GetSingleplayerGame(s.ctx, uuid.New())
 	s.Require().ErrorIs(err, singleplayer.ErrGameNotFound)
 
 	newTestGame, gameReq := s.newTestGame(newUser.ID)
@@ -209,11 +210,13 @@ func (s *SingleplayerTestSuite) TestSingleplayerRoundsWithGuesses() {
 	guesses := make([]singleplayer.Guess, 0, newGame.Rounds)
 
 	for i := 1; i <= newGame.Rounds; i++ {
+		locationUUID, _ := uuid.NewV7()
+
 		newRoundReq := dto.NewSingleplayerRoundDBRequest{
 			CreatedAt:  time.Now().UTC(),
 			StartedAt:  time.Now().UTC().Add(time.Second * 10),
 			GameID:     newGame.ID,
-			LocationID: gofakeit.Number(1, 10),
+			LocationID: locationUUID,
 			RoundNum:   i,
 		}
 
@@ -285,7 +288,7 @@ func (s *SingleplayerTestSuite) newTestUser() user.PrivateProfile {
 	return newUser
 }
 
-func (s *SingleplayerTestSuite) newTestGame(userID int) (singleplayer.Game, dto.NewSingleplayerGameRequest) {
+func (s *SingleplayerTestSuite) newTestGame(userID uuid.UUID) (singleplayer.Game, dto.NewSingleplayerGameRequest) {
 	gameReq := dto.NewSingleplayerGameRequest{
 		RequestTime:     time.Now().UTC(),
 		UserID:          userID,
@@ -305,13 +308,15 @@ func (s *SingleplayerTestSuite) newTestGame(userID int) (singleplayer.Game, dto.
 }
 
 func (s *SingleplayerTestSuite) newTestRound(
-	gameID, roundNum int,
+	gameID uuid.UUID, roundNum int,
 ) (singleplayer.Round, dto.NewSingleplayerRoundDBRequest) {
+	locationUUID, _ := uuid.NewV7()
+
 	roundReq := dto.NewSingleplayerRoundDBRequest{
 		CreatedAt:  time.Now().UTC(),
 		StartedAt:  time.Now().UTC().Add(time.Second * 10),
 		GameID:     gameID,
-		LocationID: gofakeit.Number(1, 100),
+		LocationID: locationUUID,
 		RoundNum:   roundNum,
 	}
 

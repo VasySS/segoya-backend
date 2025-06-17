@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/suite"
 
@@ -97,7 +98,7 @@ func (s *MultiplayerTestSuite) TestNewMultiplayerGame() {
 }
 
 func (s *MultiplayerTestSuite) TestMultiplayerGameByID() {
-	_, err := s.postgresRepo.GetMultiplayerGame(s.ctx, 1111)
+	_, err := s.postgresRepo.GetMultiplayerGame(s.ctx, uuid.New())
 	s.Require().ErrorIs(err, multiplayer.ErrGameNotFound)
 
 	userCreator := s.newTestUser()
@@ -371,7 +372,7 @@ func (s *MultiplayerTestSuite) newTestUser() user.PrivateProfile {
 }
 
 func (s *MultiplayerTestSuite) newTestGame(
-	userID int,
+	userID uuid.UUID,
 	connectedPlayers []user.PublicProfile,
 ) (multiplayer.Game, dto.NewMultiplayerGameRequest) {
 	gameReq := dto.NewMultiplayerGameRequest{
@@ -394,13 +395,13 @@ func (s *MultiplayerTestSuite) newTestGame(
 }
 
 func (s *MultiplayerTestSuite) newTestRound(
-	gameID, roundNum int,
+	gameID uuid.UUID, roundNum int,
 ) (multiplayer.Round, dto.NewMultiplayerRoundRequestDB) {
 	roundReq := dto.NewMultiplayerRoundRequestDB{
 		CreatedAt:  time.Now().UTC(),
 		StartedAt:  time.Now().UTC().Add(time.Second * 10),
 		GameID:     gameID,
-		LocationID: gofakeit.Number(1, 100),
+		LocationID: uuid.New(),
 		RoundNum:   roundNum,
 	}
 

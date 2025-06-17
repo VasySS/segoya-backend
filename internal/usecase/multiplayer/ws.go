@@ -7,6 +7,7 @@ import (
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
+	"github.com/google/uuid"
 )
 
 // NewRoundGuess saves a user's guess for current round (called from websocket).
@@ -117,7 +118,7 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 	return response, nil
 }
 
-func (uc Usecase) lockGameAndGetData(ctx context.Context, gameID, userID int) (
+func (uc Usecase) lockGameAndGetData(ctx context.Context, gameID, userID uuid.UUID) (
 	multiplayer.Game, multiplayer.Round, []multiplayer.Guess, error,
 ) {
 	if err := uc.repo.LockMultiplayerGame(ctx, gameID); err != nil {

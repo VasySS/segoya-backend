@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/suite"
 
@@ -122,7 +123,7 @@ func (s *UserTestSuite) TestGetUserByUsername() {
 }
 
 func (s *UserTestSuite) TestGetUserByID() {
-	_, err := s.postgresRepo.GetUserByID(s.ctx, 1111)
+	_, err := s.postgresRepo.GetUserByID(s.ctx, uuid.New())
 	s.Require().ErrorIs(err, user.ErrUserNotFound)
 
 	req := dto.RegisterRequestDB{

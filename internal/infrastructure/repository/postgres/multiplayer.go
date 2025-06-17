@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
@@ -13,7 +14,7 @@ import (
 )
 
 // LockMultiplayerGame locks a multiplayer game by id exclusively.
-func (r *Repository) LockMultiplayerGame(ctx context.Context, gameID int) error {
+func (r *Repository) LockMultiplayerGame(ctx context.Context, gameID uuid.UUID) error {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	query := `
@@ -23,7 +24,7 @@ func (r *Repository) LockMultiplayerGame(ctx context.Context, gameID int) error 
 		FOR UPDATE
 	`
 
-	if _, err := tx.Exec(ctx, query, pgx.NamedArgs{"game_id": gameID}); err != nil {
+	if _, err := tx.Exec(ctx, query, pgx.NamedArgs{"game_id": gameID.String()}); err != nil {
 		return fmt.Errorf("failed to lock game: %w", err)
 	}
 
@@ -34,7 +35,7 @@ func (r *Repository) LockMultiplayerGame(ctx context.Context, gameID int) error 
 func (r *Repository) NewMultiplayerGame(
 	ctx context.Context,
 	req dto.NewMultiplayerGameRequest,
-) (int, error) {
+) (uuid.UUID, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "NewMultiplayerGame")
@@ -57,12 +58,12 @@ func (r *Repository) NewMultiplayerGame(
         SELECT id FROM new_game
     `
 
-	userIDs := make([]int64, 0, len(req.ConnectedPlayers))
+	userIDs := make(uuid.UUIDs, 0, len(req.ConnectedPlayers))
 	for _, player := range req.ConnectedPlayers {
-		userIDs = append(userIDs, int64(player.ID))
+		userIDs = append(userIDs, player.ID)
 	}
 
-	var gameID int
+	var gameID uuid.UUID
 
 	err := pgxscan.Get(ctx, tx, &gameID, query, pgx.NamedArgs{
 		"created_at":       req.RequestTime,
@@ -75,14 +76,14 @@ func (r *Repository) NewMultiplayerGame(
 		"user_ids":         userIDs,
 	})
 	if err != nil {
-		return -1, fmt.Errorf("failed to create multiplayer game: %w", err)
+		return uuid.UUID{}, fmt.Errorf("failed to create multiplayer game: %w", err)
 	}
 
 	return gameID, nil
 }
 
 // GetMultiplayerGame returns a multiplayer game by its id.
-func (r *Repository) GetMultiplayerGame(ctx context.Context, gameID int) (multiplayer.Game, error) {
+func (r *Repository) GetMultiplayerGame(ctx context.Context, gameID uuid.UUID) (multiplayer.Game, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetMultiplayerGame")
@@ -110,7 +111,7 @@ func (r *Repository) GetMultiplayerGame(ctx context.Context, gameID int) (multip
 
 	var game multiplayer.Game
 
-	err := pgxscan.Get(ctx, tx, &game, query, pgx.NamedArgs{"game_id": gameID})
+	err := pgxscan.Get(ctx, tx, &game, query, pgx.NamedArgs{"game_id": gameID.String()})
 	if pgxscan.NotFound(err) {
 		return multiplayer.Game{}, multiplayer.ErrGameNotFound
 	} else if err != nil {
@@ -136,7 +137,7 @@ func (r *Repository) EndMultiplayerGame(ctx context.Context, req dto.EndMultipla
 	`
 
 	_, err := tx.Exec(ctx, query, pgx.NamedArgs{
-		"game_id":  req.GameID,
+		"game_id":  req.GameID.String(),
 		"ended_at": req.RequestTime,
 	})
 	if err != nil {
@@ -147,7 +148,7 @@ func (r *Repository) EndMultiplayerGame(ctx context.Context, req dto.EndMultipla
 }
 
 // GetMultiplayerGameUser returns a multiplayer game user information by using game id and user id.
-func (r *Repository) GetMultiplayerGameUser(ctx context.Context, userID, gameID int) (user.MultiplayerUser, error) {
+func (r *Repository) GetMultiplayerGameUser(ctx context.Context, userID, gameID uuid.UUID) (user.MultiplayerUser, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetMultiplayerGameUser")
@@ -173,8 +174,8 @@ func (r *Repository) GetMultiplayerGameUser(ctx context.Context, userID, gameID 
 	var u user.MultiplayerUser
 
 	err := pgxscan.Get(ctx, tx, &u, query, pgx.NamedArgs{
-		"user_id": userID,
-		"game_id": gameID,
+		"user_id": userID.String(),
+		"game_id": gameID.String(),
 	})
 	if err != nil {
 		return user.MultiplayerUser{}, fmt.Errorf("failed to get user: %w", err)
@@ -184,7 +185,7 @@ func (r *Repository) GetMultiplayerGameUser(ctx context.Context, userID, gameID 
 }
 
 // GetMultiplayerGameUsers returns a list of multiplayer game users information.
-func (r *Repository) GetMultiplayerGameUsers(ctx context.Context, gameID int) ([]user.MultiplayerUser, error) {
+func (r *Repository) GetMultiplayerGameUsers(ctx context.Context, gameID uuid.UUID) ([]user.MultiplayerUser, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetMultiplayerGameUsers")
@@ -211,7 +212,7 @@ func (r *Repository) GetMultiplayerGameUsers(ctx context.Context, gameID int) ([
 
 	var users []user.MultiplayerUser
 
-	err := pgxscan.Select(ctx, tx, &users, userQuery, pgx.NamedArgs{"game_id": gameID})
+	err := pgxscan.Select(ctx, tx, &users, userQuery, pgx.NamedArgs{"game_id": gameID.String()})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get multiplayer game users: %w", err)
 	}
@@ -220,7 +221,7 @@ func (r *Repository) GetMultiplayerGameUsers(ctx context.Context, gameID int) ([
 }
 
 // GetMultiplayerGameGuesses returns a list of all multiplayer game guesses by game id.
-func (r *Repository) GetMultiplayerGameGuesses(ctx context.Context, gameID int) ([]multiplayer.Guess, error) {
+func (r *Repository) GetMultiplayerGameGuesses(ctx context.Context, gameID uuid.UUID) ([]multiplayer.Guess, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetMultiplayerGameGuesses")
@@ -248,7 +249,7 @@ func (r *Repository) GetMultiplayerGameGuesses(ctx context.Context, gameID int) 
 
 	var guesses []multiplayer.Guess
 
-	err := pgxscan.Select(ctx, tx, &guesses, query, pgx.NamedArgs{"game_id": gameID})
+	err := pgxscan.Select(ctx, tx, &guesses, query, pgx.NamedArgs{"game_id": gameID.String()})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get multiplayer user guesses: %w", err)
 	}
@@ -274,7 +275,7 @@ func (r *Repository) NewMultiplayerRound(
 		RETURNING id
 	`
 
-	var roundID int
+	var roundID uuid.UUID
 
 	err := pgxscan.Get(ctx, tx, &roundID, roundQuery, pgx.NamedArgs{
 		"game_id":     req.GameID,
@@ -296,7 +297,7 @@ func (r *Repository) NewMultiplayerRound(
 }
 
 // GetMultiplayerRound returns a multiplayer round.
-func (r *Repository) GetMultiplayerRound(ctx context.Context, gameID, roundNum int) (multiplayer.Round, error) {
+func (r *Repository) GetMultiplayerRound(ctx context.Context, gameID uuid.UUID, roundNum int) (multiplayer.Round, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetMultiplayerRound")
@@ -327,7 +328,7 @@ func (r *Repository) GetMultiplayerRound(ctx context.Context, gameID, roundNum i
 	var round multiplayer.Round
 
 	err := pgxscan.Get(ctx, tx, &round, query, pgx.NamedArgs{
-		"game_id":   gameID,
+		"game_id":   gameID.String(),
 		"round_num": roundNum,
 	})
 	if pgxscan.NotFound(err) {
@@ -355,7 +356,7 @@ func (r *Repository) EndMultiplayerRound(ctx context.Context, req dto.EndMultipl
 	`
 
 	_, err := tx.Exec(ctx, roundQuery, pgx.NamedArgs{
-		"round_id": req.RoundID,
+		"round_id": req.RoundID.String(),
 		"ended_at": req.RequestTime,
 	})
 	if err != nil {
@@ -383,8 +384,8 @@ func (r *Repository) NewMultiplayerRoundGuess(
 
 	_, err := tx.Exec(ctx, guessQuery, pgx.NamedArgs{
 		"created_at": req.RequestTime,
-		"round_id":   req.RoundID,
-		"user_id":    req.UserID,
+		"round_id":   req.RoundID.String(),
+		"user_id":    req.UserID.String(),
 		"lat":        req.Lat,
 		"lng":        req.Lng,
 		"score":      req.Score,
@@ -398,7 +399,7 @@ func (r *Repository) NewMultiplayerRoundGuess(
 }
 
 // GetMultiplayerRoundGuesses returns a list of all multiplayer round guesses.
-func (r *Repository) GetMultiplayerRoundGuesses(ctx context.Context, roundID int) ([]multiplayer.Guess, error) {
+func (r *Repository) GetMultiplayerRoundGuesses(ctx context.Context, roundID uuid.UUID) ([]multiplayer.Guess, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetMultiplayerRoundGuesses")
@@ -428,7 +429,7 @@ func (r *Repository) GetMultiplayerRoundGuesses(ctx context.Context, roundID int
 
 	var guesses []multiplayer.Guess
 
-	err := pgxscan.Select(ctx, tx, &guesses, query, pgx.NamedArgs{"round_id": roundID})
+	err := pgxscan.Select(ctx, tx, &guesses, query, pgx.NamedArgs{"round_id": roundID.String()})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get multiplayer user guesses: %w", err)
 	}

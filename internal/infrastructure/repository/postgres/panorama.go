@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
@@ -39,7 +40,7 @@ func (r *Repository) RandomGoogleStreetview(ctx context.Context) (game.GoogleStr
 }
 
 // GetGoogleStreetview gets a Google streetview by its id from the database.
-func (r *Repository) GetGoogleStreetview(ctx context.Context, id int) (game.GoogleStreetview, error) {
+func (r *Repository) GetGoogleStreetview(ctx context.Context, id uuid.UUID) (game.GoogleStreetview, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetGoogleStreetview")
@@ -56,7 +57,7 @@ func (r *Repository) GetGoogleStreetview(ctx context.Context, id int) (game.Goog
 
 	var stv game.GoogleStreetview
 
-	err := pgxscan.Get(ctx, tx, &stv, query, pgx.NamedArgs{"location_id": id})
+	err := pgxscan.Get(ctx, tx, &stv, query, pgx.NamedArgs{"location_id": id.String()})
 	if err != nil {
 		return game.GoogleStreetview{}, fmt.Errorf("failed to get streetview by id: %w", err)
 	}
@@ -94,7 +95,7 @@ func (r *Repository) RandomYandexAirview(ctx context.Context) (game.YandexAirvie
 }
 
 // GetYandexAirview gets a Yandex air view by its id from the database.
-func (r *Repository) GetYandexAirview(ctx context.Context, id int) (game.YandexAirview, error) {
+func (r *Repository) GetYandexAirview(ctx context.Context, id uuid.UUID) (game.YandexAirview, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetYandexAirview")
@@ -112,7 +113,7 @@ func (r *Repository) GetYandexAirview(ctx context.Context, id int) (game.YandexA
 
 	var airv game.YandexAirview
 
-	err := pgxscan.Get(ctx, tx, &airv, query, pgx.NamedArgs{"location_id": id})
+	err := pgxscan.Get(ctx, tx, &airv, query, pgx.NamedArgs{"location_id": id.String()})
 	if err != nil {
 		return game.YandexAirview{}, fmt.Errorf("failed to get air view by id: %w", err)
 	}
@@ -149,7 +150,7 @@ func (r *Repository) RandomYandexStreetview(ctx context.Context) (game.YandexStr
 }
 
 // GetYandexStreetview gets a Yandex streetview by its id from the database.
-func (r *Repository) GetYandexStreetview(ctx context.Context, id int) (game.YandexStreetview, error) {
+func (r *Repository) GetYandexStreetview(ctx context.Context, id uuid.UUID) (game.YandexStreetview, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetYandexStreetview")
@@ -166,7 +167,7 @@ func (r *Repository) GetYandexStreetview(ctx context.Context, id int) (game.Yand
 
 	var stv game.YandexStreetview
 
-	err := pgxscan.Get(ctx, tx, &stv, query, pgx.NamedArgs{"id": id})
+	err := pgxscan.Get(ctx, tx, &stv, query, pgx.NamedArgs{"id": id.String()})
 	if err != nil {
 		return game.YandexStreetview{}, fmt.Errorf("failed to get streetview by id: %w", err)
 	}
@@ -203,7 +204,7 @@ func (r *Repository) RandomSeznamStreetview(ctx context.Context) (game.SeznamStr
 }
 
 // GetSeznamStreetview gets a Seznam streetview by its id from the database.
-func (r *Repository) GetSeznamStreetview(ctx context.Context, id int) (game.SeznamStreetview, error) {
+func (r *Repository) GetSeznamStreetview(ctx context.Context, id uuid.UUID) (game.SeznamStreetview, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetSeznamStreetview")
@@ -220,7 +221,7 @@ func (r *Repository) GetSeznamStreetview(ctx context.Context, id int) (game.Sezn
 
 	var stv game.SeznamStreetview
 
-	err := pgxscan.Get(ctx, tx, &stv, query, pgx.NamedArgs{"id": id})
+	err := pgxscan.Get(ctx, tx, &stv, query, pgx.NamedArgs{"id": id.String()})
 	if err != nil {
 		return stv, fmt.Errorf("failed to get streetview point by id: %w", err)
 	}

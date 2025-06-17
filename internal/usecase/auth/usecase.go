@@ -12,6 +12,7 @@ import (
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
+	"github.com/google/uuid"
 )
 
 // UserRepository defines methods for retrieving user data from the repository layer.
@@ -21,7 +22,7 @@ type UserRepository interface {
 	NewUser(ctx context.Context, req dto.RegisterRequestDB) error
 	GetUserByUsername(ctx context.Context, username string) (user.PrivateProfile, error)
 	NewOAuth(ctx context.Context, req dto.NewOAuthRequestDB) error
-	GetOAuth(ctx context.Context, userID int) ([]user.OAuth, error)
+	GetOAuth(ctx context.Context, userID uuid.UUID) ([]user.OAuth, error)
 	DeleteOAuth(ctx context.Context, req dto.DeleteOAuthRequest) error
 	GetUserByOAuth(ctx context.Context, req dto.GetUserByOAuthRequest) (user.PrivateProfile, error)
 }
@@ -31,19 +32,19 @@ type UserRepository interface {
 //go:generate go tool mockery --name=SessionRepository
 type SessionRepository interface {
 	NewSession(ctx context.Context, req dto.NewSessionRequest) error
-	GetSession(ctx context.Context, userID int, sessionID string) (user.Session, error)
-	GetSessions(ctx context.Context, userID int) ([]user.Session, error)
+	GetSession(ctx context.Context, userID, sessionID uuid.UUID) (user.Session, error)
+	GetSessions(ctx context.Context, userID uuid.UUID) ([]user.Session, error)
 	UpdateSession(ctx context.Context, req dto.UpdateSessionRequest) error
-	DeleteSession(ctx context.Context, userID int, sessionID string) error
+	DeleteSession(ctx context.Context, userID, sessionID uuid.UUID) error
 	NewOAuthState(ctx context.Context, req dto.NewOAuthRequest) error
-	GetOAuthUserID(ctx context.Context, state string) (int, error)
+	GetOAuthUserID(ctx context.Context, state string) (uuid.UUID, error)
 }
 
 // CryptoService defines methods for working with cryptographic operations.
 //
 //go:generate go tool mockery --name=CryptoService
 type CryptoService interface {
-	NewUUID4() string
+	NewUUID7() uuid.UUID
 	CompareHashAndPassword(hash, password string) error
 	GenerateHashFromPassword(password string) (string, error)
 }

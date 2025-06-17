@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/valkey-io/valkey-go"
 
@@ -48,10 +49,13 @@ func (s *SessionTestSuite) TearDownSuite() {
 }
 
 func (s *SessionTestSuite) TestNewUserSession() {
+	userUUID, _ := uuid.NewV7()
+	sessionUUID, _ := uuid.NewV7()
+
 	req := dto.NewSessionRequest{
 		RequestTime:  time.Now().UTC(),
-		UserID:       gofakeit.IntRange(1, 100),
-		SessionID:    gofakeit.UUID(),
+		UserID:       userUUID,
+		SessionID:    sessionUUID,
 		RefreshToken: gofakeit.UUID(),
 		Expiration:   2 * time.Second,
 		UA:           "Test User Agent",
@@ -74,10 +78,13 @@ func (s *SessionTestSuite) TestNewUserSession() {
 }
 
 func (s *SessionTestSuite) TestGetUserSession() {
+	userUUID, _ := uuid.NewV7()
+	sessionUUID, _ := uuid.NewV7()
+
 	req := dto.NewSessionRequest{
 		RequestTime:  time.Now().UTC(),
-		UserID:       gofakeit.IntRange(1, 100),
-		SessionID:    gofakeit.UUID(),
+		UserID:       userUUID,
+		SessionID:    sessionUUID,
 		RefreshToken: gofakeit.UUID(),
 		Expiration:   2 * time.Second,
 		UA:           "Test User Agent",
@@ -100,14 +107,16 @@ func (s *SessionTestSuite) TestGetUserSession() {
 }
 
 func (s *SessionTestSuite) TestGetUserSessions() {
-	userID := gofakeit.IntRange(1, 100)
+	userUUID, _ := uuid.NewV7()
 	newSessionIDs := make([]string, 0, 3)
 
 	for range 3 {
+		sessionUUID, _ := uuid.NewV7()
+
 		req := dto.NewSessionRequest{
 			RequestTime:  time.Now().UTC(),
-			UserID:       userID,
-			SessionID:    gofakeit.UUID(),
+			UserID:       userUUID,
+			SessionID:    sessionUUID,
 			RefreshToken: gofakeit.UUID(),
 			Expiration:   2 * time.Second,
 			UA:           "Test User Agent",
@@ -116,28 +125,28 @@ func (s *SessionTestSuite) TestGetUserSessions() {
 		err := s.valkeyRepo.NewSession(s.ctx, req)
 		s.Require().NoError(err)
 
-		newSessionIDs = append(newSessionIDs, req.SessionID)
+		newSessionIDs = append(newSessionIDs, req.SessionID.String())
 	}
 
-	sessions, err := s.valkeyRepo.GetSessions(s.ctx, userID)
+	sessions, err := s.valkeyRepo.GetSessions(s.ctx, userUUID)
 	s.Require().NoError(err)
 
 	getSessionIDs := make([]string, 0, len(sessions))
 	for _, session := range sessions {
-		getSessionIDs = append(getSessionIDs, session.SessionID)
+		getSessionIDs = append(getSessionIDs, session.SessionID.String())
 	}
 
 	s.ElementsMatch(newSessionIDs, getSessionIDs)
 }
 
 func (s *SessionTestSuite) TestUpdateUserSession() {
-	userID := gofakeit.IntRange(1, 100)
-	sessionID := gofakeit.UUID()
+	userUUID, _ := uuid.NewV7()
+	sessionUUID, _ := uuid.NewV7()
 
 	createReq := dto.NewSessionRequest{
 		RequestTime:  time.Now().UTC(),
-		UserID:       userID,
-		SessionID:    sessionID,
+		UserID:       userUUID,
+		SessionID:    sessionUUID,
 		RefreshToken: gofakeit.UUID(),
 		Expiration:   2 * time.Second,
 		UA:           "Test User Agent",
@@ -145,8 +154,8 @@ func (s *SessionTestSuite) TestUpdateUserSession() {
 
 	updateReq := dto.UpdateSessionRequest{
 		RequestTime:  time.Now().UTC(),
-		UserID:       userID,
-		SessionID:    sessionID,
+		UserID:       userUUID,
+		SessionID:    sessionUUID,
 		RefreshToken: gofakeit.UUID(),
 		Expiration:   10 * time.Second,
 	}
@@ -170,13 +179,13 @@ func (s *SessionTestSuite) TestUpdateUserSession() {
 }
 
 func (s *SessionTestSuite) TestDeleteUserSession() {
-	userID := gofakeit.IntRange(1, 100)
-	sessionID := gofakeit.UUID()
+	userUUID, _ := uuid.NewV7()
+	sessionUUID, _ := uuid.NewV7()
 
 	req := dto.NewSessionRequest{
 		RequestTime:  time.Now().UTC(),
-		UserID:       userID,
-		SessionID:    sessionID,
+		UserID:       userUUID,
+		SessionID:    sessionUUID,
 		RefreshToken: gofakeit.UUID(),
 		Expiration:   10 * time.Second,
 		UA:           "Test User Agent",

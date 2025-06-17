@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/google/uuid"
 )
 
 // NewGoogleStreetview gets a random Google streetview from the database.
@@ -26,7 +27,7 @@ func (uc Usecase) NewGoogleStreetview(ctx context.Context) (game.PanoramaMetadat
 }
 
 // GetGoogleStreetview gets a Google streetview from the database by its id.
-func (uc Usecase) GetGoogleStreetview(ctx context.Context, id int) (game.PanoramaMetadata, error) {
+func (uc Usecase) GetGoogleStreetview(ctx context.Context, id uuid.UUID) (game.PanoramaMetadata, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGoogleStreetview")
 	defer span.End()
 

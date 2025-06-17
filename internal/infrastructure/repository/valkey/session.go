@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/valkey-io/valkey-go"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
@@ -28,11 +28,11 @@ func (r *Repository) NewSession(ctx context.Context, req dto.NewSessionRequest) 
 	ctx, span := r.tracer.Start(ctx, "NewSession")
 	defer span.End()
 
-	key := userPrefix + strconv.Itoa(req.UserID) + sessionPrefix + req.SessionID
+	key := userPrefix + req.UserID.String() + sessionPrefix + req.SessionID.String()
 
 	fields := map[string]string{
-		sessionIDField:         req.SessionID,
-		sessionUserIDField:     strconv.Itoa(req.UserID),
+		sessionIDField:         req.SessionID.String(),
+		sessionUserIDField:     req.UserID.String(),
 		sessionTokenField:      req.RefreshToken,
 		sessionUAField:         req.UA,
 		sessionLastActiveField: req.RequestTime.Format(time.RFC3339),
@@ -64,7 +64,7 @@ func (r *Repository) UpdateSession(ctx context.Context, req dto.UpdateSessionReq
 	ctx, span := r.tracer.Start(ctx, "UpdateSession")
 	defer span.End()
 
-	key := userPrefix + strconv.Itoa(req.UserID) + sessionPrefix + req.SessionID
+	key := userPrefix + req.UserID.String() + sessionPrefix + req.SessionID.String()
 
 	setCmd := r.valkey.B().Hset().Key(key).FieldValue()
 	setCmd = setCmd.FieldValue(sessionTokenField, req.RefreshToken)
@@ -87,11 +87,11 @@ func (r *Repository) UpdateSession(ctx context.Context, req dto.UpdateSessionReq
 }
 
 // GetSession returns user session data.
-func (r *Repository) GetSession(ctx context.Context, userID int, sessionID string) (user.Session, error) {
+func (r *Repository) GetSession(ctx context.Context, userID, sessionID uuid.UUID) (user.Session, error) {
 	ctx, span := r.tracer.Start(ctx, "GetSession")
 	defer span.End()
 
-	key := userPrefix + strconv.Itoa(userID) + sessionPrefix + sessionID
+	key := userPrefix + userID.String() + sessionPrefix + sessionID.String()
 	cmd := r.valkey.B().Hgetall().Key(key).Build()
 
 	resp, err := r.valkey.Do(ctx, cmd).AsStrMap()
@@ -107,11 +107,11 @@ func (r *Repository) GetSession(ctx context.Context, userID int, sessionID strin
 }
 
 // GetSessions returns all user sessions.
-func (r *Repository) GetSessions(ctx context.Context, userID int) ([]user.Session, error) {
+func (r *Repository) GetSessions(ctx context.Context, userID uuid.UUID) ([]user.Session, error) {
 	ctx, span := r.tracer.Start(ctx, "GetSessions")
 	defer span.End()
 
-	key := userPrefix + strconv.Itoa(userID) + sessionPrefix
+	key := userPrefix + userID.String() + sessionPrefix
 	cmd := r.valkey.B().Keys().Pattern(key + "*").Build()
 
 	keys, err := r.valkey.Do(ctx, cmd).AsStrSlice()
@@ -155,11 +155,11 @@ func (r *Repository) GetSessions(ctx context.Context, userID int) ([]user.Sessio
 }
 
 // DeleteSession deletes user session.
-func (r *Repository) DeleteSession(ctx context.Context, userID int, sessionID string) error {
+func (r *Repository) DeleteSession(ctx context.Context, userID, sessionID uuid.UUID) error {
 	ctx, span := r.tracer.Start(ctx, "DeleteSession")
 	defer span.End()
 
-	key := userPrefix + strconv.Itoa(userID) + sessionPrefix + sessionID
+	key := userPrefix + userID.String() + sessionPrefix + sessionID.String()
 	cmd := r.valkey.B().Del().Key(key).Build()
 
 	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
@@ -170,9 +170,14 @@ func (r *Repository) DeleteSession(ctx context.Context, userID int, sessionID st
 }
 
 func parseUserSessionData(data map[string]string) (user.Session, error) {
-	userID, err := strconv.Atoi(data[sessionUserIDField])
+	userID, err := uuid.Parse(data[sessionUserIDField])
 	if err != nil {
 		return user.Session{}, fmt.Errorf("invalid user_id: %w", err)
+	}
+
+	sessionID, err := uuid.Parse(data[sessionIDField])
+	if err != nil {
+		return user.Session{}, fmt.Errorf("invalid session_id: %w", err)
 	}
 
 	lastUsed, err := time.Parse(time.RFC3339, data[sessionLastActiveField])
@@ -182,7 +187,7 @@ func parseUserSessionData(data map[string]string) (user.Session, error) {
 
 	return user.Session{
 		UserID:       userID,
-		SessionID:    data[sessionIDField],
+		SessionID:    sessionID,
 		RefreshToken: data[sessionTokenField],
 		UA:           data[sessionUAField],
 		LastActive:   lastUsed,

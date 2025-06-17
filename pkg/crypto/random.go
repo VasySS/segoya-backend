@@ -17,13 +17,13 @@ func newRandomBytesArray(length int) []byte {
 }
 
 // NewUUID4 returns a new UUID of version 4.
-func (s *Service) NewUUID4() string {
-	return uuid.NewString()
+func (s *Service) NewUUID4() uuid.UUID {
+	return uuid.New()
 }
 
 // NewUUID7 returns a new UUID of version 7.
-func (s *Service) NewUUID7() string {
-	return uuid.Must(uuid.NewV7()).String()
+func (s *Service) NewUUID7() uuid.UUID {
+	return uuid.Must(uuid.NewV7())
 }
 
 // IsUUIDValid checks if UUID is valid.

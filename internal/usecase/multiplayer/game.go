@@ -7,14 +7,15 @@ import (
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
+	"github.com/google/uuid"
 )
 
 // NewGame creates a new multiplayer game and the first round for it, returns the game id.
-func (uc Usecase) NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest) (int, error) {
+func (uc Usecase) NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest) (uuid.UUID, error) {
 	ctx, span := uc.tracer.Start(ctx, "NewGame")
 	defer span.End()
 
-	var response int
+	var response uuid.UUID
 
 	err := uc.repo.RunTx(ctx, func(ctx context.Context) error {
 		gID, err := uc.repo.NewMultiplayerGame(ctx, req)
@@ -37,14 +38,14 @@ func (uc Usecase) NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest
 	})
 	if err != nil {
 		span.RecordError(err)
-		return 0, fmt.Errorf("failed to create game: %w", err)
+		return uuid.UUID{}, fmt.Errorf("failed to create game: %w", err)
 	}
 
 	return response, nil
 }
 
 // GetGame returns a multiplayer game by its id.
-func (uc Usecase) GetGame(ctx context.Context, gameID, userID int) (multiplayer.Game, error) {
+func (uc Usecase) GetGame(ctx context.Context, gameID, userID uuid.UUID) (multiplayer.Game, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGame")
 	defer span.End()
 
@@ -119,7 +120,7 @@ func (uc Usecase) GetGameGuesses(ctx context.Context, req dto.GetGameGuessesRequ
 }
 
 // GetGameUsers returns all users from a multiplayer game (including those, who left after the start of the game).
-func (uc Usecase) GetGameUsers(ctx context.Context, gameID int) ([]user.MultiplayerUser, error) {
+func (uc Usecase) GetGameUsers(ctx context.Context, gameID uuid.UUID) ([]user.MultiplayerUser, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGameUsers")
 	defer span.End()
 
@@ -133,7 +134,7 @@ func (uc Usecase) GetGameUsers(ctx context.Context, gameID int) ([]user.Multipla
 }
 
 // GetGameUser returns a user information in a multiplayer game.
-func (uc Usecase) GetGameUser(ctx context.Context, userID, gameID int) (user.MultiplayerUser, error) {
+func (uc Usecase) GetGameUser(ctx context.Context, userID, gameID uuid.UUID) (user.MultiplayerUser, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetGameUser")
 	defer span.End()
 
@@ -147,7 +148,7 @@ func (uc Usecase) GetGameUser(ctx context.Context, userID, gameID int) (user.Mul
 }
 
 // isUserInGame validates a user's participation in a game.
-func (uc Usecase) isUserInGame(ctx context.Context, userID, gameID int) error {
+func (uc Usecase) isUserInGame(ctx context.Context, userID, gameID uuid.UUID) error {
 	users, err := uc.repo.GetMultiplayerGameUsers(ctx, gameID)
 	if err != nil {
 		return fmt.Errorf("failed to get multiplayer game users: %w", err)

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -30,9 +31,12 @@ func TestNewAccessToken(t *testing.T) {
 	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 	currentTime := time.Now().UTC()
 
+	sessionID, _ := uuid.NewV7()
+	userID, _ := uuid.NewV7()
+
 	claims := user.AccessTokenClaims{
-		SessionID: "session-123",
-		UserID:    456,
+		SessionID: sessionID,
+		UserID:    userID,
 		Username:  "testuser",
 		Name:      "Test User",
 	}
@@ -62,9 +66,12 @@ func TestNewRefreshToken(t *testing.T) {
 	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 	currentTime := time.Now()
 
+	sessionID, _ := uuid.NewV7()
+	userID, _ := uuid.NewV7()
+
 	claims := user.RefreshTokenClaims{
-		SessionID: "session-123",
-		UserID:    456,
+		SessionID: sessionID,
+		UserID:    userID,
 		Username:  "testuser",
 	}
 
@@ -93,9 +100,12 @@ func TestParseAccessToken(t *testing.T) {
 	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 	now := time.Now().UTC()
 
+	sessionID, _ := uuid.NewV7()
+	userID, _ := uuid.NewV7()
+
 	claims := user.AccessTokenClaims{
-		SessionID: "session-123",
-		UserID:    456,
+		SessionID: sessionID,
+		UserID:    userID,
 		Username:  "testuser",
 		Name:      "Test User",
 	}
@@ -190,9 +200,12 @@ func TestParseRefreshToken(t *testing.T) {
 	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 	now := time.Now().UTC()
 
+	sessionID, _ := uuid.NewV7()
+	userID, _ := uuid.NewV7()
+
 	claims := user.RefreshTokenClaims{
-		SessionID: "session-123",
-		UserID:    456,
+		SessionID: sessionID,
+		UserID:    userID,
 		Username:  "testuser",
 	}
 
@@ -283,9 +296,12 @@ func TestContext(t *testing.T) {
 
 	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
 
+	sessionID, _ := uuid.NewV7()
+	userID, _ := uuid.NewV7()
+
 	claims := user.AccessTokenClaims{
-		SessionID: "session-123",
-		UserID:    456,
+		SessionID: sessionID,
+		UserID:    userID,
 		Username:  "testuser",
 		Name:      "Test User",
 	}

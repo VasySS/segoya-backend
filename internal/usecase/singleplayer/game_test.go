@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -24,7 +25,7 @@ func TestUsecase_NewGame(t *testing.T) {
 
 	createGameReq := dto.NewSingleplayerGameRequest{
 		RequestTime:     now,
-		UserID:          1,
+		UserID:          uuid.Must(uuid.NewV7()),
 		Rounds:          5,
 		TimerSeconds:    60,
 		Provider:        "google",
@@ -32,7 +33,7 @@ func TestUsecase_NewGame(t *testing.T) {
 	}
 
 	createdGame := singleplayerEntity.Game{
-		ID:              123,
+		ID:              uuid.Must(uuid.NewV7()),
 		RoundCurrent:    0,
 		UserID:          createGameReq.UserID,
 		Rounds:          createGameReq.Rounds,
@@ -58,7 +59,7 @@ func TestUsecase_NewGame(t *testing.T) {
 		name    string
 		args    args
 		setup   func(fields, args)
-		want    int
+		want    uuid.UUID
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
@@ -84,7 +85,7 @@ func TestUsecase_NewGame(t *testing.T) {
 				fs.repo.On("GetSingleplayerRound", mock.Anything, createdGame.ID, 0).
 					Return(singleplayerEntity.Round{}, singleplayerEntity.ErrRoundNotFound)
 
-				createdPanoID := 12341
+				createdPanoID := uuid.Must(uuid.NewV7())
 				createdStreetviewID := "some_streetview_id"
 
 				fs.panoUsecase.On("NewStreetview", mock.Anything, game.PanoramaProvider(args.req.Provider)).
@@ -100,7 +101,7 @@ func TestUsecase_NewGame(t *testing.T) {
 					GameID:     createdGame.ID,
 					RoundNum:   1,
 				}).Return(
-					singleplayerEntity.Round{ID: 1, GameID: createdGame.ID},
+					singleplayerEntity.Round{ID: uuid.Must(uuid.NewV7()), GameID: createdGame.ID},
 					nil,
 				)
 			},
@@ -111,7 +112,7 @@ func TestUsecase_NewGame(t *testing.T) {
 			name: "error creating game - tx error",
 			args: args{
 				req: dto.NewSingleplayerGameRequest{
-					UserID:      1,
+					UserID:      uuid.Must(uuid.NewV7()),
 					RequestTime: now,
 				},
 			},
@@ -119,14 +120,14 @@ func TestUsecase_NewGame(t *testing.T) {
 				fs.repo.On("RunTx", mock.Anything, mock.Anything).
 					Return(errors.New("tx error"))
 			},
-			want:    0,
+			want:    uuid.UUID{},
 			wantErr: assert.Error,
 		},
 		{
 			name: "error creating round - game lock error",
 			args: args{
 				req: dto.NewSingleplayerGameRequest{
-					UserID:      1,
+					UserID:      uuid.Must(uuid.NewV7()),
 					RequestTime: now,
 				},
 			},
@@ -137,12 +138,12 @@ func TestUsecase_NewGame(t *testing.T) {
 					})
 
 				fs.repo.On("NewSingleplayerGame", mock.Anything, args.req).
-					Return(123, nil)
+					Return(createdGame.ID, nil)
 
 				fs.repo.On("LockSingleplayerGame", mock.Anything, createdGame.ID).
 					Return(errors.New("game lock error"))
 			},
-			want:    0,
+			want:    uuid.UUID{},
 			wantErr: assert.Error,
 		},
 	}
@@ -172,8 +173,8 @@ func TestUsecase_GetGame(t *testing.T) {
 	t.Parallel()
 
 	validGame := singleplayerEntity.Game{
-		ID:           123,
-		UserID:       1,
+		ID:           uuid.Must(uuid.NewV7()),
+		UserID:       uuid.Must(uuid.NewV7()),
 		RoundCurrent: 1,
 		Rounds:       5,
 	}
@@ -198,8 +199,8 @@ func TestUsecase_GetGame(t *testing.T) {
 			name: "successfully get game",
 			args: args{
 				req: dto.GetSingleplayerGameRequest{
-					GameID: 123,
-					UserID: 1,
+					GameID: validGame.ID,
+					UserID: validGame.UserID,
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -213,8 +214,8 @@ func TestUsecase_GetGame(t *testing.T) {
 			name: "error getting game",
 			args: args{
 				req: dto.GetSingleplayerGameRequest{
-					GameID: 123,
-					UserID: 1,
+					GameID: validGame.ID,
+					UserID: validGame.UserID,
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -228,8 +229,8 @@ func TestUsecase_GetGame(t *testing.T) {
 			name: "wrong user ID",
 			args: args{
 				req: dto.GetSingleplayerGameRequest{
-					GameID: 123,
-					UserID: 2,
+					GameID: validGame.ID,
+					UserID: uuid.Must(uuid.NewV7()),
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -265,8 +266,8 @@ func TestUsecase_EndGame(t *testing.T) {
 	t.Parallel()
 
 	validGame := singleplayerEntity.Game{
-		ID:           123,
-		UserID:       1,
+		ID:           uuid.Must(uuid.NewV7()),
+		UserID:       uuid.Must(uuid.NewV7()),
 		RoundCurrent: 5,
 		Rounds:       5,
 	}
@@ -295,8 +296,8 @@ func TestUsecase_EndGame(t *testing.T) {
 			args: args{
 				req: dto.EndSingleplayerGameRequest{
 					RequestTime: time.Now().UTC(),
-					GameID:      123,
-					UserID:      1,
+					GameID:      validGame.ID,
+					UserID:      validGame.UserID,
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -322,8 +323,8 @@ func TestUsecase_EndGame(t *testing.T) {
 			name: "game not found",
 			args: args{
 				req: dto.EndSingleplayerGameRequest{
-					GameID: 123,
-					UserID: 1,
+					GameID: uuid.Must(uuid.NewV7()),
+					UserID: uuid.Must(uuid.NewV7()),
 				},
 			},
 			setup: func(fs fields, _ args) {
@@ -336,8 +337,8 @@ func TestUsecase_EndGame(t *testing.T) {
 			name: "wrong user ID",
 			args: args{
 				req: dto.EndSingleplayerGameRequest{
-					GameID: 123,
-					UserID: 2,
+					GameID: validGame.ID,
+					UserID: uuid.Must(uuid.NewV7()),
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -357,8 +358,8 @@ func TestUsecase_EndGame(t *testing.T) {
 			name: "game still active",
 			args: args{
 				req: dto.EndSingleplayerGameRequest{
-					GameID: 123,
-					UserID: 1,
+					GameID: validGame.ID,
+					UserID: validGame.UserID,
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -381,8 +382,8 @@ func TestUsecase_EndGame(t *testing.T) {
 			name: "round not finished",
 			args: args{
 				req: dto.EndSingleplayerGameRequest{
-					GameID: 123,
-					UserID: 1,
+					GameID: validGame.ID,
+					UserID: validGame.UserID,
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -422,9 +423,11 @@ func TestUsecase_EndGame(t *testing.T) {
 func TestUsecase_GetGames(t *testing.T) {
 	t.Parallel()
 
+	userID := uuid.Must(uuid.NewV7())
+
 	mockGames := []singleplayerEntity.Game{
-		{ID: 1, UserID: 1},
-		{ID: 2, UserID: 1},
+		{ID: uuid.Must(uuid.NewV7()), UserID: userID},
+		{ID: uuid.Must(uuid.NewV7()), UserID: userID},
 	}
 
 	type fields struct {
@@ -446,7 +449,7 @@ func TestUsecase_GetGames(t *testing.T) {
 		{
 			name: "successfully get games",
 			args: args{
-				req: dto.GetSingleplayerGamesRequest{UserID: 1},
+				req: dto.GetSingleplayerGamesRequest{UserID: userID},
 			},
 			setup: func(fs fields, args args) {
 				fs.repo.On("GetSingleplayerGames", mock.Anything, args.req).
@@ -458,7 +461,7 @@ func TestUsecase_GetGames(t *testing.T) {
 		{
 			name: "error getting games",
 			args: args{
-				req: dto.GetSingleplayerGamesRequest{UserID: 1},
+				req: dto.GetSingleplayerGamesRequest{UserID: userID},
 			},
 			setup: func(fs fields, args args) {
 				fs.repo.On("GetSingleplayerGames", mock.Anything, args.req).

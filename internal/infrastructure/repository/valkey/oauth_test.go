@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/valkey-io/valkey-go"
 
@@ -48,10 +49,12 @@ func (s *OAuthTestSuite) TearDownSuite() {
 }
 
 func (s *OAuthTestSuite) TestNewOAuthUserState() {
+	userUUID, _ := uuid.NewV7()
+
 	req := dto.NewOAuthRequest{
 		RequestTime: time.Now().UTC(),
 		State:       gofakeit.UUID(),
-		UserID:      gofakeit.IntRange(1, 100),
+		UserID:      userUUID,
 		StateTTL:    2 * time.Second,
 	}
 
@@ -68,10 +71,12 @@ func (s *OAuthTestSuite) TestNewOAuthUserState() {
 }
 
 func (s *OAuthTestSuite) TestGetOAuthUserID() {
+	userUUID, _ := uuid.NewV7()
+
 	req := dto.NewOAuthRequest{
 		RequestTime: time.Now().UTC(),
 		State:       gofakeit.UUID(),
-		UserID:      gofakeit.IntRange(1, 100),
+		UserID:      userUUID,
 		StateTTL:    2 * time.Second,
 	}
 

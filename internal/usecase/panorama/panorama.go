@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/google/uuid"
 )
 
 // ErrUnknownProvider is returned when provided panorama provider is unknown.
@@ -33,7 +34,7 @@ func (uc Usecase) NewStreetview(
 func (uc Usecase) GetStreetview(
 	ctx context.Context,
 	provider game.PanoramaProvider,
-	id int,
+	id uuid.UUID,
 ) (game.PanoramaMetadata, error) {
 	switch provider {
 	case game.GoogleProvider:

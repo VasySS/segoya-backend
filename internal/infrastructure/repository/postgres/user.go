@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
@@ -77,7 +78,7 @@ func (r *Repository) GetUserByUsername(ctx context.Context, username string) (us
 }
 
 // GetUserByID returns user's profile by user id.
-func (r *Repository) GetUserByID(ctx context.Context, userID int) (user.PrivateProfile, error) {
+func (r *Repository) GetUserByID(ctx context.Context, userID uuid.UUID) (user.PrivateProfile, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetUserByID")
@@ -98,7 +99,7 @@ func (r *Repository) GetUserByID(ctx context.Context, userID int) (user.PrivateP
 
 	var u user.PrivateProfile
 
-	err := pgxscan.Get(ctx, tx, &u, query, pgx.NamedArgs{"id": userID})
+	err := pgxscan.Get(ctx, tx, &u, query, pgx.NamedArgs{"id": userID.String()})
 	if pgxscan.NotFound(err) {
 		return user.PrivateProfile{}, user.ErrUserNotFound
 	} else if err != nil {
@@ -126,7 +127,7 @@ func (r *Repository) UpdateAvatar(ctx context.Context, req dto.UpdateAvatarReque
 	_, err := tx.Exec(ctx, query, pgx.NamedArgs{
 		"avatar_hash": req.AvatarHash,
 		"update_time": req.RequestTime,
-		"user_id":     req.UserID,
+		"user_id":     req.UserID.String(),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to update user avatar: %w", err)
@@ -150,7 +151,7 @@ func (r *Repository) UpdateUser(ctx context.Context, info dto.UpdateUserRequest)
 	`
 
 	_, err := tx.Exec(ctx, query, pgx.NamedArgs{
-		"id":   info.UserID,
+		"id":   info.UserID.String(),
 		"name": info.Name,
 	})
 	if err != nil {

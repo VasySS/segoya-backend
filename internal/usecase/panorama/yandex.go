@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/google/uuid"
 )
 
 // NewYandexAirview gets a random airview from the database.
@@ -26,7 +27,7 @@ func (uc Usecase) NewYandexAirview(ctx context.Context) (game.PanoramaMetadata, 
 }
 
 // GetYandexAirview gets an airview by ID from the database.
-func (uc Usecase) GetYandexAirview(ctx context.Context, id int) (game.PanoramaMetadata, error) {
+func (uc Usecase) GetYandexAirview(ctx context.Context, id uuid.UUID) (game.PanoramaMetadata, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetYandexAirview")
 	defer span.End()
 
@@ -62,7 +63,7 @@ func (uc Usecase) NewYandexStreetview(ctx context.Context) (game.PanoramaMetadat
 }
 
 // GetYandexStreetview gets a streetview by ID from the database.
-func (uc Usecase) GetYandexStreetview(ctx context.Context, id int) (game.PanoramaMetadata, error) {
+func (uc Usecase) GetYandexStreetview(ctx context.Context, id uuid.UUID) (game.PanoramaMetadata, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetYandexStreetview")
 	defer span.End()
 

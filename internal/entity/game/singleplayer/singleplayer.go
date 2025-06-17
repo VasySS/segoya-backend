@@ -27,7 +27,7 @@ type Game struct {
 type Round struct {
 	ID           uuid.UUID `db:"id"            json:"id"`
 	GameID       uuid.UUID `db:"game_id"       json:"gameID"`
-	StreetviewID uuid.UUID `db:"streetview_id" json:"streetviewID"`
+	StreetviewID string    `db:"streetview_id" json:"streetviewID"`
 	Lat          float64   `db:"lat"           json:"lat"`
 	Lng          float64   `db:"lng"           json:"lng"`
 	RoundNum     int       `db:"round_num"     json:"roundNum"`

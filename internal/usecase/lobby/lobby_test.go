@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -17,10 +18,13 @@ import (
 func TestUsecase_NewLobby(t *testing.T) {
 	t.Parallel()
 
+	firstUserID := uuid.Must(uuid.NewV7())
+	secondUserID := uuid.Must(uuid.NewV7())
+
 	newPublicLobbyReq := dto.NewLobbyRequest{
 		RequestTime:     time.Now().UTC(),
 		MaxPlayers:      10,
-		CreatorID:       1,
+		CreatorID:       firstUserID,
 		Rounds:          10,
 		Provider:        "google",
 		TimerSeconds:    30,
@@ -31,7 +35,7 @@ func TestUsecase_NewLobby(t *testing.T) {
 	newPrivateLobbyReq := dto.NewLobbyRequest{
 		RequestTime:     time.Now().UTC(),
 		MaxPlayers:      10,
-		CreatorID:       2,
+		CreatorID:       secondUserID,
 		Rounds:          10,
 		Provider:        "yandex",
 		TimerSeconds:    60,
@@ -218,14 +222,17 @@ func TestUsecase_GetLobby(t *testing.T) {
 func TestUsecase_GetLobbies(t *testing.T) {
 	t.Parallel()
 
+	firstUserID := uuid.Must(uuid.NewV7())
+	secondUserID := uuid.Must(uuid.NewV7())
+
 	getLobbiesResponse := []lobbyEntity.Lobby{
 		{
 			ID:        "1234567890",
-			CreatorID: 1,
+			CreatorID: firstUserID,
 		},
 		{
 			ID:        "1234567891",
-			CreatorID: 2,
+			CreatorID: secondUserID,
 		},
 	}
 

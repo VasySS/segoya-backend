@@ -7,13 +7,14 @@ import (
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
+	"github.com/google/uuid"
 )
 
 // ConnectLobbyUser handles a user joining a lobby (called from the websocket) and updates the lobby's state.
 func (uc Usecase) ConnectLobbyUser(
 	ctx context.Context,
 	lobbyID string,
-	userID int,
+	userID uuid.UUID,
 ) (user.PublicProfile, error) {
 	ctx, span := uc.tracer.Start(ctx, "ConnectLobbyUser")
 	defer span.End()
@@ -82,18 +83,18 @@ func (uc Usecase) DisconnectLobbyUser(
 func (uc Usecase) StartLobbyGame(
 	ctx context.Context,
 	req dto.StartLobbyGameRequest,
-) (int, error) {
+) (uuid.UUID, error) {
 	ctx, span := uc.tracer.Start(ctx, "StartLobbyGame")
 	defer span.End()
 
 	lobbyRepo, err := uc.lobbyRepo.GetLobby(ctx, req.LobbyID)
 	if err != nil {
 		span.RecordError(err)
-		return 0, fmt.Errorf("failed to get lobby from db: %w", err)
+		return uuid.UUID{}, fmt.Errorf("failed to get lobby from db: %w", err)
 	}
 
 	if lobbyRepo.CreatorID != req.Creator.ID {
-		return 0, lobby.ErrOnlyCreatorCanStart
+		return uuid.UUID{}, lobby.ErrOnlyCreatorCanStart
 	}
 
 	gameID, err := uc.mult.NewGame(ctx, dto.NewMultiplayerGameRequest{
@@ -107,12 +108,12 @@ func (uc Usecase) StartLobbyGame(
 	})
 	if err != nil {
 		span.RecordError(err)
-		return 0, fmt.Errorf("error starting game: %w", err)
+		return uuid.UUID{}, fmt.Errorf("error starting game: %w", err)
 	}
 
 	if err := uc.lobbyRepo.DeleteLobby(ctx, req.LobbyID); err != nil {
 		span.RecordError(err)
-		return 0, fmt.Errorf("failed to delete lobby: %w", err)
+		return uuid.UUID{}, fmt.Errorf("failed to delete lobby: %w", err)
 	}
 
 	return gameID, nil

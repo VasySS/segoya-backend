@@ -12,13 +12,14 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
+	"github.com/google/uuid"
 )
 
 // GameRepo defines methods for accessing and modifying singleplayer game data.
 type GameRepo interface {
-	LockSingleplayerGame(ctx context.Context, gameID int) error
-	NewSingleplayerGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (int, error)
-	GetSingleplayerGame(ctx context.Context, gameID int) (singleplayer.Game, error)
+	LockSingleplayerGame(ctx context.Context, gameID uuid.UUID) error
+	NewSingleplayerGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (uuid.UUID, error)
+	GetSingleplayerGame(ctx context.Context, gameID uuid.UUID) (singleplayer.Game, error)
 	GetSingleplayerGames(
 		ctx context.Context,
 		req dto.GetSingleplayerGamesRequest,
@@ -29,8 +30,8 @@ type GameRepo interface {
 // RoundRepo defines methods for accessing and modifying singleplayer round data.
 type RoundRepo interface {
 	NewSingleplayerRound(ctx context.Context, req dto.NewSingleplayerRoundDBRequest) (singleplayer.Round, error)
-	GetSingleplayerRound(ctx context.Context, gameID, roundNum int) (singleplayer.Round, error)
-	GetSingleplayerGameGuesses(ctx context.Context, gameID int) ([]singleplayer.Guess, error)
+	GetSingleplayerRound(ctx context.Context, gameID uuid.UUID, roundNum int) (singleplayer.Round, error)
+	GetSingleplayerGameGuesses(ctx context.Context, gameID uuid.UUID) ([]singleplayer.Guess, error)
 	NewSingleplayerRoundGuess(ctx context.Context, req dto.NewSingleplayerRoundGuessRequest) error
 }
 
@@ -48,7 +49,7 @@ type Repository interface {
 //go:generate go tool mockery --name=PanoramaUsecase
 type PanoramaUsecase interface {
 	NewStreetview(ctx context.Context, provider game.PanoramaProvider) (game.PanoramaMetadata, error)
-	GetStreetview(ctx context.Context, provider game.PanoramaProvider, id int) (game.PanoramaMetadata, error)
+	GetStreetview(ctx context.Context, provider game.PanoramaProvider, id uuid.UUID) (game.PanoramaMetadata, error)
 	CalculateScoreAndDistance(
 		provider game.PanoramaProvider,
 		realLat, realLng, userLat, userLng float64,

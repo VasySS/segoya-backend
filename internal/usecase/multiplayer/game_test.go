@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -21,12 +22,15 @@ import (
 func TestUsecase_NewGame(t *testing.T) {
 	t.Parallel()
 
+	firstUserID := uuid.Must(uuid.NewV7())
+	secondUserID := uuid.Must(uuid.NewV7())
+
 	createGameReq := dto.NewMultiplayerGameRequest{
 		RequestTime: time.Now().UTC(),
-		CreatorID:   1,
+		CreatorID:   firstUserID,
 		ConnectedPlayers: []user.PublicProfile{
-			{ID: 1, Username: "username1"},
-			{ID: 2, Username: "username2"},
+			{ID: firstUserID, Username: "username1"},
+			{ID: secondUserID, Username: "username2"},
 		},
 		Rounds:          4,
 		TimerSeconds:    30,
@@ -44,11 +48,13 @@ func TestUsecase_NewGame(t *testing.T) {
 		req dto.NewMultiplayerGameRequest
 	}
 
+	createdGameID := uuid.Must(uuid.NewV7())
+
 	tests := []struct {
 		name    string
 		args    args
 		setup   func(fields, args)
-		want    int
+		want    uuid.UUID
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
@@ -62,8 +68,6 @@ func TestUsecase_NewGame(t *testing.T) {
 						return fn(ctx)
 					})
 
-				createdGameID := 123
-
 				fs.repo.On("NewMultiplayerGame", mock.Anything, args.req).
 					Return(createdGameID, nil)
 
@@ -73,11 +77,11 @@ func TestUsecase_NewGame(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, createdGameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: firstUserID, Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: secondUserID, Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)
@@ -97,8 +101,8 @@ func TestUsecase_NewGame(t *testing.T) {
 				fs.repo.On("GetMultiplayerRound", mock.Anything, createdGameID, 0).
 					Return(multiplayerEntity.Round{}, multiplayerEntity.ErrRoundNotFound)
 
-				createdPanoID := 12341
-				createdStreetviewID := "some_streetview_id"
+				createdPanoID := uuid.Must(uuid.NewV7())
+				createdStreetviewID := "external_streetview_id"
 
 				fs.pano.On("NewStreetview", mock.Anything, game.PanoramaProvider(args.req.Provider)).
 					Return(game.PanoramaMetadata{
@@ -114,7 +118,7 @@ func TestUsecase_NewGame(t *testing.T) {
 					CreatedAt:  args.req.RequestTime,
 					StartedAt:  args.req.RequestTime.Add(fs.cfg.RoundStartDelay),
 				}).Return(multiplayerEntity.Round{
-					ID:           1,
+					ID:           uuid.Must(uuid.NewV7()),
 					GameID:       createdGameID,
 					StreetviewID: createdStreetviewID,
 					RoundNum:     1,
@@ -122,7 +126,7 @@ func TestUsecase_NewGame(t *testing.T) {
 					StartedAt:    args.req.RequestTime.Add(fs.cfg.RoundStartDelay),
 				}, nil)
 			},
-			want:    123,
+			want:    createdGameID,
 			wantErr: assert.NoError,
 		},
 		{
@@ -136,7 +140,7 @@ func TestUsecase_NewGame(t *testing.T) {
 						return errors.New("tx error")
 					})
 			},
-			want:    0,
+			want:    uuid.UUID{},
 			wantErr: assert.Error,
 		},
 	}
@@ -169,9 +173,12 @@ func TestUsecase_NewGame(t *testing.T) {
 func TestUsecase_GetGame(t *testing.T) {
 	t.Parallel()
 
+	firstUserID := uuid.Must(uuid.NewV7())
+	secondUserID := uuid.Must(uuid.NewV7())
+
 	validGame := multiplayerEntity.Game{
-		ID:              123,
-		CreatorID:       1,
+		ID:              uuid.Must(uuid.NewV7()),
+		CreatorID:       firstUserID,
 		RoundCurrent:    1,
 		Rounds:          5,
 		MovementAllowed: true,
@@ -188,8 +195,8 @@ func TestUsecase_GetGame(t *testing.T) {
 	}
 
 	type args struct {
-		gameID int
-		userID int
+		gameID uuid.UUID
+		userID uuid.UUID
 	}
 
 	tests := []struct {
@@ -201,7 +208,7 @@ func TestUsecase_GetGame(t *testing.T) {
 	}{
 		{
 			name: "successfully get game",
-			args: args{gameID: validGame.ID, userID: 1},
+			args: args{gameID: validGame.ID, userID: firstUserID},
 			setup: func(fs fields, args args) {
 				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 					Return(func(ctx context.Context, fn repository.TxFunc) error {
@@ -213,8 +220,8 @@ func TestUsecase_GetGame(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.gameID).
 					Return([]user.MultiplayerUser{
-						{PublicProfile: user.PublicProfile{ID: 1, Username: "username"}},
-						{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}},
+						{PublicProfile: user.PublicProfile{ID: firstUserID, Username: "username"}},
+						{PublicProfile: user.PublicProfile{ID: secondUserID, Username: "username2"}},
 					}, nil)
 
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.gameID).
@@ -225,7 +232,7 @@ func TestUsecase_GetGame(t *testing.T) {
 		},
 		{
 			name: "trying to get game with wrong user id",
-			args: args{gameID: validGame.ID, userID: 333},
+			args: args{gameID: validGame.ID, userID: uuid.Must(uuid.NewV7())},
 			setup: func(fs fields, args args) {
 				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 					Return(func(ctx context.Context, fn repository.TxFunc) error {
@@ -237,8 +244,8 @@ func TestUsecase_GetGame(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.gameID).
 					Return([]user.MultiplayerUser{
-						{PublicProfile: user.PublicProfile{ID: 1, Username: "username"}},
-						{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}},
+						{PublicProfile: user.PublicProfile{ID: firstUserID, Username: "username"}},
+						{PublicProfile: user.PublicProfile{ID: secondUserID, Username: "username2"}},
 					}, nil)
 			},
 			want: multiplayerEntity.Game{},
@@ -272,10 +279,14 @@ func TestUsecase_GetGame(t *testing.T) {
 func TestUsecase_GetGameGuesses(t *testing.T) {
 	t.Parallel()
 
+	firstUserID := uuid.Must(uuid.NewV7())
+	secondUserID := uuid.Must(uuid.NewV7())
+	gameID := uuid.Must(uuid.NewV7())
+
 	endGameReq := dto.GetGameGuessesRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      1,
-		UserID:      1,
+		GameID:      gameID,
+		UserID:      firstUserID,
 	}
 
 	gameGuesses := []multiplayerEntity.Guess{
@@ -325,15 +336,13 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
-						{PublicProfile: user.PublicProfile{ID: 1, Username: "username1"}},
-						{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}},
+						{PublicProfile: user.PublicProfile{ID: firstUserID, Username: "username1"}},
+						{PublicProfile: user.PublicProfile{ID: secondUserID, Username: "username2"}},
 					}, nil)
-
-				createdGameID := 1
 
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
 					Return(multiplayerEntity.Game{
-						ID:           createdGameID,
+						ID:           args.req.GameID,
 						Rounds:       5,
 						RoundCurrent: 5,
 						Finished:     true,
@@ -361,13 +370,13 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
-						{PublicProfile: user.PublicProfile{ID: 1, Username: "username1"}},
-						{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}},
+						{PublicProfile: user.PublicProfile{ID: firstUserID, Username: "username1"}},
+						{PublicProfile: user.PublicProfile{ID: secondUserID, Username: "username2"}},
 					}, nil)
 
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
 					Return(multiplayerEntity.Game{
-						ID:           1,
+						ID:           args.req.GameID,
 						RoundCurrent: 4,
 						Rounds:       5,
 						Finished:     false,
@@ -394,13 +403,13 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
-						{PublicProfile: user.PublicProfile{ID: 1, Username: "username1"}},
-						{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}},
+						{PublicProfile: user.PublicProfile{ID: firstUserID, Username: "username1"}},
+						{PublicProfile: user.PublicProfile{ID: secondUserID, Username: "username2"}},
 					}, nil)
 
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
 					Return(multiplayerEntity.Game{
-						ID:           1,
+						ID:           args.req.GameID,
 						RoundCurrent: 5,
 						Rounds:       5,
 						Finished:     false,
@@ -438,7 +447,7 @@ func TestUsecase_GameUser(t *testing.T) {
 	t.Parallel()
 
 	userResponse := user.MultiplayerUser{
-		PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+		PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
 		Connected:     true,
 		Score:         11231,
 	}
@@ -449,8 +458,8 @@ func TestUsecase_GameUser(t *testing.T) {
 	}
 
 	type args struct {
-		userID int
-		gameID int
+		userID uuid.UUID
+		gameID uuid.UUID
 	}
 
 	tests := []struct {
@@ -463,8 +472,8 @@ func TestUsecase_GameUser(t *testing.T) {
 		{
 			name: "successfully get game user",
 			args: args{
-				userID: 1,
-				gameID: 1,
+				userID: userResponse.PublicProfile.ID,
+				gameID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.repo.On("GetMultiplayerGameUser", mock.Anything, args.userID, args.gameID).
@@ -476,8 +485,8 @@ func TestUsecase_GameUser(t *testing.T) {
 		{
 			name: "failed to get game user",
 			args: args{
-				userID: 2,
-				gameID: 1,
+				userID: userResponse.PublicProfile.ID,
+				gameID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.repo.On("GetMultiplayerGameUser", mock.Anything, args.userID, args.gameID).
@@ -514,12 +523,12 @@ func TestUsecase_GameUsers(t *testing.T) {
 
 	usersResponse := []user.MultiplayerUser{
 		{
-			PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+			PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
 			Connected:     true,
 			Score:         11231,
 		},
 		{
-			PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
+			PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
 			Connected:     true,
 			Score:         23422,
 		},
@@ -531,7 +540,7 @@ func TestUsecase_GameUsers(t *testing.T) {
 	}
 
 	type args struct {
-		gameID int
+		gameID uuid.UUID
 	}
 
 	tests := []struct {
@@ -544,7 +553,7 @@ func TestUsecase_GameUsers(t *testing.T) {
 		{
 			name: "successfully get game users",
 			args: args{
-				gameID: 1,
+				gameID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.gameID).
