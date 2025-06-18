@@ -149,10 +149,12 @@ func (s *SingleplayerTestSuite) TestEndSingleplayerGame() {
 }
 
 func (s *SingleplayerTestSuite) TestNewSingleplayerRound() {
+	ctx := s.T().Context()
+
 	newUser := s.newTestUser()
 	newGame, _ := s.newTestGame(newUser.ID)
 
-	newRound, newRoundReq := s.newTestRound(newGame.ID, 1)
+	newRound, newRoundReq := s.newTestRound(ctx, newGame.ID, 1)
 
 	s.Equal(newRoundReq.GameID, newRound.GameID)
 	s.Equal(newRoundReq.RoundNum, newRound.RoundNum)
@@ -161,9 +163,11 @@ func (s *SingleplayerTestSuite) TestNewSingleplayerRound() {
 }
 
 func (s *SingleplayerTestSuite) TestGetSingleplayerRound() {
+	ctx := s.T().Context()
+
 	newUser := s.newTestUser()
 	newGame, _ := s.newTestGame(newUser.ID)
-	_, newRoundReq := s.newTestRound(newGame.ID, 1)
+	_, newRoundReq := s.newTestRound(ctx, newGame.ID, 1)
 
 	getRoundResponse, err := s.postgresRepo.GetSingleplayerRound(s.ctx, newGame.ID, 1)
 	s.Require().NoError(err)
@@ -177,9 +181,11 @@ func (s *SingleplayerTestSuite) TestGetSingleplayerRound() {
 }
 
 func (s *SingleplayerTestSuite) TestSetSingleplayerGuess() {
+	ctx := s.T().Context()
+
 	newUser := s.newTestUser()
 	newGame, _ := s.newTestGame(newUser.ID)
-	firstRound, _ := s.newTestRound(newGame.ID, 1)
+	firstRound, _ := s.newTestRound(ctx, newGame.ID, 1)
 
 	setGuessReq := dto.NewSingleplayerRoundGuessRequest{
 		RequestTime: time.Now().UTC(),
@@ -204,24 +210,15 @@ func (s *SingleplayerTestSuite) TestSetSingleplayerGuess() {
 }
 
 func (s *SingleplayerTestSuite) TestSingleplayerRoundsWithGuesses() {
+	ctx := s.T().Context()
+
 	newUser := s.newTestUser()
 	newGame, _ := s.newTestGame(newUser.ID)
 
 	guesses := make([]singleplayer.Guess, 0, newGame.Rounds)
 
 	for i := 1; i <= newGame.Rounds; i++ {
-		locationUUID, _ := uuid.NewV7()
-
-		newRoundReq := dto.NewSingleplayerRoundDBRequest{
-			CreatedAt:  time.Now().UTC(),
-			StartedAt:  time.Now().UTC().Add(time.Second * 10),
-			GameID:     newGame.ID,
-			LocationID: locationUUID,
-			RoundNum:   i,
-		}
-
-		newRound, err := s.postgresRepo.NewSingleplayerRound(s.ctx, newRoundReq)
-		s.Require().NoError(err)
+		newRound, _ := s.newTestRound(ctx, newGame.ID, i)
 
 		newRoundGuessReq := dto.NewSingleplayerRoundGuessRequest{
 			RequestTime: time.Now().UTC(),
@@ -235,7 +232,7 @@ func (s *SingleplayerTestSuite) TestSingleplayerRoundsWithGuesses() {
 			Distance: gofakeit.Number(0, 10000),
 		}
 
-		err = s.postgresRepo.NewSingleplayerRoundGuess(s.ctx, newRoundGuessReq)
+		err := s.postgresRepo.NewSingleplayerRoundGuess(s.ctx, newRoundGuessReq)
 		s.Require().NoError(err)
 
 		updatedRound, err := s.postgresRepo.GetSingleplayerRound(s.ctx, newGame.ID, i)
@@ -308,15 +305,18 @@ func (s *SingleplayerTestSuite) newTestGame(userID uuid.UUID) (singleplayer.Game
 }
 
 func (s *SingleplayerTestSuite) newTestRound(
-	gameID uuid.UUID, roundNum int,
+	ctx context.Context,
+	gameID uuid.UUID,
+	roundNum int,
 ) (singleplayer.Round, dto.NewSingleplayerRoundDBRequest) {
-	locationUUID, _ := uuid.NewV7()
+	stv, err := s.postgresRepo.RandomGoogleStreetview(ctx)
+	s.Require().NoError(err)
 
 	roundReq := dto.NewSingleplayerRoundDBRequest{
 		CreatedAt:  time.Now().UTC(),
 		StartedAt:  time.Now().UTC().Add(time.Second * 10),
 		GameID:     gameID,
-		LocationID: locationUUID,
+		LocationID: stv.ID,
 		RoundNum:   roundNum,
 	}
 
