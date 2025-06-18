@@ -188,6 +188,19 @@ ALTER TABLE multiplayer_game_user DROP COLUMN id;
 ALTER TABLE multiplayer_game_user RENAME COLUMN new_id TO id;
 ALTER TABLE multiplayer_game_user ADD PRIMARY KEY (id);
 
+-- recreate indexes that were lost during migration
+CREATE INDEX user_oauth_user_id_issuer_idx ON user_oauth (user_id, issuer);
+CREATE INDEX singleplayer_game_user_id_created_at_idx ON singleplayer_game (user_id, created_at DESC);
+CREATE INDEX singleplayer_round_location_id_idx ON singleplayer_round (location_id);
+CREATE INDEX singleplayer_round_guess_round_id_idx ON singleplayer_round_guess (round_id);
+CREATE INDEX multiplayer_game_creator_id_idx ON multiplayer_game(creator_id);
+CREATE INDEX multiplayer_round_location_id_idx ON multiplayer_round (location_id);
+
+ALTER TABLE singleplayer_round ADD CONSTRAINT singleplayer_round_game_id_round_num_unique UNIQUE (game_id, round_num);
+ALTER TABLE multiplayer_game_user ADD CONSTRAINT multiplayer_game_user_user_id_game_id_unique UNIQUE (user_id, game_id);
+ALTER TABLE multiplayer_round ADD CONSTRAINT multiplayer_round_game_id_round_num_unique UNIQUE (game_id, round_num);
+ALTER TABLE multiplayer_round_user ADD CONSTRAINT multiplayer_round_user_round_id_user_id_unique UNIQUE (round_id, user_id);
+
 -- +goose StatementEnd
 
 -- +goose Down
