@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
@@ -44,9 +44,12 @@ func (h Handler) getGameUsers(s transport.WebSocketSession) ([]user.MultiplayerU
 		return nil, ErrGameIDNotFound
 	}
 
-	gameIDInt, _ := strconv.Atoi(gameID)
+	gameUUID, err := uuid.Parse(gameID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse game uuid: %w", err)
+	}
 
-	users, err := h.uc.GetGameUsers(ctx, gameIDInt)
+	users, err := h.uc.GetGameUsers(ctx, gameUUID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get game users: %w", err)
 	}
@@ -84,6 +87,13 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 	ctx := req.Context()
 
 	gameID := chi.URLParam(req, "id")
+
+	gameUUID, err := uuid.Parse(gameID)
+	if err != nil {
+		session.SendError("incorrect game id")
+		return
+	}
+
 	session.SetBroadcastID(gameID)
 
 	claims, ok := h.ts.FromContext(ctx)
@@ -108,13 +118,7 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		}
 	}
 
-	gameIDInt, err := strconv.Atoi(gameID)
-	if err != nil {
-		session.SendError("error parsing game id")
-		return
-	}
-
-	userProfile, err := h.uc.GetGameUser(ctx, claims.UserID, gameIDInt)
+	userProfile, err := h.uc.GetGameUser(ctx, claims.UserID, gameUUID)
 	if err != nil {
 		session.SendError("error connecting to game")
 		return
@@ -188,7 +192,12 @@ func (h Handler) processUserGuess(
 	message dto.MultiplayerUserGuessMessage,
 ) {
 	ctx := session.Request().Context()
-	gameIDInt, _ := strconv.Atoi(gameID)
+
+	gameUUID, err := uuid.Parse(gameID)
+	if err != nil {
+		session.SendError("incorrect game id")
+		return
+	}
 
 	userProfile, ok := getGameUser(session)
 	if !ok {
@@ -196,9 +205,9 @@ func (h Handler) processUserGuess(
 		return
 	}
 
-	err := h.uc.NewRoundGuess(ctx, dto.NewMultiplayerRoundGuessRequest{
+	err = h.uc.NewRoundGuess(ctx, dto.NewMultiplayerRoundGuessRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      gameIDInt,
+		GameID:      gameUUID,
 		UserID:      userProfile.ID,
 		Guess:       message.Guess,
 	})
@@ -238,11 +247,15 @@ func (h Handler) processRoundEnd(
 		return
 	}
 
-	gameIDInt, _ := strconv.Atoi(gameID)
+	gameUUID, err := uuid.Parse(gameID)
+	if err != nil {
+		session.SendError("incorrect game id")
+		return
+	}
 
 	guesses, err := h.uc.EndRound(ctx, dto.EndMultiplayerRoundRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      gameIDInt,
+		GameID:      gameUUID,
 		UserID:      userProfile.ID,
 	})
 	if errors.Is(err, multiplayer.ErrRoundIsStillActive) {

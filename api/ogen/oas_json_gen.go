@@ -4689,7 +4689,7 @@ func (s *NewSingleplayerGameCreated) Encode(e *jx.Encoder) {
 func (s *NewSingleplayerGameCreated) encodeFields(e *jx.Encoder) {
 	{
 		e.FieldStart("id")
-		e.Int(s.ID)
+		json.EncodeUUID(e, s.ID)
 	}
 }
 
@@ -4709,8 +4709,8 @@ func (s *NewSingleplayerGameCreated) Decode(d *jx.Decoder) error {
 		case "id":
 			requiredBitSet[0] |= 1 << 0
 			if err := func() error {
-				v, err := d.Int()
-				s.ID = int(v)
+				v, err := json.DecodeUUID(d)
+				s.ID = v
 				if err != nil {
 					return err
 				}

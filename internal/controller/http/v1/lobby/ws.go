@@ -217,7 +217,7 @@ func (h Handler) processGameStart(
 
 	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
 		Type:    dto.LobbyMessageTypeGameRedirect,
-		Payload: map[string]any{"gameID": gameID},
+		Payload: map[string]any{"gameID": gameID.String()},
 	})
 }
 

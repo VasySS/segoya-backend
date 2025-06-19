@@ -1200,16 +1200,16 @@ type NewSingleplayerGameBadRequest Error
 func (*NewSingleplayerGameBadRequest) newSingleplayerGameRes() {}
 
 type NewSingleplayerGameCreated struct {
-	ID int `json:"id"`
+	ID uuid.UUID `json:"id"`
 }
 
 // GetID returns the value of ID.
-func (s *NewSingleplayerGameCreated) GetID() int {
+func (s *NewSingleplayerGameCreated) GetID() uuid.UUID {
 	return s.ID
 }
 
 // SetID sets the value of ID.
-func (s *NewSingleplayerGameCreated) SetID(val int) {
+func (s *NewSingleplayerGameCreated) SetID(val uuid.UUID) {
 	s.ID = val
 }
 
