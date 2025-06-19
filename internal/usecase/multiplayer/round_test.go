@@ -18,6 +18,9 @@ import (
 	"github.com/VasySS/segoya-backend/internal/usecase/multiplayer/mocks"
 )
 
+// TODO: refactor
+//
+//nolint:maintidx
 func TestUsecase_NewRound(t *testing.T) {
 	t.Parallel()
 

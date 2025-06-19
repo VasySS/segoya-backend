@@ -3,10 +3,11 @@ package dto
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
-	"github.com/google/uuid"
 )
 
 // SingleplayerGameToAPI converts a singleplayer game entity to the API model.

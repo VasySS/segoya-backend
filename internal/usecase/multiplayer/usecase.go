@@ -5,6 +5,7 @@ package multiplayer
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
-	"github.com/google/uuid"
 )
 
 // GameRepo provides access to multiplayer game data.

@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/google/uuid"
+
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
 // NewGoogleStreetview gets a random Google streetview from the database.

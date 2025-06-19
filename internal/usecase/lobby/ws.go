@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
-	"github.com/google/uuid"
 )
 
 // ConnectLobbyUser handles a user joining a lobby (called from the websocket) and updates the lobby's state.
@@ -52,7 +53,7 @@ func (uc Usecase) ConnectLobbyUser(
 func (uc Usecase) DisconnectLobbyUser(
 	ctx context.Context,
 	lobbyID string,
-	_ int,
+	_ uuid.UUID,
 ) error {
 	ctx, span := uc.tracer.Start(ctx, "DisconnectLobbyUser")
 	defer span.End()

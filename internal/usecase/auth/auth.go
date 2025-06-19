@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
-	"github.com/google/uuid"
 )
 
 // Login authenticates a user and generates a new pair of access and refresh tokens.

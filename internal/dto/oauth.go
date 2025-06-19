@@ -3,9 +3,10 @@ package dto
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
-	"github.com/google/uuid"
 )
 
 // OAuthToAPI converts a slice of OAuth providers information to a format suitable for API responses.

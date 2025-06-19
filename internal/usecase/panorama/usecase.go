@@ -4,11 +4,11 @@ package panorama
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
-	"github.com/google/uuid"
 )
 
 // Repository provides access to panorama metadata.

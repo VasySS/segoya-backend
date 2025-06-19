@@ -4,8 +4,9 @@ package singleplayer
 import (
 	"time"
 
-	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/google/uuid"
+
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
 // Game struct contains singleplayer game information.

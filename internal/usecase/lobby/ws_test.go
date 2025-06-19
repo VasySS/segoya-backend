@@ -176,7 +176,7 @@ func TestUsecase_LobbyUserDisconnect(t *testing.T) {
 
 			uc := lobby.NewUsecase(conf, nil, nil, lobbyRepo, nil)
 
-			err := uc.DisconnectLobbyUser(t.Context(), tt.args.lobbyID, 0)
+			err := uc.DisconnectLobbyUser(t.Context(), tt.args.lobbyID, uuid.Nil)
 			tt.wantErr(t, err)
 		})
 	}

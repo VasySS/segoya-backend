@@ -472,7 +472,7 @@ func TestUsecase_GameUser(t *testing.T) {
 		{
 			name: "successfully get game user",
 			args: args{
-				userID: userResponse.PublicProfile.ID,
+				userID: userResponse.ID,
 				gameID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
@@ -485,7 +485,7 @@ func TestUsecase_GameUser(t *testing.T) {
 		{
 			name: "failed to get game user",
 			args: args{
-				userID: userResponse.PublicProfile.ID,
+				userID: userResponse.ID,
 				gameID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {

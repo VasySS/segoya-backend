@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
-	"github.com/google/uuid"
 )
 
 // NewRoundGuess saves a user's guess for current round (called from websocket).

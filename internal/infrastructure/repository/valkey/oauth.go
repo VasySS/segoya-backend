@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/google/uuid"
+
+	"github.com/VasySS/segoya-backend/internal/dto"
 )
 
 const (

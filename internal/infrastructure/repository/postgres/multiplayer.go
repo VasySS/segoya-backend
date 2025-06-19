@@ -148,7 +148,10 @@ func (r *Repository) EndMultiplayerGame(ctx context.Context, req dto.EndMultipla
 }
 
 // GetMultiplayerGameUser returns a multiplayer game user information by using game id and user id.
-func (r *Repository) GetMultiplayerGameUser(ctx context.Context, userID, gameID uuid.UUID) (user.MultiplayerUser, error) {
+func (r *Repository) GetMultiplayerGameUser(
+	ctx context.Context,
+	userID, gameID uuid.UUID,
+) (user.MultiplayerUser, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetMultiplayerGameUser")
@@ -297,7 +300,11 @@ func (r *Repository) NewMultiplayerRound(
 }
 
 // GetMultiplayerRound returns a multiplayer round.
-func (r *Repository) GetMultiplayerRound(ctx context.Context, gameID uuid.UUID, roundNum int) (multiplayer.Round, error) {
+func (r *Repository) GetMultiplayerRound(
+	ctx context.Context,
+	gameID uuid.UUID,
+	roundNum int,
+) (multiplayer.Round, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetMultiplayerRound")

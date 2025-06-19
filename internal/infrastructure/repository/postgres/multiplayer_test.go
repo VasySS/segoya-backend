@@ -77,15 +77,20 @@ func (s *MultiplayerTestSuite) SetupTest() {
 }
 
 func (s *MultiplayerTestSuite) TestNewMultiplayerGame() {
+	ctx := s.T().Context()
+
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 	userSecondPlayer := s.newTestUser()
 
-	newGame, gameReq := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-		userSecondPlayer.PublicProfile,
-	})
+	newGame, gameReq := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+			userSecondPlayer.PublicProfile,
+		})
 
 	s.Equal(gameReq.CreatorID, newGame.CreatorID)
 	s.Equal(gameReq.Rounds, newGame.Rounds)
@@ -98,18 +103,23 @@ func (s *MultiplayerTestSuite) TestNewMultiplayerGame() {
 }
 
 func (s *MultiplayerTestSuite) TestMultiplayerGameByID() {
-	_, err := s.postgresRepo.GetMultiplayerGame(s.ctx, uuid.New())
+	ctx := s.T().Context()
+
+	_, err := s.postgresRepo.GetMultiplayerGame(ctx, uuid.New())
 	s.Require().ErrorIs(err, multiplayer.ErrGameNotFound)
 
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 	userSecondPlayer := s.newTestUser()
 
-	newGame, gameReq := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-		userSecondPlayer.PublicProfile,
-	})
+	newGame, gameReq := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+			userSecondPlayer.PublicProfile,
+		})
 
 	s.Equal(gameReq.CreatorID, newGame.CreatorID)
 	s.Equal(gameReq.Rounds, newGame.Rounds)
@@ -127,10 +137,13 @@ func (s *MultiplayerTestSuite) TestNewMultiplayerRound() {
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 
-	newGame, _ := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-	})
+	newGame, _ := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+		})
 
 	newRound, roundReq := s.newTestRound(ctx, newGame.ID, 1)
 
@@ -149,10 +162,13 @@ func (s *MultiplayerTestSuite) TestGetMultiplayerRound() {
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 
-	newGame, _ := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-	})
+	newGame, _ := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+		})
 
 	roundNum := 1
 
@@ -171,10 +187,13 @@ func (s *MultiplayerTestSuite) TestMultiplayerGameUser() {
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 
-	newGame, _ := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-	})
+	newGame, _ := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+		})
 
 	_, _ = s.newTestRound(ctx, newGame.ID, 1)
 
@@ -199,7 +218,7 @@ func (s *MultiplayerTestSuite) TestMultiplayerGameUsers() {
 	}
 
 	for i := 1; i <= 3; i++ {
-		testGame, _ := s.newTestGame(userCreator.ID, gameUsers)
+		testGame, _ := s.newTestGame(ctx, userCreator.ID, gameUsers)
 
 		creatorScore := 0
 		firstPlayerScore := 0
@@ -207,8 +226,8 @@ func (s *MultiplayerTestSuite) TestMultiplayerGameUsers() {
 		for roundNum := 1; roundNum <= testGame.Rounds; roundNum++ {
 			newRound, _ := s.newTestRound(ctx, testGame.ID, roundNum)
 
-			creatorGuess := s.newTestGuess(userCreator, newRound)
-			firstPlayerGuess := s.newTestGuess(userFirstPlayer, newRound)
+			creatorGuess := s.newTestGuess(ctx, userCreator, newRound)
+			firstPlayerGuess := s.newTestGuess(ctx, userFirstPlayer, newRound)
 
 			creatorScore += creatorGuess.Score
 			firstPlayerScore += firstPlayerGuess.Score
@@ -232,10 +251,13 @@ func (s *MultiplayerTestSuite) TestSetMultiplayerUserGuess() {
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 
-	newGame, _ := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-	})
+	newGame, _ := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+		})
 	newRound, _ := s.newTestRound(ctx, newGame.ID, 1)
 
 	guessScore := gofakeit.Number(0, 5000)
@@ -262,20 +284,23 @@ func (s *MultiplayerTestSuite) TestMultiplayerRoundGuesses() {
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 
-	newGame, _ := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-	})
+	newGame, _ := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+		})
 
 	for i := 1; i <= 2; i++ {
 		newRound, _ := s.newTestRound(ctx, newGame.ID, i)
 
-		creatorGuess := s.newTestGuess(userCreator, newRound)
+		creatorGuess := s.newTestGuess(ctx, userCreator, newRound)
 		guesses, err := s.postgresRepo.GetMultiplayerRoundGuesses(s.ctx, newRound.ID)
 		s.Require().NoError(err)
 		s.ElementsMatch([]multiplayer.Guess{creatorGuess}, guesses)
 
-		firstUserGuess := s.newTestGuess(userFirstPlayer, newRound)
+		firstUserGuess := s.newTestGuess(ctx, userFirstPlayer, newRound)
 		guesses, err = s.postgresRepo.GetMultiplayerRoundGuesses(s.ctx, newRound.ID)
 		s.Require().NoError(err)
 		s.ElementsMatch([]multiplayer.Guess{creatorGuess, firstUserGuess}, guesses)
@@ -292,19 +317,22 @@ func (s *MultiplayerTestSuite) TestMultiplayerGameGuesses() {
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 
-	newGame, _ := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-	})
+	newGame, _ := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+		})
 
 	firstRound, _ := s.newTestRound(ctx, newGame.ID, 1)
 	secondRound, _ := s.newTestRound(ctx, newGame.ID, 2)
 
-	creatorFirstRoundGuess := s.newTestGuess(userCreator, firstRound)
-	firstPlayerFirstRoundGuess := s.newTestGuess(userFirstPlayer, firstRound)
+	creatorFirstRoundGuess := s.newTestGuess(ctx, userCreator, firstRound)
+	firstPlayerFirstRoundGuess := s.newTestGuess(ctx, userFirstPlayer, firstRound)
 
-	creatorSecondRoundGuess := s.newTestGuess(userCreator, secondRound)
-	firstPlayerSecondRoundGuess := s.newTestGuess(userFirstPlayer, secondRound)
+	creatorSecondRoundGuess := s.newTestGuess(ctx, userCreator, secondRound)
+	firstPlayerSecondRoundGuess := s.newTestGuess(ctx, userFirstPlayer, secondRound)
 
 	gameGuesses, err := s.postgresRepo.GetMultiplayerGameGuesses(s.ctx, newGame.ID)
 	s.Require().NoError(err)
@@ -323,10 +351,13 @@ func (s *MultiplayerTestSuite) TestEndMultiplayerRound() {
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 
-	newGame, _ := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-	})
+	newGame, _ := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+		})
 
 	roundNum := 1
 	newRound, _ := s.newTestRound(ctx, newGame.ID, roundNum)
@@ -347,13 +378,18 @@ func (s *MultiplayerTestSuite) TestEndMultiplayerRound() {
 }
 
 func (s *MultiplayerTestSuite) TestMultiplayerGameEnd() {
+	ctx := s.T().Context()
+
 	userCreator := s.newTestUser()
 	userFirstPlayer := s.newTestUser()
 
-	newGame, _ := s.newTestGame(userCreator.ID, []user.PublicProfile{
-		userCreator.PublicProfile,
-		userFirstPlayer.PublicProfile,
-	})
+	newGame, _ := s.newTestGame(
+		ctx,
+		userCreator.ID,
+		[]user.PublicProfile{
+			userCreator.PublicProfile,
+			userFirstPlayer.PublicProfile,
+		})
 
 	endGameReq := dto.EndMultiplayerGameRequestDB{
 		RequestTime: time.Now().UTC(),
@@ -388,6 +424,7 @@ func (s *MultiplayerTestSuite) newTestUser() user.PrivateProfile {
 }
 
 func (s *MultiplayerTestSuite) newTestGame(
+	ctx context.Context,
 	userID uuid.UUID,
 	connectedPlayers []user.PublicProfile,
 ) (multiplayer.Game, dto.NewMultiplayerGameRequest) {
@@ -401,10 +438,10 @@ func (s *MultiplayerTestSuite) newTestGame(
 		MovementAllowed:  gofakeit.Bool(),
 	}
 
-	gameID, err := s.postgresRepo.NewMultiplayerGame(s.ctx, gameReq)
+	gameID, err := s.postgresRepo.NewMultiplayerGame(ctx, gameReq)
 	s.Require().NoError(err)
 
-	newGame, err := s.postgresRepo.GetMultiplayerGame(s.ctx, gameID)
+	newGame, err := s.postgresRepo.GetMultiplayerGame(ctx, gameID)
 	s.Require().NoError(err)
 
 	return newGame, gameReq
@@ -426,14 +463,16 @@ func (s *MultiplayerTestSuite) newTestRound(
 		RoundNum:   roundNum,
 	}
 
-	round, err := s.postgresRepo.NewMultiplayerRound(s.ctx, roundReq)
+	round, err := s.postgresRepo.NewMultiplayerRound(ctx, roundReq)
 	s.Require().NoError(err)
 
 	return round, roundReq
 }
 
 func (s *MultiplayerTestSuite) newTestGuess(
-	user user.PrivateProfile, round multiplayer.Round,
+	ctx context.Context,
+	user user.PrivateProfile,
+	round multiplayer.Round,
 ) multiplayer.Guess {
 	req := dto.NewMultiplayerRoundGuessRequestDB{
 		RequestTime: time.Now().UTC(),
@@ -456,7 +495,7 @@ func (s *MultiplayerTestSuite) newTestGuess(
 		Score:      req.Score,
 	}
 
-	err := s.postgresRepo.NewMultiplayerRoundGuess(s.ctx, req)
+	err := s.postgresRepo.NewMultiplayerRoundGuess(ctx, req)
 	s.Require().NoError(err)
 
 	return multiplayerGuess

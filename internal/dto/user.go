@@ -4,9 +4,10 @@ import (
 	"io"
 	"time"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
-	"github.com/google/uuid"
 )
 
 // UserToAPIPublicUser converts a user profile to a API format.

@@ -237,7 +237,11 @@ func (r *Repository) NewSingleplayerRound(
 }
 
 // GetSingleplayerRound returns a singleplayer round.
-func (r *Repository) GetSingleplayerRound(ctx context.Context, gameID uuid.UUID, roundNum int) (singleplayer.Round, error) {
+func (r *Repository) GetSingleplayerRound(
+	ctx context.Context,
+	gameID uuid.UUID,
+	roundNum int,
+) (singleplayer.Round, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetSingleplayerRound")

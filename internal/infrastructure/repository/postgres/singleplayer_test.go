@@ -320,7 +320,7 @@ func (s *SingleplayerTestSuite) newTestRound(
 		RoundNum:   roundNum,
 	}
 
-	round, err := s.postgresRepo.NewSingleplayerRound(s.ctx, roundReq)
+	round, err := s.postgresRepo.NewSingleplayerRound(ctx, roundReq)
 	s.Require().NoError(err)
 
 	return round, roundReq

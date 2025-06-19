@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/google/uuid"
+
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
 // NewYandexAirview gets a random airview from the database.

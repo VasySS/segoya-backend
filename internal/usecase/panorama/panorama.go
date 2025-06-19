@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/google/uuid"
+
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
 // ErrUnknownProvider is returned when provided panorama provider is unknown.
