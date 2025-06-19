@@ -52,7 +52,7 @@ func (r *Repository) NewMultiplayerGame(
 		inserted_users AS (
             INSERT INTO multiplayer_game_user (user_id, game_id, created_at)
             SELECT user_id, new_game.id, @created_at
-            FROM new_game, unnest(@user_ids::bigint[]) AS user_id
+            FROM new_game, unnest(@user_ids::UUID[]) AS user_id
         )
 		
         SELECT id FROM new_game
@@ -67,13 +67,13 @@ func (r *Repository) NewMultiplayerGame(
 
 	err := pgxscan.Get(ctx, tx, &gameID, query, pgx.NamedArgs{
 		"created_at":       req.RequestTime,
-		"creator_id":       req.CreatorID,
+		"creator_id":       req.CreatorID.String(),
 		"rounds":           req.Rounds,
 		"movement_allowed": req.MovementAllowed,
 		"provider":         req.Provider,
 		"timer_seconds":    req.TimerSeconds,
 		"players":          len(req.ConnectedPlayers),
-		"user_ids":         userIDs,
+		"user_ids":         userIDs.Strings(),
 	})
 	if err != nil {
 		return uuid.UUID{}, fmt.Errorf("failed to create multiplayer game: %w", err)
@@ -278,8 +278,8 @@ func (r *Repository) NewMultiplayerRound(
 	var roundID uuid.UUID
 
 	err := pgxscan.Get(ctx, tx, &roundID, roundQuery, pgx.NamedArgs{
-		"game_id":     req.GameID,
-		"location_id": req.LocationID,
+		"game_id":     req.GameID.String(),
+		"location_id": req.LocationID.String(),
 		"round_num":   req.RoundNum,
 		"created_at":  req.CreatedAt,
 		"started_at":  req.StartedAt,
