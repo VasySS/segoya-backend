@@ -1,6 +1,6 @@
 module github.com/VasySS/segoya-backend
 
-go 1.24.2
+go 1.24.4
 
 tool (
 	github.com/ogen-go/ogen/cmd/ogen
