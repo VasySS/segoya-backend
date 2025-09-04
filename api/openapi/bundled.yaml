@@ -160,7 +160,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/BackendError'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -1045,7 +1045,7 @@ components:
         - registerDate
         - yandexConnected
         - discordConnected
-    Error:
+    BackendError:
       title: Error Object
       description: An RFC 7807/RFC 9457 application/problem+json object
       type: object
@@ -1520,43 +1520,43 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     ServerError:
       description: An internal server error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     NotFound:
       description: A not found error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     RateLimited:
       description: A too many requests error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     BadRequest:
       description: A bad request error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     Conflict:
       description: A conflict error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     Forbidden:
       description: A forbidden request error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
   parameters:
     idUUID:
       name: id

@@ -28,7 +28,7 @@ put:
       content:
         application/problem+json:
           schema:
-            $ref: "../../components/schemas/error.yaml#/Error"
+            $ref: "../../components/schemas/error.yaml#/BackendError"
     "429":
       $ref: "../../components/responses.yaml#/RateLimited"
     "500":

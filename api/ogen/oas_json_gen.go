@@ -126,9 +126,139 @@ func (s *AuthProvider) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode implements json.Marshaler.
+func (s *BackendError) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *BackendError) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("title")
+		e.Str(s.Title)
+	}
+	{
+		e.FieldStart("status")
+		e.Int(s.Status)
+	}
+	{
+		e.FieldStart("detail")
+		e.Str(s.Detail)
+	}
+}
+
+var jsonFieldsNameOfBackendError = [3]string{
+	0: "title",
+	1: "status",
+	2: "detail",
+}
+
+// Decode decodes BackendError from json.
+func (s *BackendError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode BackendError to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "title":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Title = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"title\"")
+			}
+		case "status":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Int()
+				s.Status = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"status\"")
+			}
+		case "detail":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Detail = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"detail\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode BackendError")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfBackendError) {
+					name = jsonFieldsNameOfBackendError[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *BackendError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *BackendError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes DeleteDiscordInternalServerError as json.
 func (s *DeleteDiscordInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -138,7 +268,7 @@ func (s *DeleteDiscordInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DeleteDiscordInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -166,7 +296,7 @@ func (s *DeleteDiscordInternalServerError) UnmarshalJSON(data []byte) error {
 
 // Encode encodes DeleteDiscordUnauthorized as json.
 func (s *DeleteDiscordUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -176,7 +306,7 @@ func (s *DeleteDiscordUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DeleteDiscordUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -204,7 +334,7 @@ func (s *DeleteDiscordUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes DeleteYandexInternalServerError as json.
 func (s *DeleteYandexInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -214,7 +344,7 @@ func (s *DeleteYandexInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DeleteYandexInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -242,7 +372,7 @@ func (s *DeleteYandexInternalServerError) UnmarshalJSON(data []byte) error {
 
 // Encode encodes DeleteYandexUnauthorized as json.
 func (s *DeleteYandexUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -252,7 +382,7 @@ func (s *DeleteYandexUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DeleteYandexUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -280,7 +410,7 @@ func (s *DeleteYandexUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes DiscordLoginCallbackBadRequest as json.
 func (s *DiscordLoginCallbackBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -290,7 +420,7 @@ func (s *DiscordLoginCallbackBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DiscordLoginCallbackBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -318,7 +448,7 @@ func (s *DiscordLoginCallbackBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes DiscordLoginCallbackInternalServerError as json.
 func (s *DiscordLoginCallbackInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -328,7 +458,7 @@ func (s *DiscordLoginCallbackInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DiscordLoginCallbackInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -356,7 +486,7 @@ func (s *DiscordLoginCallbackInternalServerError) UnmarshalJSON(data []byte) err
 
 // Encode encodes DiscordLoginCallbackNotFound as json.
 func (s *DiscordLoginCallbackNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -366,7 +496,7 @@ func (s *DiscordLoginCallbackNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode DiscordLoginCallbackNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -394,7 +524,7 @@ func (s *DiscordLoginCallbackNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes EndSingleplayerGameBadRequest as json.
 func (s *EndSingleplayerGameBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -404,7 +534,7 @@ func (s *EndSingleplayerGameBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerGameBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -432,7 +562,7 @@ func (s *EndSingleplayerGameBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes EndSingleplayerGameForbidden as json.
 func (s *EndSingleplayerGameForbidden) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -442,7 +572,7 @@ func (s *EndSingleplayerGameForbidden) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerGameForbidden to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -470,7 +600,7 @@ func (s *EndSingleplayerGameForbidden) UnmarshalJSON(data []byte) error {
 
 // Encode encodes EndSingleplayerGameInternalServerError as json.
 func (s *EndSingleplayerGameInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -480,7 +610,7 @@ func (s *EndSingleplayerGameInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerGameInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -508,7 +638,7 @@ func (s *EndSingleplayerGameInternalServerError) UnmarshalJSON(data []byte) erro
 
 // Encode encodes EndSingleplayerGameNotFound as json.
 func (s *EndSingleplayerGameNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -518,7 +648,7 @@ func (s *EndSingleplayerGameNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerGameNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -546,7 +676,7 @@ func (s *EndSingleplayerGameNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes EndSingleplayerGameUnauthorized as json.
 func (s *EndSingleplayerGameUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -556,7 +686,7 @@ func (s *EndSingleplayerGameUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerGameUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -584,7 +714,7 @@ func (s *EndSingleplayerGameUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes EndSingleplayerRoundBadRequest as json.
 func (s *EndSingleplayerRoundBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -594,7 +724,7 @@ func (s *EndSingleplayerRoundBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerRoundBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -622,7 +752,7 @@ func (s *EndSingleplayerRoundBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes EndSingleplayerRoundForbidden as json.
 func (s *EndSingleplayerRoundForbidden) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -632,7 +762,7 @@ func (s *EndSingleplayerRoundForbidden) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerRoundForbidden to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -660,7 +790,7 @@ func (s *EndSingleplayerRoundForbidden) UnmarshalJSON(data []byte) error {
 
 // Encode encodes EndSingleplayerRoundInternalServerError as json.
 func (s *EndSingleplayerRoundInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -670,7 +800,7 @@ func (s *EndSingleplayerRoundInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerRoundInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -698,7 +828,7 @@ func (s *EndSingleplayerRoundInternalServerError) UnmarshalJSON(data []byte) err
 
 // Encode encodes EndSingleplayerRoundNotFound as json.
 func (s *EndSingleplayerRoundNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -708,7 +838,7 @@ func (s *EndSingleplayerRoundNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerRoundNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -849,7 +979,7 @@ func (s *EndSingleplayerRoundResponse) UnmarshalJSON(data []byte) error {
 
 // Encode encodes EndSingleplayerRoundUnauthorized as json.
 func (s *EndSingleplayerRoundUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -859,7 +989,7 @@ func (s *EndSingleplayerRoundUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode EndSingleplayerRoundUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -881,136 +1011,6 @@ func (s *EndSingleplayerRoundUnauthorized) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *EndSingleplayerRoundUnauthorized) UnmarshalJSON(data []byte) error {
-	d := jx.DecodeBytes(data)
-	return s.Decode(d)
-}
-
-// Encode implements json.Marshaler.
-func (s *Error) Encode(e *jx.Encoder) {
-	e.ObjStart()
-	s.encodeFields(e)
-	e.ObjEnd()
-}
-
-// encodeFields encodes fields.
-func (s *Error) encodeFields(e *jx.Encoder) {
-	{
-		e.FieldStart("title")
-		e.Str(s.Title)
-	}
-	{
-		e.FieldStart("status")
-		e.Int(s.Status)
-	}
-	{
-		e.FieldStart("detail")
-		e.Str(s.Detail)
-	}
-}
-
-var jsonFieldsNameOfError = [3]string{
-	0: "title",
-	1: "status",
-	2: "detail",
-}
-
-// Decode decodes Error from json.
-func (s *Error) Decode(d *jx.Decoder) error {
-	if s == nil {
-		return errors.New("invalid: unable to decode Error to nil")
-	}
-	var requiredBitSet [1]uint8
-
-	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
-		switch string(k) {
-		case "title":
-			requiredBitSet[0] |= 1 << 0
-			if err := func() error {
-				v, err := d.Str()
-				s.Title = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"title\"")
-			}
-		case "status":
-			requiredBitSet[0] |= 1 << 1
-			if err := func() error {
-				v, err := d.Int()
-				s.Status = int(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"status\"")
-			}
-		case "detail":
-			requiredBitSet[0] |= 1 << 2
-			if err := func() error {
-				v, err := d.Str()
-				s.Detail = string(v)
-				if err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return errors.Wrap(err, "decode field \"detail\"")
-			}
-		default:
-			return d.Skip()
-		}
-		return nil
-	}); err != nil {
-		return errors.Wrap(err, "decode Error")
-	}
-	// Validate required fields.
-	var failures []validate.FieldError
-	for i, mask := range [1]uint8{
-		0b00000111,
-	} {
-		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
-			// Mask only required fields and check equality to mask using XOR.
-			//
-			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
-			// Bits of fields which would be set are actually bits of missed fields.
-			missed := bits.OnesCount8(result)
-			for bitN := 0; bitN < missed; bitN++ {
-				bitIdx := bits.TrailingZeros8(result)
-				fieldIdx := i*8 + bitIdx
-				var name string
-				if fieldIdx < len(jsonFieldsNameOfError) {
-					name = jsonFieldsNameOfError[fieldIdx]
-				} else {
-					name = strconv.Itoa(fieldIdx)
-				}
-				failures = append(failures, validate.FieldError{
-					Name:  name,
-					Error: validate.ErrFieldRequired,
-				})
-				// Reset bit.
-				result &^= 1 << bitIdx
-			}
-		}
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-
-	return nil
-}
-
-// MarshalJSON implements stdjson.Marshaler.
-func (s *Error) MarshalJSON() ([]byte, error) {
-	e := jx.Encoder{}
-	s.Encode(&e)
-	return e.Bytes(), nil
-}
-
-// UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *Error) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -1113,7 +1113,7 @@ func (s *GetHealthOK) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetLobbyInternalServerError as json.
 func (s *GetLobbyInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1123,7 +1123,7 @@ func (s *GetLobbyInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetLobbyInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1151,7 +1151,7 @@ func (s *GetLobbyInternalServerError) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetLobbyNotFound as json.
 func (s *GetLobbyNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1161,7 +1161,7 @@ func (s *GetLobbyNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetLobbyNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1189,7 +1189,7 @@ func (s *GetLobbyNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetMultiplayerGameGuessesBadRequest as json.
 func (s *GetMultiplayerGameGuessesBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1199,7 +1199,7 @@ func (s *GetMultiplayerGameGuessesBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerGameGuessesBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1227,7 +1227,7 @@ func (s *GetMultiplayerGameGuessesBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetMultiplayerGameGuessesInternalServerError as json.
 func (s *GetMultiplayerGameGuessesInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1237,7 +1237,7 @@ func (s *GetMultiplayerGameGuessesInternalServerError) Decode(d *jx.Decoder) err
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerGameGuessesInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1315,7 +1315,7 @@ func (s *GetMultiplayerGameGuessesOKApplicationJSON) UnmarshalJSON(data []byte) 
 
 // Encode encodes GetMultiplayerGameGuessesUnauthorized as json.
 func (s *GetMultiplayerGameGuessesUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1325,7 +1325,7 @@ func (s *GetMultiplayerGameGuessesUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerGameGuessesUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1353,7 +1353,7 @@ func (s *GetMultiplayerGameGuessesUnauthorized) UnmarshalJSON(data []byte) error
 
 // Encode encodes GetMultiplayerGameInternalServerError as json.
 func (s *GetMultiplayerGameInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1363,7 +1363,7 @@ func (s *GetMultiplayerGameInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerGameInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1391,7 +1391,7 @@ func (s *GetMultiplayerGameInternalServerError) UnmarshalJSON(data []byte) error
 
 // Encode encodes GetMultiplayerGameNotFound as json.
 func (s *GetMultiplayerGameNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1401,7 +1401,7 @@ func (s *GetMultiplayerGameNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerGameNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1429,7 +1429,7 @@ func (s *GetMultiplayerGameNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetMultiplayerGameUnauthorized as json.
 func (s *GetMultiplayerGameUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1439,7 +1439,7 @@ func (s *GetMultiplayerGameUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerGameUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1467,7 +1467,7 @@ func (s *GetMultiplayerGameUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetMultiplayerRoundInternalServerError as json.
 func (s *GetMultiplayerRoundInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1477,7 +1477,7 @@ func (s *GetMultiplayerRoundInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerRoundInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1505,7 +1505,7 @@ func (s *GetMultiplayerRoundInternalServerError) UnmarshalJSON(data []byte) erro
 
 // Encode encodes GetMultiplayerRoundNotFound as json.
 func (s *GetMultiplayerRoundNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1515,7 +1515,7 @@ func (s *GetMultiplayerRoundNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerRoundNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1543,7 +1543,7 @@ func (s *GetMultiplayerRoundNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetMultiplayerRoundUnauthorized as json.
 func (s *GetMultiplayerRoundUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1553,7 +1553,7 @@ func (s *GetMultiplayerRoundUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetMultiplayerRoundUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1581,7 +1581,7 @@ func (s *GetMultiplayerRoundUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetOAuthProvidersInternalServerError as json.
 func (s *GetOAuthProvidersInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1591,7 +1591,7 @@ func (s *GetOAuthProvidersInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetOAuthProvidersInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1669,7 +1669,7 @@ func (s *GetOAuthProvidersOKApplicationJSON) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetOAuthProvidersUnauthorized as json.
 func (s *GetOAuthProvidersUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1679,7 +1679,7 @@ func (s *GetOAuthProvidersUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetOAuthProvidersUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1707,7 +1707,7 @@ func (s *GetOAuthProvidersUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetPrivateProfileInternalServerError as json.
 func (s *GetPrivateProfileInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1717,7 +1717,7 @@ func (s *GetPrivateProfileInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetPrivateProfileInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1745,7 +1745,7 @@ func (s *GetPrivateProfileInternalServerError) UnmarshalJSON(data []byte) error 
 
 // Encode encodes GetPrivateProfileUnauthorized as json.
 func (s *GetPrivateProfileUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1755,7 +1755,7 @@ func (s *GetPrivateProfileUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetPrivateProfileUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1783,7 +1783,7 @@ func (s *GetPrivateProfileUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetPublicProfileInternalServerError as json.
 func (s *GetPublicProfileInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1793,7 +1793,7 @@ func (s *GetPublicProfileInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetPublicProfileInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1821,7 +1821,7 @@ func (s *GetPublicProfileInternalServerError) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetPublicProfileNotFound as json.
 func (s *GetPublicProfileNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1831,7 +1831,7 @@ func (s *GetPublicProfileNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetPublicProfileNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1859,7 +1859,7 @@ func (s *GetPublicProfileNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerGameForbidden as json.
 func (s *GetSingleplayerGameForbidden) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1869,7 +1869,7 @@ func (s *GetSingleplayerGameForbidden) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameForbidden to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1897,7 +1897,7 @@ func (s *GetSingleplayerGameForbidden) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerGameGuessesBadRequest as json.
 func (s *GetSingleplayerGameGuessesBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1907,7 +1907,7 @@ func (s *GetSingleplayerGameGuessesBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameGuessesBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1935,7 +1935,7 @@ func (s *GetSingleplayerGameGuessesBadRequest) UnmarshalJSON(data []byte) error 
 
 // Encode encodes GetSingleplayerGameGuessesForbidden as json.
 func (s *GetSingleplayerGameGuessesForbidden) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1945,7 +1945,7 @@ func (s *GetSingleplayerGameGuessesForbidden) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameGuessesForbidden to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -1973,7 +1973,7 @@ func (s *GetSingleplayerGameGuessesForbidden) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerGameGuessesInternalServerError as json.
 func (s *GetSingleplayerGameGuessesInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -1983,7 +1983,7 @@ func (s *GetSingleplayerGameGuessesInternalServerError) Decode(d *jx.Decoder) er
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameGuessesInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2011,7 +2011,7 @@ func (s *GetSingleplayerGameGuessesInternalServerError) UnmarshalJSON(data []byt
 
 // Encode encodes GetSingleplayerGameGuessesNotFound as json.
 func (s *GetSingleplayerGameGuessesNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2021,7 +2021,7 @@ func (s *GetSingleplayerGameGuessesNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameGuessesNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2099,7 +2099,7 @@ func (s *GetSingleplayerGameGuessesOKApplicationJSON) UnmarshalJSON(data []byte)
 
 // Encode encodes GetSingleplayerGameGuessesUnauthorized as json.
 func (s *GetSingleplayerGameGuessesUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2109,7 +2109,7 @@ func (s *GetSingleplayerGameGuessesUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameGuessesUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2137,7 +2137,7 @@ func (s *GetSingleplayerGameGuessesUnauthorized) UnmarshalJSON(data []byte) erro
 
 // Encode encodes GetSingleplayerGameInternalServerError as json.
 func (s *GetSingleplayerGameInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2147,7 +2147,7 @@ func (s *GetSingleplayerGameInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2175,7 +2175,7 @@ func (s *GetSingleplayerGameInternalServerError) UnmarshalJSON(data []byte) erro
 
 // Encode encodes GetSingleplayerGameNotFound as json.
 func (s *GetSingleplayerGameNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2185,7 +2185,7 @@ func (s *GetSingleplayerGameNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2213,7 +2213,7 @@ func (s *GetSingleplayerGameNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerGameUnauthorized as json.
 func (s *GetSingleplayerGameUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2223,7 +2223,7 @@ func (s *GetSingleplayerGameUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGameUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2251,7 +2251,7 @@ func (s *GetSingleplayerGameUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerGamesBadRequest as json.
 func (s *GetSingleplayerGamesBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2261,7 +2261,7 @@ func (s *GetSingleplayerGamesBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGamesBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2289,7 +2289,7 @@ func (s *GetSingleplayerGamesBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerGamesInternalServerError as json.
 func (s *GetSingleplayerGamesInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2299,7 +2299,7 @@ func (s *GetSingleplayerGamesInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGamesInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2327,7 +2327,7 @@ func (s *GetSingleplayerGamesInternalServerError) UnmarshalJSON(data []byte) err
 
 // Encode encodes GetSingleplayerGamesUnauthorized as json.
 func (s *GetSingleplayerGamesUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2337,7 +2337,7 @@ func (s *GetSingleplayerGamesUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerGamesUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2365,7 +2365,7 @@ func (s *GetSingleplayerGamesUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerRoundBadRequest as json.
 func (s *GetSingleplayerRoundBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2375,7 +2375,7 @@ func (s *GetSingleplayerRoundBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerRoundBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2403,7 +2403,7 @@ func (s *GetSingleplayerRoundBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerRoundForbidden as json.
 func (s *GetSingleplayerRoundForbidden) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2413,7 +2413,7 @@ func (s *GetSingleplayerRoundForbidden) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerRoundForbidden to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2441,7 +2441,7 @@ func (s *GetSingleplayerRoundForbidden) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerRoundInternalServerError as json.
 func (s *GetSingleplayerRoundInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2451,7 +2451,7 @@ func (s *GetSingleplayerRoundInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerRoundInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2479,7 +2479,7 @@ func (s *GetSingleplayerRoundInternalServerError) UnmarshalJSON(data []byte) err
 
 // Encode encodes GetSingleplayerRoundNotFound as json.
 func (s *GetSingleplayerRoundNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2489,7 +2489,7 @@ func (s *GetSingleplayerRoundNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerRoundNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -2517,7 +2517,7 @@ func (s *GetSingleplayerRoundNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes GetSingleplayerRoundUnauthorized as json.
 func (s *GetSingleplayerRoundUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -2527,7 +2527,7 @@ func (s *GetSingleplayerRoundUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode GetSingleplayerRoundUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -3089,7 +3089,7 @@ func (s *Lobby) UnmarshalJSON(data []byte) error {
 
 // Encode encodes LoginBadRequest as json.
 func (s *LoginBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -3099,7 +3099,7 @@ func (s *LoginBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode LoginBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -3127,7 +3127,7 @@ func (s *LoginBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes LoginInternalServerError as json.
 func (s *LoginInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -3137,7 +3137,7 @@ func (s *LoginInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode LoginInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -3278,7 +3278,7 @@ func (s *LoginRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes LoginUnauthorized as json.
 func (s *LoginUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -3288,7 +3288,7 @@ func (s *LoginUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode LoginUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4046,7 +4046,7 @@ func (s *MultiplayerRound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewDiscordCallbackBadRequest as json.
 func (s *NewDiscordCallbackBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4056,7 +4056,7 @@ func (s *NewDiscordCallbackBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewDiscordCallbackBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4084,7 +4084,7 @@ func (s *NewDiscordCallbackBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewDiscordCallbackInternalServerError as json.
 func (s *NewDiscordCallbackInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4094,7 +4094,7 @@ func (s *NewDiscordCallbackInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewDiscordCallbackInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4122,7 +4122,7 @@ func (s *NewDiscordCallbackInternalServerError) UnmarshalJSON(data []byte) error
 
 // Encode encodes NewDiscordCallbackUnauthorized as json.
 func (s *NewDiscordCallbackUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4132,7 +4132,7 @@ func (s *NewDiscordCallbackUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewDiscordCallbackUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4356,7 +4356,7 @@ func (s *NewLobby) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewLobbyBadRequest as json.
 func (s *NewLobbyBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4366,7 +4366,7 @@ func (s *NewLobbyBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewLobbyBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4490,7 +4490,7 @@ func (s *NewLobbyCreated) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewLobbyInternalServerError as json.
 func (s *NewLobbyInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4500,7 +4500,7 @@ func (s *NewLobbyInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewLobbyInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4528,7 +4528,7 @@ func (s *NewLobbyInternalServerError) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewMultiplayerRoundInternalServerError as json.
 func (s *NewMultiplayerRoundInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4538,7 +4538,7 @@ func (s *NewMultiplayerRoundInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewMultiplayerRoundInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4566,7 +4566,7 @@ func (s *NewMultiplayerRoundInternalServerError) UnmarshalJSON(data []byte) erro
 
 // Encode encodes NewMultiplayerRoundNotFound as json.
 func (s *NewMultiplayerRoundNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4576,7 +4576,7 @@ func (s *NewMultiplayerRoundNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewMultiplayerRoundNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4604,7 +4604,7 @@ func (s *NewMultiplayerRoundNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewMultiplayerRoundUnauthorized as json.
 func (s *NewMultiplayerRoundUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4614,7 +4614,7 @@ func (s *NewMultiplayerRoundUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewMultiplayerRoundUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4642,7 +4642,7 @@ func (s *NewMultiplayerRoundUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewSingleplayerGameBadRequest as json.
 func (s *NewSingleplayerGameBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4652,7 +4652,7 @@ func (s *NewSingleplayerGameBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewSingleplayerGameBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4776,7 +4776,7 @@ func (s *NewSingleplayerGameCreated) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewSingleplayerGameInternalServerError as json.
 func (s *NewSingleplayerGameInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4786,7 +4786,7 @@ func (s *NewSingleplayerGameInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewSingleplayerGameInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4959,7 +4959,7 @@ func (s *NewSingleplayerGameRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewSingleplayerGameUnauthorized as json.
 func (s *NewSingleplayerGameUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -4969,7 +4969,7 @@ func (s *NewSingleplayerGameUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewSingleplayerGameUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -4997,7 +4997,7 @@ func (s *NewSingleplayerGameUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewSingleplayerRoundBadRequest as json.
 func (s *NewSingleplayerRoundBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5007,7 +5007,7 @@ func (s *NewSingleplayerRoundBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewSingleplayerRoundBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5035,7 +5035,7 @@ func (s *NewSingleplayerRoundBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewSingleplayerRoundForbidden as json.
 func (s *NewSingleplayerRoundForbidden) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5045,7 +5045,7 @@ func (s *NewSingleplayerRoundForbidden) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewSingleplayerRoundForbidden to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5073,7 +5073,7 @@ func (s *NewSingleplayerRoundForbidden) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewSingleplayerRoundInternalServerError as json.
 func (s *NewSingleplayerRoundInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5083,7 +5083,7 @@ func (s *NewSingleplayerRoundInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewSingleplayerRoundInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5111,7 +5111,7 @@ func (s *NewSingleplayerRoundInternalServerError) UnmarshalJSON(data []byte) err
 
 // Encode encodes NewSingleplayerRoundNotFound as json.
 func (s *NewSingleplayerRoundNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5121,7 +5121,7 @@ func (s *NewSingleplayerRoundNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewSingleplayerRoundNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5149,7 +5149,7 @@ func (s *NewSingleplayerRoundNotFound) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewSingleplayerRoundUnauthorized as json.
 func (s *NewSingleplayerRoundUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5159,7 +5159,7 @@ func (s *NewSingleplayerRoundUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewSingleplayerRoundUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5187,7 +5187,7 @@ func (s *NewSingleplayerRoundUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewYandexCallbackBadRequest as json.
 func (s *NewYandexCallbackBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5197,7 +5197,7 @@ func (s *NewYandexCallbackBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewYandexCallbackBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5225,7 +5225,7 @@ func (s *NewYandexCallbackBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes NewYandexCallbackInternalServerError as json.
 func (s *NewYandexCallbackInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5235,7 +5235,7 @@ func (s *NewYandexCallbackInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewYandexCallbackInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5263,7 +5263,7 @@ func (s *NewYandexCallbackInternalServerError) UnmarshalJSON(data []byte) error 
 
 // Encode encodes NewYandexCallbackUnauthorized as json.
 func (s *NewYandexCallbackUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5273,7 +5273,7 @@ func (s *NewYandexCallbackUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode NewYandexCallbackUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5415,7 +5415,7 @@ func (s *Provider) UnmarshalJSON(data []byte) error {
 
 // Encode encodes RefreshTokensBadRequest as json.
 func (s *RefreshTokensBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5425,7 +5425,7 @@ func (s *RefreshTokensBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode RefreshTokensBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5453,7 +5453,7 @@ func (s *RefreshTokensBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes RefreshTokensInternalServerError as json.
 func (s *RefreshTokensInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5463,7 +5463,7 @@ func (s *RefreshTokensInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode RefreshTokensInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5587,7 +5587,7 @@ func (s *RefreshTokensReq) UnmarshalJSON(data []byte) error {
 
 // Encode encodes RegisterBadRequest as json.
 func (s *RegisterBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5597,7 +5597,7 @@ func (s *RegisterBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode RegisterBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5625,7 +5625,7 @@ func (s *RegisterBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes RegisterConflict as json.
 func (s *RegisterConflict) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5635,7 +5635,7 @@ func (s *RegisterConflict) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode RegisterConflict to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -5663,7 +5663,7 @@ func (s *RegisterConflict) UnmarshalJSON(data []byte) error {
 
 // Encode encodes RegisterInternalServerError as json.
 func (s *RegisterInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -5673,7 +5673,7 @@ func (s *RegisterInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode RegisterInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -6744,7 +6744,7 @@ func (s *SingleplayerRoundGuess) UnmarshalJSON(data []byte) error {
 
 // Encode encodes UpdateUserAvatarInternalServerError as json.
 func (s *UpdateUserAvatarInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -6754,7 +6754,7 @@ func (s *UpdateUserAvatarInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UpdateUserAvatarInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -6782,7 +6782,7 @@ func (s *UpdateUserAvatarInternalServerError) UnmarshalJSON(data []byte) error {
 
 // Encode encodes UpdateUserAvatarRequestEntityTooLarge as json.
 func (s *UpdateUserAvatarRequestEntityTooLarge) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -6792,7 +6792,7 @@ func (s *UpdateUserAvatarRequestEntityTooLarge) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UpdateUserAvatarRequestEntityTooLarge to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -6820,7 +6820,7 @@ func (s *UpdateUserAvatarRequestEntityTooLarge) UnmarshalJSON(data []byte) error
 
 // Encode encodes UpdateUserAvatarTooManyRequests as json.
 func (s *UpdateUserAvatarTooManyRequests) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -6830,7 +6830,7 @@ func (s *UpdateUserAvatarTooManyRequests) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UpdateUserAvatarTooManyRequests to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -6858,7 +6858,7 @@ func (s *UpdateUserAvatarTooManyRequests) UnmarshalJSON(data []byte) error {
 
 // Encode encodes UpdateUserAvatarUnauthorized as json.
 func (s *UpdateUserAvatarUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -6868,7 +6868,7 @@ func (s *UpdateUserAvatarUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UpdateUserAvatarUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -6896,7 +6896,7 @@ func (s *UpdateUserAvatarUnauthorized) UnmarshalJSON(data []byte) error {
 
 // Encode encodes UpdateUserInternalServerError as json.
 func (s *UpdateUserInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -6906,7 +6906,7 @@ func (s *UpdateUserInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UpdateUserInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -6934,7 +6934,7 @@ func (s *UpdateUserInternalServerError) UnmarshalJSON(data []byte) error {
 
 // Encode encodes UpdateUserUnauthorized as json.
 func (s *UpdateUserUnauthorized) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -6944,7 +6944,7 @@ func (s *UpdateUserUnauthorized) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UpdateUserUnauthorized to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -7561,7 +7561,7 @@ func (s *UserUpdateRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes YandexLoginCallbackBadRequest as json.
 func (s *YandexLoginCallbackBadRequest) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -7571,7 +7571,7 @@ func (s *YandexLoginCallbackBadRequest) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode YandexLoginCallbackBadRequest to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -7599,7 +7599,7 @@ func (s *YandexLoginCallbackBadRequest) UnmarshalJSON(data []byte) error {
 
 // Encode encodes YandexLoginCallbackInternalServerError as json.
 func (s *YandexLoginCallbackInternalServerError) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -7609,7 +7609,7 @@ func (s *YandexLoginCallbackInternalServerError) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode YandexLoginCallbackInternalServerError to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err
@@ -7637,7 +7637,7 @@ func (s *YandexLoginCallbackInternalServerError) UnmarshalJSON(data []byte) erro
 
 // Encode encodes YandexLoginCallbackNotFound as json.
 func (s *YandexLoginCallbackNotFound) Encode(e *jx.Encoder) {
-	unwrapped := (*Error)(s)
+	unwrapped := (*BackendError)(s)
 
 	unwrapped.Encode(e)
 }
@@ -7647,7 +7647,7 @@ func (s *YandexLoginCallbackNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode YandexLoginCallbackNotFound to nil")
 	}
-	var unwrapped Error
+	var unwrapped BackendError
 	if err := func() error {
 		if err := unwrapped.Decode(d); err != nil {
 			return err

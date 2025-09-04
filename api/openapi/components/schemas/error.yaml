@@ -1,4 +1,4 @@
-Error:
+BackendError:
   title: Error Object
   description: An RFC 7807/RFC 9457 application/problem+json object
   type: object
