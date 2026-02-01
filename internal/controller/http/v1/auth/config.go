@@ -21,6 +21,7 @@ type oauthConfig struct {
 // Config contains configuration for auth HTTP handlers.
 type Config struct {
 	oauthConfig
+
 	captchaSecretKey string
 	frontendURL      url.URL
 	accessTokenTTL   time.Duration

@@ -53,7 +53,12 @@ func (r *Repository) GetOAuth(ctx context.Context, userID uuid.UUID) ([]user.OAu
 	defer span.End()
 
 	query := `
-		SELECT *
+		SELECT 
+			id,
+			user_id,
+			oauth_id,
+			issuer,
+			created_at
 		FROM user_oauth
 		WHERE user_id = @user_id
 	`

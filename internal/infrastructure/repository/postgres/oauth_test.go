@@ -24,6 +24,7 @@ func TestOAuthTestSuite(t *testing.T) {
 
 type OAuthTestSuite struct {
 	suite.Suite
+
 	ctx               context.Context
 	postgresContainer *containers.PostgresContainer
 	postgresRepo      *postgresRepo.Repository

@@ -21,6 +21,7 @@ func TestPanoramaTestSuite(t *testing.T) {
 
 type PanoramaTestSuite struct {
 	suite.Suite
+
 	ctx               context.Context
 	postgresContainer *containers.PostgresContainer
 	postgresRepo      *postgresRepo.Repository

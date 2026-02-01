@@ -27,6 +27,7 @@ func TestMultiplayerTestSuite(t *testing.T) {
 
 type MultiplayerTestSuite struct {
 	suite.Suite
+
 	ctx               context.Context
 	postgresContainer *containers.PostgresContainer
 	postgresRepo      *postgresRepo.Repository

@@ -10,6 +10,7 @@ import (
 // ValkeyContainer is a wrapper around the valkey test container.
 type ValkeyContainer struct {
 	*valkey.ValkeyContainer
+
 	ConnectionString string
 }
 

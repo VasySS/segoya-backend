@@ -19,6 +19,7 @@ type PublicProfile struct {
 // PrivateProfile contains information, that can only be seen by the owner of the profile.
 type PrivateProfile struct {
 	PublicProfile
+
 	Password         string    `json:"-"`
 	AvatarLastUpdate time.Time `json:"-"`
 }
@@ -31,6 +32,7 @@ func (u PrivateProfile) ToPublicProfile() PublicProfile {
 // MultiplayerUser contains information about multiplayer user.
 type MultiplayerUser struct {
 	PublicProfile
+
 	// Guessed   bool `json:"guessed"` // TODO - implement
 	Connected bool `json:"connected"`
 	Score     int  `json:"score"`

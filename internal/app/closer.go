@@ -58,6 +58,7 @@ func (c *Closer) Close(ctx context.Context) error {
 	var combinedErr error
 
 	done := make(chan struct{})
+
 	go func() {
 		defer close(done)
 

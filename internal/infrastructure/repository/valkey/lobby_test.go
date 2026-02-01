@@ -24,6 +24,7 @@ func TestLobbyTestSuite(t *testing.T) {
 
 type LobbyTestSuite struct {
 	suite.Suite
+
 	ctx             context.Context
 	valkeyContainer *containers.ValkeyContainer
 	valkeyRepo      *valkeyRepo.Repository

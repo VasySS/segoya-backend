@@ -26,6 +26,7 @@ func IsSupportedProvider(p string) bool {
 // PanoramaMetadata contains general streetview metadata.
 type PanoramaMetadata struct {
 	LatLng
+
 	ID           uuid.UUID
 	StreetviewID string
 }

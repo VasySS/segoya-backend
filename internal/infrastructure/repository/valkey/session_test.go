@@ -23,6 +23,7 @@ func TestSessionTestSuite(t *testing.T) {
 
 type SessionTestSuite struct {
 	suite.Suite
+
 	ctx             context.Context
 	valkeyContainer *containers.ValkeyContainer
 	valkeyRepo      *valkeyRepo.Repository

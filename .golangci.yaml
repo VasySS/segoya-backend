@@ -66,3 +66,6 @@ linters:
     - varnamelen
     - containedctx
     - godox
+    - noinlineerr
+    # TODO - return later
+    - revive

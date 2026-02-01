@@ -23,6 +23,7 @@ func TestOAuthTestSuite(t *testing.T) {
 
 type OAuthTestSuite struct {
 	suite.Suite
+
 	ctx             context.Context
 	valkeyContainer *containers.ValkeyContainer
 	valkeyRepo      *valkeyRepo.Repository

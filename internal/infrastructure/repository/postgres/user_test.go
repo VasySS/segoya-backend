@@ -25,6 +25,7 @@ func TestUserTestSuite(t *testing.T) {
 
 type UserTestSuite struct {
 	suite.Suite
+
 	ctx               context.Context
 	postgresContainer *containers.PostgresContainer
 	postgresRepo      *postgresRepo.Repository

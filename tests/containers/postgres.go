@@ -13,6 +13,7 @@ import (
 // PostgresContainer is a wrapper around the postgres test container.
 type PostgresContainer struct {
 	*postgres.PostgresContainer
+
 	ConnectionString string
 }
 
