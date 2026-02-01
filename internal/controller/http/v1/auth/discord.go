@@ -21,7 +21,7 @@ func (h Handler) NewDiscord(ctx context.Context) (api.NewDiscordRes, error) {
 
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {
-		return &api.Error{
+		return &api.BackendError{
 			Title:  "Error authorizing user",
 			Status: http.StatusUnauthorized,
 			Detail: "An error occurred while authorizing user",
@@ -37,7 +37,7 @@ func (h Handler) NewDiscord(ctx context.Context) (api.NewDiscordRes, error) {
 	if err != nil {
 		slog.Error("error creating new oauth connection", slog.Any("error", err))
 
-		return &api.Error{
+		return &api.BackendError{
 			Title:  "Error creating new oauth connection",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while creating new oauth connection",

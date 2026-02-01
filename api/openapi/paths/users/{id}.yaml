@@ -5,7 +5,7 @@ get:
   tags: ["users"]
   x-ogen-operation-group: Users
   parameters:
-    - $ref: "../../components/parameters.yaml#/idInt"
+    - $ref: "../../components/parameters.yaml#/idUUID"
   responses:
     "200":
       description: User profile details.

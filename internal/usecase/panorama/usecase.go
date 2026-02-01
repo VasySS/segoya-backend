@@ -4,6 +4,7 @@ package panorama
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 
@@ -14,10 +15,10 @@ import (
 //
 //go:generate go tool mockery --name=Repository
 type Repository interface {
-	GetGoogleStreetview(ctx context.Context, id int) (game.GoogleStreetview, error)
-	GetSeznamStreetview(ctx context.Context, id int) (game.SeznamStreetview, error)
-	GetYandexStreetview(ctx context.Context, id int) (game.YandexStreetview, error)
-	GetYandexAirview(ctx context.Context, id int) (game.YandexAirview, error)
+	GetGoogleStreetview(ctx context.Context, id uuid.UUID) (game.GoogleStreetview, error)
+	GetSeznamStreetview(ctx context.Context, id uuid.UUID) (game.SeznamStreetview, error)
+	GetYandexStreetview(ctx context.Context, id uuid.UUID) (game.YandexStreetview, error)
+	GetYandexAirview(ctx context.Context, id uuid.UUID) (game.YandexAirview, error)
 	RandomGoogleStreetview(ctx context.Context) (game.GoogleStreetview, error)
 	RandomSeznamStreetview(ctx context.Context) (game.SeznamStreetview, error)
 	RandomYandexAirview(ctx context.Context) (game.YandexAirview, error)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
@@ -12,7 +13,7 @@ import (
 )
 
 // LockSingleplayerGame locks singleplayer game by id exclusively.
-func (r *Repository) LockSingleplayerGame(ctx context.Context, gameID int) error {
+func (r *Repository) LockSingleplayerGame(ctx context.Context, gameID uuid.UUID) error {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	query := `
@@ -22,7 +23,7 @@ func (r *Repository) LockSingleplayerGame(ctx context.Context, gameID int) error
 		FOR UPDATE
 	`
 
-	if _, err := tx.Exec(ctx, query, pgx.NamedArgs{"game_id": gameID}); err != nil {
+	if _, err := tx.Exec(ctx, query, pgx.NamedArgs{"game_id": gameID.String()}); err != nil {
 		return fmt.Errorf("failed to lock game: %w", err)
 	}
 
@@ -33,7 +34,7 @@ func (r *Repository) LockSingleplayerGame(ctx context.Context, gameID int) error
 func (r *Repository) NewSingleplayerGame(
 	ctx context.Context,
 	req dto.NewSingleplayerGameRequest,
-) (int, error) {
+) (uuid.UUID, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "NewSingleplayerGame")
@@ -46,10 +47,10 @@ func (r *Repository) NewSingleplayerGame(
 		RETURNING id
 	`
 
-	var gameID int
+	var gameID uuid.UUID
 
 	err := tx.QueryRow(ctx, query, pgx.NamedArgs{
-		"user_id":          req.UserID,
+		"user_id":          req.UserID.String(),
 		"rounds":           req.Rounds,
 		"movement_allowed": req.MovementAllowed,
 		"provider":         req.Provider,
@@ -57,14 +58,14 @@ func (r *Repository) NewSingleplayerGame(
 		"timer_seconds":    req.TimerSeconds,
 	}).Scan(&gameID)
 	if err != nil {
-		return -1, fmt.Errorf("failed to create singleplayer game: %w", err)
+		return uuid.UUID{}, fmt.Errorf("failed to create singleplayer game: %w", err)
 	}
 
 	return gameID, nil
 }
 
 // GetSingleplayerGame returns singleplayer game by its id.
-func (r *Repository) GetSingleplayerGame(ctx context.Context, gameID int) (singleplayer.Game, error) {
+func (r *Repository) GetSingleplayerGame(ctx context.Context, gameID uuid.UUID) (singleplayer.Game, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetSingleplayerGame")
@@ -94,7 +95,7 @@ func (r *Repository) GetSingleplayerGame(ctx context.Context, gameID int) (singl
 
 	var game singleplayer.Game
 
-	err := pgxscan.Get(ctx, tx, &game, query, pgx.NamedArgs{"game_id": gameID})
+	err := pgxscan.Get(ctx, tx, &game, query, pgx.NamedArgs{"game_id": gameID.String()})
 	if pgxscan.NotFound(err) {
 		return singleplayer.Game{}, singleplayer.ErrGameNotFound
 	} else if err != nil {
@@ -123,7 +124,7 @@ func (r *Repository) GetSingleplayerGames(
 	`
 
 	err := pgxscan.Get(ctx, tx, &totalGames, countQuery, pgx.NamedArgs{
-		"user_id": req.UserID,
+		"user_id": req.UserID.String(),
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get total singleplayer games count: %w", err)
@@ -157,7 +158,7 @@ func (r *Repository) GetSingleplayerGames(
 	var games []singleplayer.Game
 
 	err = pgxscan.Select(ctx, tx, &games, query, pgx.NamedArgs{
-		"user_id": req.UserID,
+		"user_id": req.UserID.String(),
 		"limit":   req.PageSize,
 		"offset":  offset,
 	})
@@ -184,7 +185,7 @@ func (r *Repository) EndSingleplayerGame(ctx context.Context, req dto.EndSinglep
 	`
 
 	cmd, err := tx.Exec(ctx, query, pgx.NamedArgs{
-		"game_id":  req.GameID,
+		"game_id":  req.GameID.String(),
 		"ended_at": req.RequestTime,
 	})
 	if cmd.RowsAffected() == 0 {
@@ -214,11 +215,11 @@ func (r *Repository) NewSingleplayerRound(
 		RETURNING id
 	`
 
-	var roundID int
+	var roundID uuid.UUID
 
 	err := pgxscan.Get(ctx, tx, &roundID, roundQuery, pgx.NamedArgs{
-		"game_id":     req.GameID,
-		"location_id": req.LocationID,
+		"game_id":     req.GameID.String(),
+		"location_id": req.LocationID.String(),
 		"created_at":  req.CreatedAt,
 		"started_at":  req.StartedAt,
 		"round_num":   req.RoundNum,
@@ -236,7 +237,11 @@ func (r *Repository) NewSingleplayerRound(
 }
 
 // GetSingleplayerRound returns a singleplayer round.
-func (r *Repository) GetSingleplayerRound(ctx context.Context, gameID, roundNum int) (singleplayer.Round, error) {
+func (r *Repository) GetSingleplayerRound(
+	ctx context.Context,
+	gameID uuid.UUID,
+	roundNum int,
+) (singleplayer.Round, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetSingleplayerRound")
@@ -263,7 +268,7 @@ func (r *Repository) GetSingleplayerRound(ctx context.Context, gameID, roundNum 
 	var round singleplayer.Round
 
 	err := pgxscan.Get(ctx, tx, &round, query, pgx.NamedArgs{
-		"game_id":   gameID,
+		"game_id":   gameID.String(),
 		"round_num": roundNum,
 	})
 	if pgxscan.NotFound(err) {
@@ -276,7 +281,7 @@ func (r *Repository) GetSingleplayerRound(ctx context.Context, gameID, roundNum 
 }
 
 // GetSingleplayerRoundByID returns a singleplayer round by its id.
-func (r *Repository) GetSingleplayerRoundByID(ctx context.Context, roundID int) (singleplayer.Round, error) {
+func (r *Repository) GetSingleplayerRoundByID(ctx context.Context, roundID uuid.UUID) (singleplayer.Round, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetSingleplayerRoundByID")
@@ -302,7 +307,7 @@ func (r *Repository) GetSingleplayerRoundByID(ctx context.Context, roundID int) 
 
 	var round singleplayer.Round
 
-	err := pgxscan.Get(ctx, tx, &round, query, pgx.NamedArgs{"round_id": roundID})
+	err := pgxscan.Get(ctx, tx, &round, query, pgx.NamedArgs{"round_id": roundID.String()})
 	if err != nil {
 		return singleplayer.Round{}, fmt.Errorf("failed to get singleplayer round: %w", err)
 	}
@@ -313,7 +318,7 @@ func (r *Repository) GetSingleplayerRoundByID(ctx context.Context, roundID int) 
 // GetSingleplayerGameGuesses returns a list of guesses made during singleplayer game.
 func (r *Repository) GetSingleplayerGameGuesses(
 	ctx context.Context,
-	gameID int,
+	gameID uuid.UUID,
 ) ([]singleplayer.Guess, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
@@ -339,7 +344,7 @@ func (r *Repository) GetSingleplayerGameGuesses(
 
 	var rounds []singleplayer.Guess
 
-	err := pgxscan.Select(ctx, tx, &rounds, query, pgx.NamedArgs{"game_id": gameID})
+	err := pgxscan.Select(ctx, tx, &rounds, query, pgx.NamedArgs{"game_id": gameID.String()})
 	if pgxscan.NotFound(err) {
 		return nil, singleplayer.ErrGameNotFound
 	} else if err != nil {
@@ -376,7 +381,7 @@ func (r *Repository) NewSingleplayerRoundGuess(
 	`
 
 	_, err := tx.Exec(ctx, combinedQuery, pgx.NamedArgs{
-		"round_id":   req.RoundID,
+		"round_id":   req.RoundID.String(),
 		"lat":        req.Guess.Lat,
 		"lng":        req.Guess.Lng,
 		"score":      req.Score,

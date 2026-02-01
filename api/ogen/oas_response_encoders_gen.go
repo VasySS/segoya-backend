@@ -61,7 +61,7 @@ func encodeDeleteUserSessionResponse(response DeleteUserSessionRes, w http.Respo
 
 		return nil
 
-	case *Error:
+	case *BackendError:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -425,7 +425,7 @@ func encodeGetLobbiesResponse(response GetLobbiesRes, w http.ResponseWriter, spa
 
 		return nil
 
-	case *Error:
+	case *BackendError:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1143,7 +1143,7 @@ func encodeGetUserSessionsResponse(response GetUserSessionsRes, w http.ResponseW
 
 		return nil
 
-	case *Error:
+	case *BackendError:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1265,7 +1265,7 @@ func encodeNewDiscordResponse(response NewDiscordRes, w http.ResponseWriter, spa
 
 		return nil
 
-	case *Error:
+	case *BackendError:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))
@@ -1636,7 +1636,7 @@ func encodeNewYandexResponse(response NewYandexRes, w http.ResponseWriter, span 
 
 		return nil
 
-	case *Error:
+	case *BackendError:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(500)
 		span.SetStatus(codes.Error, http.StatusText(500))

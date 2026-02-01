@@ -116,7 +116,7 @@ paths:
         - users
       x-ogen-operation-group: Users
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: User profile details.
@@ -160,7 +160,7 @@ paths:
           content:
             application/problem+json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/BackendError'
         '429':
           $ref: '#/components/responses/RateLimited'
         '500':
@@ -292,7 +292,7 @@ paths:
         - auth
       x-ogen-operation-group: Auth
       parameters:
-        - $ref: '#/components/parameters/idStr'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '204':
           description: User session deleted successfully.
@@ -741,7 +741,8 @@ paths:
                 type: object
                 properties:
                   id:
-                    type: integer
+                    type: string
+                    format: uuid
                 required:
                   - id
         '400':
@@ -759,7 +760,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Singleplayer game details.
@@ -784,7 +785,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '204':
           description: Singleplayer game ended successfully.
@@ -807,7 +808,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Singleplayer game round details.
@@ -833,7 +834,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Singleplayer game round created successfully.
@@ -860,7 +861,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       requestBody:
         required: true
         description: Round guess
@@ -894,7 +895,7 @@ paths:
         - singleplayer
       x-ogen-operation-group: Singleplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: List of singleplayer game rounds.
@@ -924,7 +925,7 @@ paths:
         - multiplayer
       x-ogen-operation-group: Multiplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Multiplayer game details.
@@ -947,7 +948,7 @@ paths:
         - multiplayer
       x-ogen-operation-group: Multiplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: List of multiplayer game guesses.
@@ -972,7 +973,7 @@ paths:
         - multiplayer
       x-ogen-operation-group: Multiplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Multiplayer game round information.
@@ -994,7 +995,7 @@ paths:
         - multiplayer
       x-ogen-operation-group: Multiplayer
       parameters:
-        - $ref: '#/components/parameters/idInt'
+        - $ref: '#/components/parameters/idUUID'
       responses:
         '200':
           description: Multiplayer game round information.
@@ -1021,7 +1022,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         username:
           type: string
         name:
@@ -1043,7 +1045,7 @@ components:
         - registerDate
         - yandexConnected
         - discordConnected
-    Error:
+    BackendError:
       title: Error Object
       description: An RFC 7807/RFC 9457 application/problem+json object
       type: object
@@ -1074,7 +1076,8 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         username:
           type: string
         name:
@@ -1127,8 +1130,10 @@ components:
       properties:
         sessionID:
           type: string
+          format: uuid
         userID:
-          type: integer
+          type: string
+          format: uuid
         refreshToken:
           type: string
         ua:
@@ -1166,7 +1171,8 @@ components:
         id:
           type: string
         creatorID:
-          type: integer
+          type: string
+          format: uuid
         createdAt:
           type: string
           format: date-time
@@ -1211,7 +1217,8 @@ components:
       type: object
       properties:
         creatorID:
-          type: integer
+          type: string
+          format: uuid
         maxPlayers:
           type: integer
           minimum: 2
@@ -1241,9 +1248,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         userID:
-          type: integer
+          type: string
+          format: uuid
         rounds:
           type: integer
         roundCurrent:
@@ -1307,9 +1316,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         gameID:
-          type: integer
+          type: string
+          format: uuid
         streetviewID:
           type: string
         roundNum:
@@ -1400,9 +1411,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         creatorID:
-          type: integer
+          type: string
+          format: uuid
         rounds:
           type: integer
         roundCurrent:
@@ -1463,9 +1476,11 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         gameID:
-          type: integer
+          type: string
+          format: uuid
         streetviewID:
           type: string
         roundNum:
@@ -1505,62 +1520,56 @@ components:
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     ServerError:
       description: An internal server error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     NotFound:
       description: A not found error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     RateLimited:
       description: A too many requests error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     BadRequest:
       description: A bad request error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     Conflict:
       description: A conflict error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
     Forbidden:
       description: A forbidden request error response.
       content:
         application/problem+json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: '#/components/schemas/BackendError'
   parameters:
-    idInt:
+    idUUID:
       name: id
-      description: Numeric ID of the resource in path.
+      description: UUID of the resource in path.
       in: path
       required: true
       schema:
-        type: integer
+        type: string
+        format: uuid
     captchaHeader:
       name: Frontend-Captcha-Token
       in: header
       description: Captcha token, required only for production environment.
-      schema:
-        type: string
-    idStr:
-      name: id
-      description: String ID of the resource in path.
-      in: path
-      required: true
       schema:
         type: string
     pageQuery:
@@ -1580,3 +1589,10 @@ components:
         type: integer
         minimum: 1
         maximum: 50
+    idStr:
+      name: id
+      description: String ID of the resource in path.
+      in: path
+      required: true
+      schema:
+        type: string

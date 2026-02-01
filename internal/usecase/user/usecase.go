@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 
@@ -26,7 +27,7 @@ type S3Repository interface {
 //go:generate go tool mockery --name=Repository
 type Repository interface {
 	repository.TxManager
-	GetUserByID(ctx context.Context, id int) (user.PrivateProfile, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (user.PrivateProfile, error)
 	UpdateUser(ctx context.Context, updateInfo dto.UpdateUserRequest) error
 	UpdateAvatar(ctx context.Context, req dto.UpdateAvatarRequestDB) error
 }

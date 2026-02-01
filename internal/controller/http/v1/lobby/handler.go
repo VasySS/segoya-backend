@@ -4,6 +4,8 @@ package lobby
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
@@ -22,9 +24,9 @@ type Usecase interface {
 	GetLobby(ctx context.Context, id string) (lobby.Lobby, error)
 	UpdateLobbySettings(ctx context.Context, req dto.UpdateLobbySettingsRequest) error
 	GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) ([]lobby.Lobby, int, error)
-	ConnectLobbyUser(ctx context.Context, lobbyID string, userID int) (user.PublicProfile, error)
-	DisconnectLobbyUser(ctx context.Context, lobbyID string, userID int) error
-	StartLobbyGame(ctx context.Context, req dto.StartLobbyGameRequest) (int, error)
+	ConnectLobbyUser(ctx context.Context, lobbyID string, userID uuid.UUID) (user.PublicProfile, error)
+	DisconnectLobbyUser(ctx context.Context, lobbyID string, userID uuid.UUID) error
+	StartLobbyGame(ctx context.Context, req dto.StartLobbyGameRequest) (uuid.UUID, error)
 }
 
 var _ api.LobbiesHandler = (*Handler)(nil)

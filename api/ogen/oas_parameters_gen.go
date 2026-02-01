@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/go-faster/errors"
+	"github.com/google/uuid"
 
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
@@ -17,8 +18,8 @@ import (
 
 // DeleteUserSessionParams is parameters of deleteUserSession operation.
 type DeleteUserSessionParams struct {
-	// String ID of the resource in path.
-	ID string
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackDeleteUserSessionParams(packed middleware.Parameters) (params DeleteUserSessionParams) {
@@ -27,7 +28,7 @@ func unpackDeleteUserSessionParams(packed middleware.Parameters) (params DeleteU
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(string)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -57,7 +58,7 @@ func decodeDeleteUserSessionParams(args [1]string, argsEscaped bool, r *http.Req
 					return err
 				}
 
-				c, err := conv.ToString(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -230,8 +231,8 @@ func decodeDiscordLoginCallbackParams(args [0]string, argsEscaped bool, r *http.
 
 // EndSingleplayerGameParams is parameters of endSingleplayerGame operation.
 type EndSingleplayerGameParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackEndSingleplayerGameParams(packed middleware.Parameters) (params EndSingleplayerGameParams) {
@@ -240,7 +241,7 @@ func unpackEndSingleplayerGameParams(packed middleware.Parameters) (params EndSi
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -270,7 +271,7 @@ func decodeEndSingleplayerGameParams(args [1]string, argsEscaped bool, r *http.R
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -296,8 +297,8 @@ func decodeEndSingleplayerGameParams(args [1]string, argsEscaped bool, r *http.R
 
 // EndSingleplayerRoundParams is parameters of endSingleplayerRound operation.
 type EndSingleplayerRoundParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackEndSingleplayerRoundParams(packed middleware.Parameters) (params EndSingleplayerRoundParams) {
@@ -306,7 +307,7 @@ func unpackEndSingleplayerRoundParams(packed middleware.Parameters) (params EndS
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -336,7 +337,7 @@ func decodeEndSingleplayerRoundParams(args [1]string, argsEscaped bool, r *http.
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -565,8 +566,8 @@ func decodeGetLobbyParams(args [1]string, argsEscaped bool, r *http.Request) (pa
 
 // GetMultiplayerGameParams is parameters of getMultiplayerGame operation.
 type GetMultiplayerGameParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackGetMultiplayerGameParams(packed middleware.Parameters) (params GetMultiplayerGameParams) {
@@ -575,7 +576,7 @@ func unpackGetMultiplayerGameParams(packed middleware.Parameters) (params GetMul
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -605,7 +606,7 @@ func decodeGetMultiplayerGameParams(args [1]string, argsEscaped bool, r *http.Re
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -631,8 +632,8 @@ func decodeGetMultiplayerGameParams(args [1]string, argsEscaped bool, r *http.Re
 
 // GetMultiplayerGameGuessesParams is parameters of getMultiplayerGameGuesses operation.
 type GetMultiplayerGameGuessesParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackGetMultiplayerGameGuessesParams(packed middleware.Parameters) (params GetMultiplayerGameGuessesParams) {
@@ -641,7 +642,7 @@ func unpackGetMultiplayerGameGuessesParams(packed middleware.Parameters) (params
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -671,7 +672,7 @@ func decodeGetMultiplayerGameGuessesParams(args [1]string, argsEscaped bool, r *
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -697,8 +698,8 @@ func decodeGetMultiplayerGameGuessesParams(args [1]string, argsEscaped bool, r *
 
 // GetMultiplayerRoundParams is parameters of getMultiplayerRound operation.
 type GetMultiplayerRoundParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackGetMultiplayerRoundParams(packed middleware.Parameters) (params GetMultiplayerRoundParams) {
@@ -707,7 +708,7 @@ func unpackGetMultiplayerRoundParams(packed middleware.Parameters) (params GetMu
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -737,7 +738,7 @@ func decodeGetMultiplayerRoundParams(args [1]string, argsEscaped bool, r *http.R
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -763,8 +764,8 @@ func decodeGetMultiplayerRoundParams(args [1]string, argsEscaped bool, r *http.R
 
 // GetPublicProfileParams is parameters of getPublicProfile operation.
 type GetPublicProfileParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackGetPublicProfileParams(packed middleware.Parameters) (params GetPublicProfileParams) {
@@ -773,7 +774,7 @@ func unpackGetPublicProfileParams(packed middleware.Parameters) (params GetPubli
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -803,7 +804,7 @@ func decodeGetPublicProfileParams(args [1]string, argsEscaped bool, r *http.Requ
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -829,8 +830,8 @@ func decodeGetPublicProfileParams(args [1]string, argsEscaped bool, r *http.Requ
 
 // GetSingleplayerGameParams is parameters of getSingleplayerGame operation.
 type GetSingleplayerGameParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackGetSingleplayerGameParams(packed middleware.Parameters) (params GetSingleplayerGameParams) {
@@ -839,7 +840,7 @@ func unpackGetSingleplayerGameParams(packed middleware.Parameters) (params GetSi
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -869,7 +870,7 @@ func decodeGetSingleplayerGameParams(args [1]string, argsEscaped bool, r *http.R
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -895,8 +896,8 @@ func decodeGetSingleplayerGameParams(args [1]string, argsEscaped bool, r *http.R
 
 // GetSingleplayerGameGuessesParams is parameters of getSingleplayerGameGuesses operation.
 type GetSingleplayerGameGuessesParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackGetSingleplayerGameGuessesParams(packed middleware.Parameters) (params GetSingleplayerGameGuessesParams) {
@@ -905,7 +906,7 @@ func unpackGetSingleplayerGameGuessesParams(packed middleware.Parameters) (param
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -935,7 +936,7 @@ func decodeGetSingleplayerGameGuessesParams(args [1]string, argsEscaped bool, r 
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -1098,8 +1099,8 @@ func decodeGetSingleplayerGamesParams(args [0]string, argsEscaped bool, r *http.
 
 // GetSingleplayerRoundParams is parameters of getSingleplayerRound operation.
 type GetSingleplayerRoundParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackGetSingleplayerRoundParams(packed middleware.Parameters) (params GetSingleplayerRoundParams) {
@@ -1108,7 +1109,7 @@ func unpackGetSingleplayerRoundParams(packed middleware.Parameters) (params GetS
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -1138,7 +1139,7 @@ func decodeGetSingleplayerRoundParams(args [1]string, argsEscaped bool, r *http.
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -1417,8 +1418,8 @@ func decodeNewDiscordCallbackParams(args [0]string, argsEscaped bool, r *http.Re
 
 // NewMultiplayerRoundParams is parameters of newMultiplayerRound operation.
 type NewMultiplayerRoundParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackNewMultiplayerRoundParams(packed middleware.Parameters) (params NewMultiplayerRoundParams) {
@@ -1427,7 +1428,7 @@ func unpackNewMultiplayerRoundParams(packed middleware.Parameters) (params NewMu
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -1457,7 +1458,7 @@ func decodeNewMultiplayerRoundParams(args [1]string, argsEscaped bool, r *http.R
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}
@@ -1483,8 +1484,8 @@ func decodeNewMultiplayerRoundParams(args [1]string, argsEscaped bool, r *http.R
 
 // NewSingleplayerRoundParams is parameters of newSingleplayerRound operation.
 type NewSingleplayerRoundParams struct {
-	// Numeric ID of the resource in path.
-	ID int
+	// UUID of the resource in path.
+	ID uuid.UUID
 }
 
 func unpackNewSingleplayerRoundParams(packed middleware.Parameters) (params NewSingleplayerRoundParams) {
@@ -1493,7 +1494,7 @@ func unpackNewSingleplayerRoundParams(packed middleware.Parameters) (params NewS
 			Name: "id",
 			In:   "path",
 		}
-		params.ID = packed[key].(int)
+		params.ID = packed[key].(uuid.UUID)
 	}
 	return params
 }
@@ -1523,7 +1524,7 @@ func decodeNewSingleplayerRoundParams(args [1]string, argsEscaped bool, r *http.
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToUUID(val)
 				if err != nil {
 					return err
 				}

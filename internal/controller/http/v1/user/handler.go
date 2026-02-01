@@ -4,6 +4,8 @@ package user
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
@@ -16,8 +18,8 @@ type TokenService interface {
 
 // Usecase defines the interface for user-related use case operations.
 type Usecase interface {
-	GetPrivateProfile(ctx context.Context, userID int) (user.PrivateProfile, error)
-	GetPublicProfile(ctx context.Context, userID int) (user.PublicProfile, error)
+	GetPrivateProfile(ctx context.Context, userID uuid.UUID) (user.PrivateProfile, error)
+	GetPublicProfile(ctx context.Context, userID uuid.UUID) (user.PublicProfile, error)
 	UpdateUser(ctx context.Context, req dto.UpdateUserRequest) error
 	UpdateAvatar(ctx context.Context, req dto.UpdateAvatarRequest) error
 }

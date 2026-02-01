@@ -3,7 +3,8 @@ package valkey
 import (
 	"context"
 	"fmt"
-	"strconv"
+
+	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 )
@@ -18,7 +19,7 @@ func (r *Repository) NewOAuthState(ctx context.Context, req dto.NewOAuthRequest)
 	defer span.End()
 
 	key := oauthPrefix + req.State
-	cmd := r.valkey.B().Set().Key(key).Value(strconv.Itoa(req.UserID)).Ex(req.StateTTL).Build()
+	cmd := r.valkey.B().Set().Key(key).Value(req.UserID.String()).Ex(req.StateTTL).Build()
 
 	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
 		return fmt.Errorf("failed to create oauth state: %w", err)
@@ -28,17 +29,22 @@ func (r *Repository) NewOAuthState(ctx context.Context, req dto.NewOAuthRequest)
 }
 
 // GetOAuthUserID returns user id associated with OAuth state.
-func (r *Repository) GetOAuthUserID(ctx context.Context, state string) (int, error) {
+func (r *Repository) GetOAuthUserID(ctx context.Context, state string) (uuid.UUID, error) {
 	ctx, span := r.tracer.Start(ctx, "GetOAuthUserID")
 	defer span.End()
 
 	key := oauthPrefix + state
 	cmd := r.valkey.B().Get().Key(key).Build()
 
-	userID, err := r.valkey.Do(ctx, cmd).AsInt64()
+	userID, err := r.valkey.Do(ctx, cmd).ToString()
 	if err != nil {
-		return 0, fmt.Errorf("failed to get oauth state: %w", err)
+		return uuid.UUID{}, fmt.Errorf("failed to get oauth state: %w", err)
 	}
 
-	return int(userID), nil
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("failed to parse user's uuid from session: %w", err)
+	}
+
+	return userUUID, nil
 }

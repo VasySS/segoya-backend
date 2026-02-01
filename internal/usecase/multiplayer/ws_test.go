@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -22,8 +23,8 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 
 	saveGuessReq := dto.NewMultiplayerRoundGuessRequest{
 		RequestTime: time.Now().UTC(),
-		UserID:      1,
-		GameID:      123,
+		UserID:      uuid.Must(uuid.NewV7()),
+		GameID:      uuid.Must(uuid.NewV7()),
 		Guess: game.LatLng{
 			Lat: 1.0,
 			Lng: 2.0,
@@ -68,17 +69,17 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: saveGuessReq.UserID, Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)
 
 				roundResponse := multiplayerEntity.Round{
-					ID:       1,
+					ID:       uuid.Must(uuid.NewV7()),
 					RoundNum: gameResponse.RoundCurrent,
 					Finished: false,
 				}
@@ -125,17 +126,17 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: saveGuessReq.UserID, Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)
 
 				roundResponse := multiplayerEntity.Round{
-					ID:       1,
+					ID:       uuid.Must(uuid.NewV7()),
 					RoundNum: gameResponse.RoundCurrent,
 					Finished: true,
 				}
@@ -174,8 +175,8 @@ func TestUsecase_EndRound(t *testing.T) {
 
 	endRoundRequest := dto.EndMultiplayerRoundRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      1,
-		UserID:      1,
+		GameID:      uuid.Must(uuid.NewV7()),
+		UserID:      uuid.Must(uuid.NewV7()),
 	}
 
 	endRoundResponse := []multiplayerEntity.Guess{
@@ -192,8 +193,8 @@ func TestUsecase_EndRound(t *testing.T) {
 	}
 
 	mockUsers := []user.MultiplayerUser{
-		{PublicProfile: user.PublicProfile{ID: 1, Username: "username1"}, Connected: true},
-		{PublicProfile: user.PublicProfile{ID: 2, Username: "username2"}, Connected: true},
+		{PublicProfile: user.PublicProfile{ID: endRoundRequest.UserID, Username: "username1"}, Connected: true},
+		{PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"}, Connected: true},
 	}
 
 	type fields struct {
@@ -238,7 +239,7 @@ func TestUsecase_EndRound(t *testing.T) {
 				}
 
 				mockRound := multiplayerEntity.Round{
-					ID:           1,
+					ID:           uuid.Must(uuid.NewV7()),
 					RoundNum:     1,
 					GuessesCount: 2,
 					Finished:     false,
@@ -249,7 +250,7 @@ func TestUsecase_EndRound(t *testing.T) {
 
 				fs.repo.On("EndMultiplayerRound", mock.Anything, dto.EndMultiplayerRoundRequestDB{
 					RequestTime: args.req.RequestTime,
-					RoundID:     1,
+					RoundID:     mockRound.ID,
 				}).Return(nil)
 			},
 			want:    endRoundResponse,
@@ -271,7 +272,7 @@ func TestUsecase_EndRound(t *testing.T) {
 				}
 
 				mockRound := multiplayerEntity.Round{
-					ID:           1,
+					ID:           uuid.Must(uuid.NewV7()),
 					RoundNum:     5,
 					GuessesCount: 2,
 					Finished:     false,
@@ -282,7 +283,7 @@ func TestUsecase_EndRound(t *testing.T) {
 
 				fs.repo.On("EndMultiplayerRound", mock.Anything, dto.EndMultiplayerRoundRequestDB{
 					RequestTime: args.req.RequestTime,
-					RoundID:     1,
+					RoundID:     mockRound.ID,
 				}).Return(nil)
 
 				fs.repo.On("EndMultiplayerGame", mock.Anything, dto.EndMultiplayerGameRequestDB{
@@ -308,7 +309,7 @@ func TestUsecase_EndRound(t *testing.T) {
 				}
 
 				mockRound := multiplayerEntity.Round{
-					ID:           1,
+					ID:           uuid.Must(uuid.NewV7()),
 					RoundNum:     1,
 					GuessesCount: 2,
 					Finished:     true,
@@ -335,7 +336,7 @@ func TestUsecase_EndRound(t *testing.T) {
 				}
 
 				mockRound := multiplayerEntity.Round{
-					ID:           1,
+					ID:           uuid.Must(uuid.NewV7()),
 					RoundNum:     1,
 					GuessesCount: 1,
 					Finished:     false,

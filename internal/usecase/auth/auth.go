@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
@@ -25,7 +27,7 @@ func (uc Usecase) Login(ctx context.Context, req dto.LoginRequest) (string, stri
 		return "", "", user.ErrWrongPassword
 	}
 
-	sessionID := uc.cryptoService.NewUUID4()
+	sessionID := uc.cryptoService.NewUUID7()
 
 	accessToken, err := uc.tokenService.NewAccessToken(req.RequestTime, user.AccessTokenClaims{
 		SessionID: sessionID,
@@ -153,7 +155,7 @@ func (uc Usecase) RefreshTokens(ctx context.Context, req dto.TokensRefreshReques
 }
 
 // GetOAuth retrieves all connected OAuth providers for a user.
-func (uc Usecase) GetOAuth(ctx context.Context, userID int) ([]user.OAuth, error) {
+func (uc Usecase) GetOAuth(ctx context.Context, userID uuid.UUID) ([]user.OAuth, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetOAuth")
 	defer span.End()
 
@@ -167,7 +169,7 @@ func (uc Usecase) GetOAuth(ctx context.Context, userID int) ([]user.OAuth, error
 }
 
 // GetSessions retrieves all active sessions for a user.
-func (uc Usecase) GetSessions(ctx context.Context, userID int) ([]user.Session, error) {
+func (uc Usecase) GetSessions(ctx context.Context, userID uuid.UUID) ([]user.Session, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetSessions")
 	defer span.End()
 
@@ -181,7 +183,7 @@ func (uc Usecase) GetSessions(ctx context.Context, userID int) ([]user.Session, 
 }
 
 // DeleteSession removes a specific session for a user.
-func (uc Usecase) DeleteSession(ctx context.Context, userID int, sessionID string) error {
+func (uc Usecase) DeleteSession(ctx context.Context, userID, sessionID uuid.UUID) error {
 	ctx, span := uc.tracer.Start(ctx, "DeleteSession")
 	defer span.End()
 

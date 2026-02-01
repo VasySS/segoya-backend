@@ -42,7 +42,8 @@ post:
             type: object
             properties:
               id:
-                type: integer
+                type: string
+                format: uuid
             required:
               - id
     "400":

@@ -7,6 +7,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 
@@ -36,14 +37,14 @@ type Repository interface {
 //
 //go:generate go tool mockery --name=UserRepository
 type UserRepository interface {
-	GetUserByID(ctx context.Context, id int) (user.PrivateProfile, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (user.PrivateProfile, error)
 }
 
 // MultiplayerUsecase defines methods for managing multiplayer games.
 //
 //go:generate go tool mockery --name=MultiplayerUsecase
 type MultiplayerUsecase interface {
-	NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest) (int, error)
+	NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest) (uuid.UUID, error)
 }
 
 // RandomGenerator provides methods for working with random strings.

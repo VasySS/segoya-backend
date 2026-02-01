@@ -4,6 +4,8 @@ package multiplayer
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
@@ -18,14 +20,14 @@ type TokenService interface {
 
 // Usecase defines methods for managing multiplayer game operations.
 type Usecase interface {
-	GetGame(ctx context.Context, gameID, userID int) (multiplayer.Game, error)
+	GetGame(ctx context.Context, gameID, userID uuid.UUID) (multiplayer.Game, error)
 	GetGameGuesses(ctx context.Context, req dto.GetGameGuessesRequest) ([]multiplayer.Guess, error)
 	NewRound(ctx context.Context, req dto.NewMultiplayerRoundRequest) (multiplayer.Round, error)
 	GetRound(ctx context.Context, req dto.GetMultiplayerRoundRequest) (multiplayer.Round, error)
 	EndRound(ctx context.Context, req dto.EndMultiplayerRoundRequest) ([]multiplayer.Guess, error)
 	NewRoundGuess(ctx context.Context, req dto.NewMultiplayerRoundGuessRequest) error
-	GetGameUser(ctx context.Context, userID, gameID int) (user.MultiplayerUser, error)
-	GetGameUsers(ctx context.Context, gameID int) ([]user.MultiplayerUser, error)
+	GetGameUser(ctx context.Context, userID, gameID uuid.UUID) (user.MultiplayerUser, error)
+	GetGameUsers(ctx context.Context, gameID uuid.UUID) ([]user.MultiplayerUser, error)
 }
 
 var _ api.MultiplayerHandler = (*Handler)(nil)

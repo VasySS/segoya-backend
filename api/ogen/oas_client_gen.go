@@ -494,7 +494,7 @@ func (c *Client) sendDeleteUserSession(ctx context.Context, params DeleteUserSes
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -912,7 +912,7 @@ func (c *Client) sendEndSingleplayerGame(ctx context.Context, params EndSinglepl
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -1036,7 +1036,7 @@ func (c *Client) sendEndSingleplayerRound(ctx context.Context, request *Singlepl
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -1495,7 +1495,7 @@ func (c *Client) sendGetMultiplayerGame(ctx context.Context, params GetMultiplay
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -1618,7 +1618,7 @@ func (c *Client) sendGetMultiplayerGameGuesses(ctx context.Context, params GetMu
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -1742,7 +1742,7 @@ func (c *Client) sendGetMultiplayerRound(ctx context.Context, params GetMultipla
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -2076,7 +2076,7 @@ func (c *Client) sendGetPublicProfile(ctx context.Context, params GetPublicProfi
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -2271,7 +2271,7 @@ func (c *Client) sendGetSingleplayerGame(ctx context.Context, params GetSinglepl
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -2394,7 +2394,7 @@ func (c *Client) sendGetSingleplayerGameGuesses(ctx context.Context, params GetS
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -2655,7 +2655,7 @@ func (c *Client) sendGetSingleplayerRound(ctx context.Context, params GetSinglep
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -3318,7 +3318,7 @@ func (c *Client) sendNewMultiplayerRound(ctx context.Context, params NewMultipla
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -3550,7 +3550,7 @@ func (c *Client) sendNewSingleplayerRound(ctx context.Context, params NewSinglep
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.ID))
+			return e.EncodeValue(conv.UUIDToString(params.ID))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}

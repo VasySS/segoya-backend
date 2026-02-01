@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
 // NewGame creates a new singleplayer game and the first round for it, returns the game id.
-func (uc Usecase) NewGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (int, error) {
+func (uc Usecase) NewGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (uuid.UUID, error) {
 	ctx, span := uc.tracer.Start(ctx, "NewGame")
 	defer span.End()
 
-	var response int
+	var response uuid.UUID
 
 	err := uc.repo.RunTx(ctx, func(ctx context.Context) error {
 		id, err := uc.repo.NewSingleplayerGame(ctx, req)
@@ -36,7 +38,7 @@ func (uc Usecase) NewGame(ctx context.Context, req dto.NewSingleplayerGameReques
 	})
 	if err != nil {
 		span.RecordError(err)
-		return 0, fmt.Errorf("failed to create game: %w", err)
+		return uuid.UUID{}, fmt.Errorf("failed to create game: %w", err)
 	}
 
 	return response, nil

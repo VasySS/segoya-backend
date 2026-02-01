@@ -4,6 +4,8 @@ package singleplayer
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
@@ -17,7 +19,7 @@ type TokenService interface {
 
 // Usecase defines methods for managing singleplayer game operations.
 type Usecase interface {
-	NewGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (int, error)
+	NewGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (uuid.UUID, error)
 	GetGame(ctx context.Context, req dto.GetSingleplayerGameRequest) (singleplayer.Game, error)
 	GetGames(ctx context.Context, req dto.GetSingleplayerGamesRequest) ([]singleplayer.Game, int, error)
 	EndGame(ctx context.Context, req dto.EndSingleplayerGameRequest) error

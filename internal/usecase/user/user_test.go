@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -24,7 +25,7 @@ func TestUsecase_GetPrivateProfile(t *testing.T) {
 
 	fullUserProfile := userEntity.PrivateProfile{
 		PublicProfile: userEntity.PublicProfile{
-			ID:           1,
+			ID:           uuid.Must(uuid.NewV7()),
 			Username:     "username",
 			Name:         "name",
 			RegisterDate: time.Now().UTC().Add(-24 * time.Hour),
@@ -40,7 +41,7 @@ func TestUsecase_GetPrivateProfile(t *testing.T) {
 	}
 
 	type args struct {
-		userID int
+		userID uuid.UUID
 	}
 
 	tests := []struct {
@@ -107,7 +108,7 @@ func TestUsecase_GetPublicProfile(t *testing.T) {
 
 	fullUserProfile := userEntity.PrivateProfile{
 		PublicProfile: userEntity.PublicProfile{
-			ID:           1,
+			ID:           uuid.Must(uuid.NewV7()),
 			Username:     "username",
 			Name:         "name",
 			RegisterDate: time.Now().UTC().Add(-24 * time.Hour),
@@ -123,7 +124,7 @@ func TestUsecase_GetPublicProfile(t *testing.T) {
 	}
 
 	type args struct {
-		userID int
+		userID uuid.UUID
 	}
 
 	tests := []struct {
@@ -208,7 +209,7 @@ func TestUsecase_UpdateUser(t *testing.T) {
 			name: "successfully update user",
 			args: args{
 				req: dto.UpdateUserRequest{
-					UserID: 1,
+					UserID: uuid.Must(uuid.NewV7()),
 					Name:   "name",
 				},
 			},
@@ -221,7 +222,7 @@ func TestUsecase_UpdateUser(t *testing.T) {
 			name: "error when UpdateUser fails",
 			args: args{
 				req: dto.UpdateUserRequest{
-					UserID: 1,
+					UserID: uuid.Must(uuid.NewV7()),
 					Name:   "name",
 				},
 			},
@@ -275,7 +276,7 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 	expectedNewAvatarHash := hex.EncodeToString(hash[:])
 
 	userPublicProfile := userEntity.PublicProfile{
-		ID:         1,
+		ID:         uuid.Must(uuid.NewV7()),
 		AvatarHash: "old_hash",
 	}
 

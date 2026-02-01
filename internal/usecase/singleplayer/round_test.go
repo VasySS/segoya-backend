@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -21,8 +22,8 @@ func TestUsecase_NewRound(t *testing.T) {
 
 	newRoundReq := dto.NewSingleplayerRoundRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      123,
-		UserID:      456,
+		GameID:      uuid.Must(uuid.NewV7()),
+		UserID:      uuid.Must(uuid.NewV7()),
 	}
 
 	type fields struct {
@@ -33,6 +34,8 @@ func TestUsecase_NewRound(t *testing.T) {
 	type args struct {
 		req dto.NewSingleplayerRoundRequest
 	}
+
+	roundID := uuid.Must(uuid.NewV7())
 
 	tests := []struct {
 		name    string
@@ -69,7 +72,7 @@ func TestUsecase_NewRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerRound", mock.Anything, args.req.GameID, 1).
 					Return(singleplayerEntity.Round{
-						ID:       1,
+						ID:       uuid.Must(uuid.NewV7()),
 						GameID:   args.req.GameID,
 						Finished: true,
 						RoundNum: 1,
@@ -77,14 +80,14 @@ func TestUsecase_NewRound(t *testing.T) {
 
 				fs.repo.On("NewSingleplayerRound", mock.Anything, mock.Anything).
 					Return(singleplayerEntity.Round{
-						ID:       2,
+						ID:       roundID,
 						GameID:   args.req.GameID,
 						Finished: false,
 						RoundNum: 2,
 					}, nil)
 			},
 			want: singleplayerEntity.Round{
-				ID:       2,
+				ID:       roundID,
 				GameID:   newRoundReq.GameID,
 				Finished: false,
 				RoundNum: 2,
@@ -108,7 +111,7 @@ func TestUsecase_NewRound(t *testing.T) {
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
 						ID:           args.req.GameID,
-						UserID:       777,
+						UserID:       uuid.Must(uuid.NewV7()),
 						Rounds:       5,
 						RoundCurrent: 3,
 						Finished:     false,
@@ -170,8 +173,8 @@ func TestUsecase_GetRound(t *testing.T) {
 
 	getRoundReq := dto.GetSingleplayerRoundRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      1,
-		UserID:      1,
+		GameID:      uuid.Must(uuid.NewV7()),
+		UserID:      uuid.Must(uuid.NewV7()),
 	}
 
 	type fields struct {
@@ -182,6 +185,8 @@ func TestUsecase_GetRound(t *testing.T) {
 	type args struct {
 		req dto.GetSingleplayerRoundRequest
 	}
+
+	roundID := uuid.Must(uuid.NewV7())
 
 	tests := []struct {
 		name    string
@@ -215,14 +220,14 @@ func TestUsecase_GetRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerRound", mock.Anything, args.req.GameID, 2).
 					Return(singleplayerEntity.Round{
-						ID:       1,
+						ID:       roundID,
 						GameID:   args.req.GameID,
 						Finished: false,
 						RoundNum: 2,
 					}, nil)
 			},
 			want: singleplayerEntity.Round{
-				ID:       1,
+				ID:       roundID,
 				GameID:   getRoundReq.GameID,
 				Finished: false,
 				RoundNum: 2,
@@ -246,7 +251,7 @@ func TestUsecase_GetRound(t *testing.T) {
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
 						ID:           args.req.GameID,
-						UserID:       234,
+						UserID:       uuid.Must(uuid.NewV7()),
 						Rounds:       5,
 						RoundCurrent: 3,
 						Finished:     false,
@@ -282,8 +287,8 @@ func TestUsecase_EndRound(t *testing.T) {
 
 	endRoundReq := dto.EndSingleplayerRoundRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      1,
-		UserID:      1,
+		GameID:      uuid.Must(uuid.NewV7()),
+		UserID:      uuid.Must(uuid.NewV7()),
 		Guess: game.LatLng{
 			Lat: 1,
 			Lng: 1,
@@ -327,9 +332,11 @@ func TestUsecase_EndRound(t *testing.T) {
 						Finished:     false,
 					}, nil)
 
+				roundID := uuid.Must(uuid.NewV7())
+
 				fs.repo.On("GetSingleplayerRound", mock.Anything, args.req.GameID, 2).
 					Return(singleplayerEntity.Round{
-						ID:        1,
+						ID:        roundID,
 						GameID:    args.req.GameID,
 						Lat:       11.22,
 						Lng:       33.44,
@@ -344,7 +351,7 @@ func TestUsecase_EndRound(t *testing.T) {
 
 				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything, dto.NewSingleplayerRoundGuessRequest{
 					RequestTime: args.req.RequestTime,
-					RoundID:     1,
+					RoundID:     roundID,
 					GameID:      args.req.GameID,
 					Guess:       args.req.Guess,
 					Score:       1234,
@@ -380,7 +387,7 @@ func TestUsecase_EndRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerRound", mock.Anything, args.req.GameID, 2).
 					Return(singleplayerEntity.Round{
-						ID:       1,
+						ID:       uuid.Must(uuid.NewV7()),
 						GameID:   args.req.GameID,
 						RoundNum: 2,
 						Finished: true,
@@ -405,7 +412,7 @@ func TestUsecase_EndRound(t *testing.T) {
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
 						ID:           args.req.GameID,
-						UserID:       2,
+						UserID:       uuid.Must(uuid.NewV7()),
 						Rounds:       5,
 						RoundCurrent: 2,
 						Finished:     false,
@@ -435,9 +442,11 @@ func TestUsecase_EndRound(t *testing.T) {
 						Finished:     false,
 					}, nil)
 
+				roundID := uuid.Must(uuid.NewV7())
+
 				fs.repo.On("GetSingleplayerRound", mock.Anything, args.req.GameID, 2).
 					Return(singleplayerEntity.Round{
-						ID:        2,
+						ID:        roundID,
 						GameID:    args.req.GameID,
 						Lat:       11.22,
 						Lng:       33.44,
@@ -452,7 +461,7 @@ func TestUsecase_EndRound(t *testing.T) {
 
 				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything, dto.NewSingleplayerRoundGuessRequest{
 					RequestTime: args.req.RequestTime,
-					RoundID:     2,
+					RoundID:     roundID,
 					GameID:      args.req.GameID,
 					Guess:       args.req.Guess,
 					Score:       0,
@@ -487,8 +496,8 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 	getRoundsReq := dto.GetSingleplayerGameGuessesRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      1,
-		UserID:      1,
+		GameID:      uuid.Must(uuid.NewV7()),
+		UserID:      uuid.Must(uuid.NewV7()),
 	}
 
 	getRoundsResp := []singleplayerEntity.Guess{
@@ -560,7 +569,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
 						ID:           args.req.GameID,
-						UserID:       2,
+						UserID:       uuid.Must(uuid.NewV7()),
 						Rounds:       2,
 						RoundCurrent: 2,
 						Finished:     true,

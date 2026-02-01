@@ -3,6 +3,8 @@ package dto
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
@@ -32,7 +34,7 @@ type NewOAuthRequest struct {
 	RequestTime time.Time
 	StateTTL    time.Duration
 	State       string
-	UserID      int
+	UserID      uuid.UUID
 }
 
 // NewOAuthCallbackRequest represents a request to handle the OAuth callback after authentication.
@@ -46,13 +48,13 @@ type NewOAuthCallbackRequest struct {
 type NewOAuthRequestDB struct {
 	RequestTime time.Time
 	OAuthID     string
-	UserID      int
+	UserID      uuid.UUID
 	Issuer      user.OAuthIssuer
 }
 
 // DeleteOAuthRequest represents a request to delete OAuth connection.
 type DeleteOAuthRequest struct {
-	UserID int
+	UserID uuid.UUID
 	Issuer user.OAuthIssuer
 }
 

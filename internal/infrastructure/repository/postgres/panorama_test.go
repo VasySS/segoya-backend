@@ -86,7 +86,7 @@ func (s *PanoramaTestSuite) TestGoogleStreetviewByID() {
 	fetched, err := s.postgresRepo.GetGoogleStreetview(s.ctx, original.ID)
 	s.Require().NoError(err)
 
-	s.InEpsilon(original.ID, fetched.ID, 0.01)
+	s.Equal(original.ID, fetched.ID)
 	s.InEpsilon(original.Lat, fetched.Lat, 0.01)
 	s.InEpsilon(original.Lng, fetched.Lng, 0.01)
 }

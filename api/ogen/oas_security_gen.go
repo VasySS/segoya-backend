@@ -35,6 +35,35 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 	return "", false
 }
 
+var operationRolesBearer = map[string][]string{
+	DeleteDiscordOperation:              []string{},
+	DeleteUserSessionOperation:          []string{},
+	DeleteYandexOperation:               []string{},
+	EndSingleplayerGameOperation:        []string{},
+	EndSingleplayerRoundOperation:       []string{},
+	GetLobbiesOperation:                 []string{},
+	GetLobbyOperation:                   []string{},
+	GetMultiplayerGameOperation:         []string{},
+	GetMultiplayerGameGuessesOperation:  []string{},
+	GetMultiplayerRoundOperation:        []string{},
+	GetOAuthProvidersOperation:          []string{},
+	GetPrivateProfileOperation:          []string{},
+	GetPublicProfileOperation:           []string{},
+	GetSingleplayerGameOperation:        []string{},
+	GetSingleplayerGameGuessesOperation: []string{},
+	GetSingleplayerGamesOperation:       []string{},
+	GetSingleplayerRoundOperation:       []string{},
+	GetUserSessionsOperation:            []string{},
+	NewDiscordOperation:                 []string{},
+	NewLobbyOperation:                   []string{},
+	NewMultiplayerRoundOperation:        []string{},
+	NewSingleplayerGameOperation:        []string{},
+	NewSingleplayerRoundOperation:       []string{},
+	NewYandexOperation:                  []string{},
+	UpdateUserOperation:                 []string{},
+	UpdateUserAvatarOperation:           []string{},
+}
+
 func (s *Server) securityBearer(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {
 	var t Bearer
 	token, ok := findAuthorization(req.Header, "Bearer")
@@ -42,6 +71,7 @@ func (s *Server) securityBearer(ctx context.Context, operationName OperationName
 		return ctx, false, nil
 	}
 	t.Token = token
+	t.Roles = operationRolesBearer[operationName]
 	rctx, err := s.sec.HandleBearer(ctx, operationName, t)
 	if errors.Is(err, ogenerrors.ErrSkipServerSecurity) {
 		return nil, false, nil

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/valkey-io/valkey-go"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
@@ -37,7 +38,7 @@ func (r *Repository) NewLobby(ctx context.Context, req dto.NewLobbyRequestDB) er
 	key := lobbyPrefix + req.ID
 	fields := map[string]string{
 		lobbyIDField:              req.ID,
-		lobbyCreatorIDField:       strconv.Itoa(req.CreatorID),
+		lobbyCreatorIDField:       req.CreatorID.String(),
 		lobbyCreatedAtField:       req.RequestTime.Format(time.RFC3339),
 		lobbyRoundsField:          strconv.Itoa(req.Rounds),
 		lobbyProviderField:        req.Provider,
@@ -75,7 +76,7 @@ func (r *Repository) NewPrivateLobby(ctx context.Context, req dto.NewLobbyReques
 	key := lobbyPrivatePrefix + req.ID
 	fields := map[string]string{
 		lobbyIDField:              req.ID,
-		lobbyCreatorIDField:       strconv.Itoa(req.CreatorID),
+		lobbyCreatorIDField:       req.CreatorID.String(),
 		lobbyCreatedAtField:       req.RequestTime.Format(time.RFC3339),
 		lobbyRoundsField:          strconv.Itoa(req.Rounds),
 		lobbyProviderField:        req.Provider,
@@ -331,7 +332,7 @@ func (r *Repository) getLobbyKey(ctx context.Context, id string) (string, error)
 }
 
 func parseLobbyData(id string, data map[string]string) (lobby.Lobby, error) {
-	creatorID, err := strconv.Atoi(data[lobbyCreatorIDField])
+	creatorID, err := uuid.Parse(data[lobbyCreatorIDField])
 	if err != nil {
 		return lobby.Lobby{}, fmt.Errorf("invalid creatorID: %w", err)
 	}

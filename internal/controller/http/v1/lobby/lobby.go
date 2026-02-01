@@ -79,7 +79,7 @@ func (h Handler) GetLobbies(
 	if err != nil {
 		slog.Error("error getting lobbies", slog.Any("error", err))
 
-		return &api.Error{
+		return &api.BackendError{
 			Title:  "Error getting lobbies",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while getting lobbies",

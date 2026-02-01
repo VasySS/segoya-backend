@@ -4,6 +4,8 @@ package auth
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
@@ -30,9 +32,9 @@ type DefaultAuth interface {
 	Register(ctx context.Context, userReq dto.RegisterRequest) error
 	Login(ctx context.Context, user dto.LoginRequest) (access string, refresh string, err error)
 	RefreshTokens(ctx context.Context, req dto.TokensRefreshRequest) (access string, refresh string, err error)
-	GetOAuth(ctx context.Context, userID int) ([]user.OAuth, error)
-	GetSessions(ctx context.Context, userID int) ([]user.Session, error)
-	DeleteSession(ctx context.Context, userID int, sessionID string) error
+	GetOAuth(ctx context.Context, userID uuid.UUID) ([]user.OAuth, error)
+	GetSessions(ctx context.Context, userID uuid.UUID) ([]user.Session, error)
+	DeleteSession(ctx context.Context, userID, sessionID uuid.UUID) error
 }
 
 // Usecase consolidates all authentication use cases into a single interface.

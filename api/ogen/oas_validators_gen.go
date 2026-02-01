@@ -10,143 +10,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s *DeleteDiscordInternalServerError) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *DeleteDiscordUnauthorized) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *DeleteYandexInternalServerError) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *DeleteYandexUnauthorized) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *DiscordLoginCallbackBadRequest) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *DiscordLoginCallbackInternalServerError) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *DiscordLoginCallbackNotFound) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerGameBadRequest) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerGameForbidden) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerGameInternalServerError) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerGameNotFound) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerGameUnauthorized) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerRoundBadRequest) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerRoundForbidden) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerRoundInternalServerError) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerRoundNotFound) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *EndSingleplayerRoundUnauthorized) Validate() error {
-	alias := (*Error)(s)
-	if err := alias.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *Error) Validate() error {
+func (s *BackendError) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
@@ -178,8 +42,144 @@ func (s *Error) Validate() error {
 	return nil
 }
 
+func (s *DeleteDiscordInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeleteDiscordUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeleteYandexInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeleteYandexUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DiscordLoginCallbackBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DiscordLoginCallbackInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DiscordLoginCallbackNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerGameBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerGameForbidden) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerGameInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerGameNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerGameUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerRoundBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerRoundForbidden) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerRoundInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerRoundNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *EndSingleplayerRoundUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *GetLobbyInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -187,7 +187,7 @@ func (s *GetLobbyInternalServerError) Validate() error {
 }
 
 func (s *GetLobbyNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -195,7 +195,7 @@ func (s *GetLobbyNotFound) Validate() error {
 }
 
 func (s *GetMultiplayerGameGuessesBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -203,7 +203,7 @@ func (s *GetMultiplayerGameGuessesBadRequest) Validate() error {
 }
 
 func (s *GetMultiplayerGameGuessesInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -236,7 +236,7 @@ func (s GetMultiplayerGameGuessesOKApplicationJSON) Validate() error {
 }
 
 func (s *GetMultiplayerGameGuessesUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -244,7 +244,7 @@ func (s *GetMultiplayerGameGuessesUnauthorized) Validate() error {
 }
 
 func (s *GetMultiplayerGameInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -252,7 +252,7 @@ func (s *GetMultiplayerGameInternalServerError) Validate() error {
 }
 
 func (s *GetMultiplayerGameNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -260,7 +260,7 @@ func (s *GetMultiplayerGameNotFound) Validate() error {
 }
 
 func (s *GetMultiplayerGameUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -268,7 +268,7 @@ func (s *GetMultiplayerGameUnauthorized) Validate() error {
 }
 
 func (s *GetMultiplayerRoundInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -276,7 +276,7 @@ func (s *GetMultiplayerRoundInternalServerError) Validate() error {
 }
 
 func (s *GetMultiplayerRoundNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -284,7 +284,7 @@ func (s *GetMultiplayerRoundNotFound) Validate() error {
 }
 
 func (s *GetMultiplayerRoundUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -292,7 +292,7 @@ func (s *GetMultiplayerRoundUnauthorized) Validate() error {
 }
 
 func (s *GetOAuthProvidersInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -308,7 +308,7 @@ func (s GetOAuthProvidersOKApplicationJSON) Validate() error {
 }
 
 func (s *GetOAuthProvidersUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -316,7 +316,7 @@ func (s *GetOAuthProvidersUnauthorized) Validate() error {
 }
 
 func (s *GetPrivateProfileInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -324,7 +324,7 @@ func (s *GetPrivateProfileInternalServerError) Validate() error {
 }
 
 func (s *GetPrivateProfileUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -332,7 +332,7 @@ func (s *GetPrivateProfileUnauthorized) Validate() error {
 }
 
 func (s *GetPublicProfileInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -340,7 +340,7 @@ func (s *GetPublicProfileInternalServerError) Validate() error {
 }
 
 func (s *GetPublicProfileNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -348,7 +348,7 @@ func (s *GetPublicProfileNotFound) Validate() error {
 }
 
 func (s *GetSingleplayerGameForbidden) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -356,7 +356,7 @@ func (s *GetSingleplayerGameForbidden) Validate() error {
 }
 
 func (s *GetSingleplayerGameGuessesBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -364,7 +364,7 @@ func (s *GetSingleplayerGameGuessesBadRequest) Validate() error {
 }
 
 func (s *GetSingleplayerGameGuessesForbidden) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -372,7 +372,7 @@ func (s *GetSingleplayerGameGuessesForbidden) Validate() error {
 }
 
 func (s *GetSingleplayerGameGuessesInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -380,7 +380,7 @@ func (s *GetSingleplayerGameGuessesInternalServerError) Validate() error {
 }
 
 func (s *GetSingleplayerGameGuessesNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -413,7 +413,7 @@ func (s GetSingleplayerGameGuessesOKApplicationJSON) Validate() error {
 }
 
 func (s *GetSingleplayerGameGuessesUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -421,7 +421,7 @@ func (s *GetSingleplayerGameGuessesUnauthorized) Validate() error {
 }
 
 func (s *GetSingleplayerGameInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -429,7 +429,7 @@ func (s *GetSingleplayerGameInternalServerError) Validate() error {
 }
 
 func (s *GetSingleplayerGameNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -437,7 +437,7 @@ func (s *GetSingleplayerGameNotFound) Validate() error {
 }
 
 func (s *GetSingleplayerGameUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -445,7 +445,7 @@ func (s *GetSingleplayerGameUnauthorized) Validate() error {
 }
 
 func (s *GetSingleplayerGamesBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -453,7 +453,7 @@ func (s *GetSingleplayerGamesBadRequest) Validate() error {
 }
 
 func (s *GetSingleplayerGamesInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -461,7 +461,7 @@ func (s *GetSingleplayerGamesInternalServerError) Validate() error {
 }
 
 func (s *GetSingleplayerGamesUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -469,7 +469,7 @@ func (s *GetSingleplayerGamesUnauthorized) Validate() error {
 }
 
 func (s *GetSingleplayerRoundBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -477,7 +477,7 @@ func (s *GetSingleplayerRoundBadRequest) Validate() error {
 }
 
 func (s *GetSingleplayerRoundForbidden) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -485,7 +485,7 @@ func (s *GetSingleplayerRoundForbidden) Validate() error {
 }
 
 func (s *GetSingleplayerRoundInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -493,7 +493,7 @@ func (s *GetSingleplayerRoundInternalServerError) Validate() error {
 }
 
 func (s *GetSingleplayerRoundNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -501,7 +501,7 @@ func (s *GetSingleplayerRoundNotFound) Validate() error {
 }
 
 func (s *GetSingleplayerRoundUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -632,7 +632,7 @@ func (s *Lobby) Validate() error {
 }
 
 func (s *LoginBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -640,7 +640,7 @@ func (s *LoginBadRequest) Validate() error {
 }
 
 func (s *LoginInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -698,7 +698,7 @@ func (s *LoginRequest) Validate() error {
 }
 
 func (s *LoginUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -819,7 +819,7 @@ func (s *MultiplayerRound) Validate() error {
 }
 
 func (s *NewDiscordCallbackBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -827,7 +827,7 @@ func (s *NewDiscordCallbackBadRequest) Validate() error {
 }
 
 func (s *NewDiscordCallbackInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -835,7 +835,7 @@ func (s *NewDiscordCallbackInternalServerError) Validate() error {
 }
 
 func (s *NewDiscordCallbackUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -933,7 +933,7 @@ func (s *NewLobby) Validate() error {
 }
 
 func (s *NewLobbyBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -941,7 +941,7 @@ func (s *NewLobbyBadRequest) Validate() error {
 }
 
 func (s *NewLobbyInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -949,7 +949,7 @@ func (s *NewLobbyInternalServerError) Validate() error {
 }
 
 func (s *NewMultiplayerRoundInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -957,7 +957,7 @@ func (s *NewMultiplayerRoundInternalServerError) Validate() error {
 }
 
 func (s *NewMultiplayerRoundNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -965,7 +965,7 @@ func (s *NewMultiplayerRoundNotFound) Validate() error {
 }
 
 func (s *NewMultiplayerRoundUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -973,7 +973,7 @@ func (s *NewMultiplayerRoundUnauthorized) Validate() error {
 }
 
 func (s *NewSingleplayerGameBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -981,7 +981,7 @@ func (s *NewSingleplayerGameBadRequest) Validate() error {
 }
 
 func (s *NewSingleplayerGameInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1059,7 +1059,7 @@ func (s *NewSingleplayerGameRequest) Validate() error {
 }
 
 func (s *NewSingleplayerGameUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1067,7 +1067,7 @@ func (s *NewSingleplayerGameUnauthorized) Validate() error {
 }
 
 func (s *NewSingleplayerRoundBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1075,7 +1075,7 @@ func (s *NewSingleplayerRoundBadRequest) Validate() error {
 }
 
 func (s *NewSingleplayerRoundForbidden) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1083,7 +1083,7 @@ func (s *NewSingleplayerRoundForbidden) Validate() error {
 }
 
 func (s *NewSingleplayerRoundInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1091,7 +1091,7 @@ func (s *NewSingleplayerRoundInternalServerError) Validate() error {
 }
 
 func (s *NewSingleplayerRoundNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1099,7 +1099,7 @@ func (s *NewSingleplayerRoundNotFound) Validate() error {
 }
 
 func (s *NewSingleplayerRoundUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1107,7 +1107,7 @@ func (s *NewSingleplayerRoundUnauthorized) Validate() error {
 }
 
 func (s *NewYandexCallbackBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1115,7 +1115,7 @@ func (s *NewYandexCallbackBadRequest) Validate() error {
 }
 
 func (s *NewYandexCallbackInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1123,7 +1123,7 @@ func (s *NewYandexCallbackInternalServerError) Validate() error {
 }
 
 func (s *NewYandexCallbackUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1146,7 +1146,7 @@ func (s Provider) Validate() error {
 }
 
 func (s *RefreshTokensBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1154,7 +1154,7 @@ func (s *RefreshTokensBadRequest) Validate() error {
 }
 
 func (s *RefreshTokensInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1162,7 +1162,7 @@ func (s *RefreshTokensInternalServerError) Validate() error {
 }
 
 func (s *RegisterBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1170,7 +1170,7 @@ func (s *RegisterBadRequest) Validate() error {
 }
 
 func (s *RegisterConflict) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1178,7 +1178,7 @@ func (s *RegisterConflict) Validate() error {
 }
 
 func (s *RegisterInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1438,7 +1438,7 @@ func (s *SingleplayerRoundGuess) Validate() error {
 }
 
 func (s *UpdateUserAvatarInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1446,7 +1446,7 @@ func (s *UpdateUserAvatarInternalServerError) Validate() error {
 }
 
 func (s *UpdateUserAvatarRequestEntityTooLarge) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1454,7 +1454,7 @@ func (s *UpdateUserAvatarRequestEntityTooLarge) Validate() error {
 }
 
 func (s *UpdateUserAvatarTooManyRequests) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1462,7 +1462,7 @@ func (s *UpdateUserAvatarTooManyRequests) Validate() error {
 }
 
 func (s *UpdateUserAvatarUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1470,7 +1470,7 @@ func (s *UpdateUserAvatarUnauthorized) Validate() error {
 }
 
 func (s *UpdateUserInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1478,7 +1478,7 @@ func (s *UpdateUserInternalServerError) Validate() error {
 }
 
 func (s *UpdateUserUnauthorized) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1524,7 +1524,7 @@ func (s *UserUpdateRequest) Validate() error {
 }
 
 func (s *YandexLoginCallbackBadRequest) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1532,7 +1532,7 @@ func (s *YandexLoginCallbackBadRequest) Validate() error {
 }
 
 func (s *YandexLoginCallbackInternalServerError) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}
@@ -1540,7 +1540,7 @@ func (s *YandexLoginCallbackInternalServerError) Validate() error {
 }
 
 func (s *YandexLoginCallbackNotFound) Validate() error {
-	alias := (*Error)(s)
+	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
 	}

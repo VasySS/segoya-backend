@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/valkey-io/valkey-go"
 
@@ -49,9 +50,11 @@ func (s *LobbyTestSuite) TearDownSuite() {
 }
 
 func (s *LobbyTestSuite) TestNewLobby() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "google",
@@ -78,9 +81,11 @@ func (s *LobbyTestSuite) TestNewLobby() {
 }
 
 func (s *LobbyTestSuite) TestNewPrivateLobby() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "yandex",
@@ -107,9 +112,11 @@ func (s *LobbyTestSuite) TestNewPrivateLobby() {
 }
 
 func (s *LobbyTestSuite) TestGetLobby() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "google",
@@ -140,9 +147,11 @@ func (s *LobbyTestSuite) TestGetLobby() {
 }
 
 func (s *LobbyTestSuite) TestUpdateLobby() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "google",
@@ -193,9 +202,11 @@ func (s *LobbyTestSuite) TestGetLobbies() {
 	newLobbyIDs := make([]string, 0, 3)
 
 	for range 3 {
+		creatorUUID, _ := uuid.NewV7()
+
 		req := dto.NewLobbyRequestDB{
 			ID:              gofakeit.UUID(),
-			CreatorID:       gofakeit.IntRange(1, 100),
+			CreatorID:       creatorUUID,
 			RequestTime:     time.Now().UTC(),
 			Rounds:          gofakeit.IntRange(1, 10),
 			Provider:        "google",
@@ -232,9 +243,11 @@ func (s *LobbyTestSuite) TestGetLobbies() {
 }
 
 func (s *LobbyTestSuite) TestIncrementLobbyPlayers() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "google",
@@ -257,9 +270,11 @@ func (s *LobbyTestSuite) TestIncrementLobbyPlayers() {
 }
 
 func (s *LobbyTestSuite) TestDecrementLobbyPlayers() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "google",
@@ -285,9 +300,11 @@ func (s *LobbyTestSuite) TestDecrementLobbyPlayers() {
 }
 
 func (s *LobbyTestSuite) TestDeleteLobby() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "google",
@@ -311,9 +328,11 @@ func (s *LobbyTestSuite) TestDeleteLobby() {
 }
 
 func (s *LobbyTestSuite) TestAddLobbyExpiration() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "google",
@@ -338,9 +357,11 @@ func (s *LobbyTestSuite) TestAddLobbyExpiration() {
 }
 
 func (s *LobbyTestSuite) TestDeleteLobbyExpiration() {
+	creatorUUID, _ := uuid.NewV7()
+
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
-		CreatorID:       gofakeit.IntRange(1, 100),
+		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
 		Provider:        "google",

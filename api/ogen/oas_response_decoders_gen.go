@@ -132,7 +132,7 @@ func decodeDeleteUserSessionResponse(resp *http.Response) (res DeleteUserSession
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response Error
+			var response BackendError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -1136,7 +1136,7 @@ func decodeGetLobbiesResponse(resp *http.Response) (res GetLobbiesRes, _ error) 
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response Error
+			var response BackendError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -3301,7 +3301,7 @@ func decodeGetUserSessionsResponse(resp *http.Response) (res GetUserSessionsRes,
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response Error
+			var response BackendError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -3595,7 +3595,7 @@ func decodeNewDiscordResponse(resp *http.Response) (res NewDiscordRes, _ error) 
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response Error
+			var response BackendError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -4643,7 +4643,7 @@ func decodeNewYandexResponse(resp *http.Response) (res NewYandexRes, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response Error
+			var response BackendError
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

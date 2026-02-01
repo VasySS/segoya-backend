@@ -74,7 +74,7 @@ func (uc Usecase) LoginYandexCallback(ctx context.Context, req dto.OAuthLoginCal
 		return "", "", fmt.Errorf("failed to get user from db: %w", err)
 	}
 
-	sessionID := uc.cryptoService.NewUUID4()
+	sessionID := uc.cryptoService.NewUUID7()
 
 	accessToken, err := uc.tokenService.NewAccessToken(req.RequestTime, user.AccessTokenClaims{
 		SessionID: sessionID,

@@ -127,7 +127,7 @@ func (h Handler) RefreshTokens(
 func (h Handler) GetUserSessions(ctx context.Context) (api.GetUserSessionsRes, error) {
 	tokenClaims, ok := h.ts.FromContext(ctx)
 	if !ok {
-		return &api.Error{
+		return &api.BackendError{
 			Title:  "Error authorizing user",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while authorizing user",
@@ -138,7 +138,7 @@ func (h Handler) GetUserSessions(ctx context.Context) (api.GetUserSessionsRes, e
 	if err != nil {
 		slog.Error("error getting user sessions", slog.Any("error", err))
 
-		return &api.Error{
+		return &api.BackendError{
 			Title:  "Error getting user sessions",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while getting user sessions",
@@ -155,7 +155,7 @@ func (h Handler) DeleteUserSession(
 ) (api.DeleteUserSessionRes, error) {
 	tokenClaims, ok := h.ts.FromContext(ctx)
 	if !ok {
-		return &api.Error{
+		return &api.BackendError{
 			Title:  "Error authorizing user",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while authorizing user",
@@ -165,7 +165,7 @@ func (h Handler) DeleteUserSession(
 	if err := h.uc.DeleteSession(ctx, tokenClaims.UserID, params.ID); err != nil {
 		slog.Error("error deleting user session", slog.Any("error", err))
 
-		return &api.Error{
+		return &api.BackendError{
 			Title:  "Error deleting user session",
 			Status: http.StatusInternalServerError,
 			Detail: "An error occurred while deleting user session",

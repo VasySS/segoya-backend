@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -24,8 +25,10 @@ func TestUsecase_LobbyUserConnect(t *testing.T) {
 
 	type args struct {
 		lobbyID string
-		userID  int
+		userID  uuid.UUID
 	}
+
+	userID := uuid.Must(uuid.NewV7())
 
 	tests := []struct {
 		name    string
@@ -38,7 +41,7 @@ func TestUsecase_LobbyUserConnect(t *testing.T) {
 			name: "successfully connect user to lobby",
 			args: args{
 				lobbyID: "1234567890",
-				userID:  1,
+				userID:  userID,
 			},
 			setup: func(fs fields, args args) {
 				fs.lobbyRepo.On("GetLobby", mock.Anything, args.lobbyID).
@@ -54,14 +57,14 @@ func TestUsecase_LobbyUserConnect(t *testing.T) {
 				fs.userRepo.On("GetUserByID", mock.Anything, args.userID).
 					Return(user.PrivateProfile{PublicProfile: user.PublicProfile{ID: args.userID}}, nil)
 			},
-			want:    user.PublicProfile{ID: 1},
+			want:    user.PublicProfile{ID: userID},
 			wantErr: assert.NoError,
 		},
 		{
 			name: "trying to connect to full lobby",
 			args: args{
 				lobbyID: "1234567890",
-				userID:  1,
+				userID:  userID,
 			},
 			setup: func(fs fields, args args) {
 				fs.lobbyRepo.On("GetLobby", mock.Anything, args.lobbyID).
@@ -173,7 +176,7 @@ func TestUsecase_LobbyUserDisconnect(t *testing.T) {
 
 			uc := lobby.NewUsecase(conf, nil, nil, lobbyRepo, nil)
 
-			err := uc.DisconnectLobbyUser(t.Context(), tt.args.lobbyID, 0)
+			err := uc.DisconnectLobbyUser(t.Context(), tt.args.lobbyID, uuid.Nil)
 			tt.wantErr(t, err)
 		})
 	}
@@ -182,18 +185,21 @@ func TestUsecase_LobbyUserDisconnect(t *testing.T) {
 func TestUsecase_LobbyGameStart(t *testing.T) {
 	t.Parallel()
 
+	firstUserID := uuid.Must(uuid.NewV7())
+	secondUserID := uuid.Must(uuid.NewV7())
+
 	startLobbyReq := dto.StartLobbyGameRequest{
 		RequestTime: time.Now().UTC(),
 		LobbyID:     "1234567890",
 		Creator: user.PublicProfile{
-			ID: 1,
+			ID: firstUserID,
 		},
 		ConnectedPlayers: []user.PublicProfile{
 			{
-				ID: 1,
+				ID: firstUserID,
 			},
 			{
-				ID: 3,
+				ID: secondUserID,
 			},
 		},
 	}
@@ -207,11 +213,13 @@ func TestUsecase_LobbyGameStart(t *testing.T) {
 		req dto.StartLobbyGameRequest
 	}
 
+	gameID := uuid.Must(uuid.NewV7())
+
 	tests := []struct {
 		name    string
 		args    args
 		setup   func(fields, args)
-		want    int
+		want    uuid.UUID
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
@@ -240,12 +248,12 @@ func TestUsecase_LobbyGameStart(t *testing.T) {
 					TimerSeconds:     60,
 					Provider:         "google",
 					MovementAllowed:  true,
-				}).Return(1, nil)
+				}).Return(gameID, nil)
 
 				fs.lobbyRepo.On("DeleteLobby", mock.Anything, args.req.LobbyID).
 					Return(nil)
 			},
-			want:    1,
+			want:    gameID,
 			wantErr: assert.NoError,
 		},
 		{
@@ -257,7 +265,7 @@ func TestUsecase_LobbyGameStart(t *testing.T) {
 				fs.lobbyRepo.On("GetLobby", mock.Anything, args.req.LobbyID).
 					Return(lobbyEntity.Lobby{
 						ID:              args.req.LobbyID,
-						CreatorID:       777,
+						CreatorID:       uuid.Must(uuid.NewV7()),
 						CurrentPlayers:  2,
 						MaxPlayers:      5,
 						Rounds:          10,
@@ -266,7 +274,7 @@ func TestUsecase_LobbyGameStart(t *testing.T) {
 						Provider:        "google",
 					}, nil)
 			},
-			want:    0,
+			want:    uuid.UUID{},
 			wantErr: assert.Error,
 		},
 	}
@@ -316,7 +324,7 @@ func TestUsecase_UpdateLobbySettings(t *testing.T) {
 					RequestTime: time.Now().UTC(),
 					LobbyID:     "1234567890",
 					Creator: user.PublicProfile{
-						ID: 1,
+						ID: uuid.Must(uuid.NewV7()),
 					},
 					Settings: dto.LobbySettingsMessage{
 						Provider:        "google",
@@ -359,7 +367,7 @@ func TestUsecase_UpdateLobbySettings(t *testing.T) {
 					RequestTime: time.Now().UTC(),
 					LobbyID:     "1234567890",
 					Creator: user.PublicProfile{
-						ID: 777,
+						ID: uuid.Must(uuid.NewV7()),
 					},
 					Settings: dto.LobbySettingsMessage{
 						Provider:        "google",
@@ -373,7 +381,7 @@ func TestUsecase_UpdateLobbySettings(t *testing.T) {
 				fs.lobbyRepo.On("GetLobby", mock.Anything, args.req.LobbyID).
 					Return(lobbyEntity.Lobby{
 						ID:              args.req.LobbyID,
-						CreatorID:       888,
+						CreatorID:       uuid.Must(uuid.NewV7()),
 						CurrentPlayers:  2,
 						MaxPlayers:      5,
 						Rounds:          5,

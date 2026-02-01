@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
+
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
@@ -33,7 +35,7 @@ func (uc Usecase) NewStreetview(
 func (uc Usecase) GetStreetview(
 	ctx context.Context,
 	provider game.PanoramaProvider,
-	id int,
+	id uuid.UUID,
 ) (game.PanoramaMetadata, error) {
 	switch provider {
 	case game.GoogleProvider:

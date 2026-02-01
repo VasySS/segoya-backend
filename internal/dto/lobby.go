@@ -3,6 +3,8 @@ package dto
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
@@ -97,7 +99,7 @@ func LobbiesToAPI(l []lobby.Lobby, total int) *api.LobbiesResponse {
 type NewLobbyRequest struct {
 	RequestTime     time.Time
 	MaxPlayers      int
-	CreatorID       int
+	CreatorID       uuid.UUID
 	Rounds          int
 	Provider        string
 	TimerSeconds    int
@@ -109,7 +111,7 @@ type NewLobbyRequest struct {
 type NewLobbyRequestDB struct {
 	RequestTime     time.Time
 	ID              string
-	CreatorID       int
+	CreatorID       uuid.UUID
 	Rounds          int
 	Provider        string
 	TimerSeconds    int

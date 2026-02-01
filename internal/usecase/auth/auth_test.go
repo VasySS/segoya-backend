@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -52,7 +53,7 @@ func TestUsecase_Login(t *testing.T) {
 			setup: func(fs fields, args args) {
 				userDB := user.PrivateProfile{
 					PublicProfile: user.PublicProfile{
-						ID:       1,
+						ID:       uuid.Must(uuid.NewV7()),
 						Username: "username",
 						Name:     "name",
 					},
@@ -65,9 +66,9 @@ func TestUsecase_Login(t *testing.T) {
 				fs.cryptoService.On("CompareHashAndPassword", userDB.Password, args.req.Password).
 					Return(nil)
 
-				generatedSessionID := "random-session-uuid"
+				generatedSessionID := uuid.Must(uuid.NewV7())
 
-				fs.cryptoService.On("NewUUID4").Return(generatedSessionID)
+				fs.cryptoService.On("NewUUID7").Return(generatedSessionID)
 
 				fs.tokenService.On("NewAccessToken", mock.Anything, user.AccessTokenClaims{
 					SessionID: generatedSessionID,
@@ -103,7 +104,7 @@ func TestUsecase_Login(t *testing.T) {
 			setup: func(fs fields, args args) {
 				userDB := user.PrivateProfile{
 					PublicProfile: user.PublicProfile{
-						ID:       1,
+						ID:       uuid.Must(uuid.NewV7()),
 						Username: "username",
 						Name:     "name",
 					},
@@ -270,8 +271,8 @@ func TestUsecase_RefreshTokens(t *testing.T) {
 			},
 			setup: func(fs fields, args args) {
 				refreshTokenClaims := user.RefreshTokenClaims{
-					SessionID: "session_id",
-					UserID:    1,
+					SessionID: uuid.Must(uuid.NewV7()),
+					UserID:    uuid.Must(uuid.NewV7()),
 					Username:  "username",
 				}
 
@@ -332,13 +333,16 @@ func TestUsecase_RefreshTokens(t *testing.T) {
 				},
 			},
 			setup: func(fs fields, args args) {
+				userID := uuid.Must(uuid.NewV7())
+				sessionID := uuid.Must(uuid.NewV7())
+
 				fs.tokenService.On("ParseRefreshToken", args.req.RefreshToken).
 					Return(user.RefreshTokenClaims{
-						UserID:    1,
-						SessionID: "session_id",
+						UserID:    userID,
+						SessionID: sessionID,
 					}, nil)
 
-				fs.sessionRepo.On("GetSession", mock.Anything, 1, "session_id").
+				fs.sessionRepo.On("GetSession", mock.Anything, userID, sessionID).
 					Return(user.Session{}, errors.New("session not found"))
 			},
 			wantAccessToken:  "",
@@ -388,7 +392,7 @@ func TestUsecase_GetOAuth(t *testing.T) {
 	}
 
 	type args struct {
-		userID int
+		userID uuid.UUID
 	}
 
 	tests := []struct {
@@ -401,7 +405,7 @@ func TestUsecase_GetOAuth(t *testing.T) {
 		{
 			name: "successfully get oauth info",
 			args: args{
-				userID: 1,
+				userID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.userRepo.On("GetOAuth", mock.Anything, args.userID).
@@ -413,7 +417,7 @@ func TestUsecase_GetOAuth(t *testing.T) {
 		{
 			name: "failed to get oauth info",
 			args: args{
-				userID: 1,
+				userID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.userRepo.On("GetOAuth", mock.Anything, args.userID).
@@ -446,8 +450,8 @@ func TestUsecase_GetSessions(t *testing.T) {
 	t.Parallel()
 
 	userSessionsResponse := []user.Session{
-		{UserID: 1, SessionID: "session_id1"},
-		{UserID: 2, SessionID: "session_id2"},
+		{UserID: uuid.Must(uuid.NewV7()), SessionID: uuid.Must(uuid.NewV7())},
+		{UserID: uuid.Must(uuid.NewV7()), SessionID: uuid.Must(uuid.NewV7())},
 	}
 
 	type fields struct {
@@ -455,7 +459,7 @@ func TestUsecase_GetSessions(t *testing.T) {
 	}
 
 	type args struct {
-		userID int
+		userID uuid.UUID
 	}
 
 	tests := []struct {
@@ -468,7 +472,7 @@ func TestUsecase_GetSessions(t *testing.T) {
 		{
 			name: "successfully get user session",
 			args: args{
-				userID: 1,
+				userID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.sessionRepo.On("GetSessions", mock.Anything, args.userID, mock.Anything).
@@ -480,7 +484,7 @@ func TestUsecase_GetSessions(t *testing.T) {
 		{
 			name: "failed to get user session",
 			args: args{
-				userID: 1,
+				userID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.sessionRepo.On("GetSessions", mock.Anything, args.userID, mock.Anything).
@@ -517,8 +521,8 @@ func TestUsecase_DeleteSession(t *testing.T) {
 	}
 
 	type args struct {
-		userID    int
-		sessionID string
+		userID    uuid.UUID
+		sessionID uuid.UUID
 	}
 
 	tests := []struct {
@@ -530,8 +534,8 @@ func TestUsecase_DeleteSession(t *testing.T) {
 		{
 			name: "successfully delete user session",
 			args: args{
-				userID:    1,
-				sessionID: "session_id",
+				userID:    uuid.Must(uuid.NewV7()),
+				sessionID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.sessionRepo.On("GetSession", mock.Anything, args.userID, args.sessionID).
@@ -545,12 +549,12 @@ func TestUsecase_DeleteSession(t *testing.T) {
 		{
 			name: "trying to get user session of another user",
 			args: args{
-				userID:    1,
-				sessionID: "session_id",
+				userID:    uuid.Must(uuid.NewV7()),
+				sessionID: uuid.Must(uuid.NewV7()),
 			},
 			setup: func(fs fields, args args) {
 				fs.sessionRepo.On("GetSession", mock.Anything, args.userID, args.sessionID).
-					Return(user.Session{UserID: 2, SessionID: args.sessionID}, nil)
+					Return(user.Session{UserID: uuid.Must(uuid.NewV7()), SessionID: args.sessionID}, nil)
 			},
 			wantErr: assert.Error,
 		},

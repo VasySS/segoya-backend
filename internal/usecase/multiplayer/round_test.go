@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
@@ -17,20 +18,23 @@ import (
 	"github.com/VasySS/segoya-backend/internal/usecase/multiplayer/mocks"
 )
 
+// TODO: refactor
+//
+//nolint:maintidx
 func TestUsecase_NewRound(t *testing.T) {
 	t.Parallel()
 
 	newRoundReq := dto.NewMultiplayerRoundRequest{
 		RequestTime: time.Now().UTC(),
-		GameID:      123,
-		UserID:      456,
+		GameID:      uuid.Must(uuid.NewV7()),
+		UserID:      uuid.Must(uuid.NewV7()),
 	}
 
-	createdPanoID := 12341
+	createdPanoID := uuid.Must(uuid.NewV7())
 	createdStreetviewID := "some_streetview_id"
 
 	newRoundResp := multiplayerEntity.Round{
-		ID:           2,
+		ID:           uuid.Must(uuid.NewV7()),
 		GameID:       newRoundReq.GameID,
 		StreetviewID: createdStreetviewID,
 		RoundNum:     2,
@@ -47,6 +51,8 @@ func TestUsecase_NewRound(t *testing.T) {
 	type args struct {
 		req dto.NewMultiplayerRoundRequest
 	}
+
+	roundID := uuid.Must(uuid.NewV7())
 
 	tests := []struct {
 		name    string
@@ -72,11 +78,11 @@ func TestUsecase_NewRound(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: newRoundReq.UserID, Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 456, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)
@@ -93,7 +99,7 @@ func TestUsecase_NewRound(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 1).
 					Return(multiplayerEntity.Round{
-						ID:       2,
+						ID:       roundID,
 						RoundNum: 2,
 						Finished: true,
 					}, nil)
@@ -133,11 +139,11 @@ func TestUsecase_NewRound(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)
@@ -164,11 +170,11 @@ func TestUsecase_NewRound(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 456, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: newRoundReq.UserID, Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)
@@ -185,7 +191,7 @@ func TestUsecase_NewRound(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 5).
 					Return(multiplayerEntity.Round{
-						ID:       5,
+						ID:       uuid.Must(uuid.NewV7()),
 						RoundNum: 5,
 						Finished: true,
 					}, nil)
@@ -212,11 +218,11 @@ func TestUsecase_NewRound(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 456, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: newRoundReq.UserID, Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)
@@ -234,14 +240,14 @@ func TestUsecase_NewRound(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 3).
 					Return(multiplayerEntity.Round{
-						ID:       3,
+						ID:       roundID,
 						RoundNum: 3,
 						Finished: true,
 						EndedAt:  args.req.RequestTime.Add(-9 * time.Second),
 					}, nil)
 			},
 			want: multiplayerEntity.Round{
-				ID:       3,
+				ID:       roundID,
 				RoundNum: 3,
 				Finished: true,
 				EndedAt:  newRoundReq.RequestTime.Add(-9 * time.Second),
@@ -288,6 +294,8 @@ func TestUsecase_GetRound(t *testing.T) {
 		req dto.GetMultiplayerRoundRequest
 	}
 
+	roundID := uuid.Must(uuid.NewV7())
+
 	tests := []struct {
 		name    string
 		args    args
@@ -299,8 +307,8 @@ func TestUsecase_GetRound(t *testing.T) {
 			name: "successfully get round",
 			args: args{
 				req: dto.GetMultiplayerRoundRequest{
-					GameID: 1,
-					UserID: 1,
+					GameID: uuid.Must(uuid.NewV7()),
+					UserID: uuid.Must(uuid.NewV7()),
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -315,11 +323,11 @@ func TestUsecase_GetRound(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 1, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: args.req.UserID, Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 456, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)
@@ -337,12 +345,12 @@ func TestUsecase_GetRound(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 3).
 					Return(multiplayerEntity.Round{
-						ID:       3,
+						ID:       roundID,
 						RoundNum: 3,
 					}, nil)
 			},
 			want: multiplayerEntity.Round{
-				ID:       3,
+				ID:       roundID,
 				RoundNum: 3,
 			},
 			wantErr: assert.NoError,
@@ -351,8 +359,8 @@ func TestUsecase_GetRound(t *testing.T) {
 			name: "trying to get round of a game where user is not participanting",
 			args: args{
 				req: dto.GetMultiplayerRoundRequest{
-					GameID: 1,
-					UserID: 1,
+					GameID: uuid.Must(uuid.NewV7()),
+					UserID: uuid.Must(uuid.NewV7()),
 				},
 			},
 			setup: func(fs fields, args args) {
@@ -367,11 +375,11 @@ func TestUsecase_GetRound(t *testing.T) {
 				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
 					Return([]user.MultiplayerUser{
 						{
-							PublicProfile: user.PublicProfile{ID: 2, Username: "username1"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
 							Connected:     true,
 						},
 						{
-							PublicProfile: user.PublicProfile{ID: 456, Username: "username2"},
+							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
 							Connected:     true,
 						},
 					}, nil)

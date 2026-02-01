@@ -2,7 +2,8 @@ NewLobby:
   type: object
   properties:
     creatorID:
-      type: integer
+      type: string
+      format: uuid
     maxPlayers:
       type: integer
       minimum: 2
@@ -29,7 +30,8 @@ Lobby:
     id:
       type: string
     creatorID:
-      type: integer
+      type: string
+      format: uuid
     createdAt:
       type: string
       format: date-time

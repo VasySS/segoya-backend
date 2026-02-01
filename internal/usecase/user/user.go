@@ -8,12 +8,14 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/google/uuid"
+
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
 // GetPrivateProfile returns user's own profile.
-func (uc Usecase) GetPrivateProfile(ctx context.Context, userID int) (user.PrivateProfile, error) {
+func (uc Usecase) GetPrivateProfile(ctx context.Context, userID uuid.UUID) (user.PrivateProfile, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetPrivateProfile")
 	defer span.End()
 
@@ -27,7 +29,7 @@ func (uc Usecase) GetPrivateProfile(ctx context.Context, userID int) (user.Priva
 }
 
 // GetPublicProfile returns user's public profile.
-func (uc Usecase) GetPublicProfile(ctx context.Context, userID int) (user.PublicProfile, error) {
+func (uc Usecase) GetPublicProfile(ctx context.Context, userID uuid.UUID) (user.PublicProfile, error) {
 	ctx, span := uc.tracer.Start(ctx, "GetPublicProfile")
 	defer span.End()
 

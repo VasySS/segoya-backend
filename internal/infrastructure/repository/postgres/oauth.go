@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/georgysavva/scany/v2/pgxscan"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
@@ -28,7 +29,7 @@ func (r *Repository) NewOAuth(ctx context.Context, req dto.NewOAuthRequestDB) er
 
 	_, err := tx.Exec(ctx, query, pgx.NamedArgs{
 		"created_at": req.RequestTime,
-		"user_id":    req.UserID,
+		"user_id":    req.UserID.String(),
 		"issuer":     req.Issuer,
 		"oauth_id":   req.OAuthID,
 	})
@@ -45,7 +46,7 @@ func (r *Repository) NewOAuth(ctx context.Context, req dto.NewOAuthRequestDB) er
 }
 
 // GetOAuth returns all OAuth connections for user.
-func (r *Repository) GetOAuth(ctx context.Context, userID int) ([]user.OAuth, error) {
+func (r *Repository) GetOAuth(ctx context.Context, userID uuid.UUID) ([]user.OAuth, error) {
 	tx := r.txManager.GetQueryEngine(ctx)
 
 	ctx, span := r.tracer.Start(ctx, "GetOAuth")
@@ -59,7 +60,7 @@ func (r *Repository) GetOAuth(ctx context.Context, userID int) ([]user.OAuth, er
 
 	var providers []user.OAuth
 
-	err := pgxscan.Select(ctx, tx, &providers, query, pgx.NamedArgs{"user_id": userID})
+	err := pgxscan.Select(ctx, tx, &providers, query, pgx.NamedArgs{"user_id": userID.String()})
 	if err != nil {
 		return nil, fmt.Errorf("failed to get oauth info: %w", err)
 	}
@@ -80,7 +81,7 @@ func (r *Repository) DeleteOAuth(ctx context.Context, req dto.DeleteOAuthRequest
 	`
 
 	_, err := tx.Exec(ctx, query, pgx.NamedArgs{
-		"user_id": req.UserID,
+		"user_id": req.UserID.String(),
 		"issuer":  req.Issuer,
 	})
 	if err != nil {

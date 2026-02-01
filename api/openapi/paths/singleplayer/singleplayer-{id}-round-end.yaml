@@ -5,7 +5,7 @@ post:
   tags: ["singleplayer"]
   x-ogen-operation-group: Singleplayer
   parameters:
-    - $ref: "../../components/parameters.yaml#/idInt"
+    - $ref: "../../components/parameters.yaml#/idUUID"
   requestBody:
     required: true
     description: Round guess

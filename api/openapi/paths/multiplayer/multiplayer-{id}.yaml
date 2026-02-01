@@ -5,7 +5,7 @@ get:
   tags: ["multiplayer"]
   x-ogen-operation-group: Multiplayer
   parameters:
-    - $ref: "../../components/parameters.yaml#/idInt"
+    - $ref: "../../components/parameters.yaml#/idUUID"
   responses:
     "200":
       description: Multiplayer game details.

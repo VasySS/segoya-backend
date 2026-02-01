@@ -3,6 +3,7 @@ package token
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 )
 
@@ -26,14 +27,19 @@ const (
 )
 
 // GetUserID returns the user ID from the claims.
-func GetUserID(token jwt.Token) (int, error) {
-	var userID float64
+func GetUserID(token jwt.Token) (uuid.UUID, error) {
+	var userID string
 
 	if err := token.Get(ClaimsUserIDKey, &userID); err != nil {
-		return 0, fmt.Errorf("error getting userID from claims: %w", err)
+		return uuid.UUID{}, fmt.Errorf("error getting userID from claims: %w", err)
 	}
 
-	return int(userID), nil
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("error parsing user uuid: %w", err)
+	}
+
+	return userUUID, nil
 }
 
 // GetUsername returns the username from the claims.
@@ -70,12 +76,17 @@ func GetType(token jwt.Token) (Type, error) {
 }
 
 // GetSessionID returns the session ID from the claims.
-func GetSessionID(token jwt.Token) (string, error) {
+func GetSessionID(token jwt.Token) (uuid.UUID, error) {
 	var sessionID string
 
 	if err := token.Get(ClaimsSessionIDKey, &sessionID); err != nil {
-		return "", fmt.Errorf("error getting sessionID from claims: %w", err)
+		return uuid.UUID{}, fmt.Errorf("error getting sessionID from claims: %w", err)
 	}
 
-	return sessionID, nil
+	sessionUUID, err := uuid.Parse(sessionID)
+	if err != nil {
+		return uuid.UUID{}, fmt.Errorf("error parsing session uuid: %w", err)
+	}
+
+	return sessionUUID, nil
 }

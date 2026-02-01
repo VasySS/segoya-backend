@@ -13,6 +13,15 @@ idStr:
   schema:
     type: string
 
+idUUID:
+  name: id
+  description: UUID of the resource in path.
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+
 pageQuery:
   name: page
   in: query

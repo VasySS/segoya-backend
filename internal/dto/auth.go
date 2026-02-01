@@ -3,6 +3,8 @@ package dto
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
@@ -34,16 +36,16 @@ type TokensRefreshRequest struct {
 type NewTokenRequest struct {
 	RequestTime time.Time
 	Username    string
-	UserID      int
-	SessionID   string
+	UserID      uuid.UUID
+	SessionID   uuid.UUID
 	Name        string
 }
 
 // NewSessionRequest represents a request to create a new user session.
 type NewSessionRequest struct {
 	RequestTime  time.Time
-	UserID       int
-	SessionID    string
+	UserID       uuid.UUID
+	SessionID    uuid.UUID
 	RefreshToken string
 	UA           string
 	Expiration   time.Duration
@@ -52,8 +54,8 @@ type NewSessionRequest struct {
 // UpdateSessionRequest represents a request to update an existing user session.
 type UpdateSessionRequest struct {
 	RequestTime  time.Time
-	UserID       int
-	SessionID    string
+	UserID       uuid.UUID
+	SessionID    uuid.UUID
 	RefreshToken string
 	Expiration   time.Duration
 }

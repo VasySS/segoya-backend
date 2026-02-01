@@ -1,11 +1,15 @@
 // Package user contains types for working with user data.
 package user
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // PublicProfile contains information, that can be seen by other users.
 type PublicProfile struct {
-	ID           int       `json:"id"`
+	ID           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`
 	Name         string    `json:"name"`
 	RegisterDate time.Time `json:"registerDate"`

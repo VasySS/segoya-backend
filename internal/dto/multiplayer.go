@@ -3,6 +3,8 @@ package dto
 import (
 	"time"
 
+	"github.com/google/uuid"
+
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
@@ -90,7 +92,7 @@ func MultiplayerGameGuessesToAPI(guesses []multiplayer.Guess) *api.GetMultiplaye
 // NewMultiplayerGameRequest is a request for a new multiplayer game.
 type NewMultiplayerGameRequest struct {
 	RequestTime      time.Time
-	CreatorID        int
+	CreatorID        uuid.UUID
 	ConnectedPlayers []user.PublicProfile
 	Rounds           int
 	TimerSeconds     int
@@ -101,22 +103,22 @@ type NewMultiplayerGameRequest struct {
 // EndMultiplayerGameRequestDB is a request to end a multiplayer game in the database.
 type EndMultiplayerGameRequestDB struct {
 	RequestTime time.Time
-	GameID      int
+	GameID      uuid.UUID
 }
 
 // NewMultiplayerRoundGuessRequest is a request to create a new multiplayer round guess.
 type NewMultiplayerRoundGuessRequest struct {
 	RequestTime time.Time
-	UserID      int
-	GameID      int
+	UserID      uuid.UUID
+	GameID      uuid.UUID
 	Guess       game.LatLng
 }
 
 // NewMultiplayerRoundGuessRequestDB is a request to create a new multiplayer round guess in the database.
 type NewMultiplayerRoundGuessRequestDB struct {
 	RequestTime time.Time
-	UserID      int
-	RoundID     int
+	UserID      uuid.UUID
+	RoundID     uuid.UUID
 	Lat         float64
 	Lng         float64
 	Score       int
@@ -126,21 +128,21 @@ type NewMultiplayerRoundGuessRequestDB struct {
 // GetMultiplayerRoundRequest is a request to get a multiplayer round.
 type GetMultiplayerRoundRequest struct {
 	RequestTime time.Time
-	GameID      int
-	UserID      int
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }
 
 // NewMultiplayerRoundRequest is a request to create a new multiplayer round.
 type NewMultiplayerRoundRequest struct {
 	RequestTime time.Time
-	GameID      int
-	UserID      int
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }
 
 // NewMultiplayerRoundRequestDB is a request to create a new multiplayer round in the database.
 type NewMultiplayerRoundRequestDB struct {
-	GameID     int
-	LocationID int
+	GameID     uuid.UUID
+	LocationID uuid.UUID
 	RoundNum   int
 	CreatedAt  time.Time
 	StartedAt  time.Time
@@ -149,19 +151,19 @@ type NewMultiplayerRoundRequestDB struct {
 // EndMultiplayerRoundRequest is a request to end a multiplayer round.
 type EndMultiplayerRoundRequest struct {
 	RequestTime time.Time
-	GameID      int
-	UserID      int
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }
 
 // EndMultiplayerRoundRequestDB is a request to end a multiplayer round in the database.
 type EndMultiplayerRoundRequestDB struct {
 	RequestTime time.Time
-	RoundID     int
+	RoundID     uuid.UUID
 }
 
 // GetGameGuessesRequest is a request to end a multiplayer game.
 type GetGameGuessesRequest struct {
 	RequestTime time.Time
-	GameID      int
-	UserID      int
+	GameID      uuid.UUID
+	UserID      uuid.UUID
 }

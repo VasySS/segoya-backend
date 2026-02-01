@@ -2,7 +2,8 @@ UserPublicProfile:
   type: object
   properties:
     id:
-      type: integer
+      type: string
+      format: uuid
     username:
       type: string
     name:
@@ -18,7 +19,8 @@ UserPrivateProfile:
   type: object
   properties:
     id:
-      type: integer
+      type: string
+      format: uuid
     username:
       type: string
     name:
