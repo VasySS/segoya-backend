@@ -1,8 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS panorama_location (
-    id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    streetview_id VARCHAR, 
+    id UUID PRIMARY KEY DEFAULT uuidv7(),
+    streetview_id TEXT, 
     provider panorama_provider NOT NULL,
     lat FLOAT NOT NULL,
     lng FLOAT NOT NULL
