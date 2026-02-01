@@ -19,7 +19,7 @@ type PostgresContainer struct {
 // NewPostgresContainer creates a new postgres test container.
 func NewPostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 	postgresContainer, err := postgres.Run(ctx,
-		"postgres:18-beta1-alpine3.22@sha256:7f7f8a4d719a82301470b0c3f3a586ef343e9164e888a7f117f85ae5b7773c41",
+		"postgres:18.1-alpine3.23@sha256:aa6eb304ddb6dd26df23d05db4e5cb05af8951cda3e0dc57731b771e0ef4ab29",
 		postgres.WithDatabase("segoya_data"),
 		postgres.WithSQLDriver("pgx"),
 		testcontainers.WithWaitStrategy(
