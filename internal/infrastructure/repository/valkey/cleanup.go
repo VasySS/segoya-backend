@@ -13,6 +13,7 @@ import (
 //
 // Since there is no expiration for sorted sets in valkey/redis, this workaround is needed.
 // Not an ideal solution, but it should work fine on thousands of entries, if not triggered too often.
+// https://github.com/valkey-io/valkey/issues/2778
 func (r *Repository) StartPeriodicCleanup(ctx context.Context, interval time.Duration) {
 	go func() {
 		ticker := time.NewTicker(interval)
