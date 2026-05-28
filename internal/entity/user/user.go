@@ -33,7 +33,7 @@ func (u PrivateProfile) ToPublicProfile() PublicProfile {
 type MultiplayerUser struct {
 	PublicProfile
 
-	// Guessed   bool `json:"guessed"` // TODO - implement
+	Guessed   bool `json:"guessed"`
 	Connected bool `json:"connected"`
 	Score     int  `json:"score"`
 }
