@@ -51,10 +51,6 @@ type Repository interface {
 type PanoramaUsecase interface {
 	NewStreetview(ctx context.Context, provider game.PanoramaProvider) (game.PanoramaMetadata, error)
 	GetStreetview(ctx context.Context, provider game.PanoramaProvider, id uuid.UUID) (game.PanoramaMetadata, error)
-	CalculateScoreAndDistance(
-		provider game.PanoramaProvider,
-		realLat, realLng, userLat, userLng float64,
-	) (score int, distance int)
 }
 
 // Usecase contains business logic for multiplayer game management.

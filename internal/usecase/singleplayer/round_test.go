@@ -327,6 +327,7 @@ func TestUsecase_EndRound(t *testing.T) {
 						ID:           args.req.GameID,
 						UserID:       args.req.UserID,
 						Rounds:       5,
+						Provider:     game.GoogleProvider,
 						TimerSeconds: 60,
 						RoundCurrent: 2,
 						Finished:     false,
@@ -345,23 +346,28 @@ func TestUsecase_EndRound(t *testing.T) {
 						StartedAt: args.req.RequestTime.Add(-59 * time.Second),
 					}, nil)
 
-				fs.pano.On("CalculateScoreAndDistance", mock.Anything,
-					11.22, 33.44, args.req.Guess.Lat, args.req.Guess.Lng).
-					Return(1234, 5678, nil)
+				wantScore, wantDistance := game.CalculateScore(
+					game.GoogleProvider,
+					game.LatLng{Lat: 11.22, Lng: 33.44},
+					args.req.Guess,
+				)
 
-				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything, dto.NewSingleplayerRoundGuessRequest{
-					RequestTime: args.req.RequestTime,
-					RoundID:     roundID,
-					GameID:      args.req.GameID,
-					Guess:       args.req.Guess,
-					Score:       1234,
-					Distance:    5678,
-				}).
-					Return(nil)
+				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything,
+					mock.MatchedBy(func(req dto.NewSingleplayerRoundGuessRequest) bool {
+						return req.RequestTime == args.req.RequestTime &&
+							req.RoundID == roundID &&
+							req.GameID == args.req.GameID &&
+							req.Guess == args.req.Guess &&
+							req.Score == wantScore &&
+							req.Distance == wantDistance
+					}),
+				).Return(nil)
 			},
 			want: dto.EndCurrentRoundResponse{
-				Score:    1234,
-				Distance: 5678,
+				Score: func() int { s, _ := game.CalculateScore(game.GoogleProvider,
+					game.LatLng{Lat: 11.22, Lng: 33.44}, endRoundReq.Guess); return s }(),
+				Distance: func() int { _, d := game.CalculateScore(game.GoogleProvider,
+					game.LatLng{Lat: 11.22, Lng: 33.44}, endRoundReq.Guess); return d }(),
 			},
 			wantErr: assert.NoError,
 		},
@@ -425,7 +431,9 @@ func TestUsecase_EndRound(t *testing.T) {
 		},
 		{
 			name: "trying to end round after timer has expired",
-			args: args{},
+			args: args{
+				req: endRoundReq,
+			},
 			setup: func(fs fields, args args) {
 				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 					Return(func(ctx context.Context, fn repository.TxFunc) error {
@@ -436,6 +444,7 @@ func TestUsecase_EndRound(t *testing.T) {
 					Return(singleplayerEntity.Game{
 						ID:           args.req.GameID,
 						UserID:       args.req.UserID,
+						Provider:     game.GoogleProvider,
 						TimerSeconds: 60,
 						Rounds:       5,
 						RoundCurrent: 2,
@@ -455,20 +464,28 @@ func TestUsecase_EndRound(t *testing.T) {
 						StartedAt: args.req.RequestTime.Add(-61 * time.Second),
 					}, nil)
 
-				fs.pano.On("CalculateScoreAndDistance", mock.Anything,
-					11.22, 33.44, args.req.Guess.Lat, args.req.Guess.Lng).
-					Return(1234, 5678)
+				_, wantDistance := game.CalculateScore(
+					game.GoogleProvider,
+					game.LatLng{Lat: 11.22, Lng: 33.44},
+					endRoundReq.Guess,
+				)
 
-				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything, dto.NewSingleplayerRoundGuessRequest{
-					RequestTime: args.req.RequestTime,
-					RoundID:     roundID,
-					GameID:      args.req.GameID,
-					Guess:       args.req.Guess,
-					Score:       0,
-					Distance:    5678,
-				}).Return(nil)
+				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything,
+					mock.MatchedBy(func(req dto.NewSingleplayerRoundGuessRequest) bool {
+						return req.RequestTime == args.req.RequestTime &&
+							req.RoundID == roundID &&
+							req.GameID == args.req.GameID &&
+							req.Guess == args.req.Guess &&
+							req.Score == 0 &&
+							req.Distance == wantDistance
+					}),
+				).Return(nil)
 			},
-			want:    dto.EndCurrentRoundResponse{Score: 0, Distance: 5678},
+			want: dto.EndCurrentRoundResponse{
+				Score: 0,
+				Distance: func() int { _, d := game.CalculateScore(game.GoogleProvider,
+					game.LatLng{Lat: 11.22, Lng: 33.44}, endRoundReq.Guess); return d }(),
+			},
 			wantErr: assert.NoError,
 		},
 	}

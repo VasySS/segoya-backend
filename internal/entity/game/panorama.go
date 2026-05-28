@@ -23,6 +23,20 @@ func IsSupportedProvider(p string) bool {
 	}
 }
 
+// ScoreModifier returns the distance modifier used in score calculation for this provider.
+func (p PanoramaProvider) ScoreModifier() float64 {
+	switch p {
+	case SeznamProvider:
+		return 150.0
+	case YandexProvider:
+		return 500.0
+	case GoogleProvider, YandexAirProvider:
+		return 750.0
+	default:
+		return 0
+	}
+}
+
 // PanoramaMetadata contains general streetview metadata.
 type PanoramaMetadata struct {
 	LatLng

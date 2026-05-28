@@ -67,7 +67,7 @@ func (uc Usecase) getOrGenerateRound(
 		return multiplayer.Round{}, fmt.Errorf("failed to get current round: %w", err)
 	}
 
-	if game.RoundCurrent != 0 && game.RoundCurrent == game.Rounds {
+	if game.MaxRoundsReached() {
 		return multiplayer.Round{}, multiplayer.ErrRoundMaxAmount
 	}
 

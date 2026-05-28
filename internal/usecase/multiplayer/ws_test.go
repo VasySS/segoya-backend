@@ -81,15 +81,19 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 				roundResponse := multiplayerEntity.Round{
 					ID:       uuid.Must(uuid.NewV7()),
 					RoundNum: gameResponse.RoundCurrent,
+					Lat:      55.55,
+					Lng:      66.66,
 					Finished: false,
 				}
 
 				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, gameResponse.RoundCurrent).
 					Return(roundResponse, nil)
 
-				fs.pano.On("CalculateScoreAndDistance",
-					gameResponse.Provider, roundResponse.Lat, roundResponse.Lng, args.req.Guess.Lat, args.req.Guess.Lng).
-					Return(4567, 1234)
+				wantScore, wantDistance := game.CalculateScore(
+					gameResponse.Provider,
+					game.LatLng{Lat: roundResponse.Lat, Lng: roundResponse.Lng},
+					args.req.Guess,
+				)
 
 				fs.repo.On("NewMultiplayerRoundGuess", mock.Anything, dto.NewMultiplayerRoundGuessRequestDB{
 					RequestTime: args.req.RequestTime,
@@ -97,8 +101,8 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 					UserID:      args.req.UserID,
 					Lat:         args.req.Guess.Lat,
 					Lng:         args.req.Guess.Lng,
-					Score:       4567,
-					Distance:    1234,
+					Score:       wantScore,
+					Distance:    wantDistance,
 				}).Return(nil)
 			},
 			wantErr: assert.NoError,

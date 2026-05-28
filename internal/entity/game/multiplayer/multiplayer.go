@@ -9,6 +9,26 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
+// MaxRoundsReached returns true if all rounds have been created.
+func (g Game) MaxRoundsReached() bool {
+	return g.RoundCurrent != 0 && g.RoundCurrent == g.Rounds
+}
+
+// IsComplete returns true if the game is fully finished (all rounds done).
+func (g Game) IsComplete() bool {
+	return g.RoundCurrent >= g.Rounds && g.Finished
+}
+
+// TimerPassed returns true if there is no timer or the timer has expired.
+func (r Round) TimerPassed(now time.Time, timerSeconds int) bool {
+	return timerSeconds == 0 || !now.Before(r.StartedAt.Add(time.Second*time.Duration(timerSeconds)))
+}
+
+// AllPlayersGuessed returns true if all players have submitted a guess for this round.
+func (r Round) AllPlayersGuessed(players int) bool {
+	return r.GuessesCount == players
+}
+
 // Game struct contains multiplayer game information.
 type Game struct {
 	ID              uuid.UUID             `db:"id"               json:"id"`

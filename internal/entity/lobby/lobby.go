@@ -20,3 +20,8 @@ type Lobby struct {
 	MaxPlayers      int       `json:"maxPlayers"`
 	Private         bool      `json:"private"`
 }
+
+// IsFull returns true if the lobby has reached its maximum player capacity.
+func (l Lobby) IsFull() bool {
+	return l.CurrentPlayers >= l.MaxPlayers
+}

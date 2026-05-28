@@ -99,7 +99,7 @@ func (uc Usecase) GetGameGuesses(ctx context.Context, req dto.GetGameGuessesRequ
 			return fmt.Errorf("failed to get game from repo: %w", err)
 		}
 
-		if game.RoundCurrent < game.Rounds || !game.Finished {
+		if !game.IsComplete() {
 			return multiplayer.ErrGameIsStillActive
 		}
 

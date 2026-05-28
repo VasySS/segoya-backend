@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	gameEntity "github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
@@ -34,7 +35,7 @@ func (uc Usecase) NewRound(
 			return singleplayer.ErrGameWrongUserID
 		}
 
-		if game.RoundCurrent != 0 && game.RoundCurrent == game.Rounds {
+		if game.MaxRoundsReached() {
 			return singleplayer.ErrRoundMaxAmount
 		}
 
@@ -159,13 +160,10 @@ func (uc Usecase) EndRound(
 			return singleplayer.ErrRoundAlreadyFinished
 		}
 
-		score, distance := uc.pano.CalculateScoreAndDistance(
-			game.Provider, round.Lat, round.Lng, req.Guess.Lat, req.Guess.Lng,
-		)
+		real := gameEntity.LatLng{Lat: round.Lat, Lng: round.Lng}
+		score, distance := gameEntity.CalculateScore(game.Provider, real, req.Guess)
 
-		roundTimerEnd := round.StartedAt.Add(time.Second * time.Duration(game.TimerSeconds))
-		if game.TimerSeconds != 0 && req.RequestTime.After(roundTimerEnd) {
-			// if timer is enabled and round timer has ended, reset score
+		if round.TimerExpired(req.RequestTime, game.TimerSeconds) {
 			score = 0
 		}
 

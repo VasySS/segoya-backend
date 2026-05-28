@@ -3,11 +3,11 @@ package multiplayer
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
 )
 
@@ -35,13 +35,8 @@ func (uc Usecase) NewRoundGuess(ctx context.Context, req dto.NewMultiplayerRound
 			return multiplayer.ErrRoundAlreadyFinished
 		}
 
-		score, distance := uc.pano.CalculateScoreAndDistance(
-			multiplayerGame.Provider,
-			round.Lat,
-			round.Lng,
-			req.Guess.Lat,
-			req.Guess.Lng,
-		)
+		real := game.LatLng{Lat: round.Lat, Lng: round.Lng}
+		score, distance := game.CalculateScore(multiplayerGame.Provider, real, req.Guess)
 
 		err = uc.repo.NewMultiplayerRoundGuess(ctx, dto.NewMultiplayerRoundGuessRequestDB{
 			RequestTime: req.RequestTime,
@@ -86,8 +81,7 @@ func (uc Usecase) EndRound(ctx context.Context, req dto.EndMultiplayerRoundReque
 			return nil
 		}
 
-		timerEndTime := round.StartedAt.Add(time.Second * time.Duration(game.TimerSeconds))
-		if game.TimerSeconds != 0 && req.RequestTime.Before(timerEndTime) && round.GuessesCount != game.Players {
+		if !round.TimerPassed(req.RequestTime, game.TimerSeconds) && !round.AllPlayersGuessed(game.Players) {
 			return multiplayer.ErrRoundIsStillActive
 		}
 

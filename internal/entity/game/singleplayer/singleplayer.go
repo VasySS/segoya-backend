@@ -9,6 +9,21 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
+// MaxRoundsReached returns true if all rounds have been created.
+func (g Game) MaxRoundsReached() bool {
+	return g.RoundCurrent != 0 && g.RoundCurrent == g.Rounds
+}
+
+// AllRoundsCreated returns true if all rounds have been created.
+func (g Game) AllRoundsCreated() bool {
+	return g.RoundCurrent == g.Rounds
+}
+
+// TimerExpired returns true if the timer is enabled and has expired.
+func (r Round) TimerExpired(now time.Time, timerSeconds int) bool {
+	return timerSeconds != 0 && now.After(r.StartedAt.Add(time.Second*time.Duration(timerSeconds)))
+}
+
 // Game struct contains singleplayer game information.
 type Game struct {
 	ID              uuid.UUID             `db:"id"               json:"id"`

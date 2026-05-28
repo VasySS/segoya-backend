@@ -1,4 +1,4 @@
-package panorama_test
+package game_test
 
 import (
 	"testing"
@@ -6,10 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
-	"github.com/VasySS/segoya-backend/internal/usecase/panorama"
 )
 
-func TestUsecase_CalculateScoreAndDistance(t *testing.T) {
+func TestCalculateScore(t *testing.T) {
 	t.Parallel()
 
 	type args struct {
@@ -92,10 +91,10 @@ func TestUsecase_CalculateScoreAndDistance(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			uc := panorama.NewUsecase(panorama.Config{}, nil)
+			real := game.LatLng{Lat: tt.args.realLat, Lng: tt.args.realLng}
+			guess := game.LatLng{Lat: tt.args.userLat, Lng: tt.args.userLng}
+			score, distance := game.CalculateScore(tt.args.provider, real, guess)
 
-			score, distance := uc.CalculateScoreAndDistance(tt.args.provider,
-				tt.args.realLat, tt.args.realLng, tt.args.userLat, tt.args.userLng)
 			assert.Equal(t, tt.wantScore, score)
 			assert.Equal(t, tt.wantDistance, distance)
 		})

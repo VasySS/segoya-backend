@@ -26,7 +26,7 @@ func (uc Usecase) ConnectLobbyUser(
 		return user.PublicProfile{}, fmt.Errorf("error getting lobby: %w", err)
 	}
 
-	if lobbyRepo.CurrentPlayers >= lobbyRepo.MaxPlayers {
+	if lobbyRepo.IsFull() {
 		return user.PublicProfile{}, lobby.ErrLobbyIsFull
 	}
 

@@ -77,7 +77,7 @@ func (uc Usecase) EndGame(ctx context.Context, req dto.EndSingleplayerGameReques
 			return singleplayer.ErrGameWrongUserID
 		}
 
-		if game.RoundCurrent != game.Rounds {
+		if !game.AllRoundsCreated() {
 			return singleplayer.ErrGameIsStillActive
 		}
 
