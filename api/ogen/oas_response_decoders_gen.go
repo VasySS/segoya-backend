@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/uri"
@@ -110,7 +109,7 @@ func decodeDeleteDiscordResponse(resp *http.Response) (res DeleteDiscordRes, _ e
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeDeleteUserSessionResponse(resp *http.Response) (res DeleteUserSessionRes, _ error) {
@@ -163,7 +162,7 @@ func decodeDeleteUserSessionResponse(resp *http.Response) (res DeleteUserSession
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeDeleteYandexResponse(resp *http.Response) (res DeleteYandexRes, _ error) {
@@ -260,7 +259,7 @@ func decodeDeleteYandexResponse(resp *http.Response) (res DeleteYandexRes, _ err
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeDiscordLoginResponse(resp *http.Response) (res *DiscordLoginTemporaryRedirect, _ error) {
@@ -335,7 +334,7 @@ func decodeDiscordLoginResponse(resp *http.Response) (res *DiscordLoginTemporary
 		}
 		return &wrapper, nil
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeDiscordLoginCallbackResponse(resp *http.Response) (res DiscordLoginCallbackRes, _ error) {
@@ -542,7 +541,7 @@ func decodeDiscordLoginCallbackResponse(resp *http.Response) (res DiscordLoginCa
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeEndSingleplayerGameResponse(resp *http.Response) (res EndSingleplayerGameRes, _ error) {
@@ -771,7 +770,7 @@ func decodeEndSingleplayerGameResponse(resp *http.Response) (res EndSingleplayer
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeEndSingleplayerRoundResponse(resp *http.Response) (res EndSingleplayerRoundRes, _ error) {
@@ -1032,7 +1031,7 @@ func decodeEndSingleplayerRoundResponse(resp *http.Response) (res EndSingleplaye
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetHealthResponse(resp *http.Response) (res *GetHealthOK, _ error) {
@@ -1073,7 +1072,7 @@ func decodeGetHealthResponse(resp *http.Response) (res *GetHealthOK, _ error) {
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetLobbiesResponse(resp *http.Response) (res GetLobbiesRes, _ error) {
@@ -1167,7 +1166,7 @@ func decodeGetLobbiesResponse(resp *http.Response) (res GetLobbiesRes, _ error) 
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetLobbyResponse(resp *http.Response) (res GetLobbyRes, _ error) {
@@ -1305,7 +1304,7 @@ func decodeGetLobbyResponse(resp *http.Response) (res GetLobbyRes, _ error) {
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetMultiplayerGameResponse(resp *http.Response) (res GetMultiplayerGameRes, _ error) {
@@ -1487,7 +1486,7 @@ func decodeGetMultiplayerGameResponse(resp *http.Response) (res GetMultiplayerGa
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetMultiplayerGameGuessesResponse(resp *http.Response) (res GetMultiplayerGameGuessesRes, _ error) {
@@ -1669,7 +1668,7 @@ func decodeGetMultiplayerGameGuessesResponse(resp *http.Response) (res GetMultip
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetMultiplayerRoundResponse(resp *http.Response) (res GetMultiplayerRoundRes, _ error) {
@@ -1851,7 +1850,7 @@ func decodeGetMultiplayerRoundResponse(resp *http.Response) (res GetMultiplayerR
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetOAuthProvidersResponse(resp *http.Response) (res GetOAuthProvidersRes, _ error) {
@@ -1989,7 +1988,7 @@ func decodeGetOAuthProvidersResponse(resp *http.Response) (res GetOAuthProviders
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetPrivateProfileResponse(resp *http.Response) (res GetPrivateProfileRes, _ error) {
@@ -2118,7 +2117,7 @@ func decodeGetPrivateProfileResponse(resp *http.Response) (res GetPrivateProfile
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetPublicProfileResponse(resp *http.Response) (res GetPublicProfileRes, _ error) {
@@ -2247,7 +2246,7 @@ func decodeGetPublicProfileResponse(resp *http.Response) (res GetPublicProfileRe
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetRootResponse(resp *http.Response) (res *GetRootFound, _ error) {
@@ -2290,7 +2289,7 @@ func decodeGetRootResponse(resp *http.Response) (res *GetRootFound, _ error) {
 		}
 		return &wrapper, nil
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetSingleplayerGameResponse(resp *http.Response) (res GetSingleplayerGameRes, _ error) {
@@ -2516,7 +2515,7 @@ func decodeGetSingleplayerGameResponse(resp *http.Response) (res GetSingleplayer
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetSingleplayerGameGuessesResponse(resp *http.Response) (res GetSingleplayerGameGuessesRes, _ error) {
@@ -2786,7 +2785,7 @@ func decodeGetSingleplayerGameGuessesResponse(resp *http.Response) (res GetSingl
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetSingleplayerGamesResponse(resp *http.Response) (res GetSingleplayerGamesRes, _ error) {
@@ -2968,7 +2967,7 @@ func decodeGetSingleplayerGamesResponse(resp *http.Response) (res GetSingleplaye
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetSingleplayerRoundResponse(resp *http.Response) (res GetSingleplayerRoundRes, _ error) {
@@ -3238,7 +3237,7 @@ func decodeGetSingleplayerRoundResponse(resp *http.Response) (res GetSingleplaye
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeGetUserSessionsResponse(resp *http.Response) (res GetUserSessionsRes, _ error) {
@@ -3332,7 +3331,7 @@ func decodeGetUserSessionsResponse(resp *http.Response) (res GetUserSessionsRes,
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeLoginResponse(resp *http.Response) (res LoginRes, _ error) {
@@ -3507,7 +3506,7 @@ func decodeLoginResponse(resp *http.Response) (res LoginRes, _ error) {
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeNewDiscordResponse(resp *http.Response) (res NewDiscordRes, _ error) {
@@ -3626,7 +3625,7 @@ func decodeNewDiscordResponse(resp *http.Response) (res NewDiscordRes, _ error) 
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeNewDiscordCallbackResponse(resp *http.Response) (res NewDiscordCallbackRes, _ error) {
@@ -3801,7 +3800,7 @@ func decodeNewDiscordCallbackResponse(resp *http.Response) (res NewDiscordCallba
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeNewLobbyResponse(resp *http.Response) (res NewLobbyRes, _ error) {
@@ -3930,7 +3929,7 @@ func decodeNewLobbyResponse(resp *http.Response) (res NewLobbyRes, _ error) {
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeNewMultiplayerRoundResponse(resp *http.Response) (res NewMultiplayerRoundRes, _ error) {
@@ -4112,7 +4111,7 @@ func decodeNewMultiplayerRoundResponse(resp *http.Response) (res NewMultiplayerR
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeNewSingleplayerGameResponse(resp *http.Response) (res NewSingleplayerGameRes, _ error) {
@@ -4285,7 +4284,7 @@ func decodeNewSingleplayerGameResponse(resp *http.Response) (res NewSingleplayer
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeNewSingleplayerRoundResponse(resp *http.Response) (res NewSingleplayerRoundRes, _ error) {
@@ -4555,7 +4554,7 @@ func decodeNewSingleplayerRoundResponse(resp *http.Response) (res NewSingleplaye
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeNewYandexResponse(resp *http.Response) (res NewYandexRes, _ error) {
@@ -4674,7 +4673,7 @@ func decodeNewYandexResponse(resp *http.Response) (res NewYandexRes, _ error) {
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeNewYandexCallbackResponse(resp *http.Response) (res NewYandexCallbackRes, _ error) {
@@ -4849,7 +4848,7 @@ func decodeNewYandexCallbackResponse(resp *http.Response) (res NewYandexCallback
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeRefreshTokensResponse(resp *http.Response) (res RefreshTokensRes, _ error) {
@@ -4980,7 +4979,7 @@ func decodeRefreshTokensResponse(resp *http.Response) (res RefreshTokensRes, _ e
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeRegisterResponse(resp *http.Response) (res RegisterRes, _ error) {
@@ -5121,7 +5120,7 @@ func decodeRegisterResponse(resp *http.Response) (res RegisterRes, _ error) {
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeUpdateUserResponse(resp *http.Response) (res UpdateUserRes, _ error) {
@@ -5218,7 +5217,7 @@ func decodeUpdateUserResponse(resp *http.Response) (res UpdateUserRes, _ error) 
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeUpdateUserAvatarResponse(resp *http.Response) (res UpdateUserAvatarRes, _ error) {
@@ -5403,7 +5402,7 @@ func decodeUpdateUserAvatarResponse(resp *http.Response) (res UpdateUserAvatarRe
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeYandexLoginResponse(resp *http.Response) (res *YandexLoginTemporaryRedirect, _ error) {
@@ -5478,7 +5477,7 @@ func decodeYandexLoginResponse(resp *http.Response) (res *YandexLoginTemporaryRe
 		}
 		return &wrapper, nil
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }
 
 func decodeYandexLoginCallbackResponse(resp *http.Response) (res YandexLoginCallbackRes, _ error) {
@@ -5685,5 +5684,5 @@ func decodeYandexLoginCallbackResponse(resp *http.Response) (res YandexLoginCall
 			return res, validate.InvalidContentType(ct)
 		}
 	}
-	return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	return res, validate.UnexpectedStatusCodeWithResponse(resp)
 }

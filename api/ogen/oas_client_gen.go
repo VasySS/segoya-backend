@@ -4,22 +4,22 @@ package api
 
 import (
 	"context"
+	"io"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/go-faster/errors"
-	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/metric"
-	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
-	"go.opentelemetry.io/otel/trace"
-
 	"github.com/ogen-go/ogen/conv"
 	ht "github.com/ogen-go/ogen/http"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/ogen-go/ogen/otelogen"
 	"github.com/ogen-go/ogen/uri"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/metric"
+	semconv "go.opentelemetry.io/otel/semconv/v1.39.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func trimTrailingSlashes(u *url.URL) {
@@ -295,10 +295,6 @@ type Client struct {
 	baseClient
 }
 
-var _ Handler = struct {
-	*Client
-}{}
-
 // NewClient initializes new Client defined by OAS.
 func NewClient(serverURL string, sec SecuritySource, opts ...ClientOption) (*Client, error) {
 	u, err := url.Parse(serverURL)
@@ -347,8 +343,9 @@ func (c *Client) sendDeleteDiscord(ctx context.Context) (res DeleteDiscordRes, e
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteDiscord"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/v1/auth/discord"),
+		semconv.URLTemplateKey.String("/v1/auth/discord"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -427,7 +424,14 @@ func (c *Client) sendDeleteDiscord(ctx context.Context) (res DeleteDiscordRes, e
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteDiscordResponse(resp)
@@ -452,8 +456,9 @@ func (c *Client) sendDeleteUserSession(ctx context.Context, params DeleteUserSes
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteUserSession"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/v1/auth/sessions/{id}"),
+		semconv.URLTemplateKey.String("/v1/auth/sessions/{id}"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -550,7 +555,14 @@ func (c *Client) sendDeleteUserSession(ctx context.Context, params DeleteUserSes
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteUserSessionResponse(resp)
@@ -575,8 +587,9 @@ func (c *Client) sendDeleteYandex(ctx context.Context) (res DeleteYandexRes, err
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("deleteYandex"),
 		semconv.HTTPRequestMethodKey.String("DELETE"),
-		semconv.HTTPRouteKey.String("/v1/auth/yandex"),
+		semconv.URLTemplateKey.String("/v1/auth/yandex"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -655,7 +668,14 @@ func (c *Client) sendDeleteYandex(ctx context.Context) (res DeleteYandexRes, err
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteYandexResponse(resp)
@@ -680,8 +700,9 @@ func (c *Client) sendDiscordLogin(ctx context.Context) (res *DiscordLoginTempora
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("discordLogin"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/discord/login"),
+		semconv.URLTemplateKey.String("/v1/auth/discord/login"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -727,7 +748,14 @@ func (c *Client) sendDiscordLogin(ctx context.Context) (res *DiscordLoginTempora
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDiscordLoginResponse(resp)
@@ -752,8 +780,9 @@ func (c *Client) sendDiscordLoginCallback(ctx context.Context, params DiscordLog
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("discordLoginCallback"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/discord/login/callback"),
+		semconv.URLTemplateKey.String("/v1/auth/discord/login/callback"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -845,7 +874,14 @@ func (c *Client) sendDiscordLoginCallback(ctx context.Context, params DiscordLog
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeDiscordLoginCallbackResponse(resp)
@@ -870,8 +906,9 @@ func (c *Client) sendEndSingleplayerGame(ctx context.Context, params EndSinglepl
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("endSingleplayerGame"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/end"),
+		semconv.URLTemplateKey.String("/v1/singleplayer/{id}/end"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -969,7 +1006,14 @@ func (c *Client) sendEndSingleplayerGame(ctx context.Context, params EndSinglepl
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeEndSingleplayerGameResponse(resp)
@@ -994,8 +1038,9 @@ func (c *Client) sendEndSingleplayerRound(ctx context.Context, request *Singlepl
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("endSingleplayerRound"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/round/end"),
+		semconv.URLTemplateKey.String("/v1/singleplayer/{id}/round/end"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1096,7 +1141,14 @@ func (c *Client) sendEndSingleplayerRound(ctx context.Context, request *Singlepl
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeEndSingleplayerRoundResponse(resp)
@@ -1121,8 +1173,9 @@ func (c *Client) sendGetHealth(ctx context.Context) (res *GetHealthOK, err error
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getHealth"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/health"),
+		semconv.URLTemplateKey.String("/health"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1168,7 +1221,14 @@ func (c *Client) sendGetHealth(ctx context.Context) (res *GetHealthOK, err error
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetHealthResponse(resp)
@@ -1193,8 +1253,9 @@ func (c *Client) sendGetLobbies(ctx context.Context, params GetLobbiesParams) (r
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getLobbies"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/lobbies"),
+		semconv.URLTemplateKey.String("/v1/lobbies"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1305,7 +1366,14 @@ func (c *Client) sendGetLobbies(ctx context.Context, params GetLobbiesParams) (r
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetLobbiesResponse(resp)
@@ -1330,8 +1398,9 @@ func (c *Client) sendGetLobby(ctx context.Context, params GetLobbyParams) (res G
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getLobby"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/lobbies/{id}"),
+		semconv.URLTemplateKey.String("/v1/lobbies/{id}"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1428,7 +1497,14 @@ func (c *Client) sendGetLobby(ctx context.Context, params GetLobbyParams) (res G
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetLobbyResponse(resp)
@@ -1453,8 +1529,9 @@ func (c *Client) sendGetMultiplayerGame(ctx context.Context, params GetMultiplay
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getMultiplayerGame"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/multiplayer/{id}"),
+		semconv.URLTemplateKey.String("/v1/multiplayer/{id}"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1551,7 +1628,14 @@ func (c *Client) sendGetMultiplayerGame(ctx context.Context, params GetMultiplay
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetMultiplayerGameResponse(resp)
@@ -1576,8 +1660,9 @@ func (c *Client) sendGetMultiplayerGameGuesses(ctx context.Context, params GetMu
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getMultiplayerGameGuesses"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/multiplayer/{id}/guesses"),
+		semconv.URLTemplateKey.String("/v1/multiplayer/{id}/guesses"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1675,7 +1760,14 @@ func (c *Client) sendGetMultiplayerGameGuesses(ctx context.Context, params GetMu
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetMultiplayerGameGuessesResponse(resp)
@@ -1700,8 +1792,9 @@ func (c *Client) sendGetMultiplayerRound(ctx context.Context, params GetMultipla
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getMultiplayerRound"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/multiplayer/{id}/round"),
+		semconv.URLTemplateKey.String("/v1/multiplayer/{id}/round"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1799,7 +1892,14 @@ func (c *Client) sendGetMultiplayerRound(ctx context.Context, params GetMultipla
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetMultiplayerRoundResponse(resp)
@@ -1824,8 +1924,9 @@ func (c *Client) sendGetOAuthProviders(ctx context.Context) (res GetOAuthProvide
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getOAuthProviders"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/providers"),
+		semconv.URLTemplateKey.String("/v1/auth/providers"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -1904,7 +2005,14 @@ func (c *Client) sendGetOAuthProviders(ctx context.Context) (res GetOAuthProvide
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetOAuthProvidersResponse(resp)
@@ -1929,8 +2037,9 @@ func (c *Client) sendGetPrivateProfile(ctx context.Context) (res GetPrivateProfi
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getPrivateProfile"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/users/me"),
+		semconv.URLTemplateKey.String("/v1/users/me"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2009,7 +2118,14 @@ func (c *Client) sendGetPrivateProfile(ctx context.Context) (res GetPrivateProfi
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetPrivateProfileResponse(resp)
@@ -2034,8 +2150,9 @@ func (c *Client) sendGetPublicProfile(ctx context.Context, params GetPublicProfi
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getPublicProfile"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/users/{id}"),
+		semconv.URLTemplateKey.String("/v1/users/{id}"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2132,7 +2249,14 @@ func (c *Client) sendGetPublicProfile(ctx context.Context, params GetPublicProfi
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetPublicProfileResponse(resp)
@@ -2157,8 +2281,9 @@ func (c *Client) sendGetRoot(ctx context.Context) (res *GetRootFound, err error)
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getRoot"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/"),
+		semconv.URLTemplateKey.String("/"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2204,7 +2329,14 @@ func (c *Client) sendGetRoot(ctx context.Context) (res *GetRootFound, err error)
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetRootResponse(resp)
@@ -2229,8 +2361,9 @@ func (c *Client) sendGetSingleplayerGame(ctx context.Context, params GetSinglepl
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getSingleplayerGame"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}"),
+		semconv.URLTemplateKey.String("/v1/singleplayer/{id}"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2327,7 +2460,14 @@ func (c *Client) sendGetSingleplayerGame(ctx context.Context, params GetSinglepl
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetSingleplayerGameResponse(resp)
@@ -2352,8 +2492,9 @@ func (c *Client) sendGetSingleplayerGameGuesses(ctx context.Context, params GetS
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getSingleplayerGameGuesses"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/guesses"),
+		semconv.URLTemplateKey.String("/v1/singleplayer/{id}/guesses"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2451,7 +2592,14 @@ func (c *Client) sendGetSingleplayerGameGuesses(ctx context.Context, params GetS
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetSingleplayerGameGuessesResponse(resp)
@@ -2476,8 +2624,9 @@ func (c *Client) sendGetSingleplayerGames(ctx context.Context, params GetSinglep
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getSingleplayerGames"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer"),
+		semconv.URLTemplateKey.String("/v1/singleplayer"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2588,7 +2737,14 @@ func (c *Client) sendGetSingleplayerGames(ctx context.Context, params GetSinglep
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetSingleplayerGamesResponse(resp)
@@ -2613,8 +2769,9 @@ func (c *Client) sendGetSingleplayerRound(ctx context.Context, params GetSinglep
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getSingleplayerRound"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/round"),
+		semconv.URLTemplateKey.String("/v1/singleplayer/{id}/round"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2712,7 +2869,14 @@ func (c *Client) sendGetSingleplayerRound(ctx context.Context, params GetSinglep
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetSingleplayerRoundResponse(resp)
@@ -2737,8 +2901,9 @@ func (c *Client) sendGetUserSessions(ctx context.Context) (res GetUserSessionsRe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("getUserSessions"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/sessions"),
+		semconv.URLTemplateKey.String("/v1/auth/sessions"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2817,7 +2982,14 @@ func (c *Client) sendGetUserSessions(ctx context.Context) (res GetUserSessionsRe
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeGetUserSessionsResponse(resp)
@@ -2842,8 +3014,9 @@ func (c *Client) sendLogin(ctx context.Context, request *LoginRequest, params Lo
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("login"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/auth/login"),
+		semconv.URLTemplateKey.String("/v1/auth/login"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -2920,7 +3093,14 @@ func (c *Client) sendLogin(ctx context.Context, request *LoginRequest, params Lo
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeLoginResponse(resp)
@@ -2945,8 +3125,9 @@ func (c *Client) sendNewDiscord(ctx context.Context) (res NewDiscordRes, err err
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newDiscord"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/discord/new"),
+		semconv.URLTemplateKey.String("/v1/auth/discord/new"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3025,7 +3206,14 @@ func (c *Client) sendNewDiscord(ctx context.Context) (res NewDiscordRes, err err
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeNewDiscordResponse(resp)
@@ -3050,8 +3238,9 @@ func (c *Client) sendNewDiscordCallback(ctx context.Context, params NewDiscordCa
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newDiscordCallback"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/discord/new/callback"),
+		semconv.URLTemplateKey.String("/v1/auth/discord/new/callback"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3143,7 +3332,14 @@ func (c *Client) sendNewDiscordCallback(ctx context.Context, params NewDiscordCa
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeNewDiscordCallbackResponse(resp)
@@ -3168,8 +3364,9 @@ func (c *Client) sendNewLobby(ctx context.Context, request *NewLobby) (res NewLo
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newLobby"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/lobbies"),
+		semconv.URLTemplateKey.String("/v1/lobbies"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3251,7 +3448,14 @@ func (c *Client) sendNewLobby(ctx context.Context, request *NewLobby) (res NewLo
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeNewLobbyResponse(resp)
@@ -3276,8 +3480,9 @@ func (c *Client) sendNewMultiplayerRound(ctx context.Context, params NewMultipla
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newMultiplayerRound"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/multiplayer/{id}/round"),
+		semconv.URLTemplateKey.String("/v1/multiplayer/{id}/round"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3375,7 +3580,14 @@ func (c *Client) sendNewMultiplayerRound(ctx context.Context, params NewMultipla
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeNewMultiplayerRoundResponse(resp)
@@ -3400,8 +3612,9 @@ func (c *Client) sendNewSingleplayerGame(ctx context.Context, request *NewSingle
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newSingleplayerGame"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer"),
+		semconv.URLTemplateKey.String("/v1/singleplayer"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3483,7 +3696,14 @@ func (c *Client) sendNewSingleplayerGame(ctx context.Context, request *NewSingle
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeNewSingleplayerGameResponse(resp)
@@ -3508,8 +3728,9 @@ func (c *Client) sendNewSingleplayerRound(ctx context.Context, params NewSinglep
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newSingleplayerRound"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/singleplayer/{id}/round"),
+		semconv.URLTemplateKey.String("/v1/singleplayer/{id}/round"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3607,7 +3828,14 @@ func (c *Client) sendNewSingleplayerRound(ctx context.Context, params NewSinglep
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeNewSingleplayerRoundResponse(resp)
@@ -3632,8 +3860,9 @@ func (c *Client) sendNewYandex(ctx context.Context) (res NewYandexRes, err error
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newYandex"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/yandex/new"),
+		semconv.URLTemplateKey.String("/v1/auth/yandex/new"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3712,7 +3941,14 @@ func (c *Client) sendNewYandex(ctx context.Context) (res NewYandexRes, err error
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeNewYandexResponse(resp)
@@ -3737,8 +3973,9 @@ func (c *Client) sendNewYandexCallback(ctx context.Context, params NewYandexCall
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("newYandexCallback"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/yandex/new/callback"),
+		semconv.URLTemplateKey.String("/v1/auth/yandex/new/callback"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3830,7 +4067,14 @@ func (c *Client) sendNewYandexCallback(ctx context.Context, params NewYandexCall
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeNewYandexCallbackResponse(resp)
@@ -3855,8 +4099,9 @@ func (c *Client) sendRefreshTokens(ctx context.Context, request *RefreshTokensRe
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("refreshTokens"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/auth/tokens/refresh"),
+		semconv.URLTemplateKey.String("/v1/auth/tokens/refresh"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3905,7 +4150,14 @@ func (c *Client) sendRefreshTokens(ctx context.Context, request *RefreshTokensRe
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRefreshTokensResponse(resp)
@@ -3930,8 +4182,9 @@ func (c *Client) sendRegister(ctx context.Context, request *RegisterRequest, par
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("register"),
 		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/v1/auth/register"),
+		semconv.URLTemplateKey.String("/v1/auth/register"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -3997,7 +4250,14 @@ func (c *Client) sendRegister(ctx context.Context, request *RegisterRequest, par
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeRegisterResponse(resp)
@@ -4022,8 +4282,9 @@ func (c *Client) sendUpdateUser(ctx context.Context, request *UserUpdateRequest)
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateUser"),
 		semconv.HTTPRequestMethodKey.String("PATCH"),
-		semconv.HTTPRouteKey.String("/v1/users/me"),
+		semconv.URLTemplateKey.String("/v1/users/me"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -4105,7 +4366,14 @@ func (c *Client) sendUpdateUser(ctx context.Context, request *UserUpdateRequest)
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateUserResponse(resp)
@@ -4130,8 +4398,9 @@ func (c *Client) sendUpdateUserAvatar(ctx context.Context, request *UpdateUserAv
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("updateUserAvatar"),
 		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/v1/users/avatar"),
+		semconv.URLTemplateKey.String("/v1/users/avatar"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -4213,7 +4482,14 @@ func (c *Client) sendUpdateUserAvatar(ctx context.Context, request *UpdateUserAv
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeUpdateUserAvatarResponse(resp)
@@ -4238,8 +4514,9 @@ func (c *Client) sendYandexLogin(ctx context.Context) (res *YandexLoginTemporary
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("yandexLogin"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/yandex/login"),
+		semconv.URLTemplateKey.String("/v1/auth/yandex/login"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -4285,7 +4562,14 @@ func (c *Client) sendYandexLogin(ctx context.Context) (res *YandexLoginTemporary
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeYandexLoginResponse(resp)
@@ -4310,8 +4594,9 @@ func (c *Client) sendYandexLoginCallback(ctx context.Context, params YandexLogin
 	otelAttrs := []attribute.KeyValue{
 		otelogen.OperationID("yandexLoginCallback"),
 		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/v1/auth/yandex/login/callback"),
+		semconv.URLTemplateKey.String("/v1/auth/yandex/login/callback"),
 	}
+	otelAttrs = append(otelAttrs, c.cfg.Attributes...)
 
 	// Run stopwatch.
 	startTime := time.Now()
@@ -4403,7 +4688,14 @@ func (c *Client) sendYandexLoginCallback(ctx context.Context, params YandexLogin
 	if err != nil {
 		return res, errors.Wrap(err, "do request")
 	}
-	defer resp.Body.Close()
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
 
 	stage = "DecodeResponse"
 	result, err := decodeYandexLoginCallbackResponse(resp)
