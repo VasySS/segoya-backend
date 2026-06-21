@@ -69,3 +69,4 @@ linters:
     - noinlineerr
     # TODO - return later
     - revive
+    - goconst

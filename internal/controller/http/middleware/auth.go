@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 
 	api "github.com/VasySS/segoya-backend/api/ogen"
@@ -56,7 +55,6 @@ func (mw Auth) HandleWS(next http.Handler) http.Handler {
 
 		token, err := mw.tokenService.ParseAccessToken(queryToken)
 		if err != nil {
-			slog.Debug(err.Error())
 			http.Error(w, "invalid token", http.StatusUnauthorized)
 
 			return

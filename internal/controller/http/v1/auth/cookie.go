@@ -62,6 +62,7 @@ func (h Handler) newOAuthCookieState(state string) string {
 		MaxAge:   int(cookieTTL.Seconds()),
 		Secure:   true,
 		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
 	}
 
 	return stateCookie.String()

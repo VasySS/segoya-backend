@@ -188,6 +188,7 @@ func TestUsecase_Register(t *testing.T) {
 			},
 			setup: func(fs fields, args args) {
 				fs.userRepo.On("GetUserByUsername", mock.Anything, args.req.Username).
+					//nolint:gosec
 					Return(user.PrivateProfile{
 						Password: "some_hash_from_db",
 					}, user.ErrUserNotFound)
