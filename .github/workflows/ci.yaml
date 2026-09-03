@@ -90,10 +90,10 @@ jobs:
           echo "modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
 
       - name: Init CodeQL
-        uses: github/codeql-action/init@v4.37.3
+        uses: github/codeql-action/init@v4.37.9
         with:
           languages: go
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run CodeQL
-        uses: github/codeql-action/analyze@v4.37.3
+        uses: github/codeql-action/analyze@v4.37.9
