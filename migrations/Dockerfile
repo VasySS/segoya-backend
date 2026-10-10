@@ -1,7 +1,7 @@
 #*#################################################
 #* Build stage
 #*#################################################
-FROM golang:1.25.6-alpine3.22@sha256:fa3380ab0d73b706e6b07d2a306a4dc68f20bfc1437a6a6c47c8f88fe4af6f75 AS builder
+FROM golang:1.26.4-alpine3.24@sha256:3ad57304ad93bbec8548a0437ad9e06a455660655d9af011d58b993f6f615648 AS builder
 
 WORKDIR /build
 
@@ -18,7 +18,7 @@ RUN CGO_ENABLED=0 go build \
 #*#################################################
 #* Runtime stage
 #*#################################################
-FROM alpine:3.22@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715 AS runtime
+FROM alpine:3.24@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS runtime
 
 WORKDIR /app
 

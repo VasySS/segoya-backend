@@ -21,7 +21,7 @@ var SignatureMethod = jwa.HS256()
 
 const (
 	parsingAcceptableSkew = 3 * time.Minute
-	discordOAuthKeysURL   = "https://discord.com/api/oauth2/keys"
+	// discordOAuthKeysURL   = "https://discord.com/api/oauth2/keys"
 )
 
 type tokenCtxKey struct{}
@@ -44,7 +44,7 @@ func NewService(
 	yandexSecretKey string,
 	httpClient *http.Client,
 ) *Service {
-	jwkSet := newCachedJWKSet(ctx, discordOAuthKeysURL, httpClient)
+	// jwkSet := newCachedJWKSet(ctx, discordOAuthKeysURL, httpClient)
 
 	return &Service{
 		jwtSecret:       []byte(jwtSecret),
@@ -52,7 +52,7 @@ func NewService(
 		refreshTokenTTL: refreshTokenTTL,
 		httpClient:      httpClient,
 		yandexSecretKey: yandexSecretKey,
-		jwkSet:          jwkSet,
+		// jwkSet:          jwkSet,
 	}
 }
 

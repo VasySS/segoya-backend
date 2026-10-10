@@ -7,7 +7,6 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/google/uuid"
-
 	ht "github.com/ogen-go/ogen/http"
 )
 

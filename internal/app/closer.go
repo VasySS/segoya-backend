@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"slices"
 	"sync"
 )
 
@@ -62,7 +63,7 @@ func (c *Closer) Close(ctx context.Context) error {
 	go func() {
 		defer close(done)
 
-		for i := len(c.funcs) - 1; i >= 0; i-- {
+		for i := range slices.Backward(c.funcs) {
 			if err := c.funcs[i](ctx); err != nil {
 				combinedErr = errors.Join(combinedErr, err)
 			}

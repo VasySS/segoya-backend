@@ -7,25 +7,22 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
-	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/trace"
-
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/uri"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func encodeDeleteDiscordResponse(response DeleteDiscordRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DeleteDiscordNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *DeleteDiscordUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -57,7 +54,6 @@ func encodeDeleteUserSessionResponse(response DeleteUserSessionRes, w http.Respo
 	switch response := response.(type) {
 	case *DeleteUserSessionNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
@@ -83,14 +79,12 @@ func encodeDeleteYandexResponse(response DeleteYandexRes, w http.ResponseWriter,
 	switch response := response.(type) {
 	case *DeleteYandexNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *DeleteYandexUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -119,6 +113,7 @@ func encodeDeleteYandexResponse(response DeleteYandexRes, w http.ResponseWriter,
 }
 
 func encodeDiscordLoginResponse(response *DiscordLoginTemporaryRedirect, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Access-Control-Expose-Headers", "Location,Set-Cookie")
 	// Encoding response headers.
 	{
 		h := uri.NewHeaderEncoder(w.Header())
@@ -148,7 +143,6 @@ func encodeDiscordLoginResponse(response *DiscordLoginTemporaryRedirect, w http.
 		}
 	}
 	w.WriteHeader(307)
-	span.SetStatus(codes.Ok, http.StatusText(307))
 
 	return nil
 }
@@ -156,6 +150,7 @@ func encodeDiscordLoginResponse(response *DiscordLoginTemporaryRedirect, w http.
 func encodeDiscordLoginCallbackResponse(response DiscordLoginCallbackRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *DiscordLoginCallbackTemporaryRedirect:
+		w.Header().Set("Access-Control-Expose-Headers", "Location,Set-Cookie")
 		// Encoding response headers.
 		{
 			h := uri.NewHeaderEncoder(w.Header())
@@ -185,14 +180,12 @@ func encodeDiscordLoginCallbackResponse(response DiscordLoginCallbackRes, w http
 			}
 		}
 		w.WriteHeader(307)
-		span.SetStatus(codes.Ok, http.StatusText(307))
 
 		return nil
 
 	case *DiscordLoginCallbackBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -205,7 +198,6 @@ func encodeDiscordLoginCallbackResponse(response DiscordLoginCallbackRes, w http
 	case *DiscordLoginCallbackNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -237,14 +229,12 @@ func encodeEndSingleplayerGameResponse(response EndSingleplayerGameRes, w http.R
 	switch response := response.(type) {
 	case *EndSingleplayerGameNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *EndSingleplayerGameBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -257,7 +247,6 @@ func encodeEndSingleplayerGameResponse(response EndSingleplayerGameRes, w http.R
 	case *EndSingleplayerGameUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -270,7 +259,6 @@ func encodeEndSingleplayerGameResponse(response EndSingleplayerGameRes, w http.R
 	case *EndSingleplayerGameForbidden:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -283,7 +271,6 @@ func encodeEndSingleplayerGameResponse(response EndSingleplayerGameRes, w http.R
 	case *EndSingleplayerGameNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -316,7 +303,6 @@ func encodeEndSingleplayerRoundResponse(response EndSingleplayerRoundRes, w http
 	case *EndSingleplayerRoundResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -329,7 +315,6 @@ func encodeEndSingleplayerRoundResponse(response EndSingleplayerRoundRes, w http
 	case *EndSingleplayerRoundBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -342,7 +327,6 @@ func encodeEndSingleplayerRoundResponse(response EndSingleplayerRoundRes, w http
 	case *EndSingleplayerRoundUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -355,7 +339,6 @@ func encodeEndSingleplayerRoundResponse(response EndSingleplayerRoundRes, w http
 	case *EndSingleplayerRoundForbidden:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -368,7 +351,6 @@ func encodeEndSingleplayerRoundResponse(response EndSingleplayerRoundRes, w http
 	case *EndSingleplayerRoundNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -399,7 +381,6 @@ func encodeEndSingleplayerRoundResponse(response EndSingleplayerRoundRes, w http
 func encodeGetHealthResponse(response *GetHealthOK, w http.ResponseWriter, span trace.Span) error {
 	w.Header().Set("Content-Type", "application/vnd.health+json")
 	w.WriteHeader(200)
-	span.SetStatus(codes.Ok, http.StatusText(200))
 
 	e := new(jx.Encoder)
 	response.Encode(e)
@@ -415,7 +396,6 @@ func encodeGetLobbiesResponse(response GetLobbiesRes, w http.ResponseWriter, spa
 	case *LobbiesResponse:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -448,7 +428,6 @@ func encodeGetLobbyResponse(response GetLobbyRes, w http.ResponseWriter, span tr
 	case *Lobby:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -461,7 +440,6 @@ func encodeGetLobbyResponse(response GetLobbyRes, w http.ResponseWriter, span tr
 	case *GetLobbyNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -494,7 +472,6 @@ func encodeGetMultiplayerGameResponse(response GetMultiplayerGameRes, w http.Res
 	case *MultiplayerGame:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -507,7 +484,6 @@ func encodeGetMultiplayerGameResponse(response GetMultiplayerGameRes, w http.Res
 	case *GetMultiplayerGameUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -520,7 +496,6 @@ func encodeGetMultiplayerGameResponse(response GetMultiplayerGameRes, w http.Res
 	case *GetMultiplayerGameNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -553,7 +528,6 @@ func encodeGetMultiplayerGameGuessesResponse(response GetMultiplayerGameGuessesR
 	case *GetMultiplayerGameGuessesOKApplicationJSON:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -566,7 +540,6 @@ func encodeGetMultiplayerGameGuessesResponse(response GetMultiplayerGameGuessesR
 	case *GetMultiplayerGameGuessesBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -579,7 +552,6 @@ func encodeGetMultiplayerGameGuessesResponse(response GetMultiplayerGameGuessesR
 	case *GetMultiplayerGameGuessesUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -612,7 +584,6 @@ func encodeGetMultiplayerRoundResponse(response GetMultiplayerRoundRes, w http.R
 	case *MultiplayerRound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -625,7 +596,6 @@ func encodeGetMultiplayerRoundResponse(response GetMultiplayerRoundRes, w http.R
 	case *GetMultiplayerRoundUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -638,7 +608,6 @@ func encodeGetMultiplayerRoundResponse(response GetMultiplayerRoundRes, w http.R
 	case *GetMultiplayerRoundNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -671,7 +640,6 @@ func encodeGetOAuthProvidersResponse(response GetOAuthProvidersRes, w http.Respo
 	case *GetOAuthProvidersOKApplicationJSON:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -684,7 +652,6 @@ func encodeGetOAuthProvidersResponse(response GetOAuthProvidersRes, w http.Respo
 	case *GetOAuthProvidersUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -717,7 +684,6 @@ func encodeGetPrivateProfileResponse(response GetPrivateProfileRes, w http.Respo
 	case *UserPrivateProfile:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -730,7 +696,6 @@ func encodeGetPrivateProfileResponse(response GetPrivateProfileRes, w http.Respo
 	case *GetPrivateProfileUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -763,7 +728,6 @@ func encodeGetPublicProfileResponse(response GetPublicProfileRes, w http.Respons
 	case *UserPublicProfile:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -776,7 +740,6 @@ func encodeGetPublicProfileResponse(response GetPublicProfileRes, w http.Respons
 	case *GetPublicProfileNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -805,6 +768,7 @@ func encodeGetPublicProfileResponse(response GetPublicProfileRes, w http.Respons
 }
 
 func encodeGetRootResponse(response *GetRootFound, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Access-Control-Expose-Headers", "Location")
 	// Encoding response headers.
 	{
 		h := uri.NewHeaderEncoder(w.Header())
@@ -822,7 +786,6 @@ func encodeGetRootResponse(response *GetRootFound, w http.ResponseWriter, span t
 		}
 	}
 	w.WriteHeader(302)
-	span.SetStatus(codes.Ok, http.StatusText(302))
 
 	return nil
 }
@@ -832,7 +795,6 @@ func encodeGetSingleplayerGameResponse(response GetSingleplayerGameRes, w http.R
 	case *SingleplayerGame:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -845,7 +807,6 @@ func encodeGetSingleplayerGameResponse(response GetSingleplayerGameRes, w http.R
 	case *GetSingleplayerGameUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -858,7 +819,6 @@ func encodeGetSingleplayerGameResponse(response GetSingleplayerGameRes, w http.R
 	case *GetSingleplayerGameForbidden:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -871,7 +831,6 @@ func encodeGetSingleplayerGameResponse(response GetSingleplayerGameRes, w http.R
 	case *GetSingleplayerGameNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -904,7 +863,6 @@ func encodeGetSingleplayerGameGuessesResponse(response GetSingleplayerGameGuesse
 	case *GetSingleplayerGameGuessesOKApplicationJSON:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -917,7 +875,6 @@ func encodeGetSingleplayerGameGuessesResponse(response GetSingleplayerGameGuesse
 	case *GetSingleplayerGameGuessesBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -930,7 +887,6 @@ func encodeGetSingleplayerGameGuessesResponse(response GetSingleplayerGameGuesse
 	case *GetSingleplayerGameGuessesUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -943,7 +899,6 @@ func encodeGetSingleplayerGameGuessesResponse(response GetSingleplayerGameGuesse
 	case *GetSingleplayerGameGuessesForbidden:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -956,7 +911,6 @@ func encodeGetSingleplayerGameGuessesResponse(response GetSingleplayerGameGuesse
 	case *GetSingleplayerGameGuessesNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -989,7 +943,6 @@ func encodeGetSingleplayerGamesResponse(response GetSingleplayerGamesRes, w http
 	case *SingleplayerGames:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1002,7 +955,6 @@ func encodeGetSingleplayerGamesResponse(response GetSingleplayerGamesRes, w http
 	case *GetSingleplayerGamesBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1015,7 +967,6 @@ func encodeGetSingleplayerGamesResponse(response GetSingleplayerGamesRes, w http
 	case *GetSingleplayerGamesUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1048,7 +999,6 @@ func encodeGetSingleplayerRoundResponse(response GetSingleplayerRoundRes, w http
 	case *SingleplayerRound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1061,7 +1011,6 @@ func encodeGetSingleplayerRoundResponse(response GetSingleplayerRoundRes, w http
 	case *GetSingleplayerRoundBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1074,7 +1023,6 @@ func encodeGetSingleplayerRoundResponse(response GetSingleplayerRoundRes, w http
 	case *GetSingleplayerRoundUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1087,7 +1035,6 @@ func encodeGetSingleplayerRoundResponse(response GetSingleplayerRoundRes, w http
 	case *GetSingleplayerRoundForbidden:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1100,7 +1047,6 @@ func encodeGetSingleplayerRoundResponse(response GetSingleplayerRoundRes, w http
 	case *GetSingleplayerRoundNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1133,7 +1079,6 @@ func encodeGetUserSessionsResponse(response GetUserSessionsRes, w http.ResponseW
 	case *GetUserSessionsOKApplicationJSON:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1164,6 +1109,7 @@ func encodeGetUserSessionsResponse(response GetUserSessionsRes, w http.ResponseW
 func encodeLoginResponse(response LoginRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *LoginNoContent:
+		w.Header().Set("Access-Control-Expose-Headers", "Set-Cookie")
 		// Encoding response headers.
 		{
 			h := uri.NewHeaderEncoder(w.Header())
@@ -1181,14 +1127,12 @@ func encodeLoginResponse(response LoginRes, w http.ResponseWriter, span trace.Sp
 			}
 		}
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *LoginBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1201,7 +1145,6 @@ func encodeLoginResponse(response LoginRes, w http.ResponseWriter, span trace.Sp
 	case *LoginUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1232,6 +1175,7 @@ func encodeLoginResponse(response LoginRes, w http.ResponseWriter, span trace.Sp
 func encodeNewDiscordResponse(response NewDiscordRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *NewDiscordTemporaryRedirect:
+		w.Header().Set("Access-Control-Expose-Headers", "Location,Set-Cookie")
 		// Encoding response headers.
 		{
 			h := uri.NewHeaderEncoder(w.Header())
@@ -1261,7 +1205,6 @@ func encodeNewDiscordResponse(response NewDiscordRes, w http.ResponseWriter, spa
 			}
 		}
 		w.WriteHeader(307)
-		span.SetStatus(codes.Ok, http.StatusText(307))
 
 		return nil
 
@@ -1286,6 +1229,7 @@ func encodeNewDiscordResponse(response NewDiscordRes, w http.ResponseWriter, spa
 func encodeNewDiscordCallbackResponse(response NewDiscordCallbackRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *NewDiscordCallbackTemporaryRedirect:
+		w.Header().Set("Access-Control-Expose-Headers", "Location")
 		// Encoding response headers.
 		{
 			h := uri.NewHeaderEncoder(w.Header())
@@ -1303,14 +1247,12 @@ func encodeNewDiscordCallbackResponse(response NewDiscordCallbackRes, w http.Res
 			}
 		}
 		w.WriteHeader(307)
-		span.SetStatus(codes.Ok, http.StatusText(307))
 
 		return nil
 
 	case *NewDiscordCallbackBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1323,7 +1265,6 @@ func encodeNewDiscordCallbackResponse(response NewDiscordCallbackRes, w http.Res
 	case *NewDiscordCallbackUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1356,7 +1297,6 @@ func encodeNewLobbyResponse(response NewLobbyRes, w http.ResponseWriter, span tr
 	case *NewLobbyCreated:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(201)
-		span.SetStatus(codes.Ok, http.StatusText(201))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1369,7 +1309,6 @@ func encodeNewLobbyResponse(response NewLobbyRes, w http.ResponseWriter, span tr
 	case *NewLobbyBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1402,7 +1341,6 @@ func encodeNewMultiplayerRoundResponse(response NewMultiplayerRoundRes, w http.R
 	case *MultiplayerRound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1415,7 +1353,6 @@ func encodeNewMultiplayerRoundResponse(response NewMultiplayerRoundRes, w http.R
 	case *NewMultiplayerRoundUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1428,7 +1365,6 @@ func encodeNewMultiplayerRoundResponse(response NewMultiplayerRoundRes, w http.R
 	case *NewMultiplayerRoundNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1461,7 +1397,6 @@ func encodeNewSingleplayerGameResponse(response NewSingleplayerGameRes, w http.R
 	case *NewSingleplayerGameCreated:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(201)
-		span.SetStatus(codes.Ok, http.StatusText(201))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1474,7 +1409,6 @@ func encodeNewSingleplayerGameResponse(response NewSingleplayerGameRes, w http.R
 	case *NewSingleplayerGameBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1487,7 +1421,6 @@ func encodeNewSingleplayerGameResponse(response NewSingleplayerGameRes, w http.R
 	case *NewSingleplayerGameUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1520,7 +1453,6 @@ func encodeNewSingleplayerRoundResponse(response NewSingleplayerRoundRes, w http
 	case *SingleplayerRound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(200)
-		span.SetStatus(codes.Ok, http.StatusText(200))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1533,7 +1465,6 @@ func encodeNewSingleplayerRoundResponse(response NewSingleplayerRoundRes, w http
 	case *NewSingleplayerRoundBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1546,7 +1477,6 @@ func encodeNewSingleplayerRoundResponse(response NewSingleplayerRoundRes, w http
 	case *NewSingleplayerRoundUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1559,7 +1489,6 @@ func encodeNewSingleplayerRoundResponse(response NewSingleplayerRoundRes, w http
 	case *NewSingleplayerRoundForbidden:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(403)
-		span.SetStatus(codes.Error, http.StatusText(403))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1572,7 +1501,6 @@ func encodeNewSingleplayerRoundResponse(response NewSingleplayerRoundRes, w http
 	case *NewSingleplayerRoundNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1603,6 +1531,7 @@ func encodeNewSingleplayerRoundResponse(response NewSingleplayerRoundRes, w http
 func encodeNewYandexResponse(response NewYandexRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *NewYandexTemporaryRedirect:
+		w.Header().Set("Access-Control-Expose-Headers", "Location,Set-Cookie")
 		// Encoding response headers.
 		{
 			h := uri.NewHeaderEncoder(w.Header())
@@ -1632,7 +1561,6 @@ func encodeNewYandexResponse(response NewYandexRes, w http.ResponseWriter, span 
 			}
 		}
 		w.WriteHeader(307)
-		span.SetStatus(codes.Ok, http.StatusText(307))
 
 		return nil
 
@@ -1657,6 +1585,7 @@ func encodeNewYandexResponse(response NewYandexRes, w http.ResponseWriter, span 
 func encodeNewYandexCallbackResponse(response NewYandexCallbackRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *NewYandexCallbackTemporaryRedirect:
+		w.Header().Set("Access-Control-Expose-Headers", "Location")
 		// Encoding response headers.
 		{
 			h := uri.NewHeaderEncoder(w.Header())
@@ -1674,14 +1603,12 @@ func encodeNewYandexCallbackResponse(response NewYandexCallbackRes, w http.Respo
 			}
 		}
 		w.WriteHeader(307)
-		span.SetStatus(codes.Ok, http.StatusText(307))
 
 		return nil
 
 	case *NewYandexCallbackBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1694,7 +1621,6 @@ func encodeNewYandexCallbackResponse(response NewYandexCallbackRes, w http.Respo
 	case *NewYandexCallbackUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1725,6 +1651,7 @@ func encodeNewYandexCallbackResponse(response NewYandexCallbackRes, w http.Respo
 func encodeRefreshTokensResponse(response RefreshTokensRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *RefreshTokensNoContent:
+		w.Header().Set("Access-Control-Expose-Headers", "Set-Cookie")
 		// Encoding response headers.
 		{
 			h := uri.NewHeaderEncoder(w.Header())
@@ -1742,14 +1669,12 @@ func encodeRefreshTokensResponse(response RefreshTokensRes, w http.ResponseWrite
 			}
 		}
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *RefreshTokensBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1781,14 +1706,12 @@ func encodeRegisterResponse(response RegisterRes, w http.ResponseWriter, span tr
 	switch response := response.(type) {
 	case *RegisterCreated:
 		w.WriteHeader(201)
-		span.SetStatus(codes.Ok, http.StatusText(201))
 
 		return nil
 
 	case *RegisterBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1801,7 +1724,6 @@ func encodeRegisterResponse(response RegisterRes, w http.ResponseWriter, span tr
 	case *RegisterConflict:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(409)
-		span.SetStatus(codes.Error, http.StatusText(409))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1833,14 +1755,12 @@ func encodeUpdateUserResponse(response UpdateUserRes, w http.ResponseWriter, spa
 	switch response := response.(type) {
 	case *UpdateUserNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *UpdateUserUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1872,14 +1792,12 @@ func encodeUpdateUserAvatarResponse(response UpdateUserAvatarRes, w http.Respons
 	switch response := response.(type) {
 	case *UpdateUserAvatarNoContent:
 		w.WriteHeader(204)
-		span.SetStatus(codes.Ok, http.StatusText(204))
 
 		return nil
 
 	case *UpdateUserAvatarUnauthorized:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(401)
-		span.SetStatus(codes.Error, http.StatusText(401))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1892,7 +1810,6 @@ func encodeUpdateUserAvatarResponse(response UpdateUserAvatarRes, w http.Respons
 	case *UpdateUserAvatarRequestEntityTooLarge:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(413)
-		span.SetStatus(codes.Error, http.StatusText(413))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1905,7 +1822,6 @@ func encodeUpdateUserAvatarResponse(response UpdateUserAvatarRes, w http.Respons
 	case *UpdateUserAvatarTooManyRequests:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(429)
-		span.SetStatus(codes.Error, http.StatusText(429))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -1934,6 +1850,7 @@ func encodeUpdateUserAvatarResponse(response UpdateUserAvatarRes, w http.Respons
 }
 
 func encodeYandexLoginResponse(response *YandexLoginTemporaryRedirect, w http.ResponseWriter, span trace.Span) error {
+	w.Header().Set("Access-Control-Expose-Headers", "Location,Set-Cookie")
 	// Encoding response headers.
 	{
 		h := uri.NewHeaderEncoder(w.Header())
@@ -1963,7 +1880,6 @@ func encodeYandexLoginResponse(response *YandexLoginTemporaryRedirect, w http.Re
 		}
 	}
 	w.WriteHeader(307)
-	span.SetStatus(codes.Ok, http.StatusText(307))
 
 	return nil
 }
@@ -1971,6 +1887,7 @@ func encodeYandexLoginResponse(response *YandexLoginTemporaryRedirect, w http.Re
 func encodeYandexLoginCallbackResponse(response YandexLoginCallbackRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *YandexLoginCallbackTemporaryRedirect:
+		w.Header().Set("Access-Control-Expose-Headers", "Location,Set-Cookie")
 		// Encoding response headers.
 		{
 			h := uri.NewHeaderEncoder(w.Header())
@@ -2000,14 +1917,12 @@ func encodeYandexLoginCallbackResponse(response YandexLoginCallbackRes, w http.R
 			}
 		}
 		w.WriteHeader(307)
-		span.SetStatus(codes.Ok, http.StatusText(307))
 
 		return nil
 
 	case *YandexLoginCallbackBadRequest:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(400)
-		span.SetStatus(codes.Error, http.StatusText(400))
 
 		e := new(jx.Encoder)
 		response.Encode(e)
@@ -2020,7 +1935,6 @@ func encodeYandexLoginCallbackResponse(response YandexLoginCallbackRes, w http.R
 	case *YandexLoginCallbackNotFound:
 		w.Header().Set("Content-Type", "application/problem+json")
 		w.WriteHeader(404)
-		span.SetStatus(codes.Error, http.StatusText(404))
 
 		e := new(jx.Encoder)
 		response.Encode(e)

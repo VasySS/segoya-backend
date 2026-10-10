@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/go-faster/errors"
-
 	"github.com/ogen-go/ogen/ogenerrors"
 )
 
@@ -35,6 +34,7 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 	return "", false
 }
 
+// operationRolesBearer is a private map storing roles per operation.
 var operationRolesBearer = map[string][]string{
 	DeleteDiscordOperation:              []string{},
 	DeleteUserSessionOperation:          []string{},
@@ -62,6 +62,27 @@ var operationRolesBearer = map[string][]string{
 	NewYandexOperation:                  []string{},
 	UpdateUserOperation:                 []string{},
 	UpdateUserAvatarOperation:           []string{},
+}
+
+// GetRolesForBearer returns the required roles for the given operation.
+//
+// This is useful for authorization scenarios where you need to know which roles
+// are required for an operation.
+//
+// Example:
+//
+//	requiredRoles := GetRolesForBearer(AddPetOperation)
+//
+// Returns nil if the operation has no role requirements or if the operation is unknown.
+func GetRolesForBearer(operation string) []string {
+	roles, ok := operationRolesBearer[operation]
+	if !ok {
+		return nil
+	}
+	// Return a copy to prevent external modification
+	result := make([]string, len(roles))
+	copy(result, roles)
+	return result
 }
 
 func (s *Server) securityBearer(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {

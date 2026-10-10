@@ -158,17 +158,27 @@ func (r *Repository) GetMultiplayerGameUser(
 	defer span.End()
 
 	query := `
-		SELECT 
-			u.id, 
-			u.name, 
+		SELECT
+			u.id,
+			u.name,
 			u.username,
 			u.register_date,
 			COALESCE(u.avatar_hash, '') AS avatar_hash,
-			SUM(COALESCE(mru.score, 0)) AS score
-		FROM user_info AS u 
+			SUM(COALESCE(mru.score, 0)) AS score,
+			EXISTS (
+				SELECT 1
+				FROM multiplayer_round_user AS cur_mru
+				JOIN multiplayer_round AS cur_mr ON cur_mr.id = cur_mru.round_id
+				WHERE cur_mru.user_id = u.id
+					AND cur_mr.game_id = @game_id
+					AND cur_mr.round_num = (
+						SELECT MAX(round_num) FROM multiplayer_round WHERE game_id = @game_id
+					)
+			) AS guessed
+		FROM user_info AS u
 		JOIN multiplayer_round AS mr
 			ON mr.game_id = @game_id
-		LEFT JOIN multiplayer_round_user AS mru 
+		LEFT JOIN multiplayer_round_user AS mru
 			ON mru.round_id = mr.id
 		WHERE u.id = @user_id
 		GROUP BY u.id
@@ -195,19 +205,29 @@ func (r *Repository) GetMultiplayerGameUsers(ctx context.Context, gameID uuid.UU
 	defer span.End()
 
 	userQuery := `
-		SELECT 
-			u.id, 
-			u.name, 
-			u.username, 
+		SELECT
+			u.id,
+			u.name,
+			u.username,
 			u.register_date,
 			COALESCE(u.avatar_hash, '') AS avatar_hash,
-			SUM(COALESCE(mru.score, 0)) AS score
+			SUM(COALESCE(mru.score, 0)) AS score,
+			EXISTS (
+				SELECT 1
+				FROM multiplayer_round_user AS cur_mru
+				JOIN multiplayer_round AS cur_mr ON cur_mr.id = cur_mru.round_id
+				WHERE cur_mru.user_id = u.id
+					AND cur_mr.game_id = @game_id
+					AND cur_mr.round_num = (
+						SELECT MAX(round_num) FROM multiplayer_round WHERE game_id = @game_id
+					)
+			) AS guessed
 		FROM multiplayer_game_user AS mgu
 		JOIN user_info AS u
 			ON u.id = mgu.user_id
 		LEFT JOIN multiplayer_round AS mr
 			ON mr.game_id = mgu.game_id
-		LEFT JOIN multiplayer_round_user AS mru 
+		LEFT JOIN multiplayer_round_user AS mru
 			ON mru.user_id = u.id AND mru.round_id = mr.id
 		WHERE mgu.game_id = @game_id
 		GROUP BY u.id

@@ -20,7 +20,6 @@ import (
 	"github.com/VasySS/segoya-backend/internal/controller/http/v1/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/token"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
-	"github.com/VasySS/segoya-backend/pkg/captcha"
 	"github.com/VasySS/segoya-backend/pkg/crypto"
 )
 
@@ -64,7 +63,7 @@ func NewRouter(
 	conf config.Config,
 	randomService *crypto.Service,
 	tokenService *token.Service,
-	captchaService *captcha.CloudflareService,
+	captchaService auth.CaptchaService,
 	lobbyWSService transport.WebSocketService,
 	multiplayerWSService transport.WebSocketService,
 	authUsecase auth.Usecase,

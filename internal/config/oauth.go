@@ -41,6 +41,7 @@ func newOAuthConfig(conf Config) OAuth {
 		ClientID:     conf.ENV.DiscordOAuth.ClientID,
 		ClientSecret: conf.ENV.DiscordOAuth.ClientSecret,
 		Scopes:       []string{"openid"},
+		//nolint:gosec
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://discord.com/api/oauth2/authorize",
 			TokenURL: "https://discord.com/api/oauth2/token",
@@ -51,6 +52,7 @@ func newOAuthConfig(conf Config) OAuth {
 		ClientID:     conf.ENV.YandexOAuth.ClientID,
 		ClientSecret: conf.ENV.YandexOAuth.ClientSecret,
 		Scopes:       []string{"login:email"},
+		//nolint:gosec
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://oauth.yandex.ru/authorize",
 			TokenURL: "https://oauth.yandex.ru/token",

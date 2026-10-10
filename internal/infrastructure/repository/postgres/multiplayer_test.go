@@ -243,6 +243,10 @@ func (s *MultiplayerTestSuite) TestMultiplayerGameUsers() {
 		)
 		s.Equal(creatorScore, users[0].Score)
 		s.Equal(firstPlayerScore, users[1].Score)
+
+		// both players guessed the last (current) round
+		s.True(users[0].Guessed)
+		s.True(users[1].Guessed)
 	}
 }
 
@@ -277,6 +281,19 @@ func (s *MultiplayerTestSuite) TestSetMultiplayerUserGuess() {
 	firstPlayerMultiplayer, err := s.postgresRepo.GetMultiplayerGameUser(s.ctx, userFirstPlayer.ID, newGame.ID)
 	s.Require().NoError(err)
 	s.Equal(guessScore, firstPlayerMultiplayer.Score)
+	s.True(firstPlayerMultiplayer.Guessed)
+
+	// creator has not guessed the current round
+	creatorMultiplayer, err := s.postgresRepo.GetMultiplayerGameUser(s.ctx, userCreator.ID, newGame.ID)
+	s.Require().NoError(err)
+	s.False(creatorMultiplayer.Guessed)
+
+	// once a new round starts (with no guesses), the flag is derived against it and resets
+	_, _ = s.newTestRound(ctx, newGame.ID, 2)
+
+	firstPlayerMultiplayer, err = s.postgresRepo.GetMultiplayerGameUser(s.ctx, userFirstPlayer.ID, newGame.ID)
+	s.Require().NoError(err)
+	s.False(firstPlayerMultiplayer.Guessed)
 }
 
 func (s *MultiplayerTestSuite) TestMultiplayerRoundGuesses() {

@@ -8,7 +8,6 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/google/uuid"
-
 	"github.com/ogen-go/ogen/conv"
 	"github.com/ogen-go/ogen/middleware"
 	"github.com/ogen-go/ogen/ogenerrors"
@@ -424,6 +423,7 @@ func decodeGetLobbiesParams(args [0]string, argsEscaped bool, r *http.Request) (
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Page)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -477,6 +477,7 @@ func decodeGetLobbiesParams(args [0]string, argsEscaped bool, r *http.Request) (
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.PageSize)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -1023,6 +1024,7 @@ func decodeGetSingleplayerGamesParams(args [0]string, argsEscaped bool, r *http.
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.Page)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -1076,6 +1078,7 @@ func decodeGetSingleplayerGamesParams(args [0]string, argsEscaped bool, r *http.
 					MaxExclusive:  false,
 					MultipleOfSet: false,
 					MultipleOf:    0,
+					Pattern:       nil,
 				}).Validate(int64(params.PageSize)); err != nil {
 					return errors.Wrap(err, "int")
 				}
@@ -1168,7 +1171,7 @@ type LoginParams struct {
 	// User agent is required to store sessions.
 	UserAgent string
 	// Captcha token, required only for production environment.
-	FrontendCaptchaToken OptString
+	FrontendCaptchaToken OptString `json:",omitempty,omitzero"`
 }
 
 func unpackLoginParams(packed middleware.Parameters) (params LoginParams) {
@@ -1698,7 +1701,7 @@ func decodeNewYandexCallbackParams(args [0]string, argsEscaped bool, r *http.Req
 // RegisterParams is parameters of register operation.
 type RegisterParams struct {
 	// Captcha token, required only for production environment.
-	FrontendCaptchaToken OptString
+	FrontendCaptchaToken OptString `json:",omitempty,omitzero"`
 }
 
 func unpackRegisterParams(packed middleware.Parameters) (params RegisterParams) {

@@ -10,6 +10,98 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
+var (
+	rn1AllowedHeaders = map[string]string{
+		"DELETE": "Authorization",
+	}
+	rn7AllowedHeaders = map[string]string{
+		"GET": "Cookie",
+	}
+	rn34AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn35AllowedHeaders = map[string]string{
+		"GET": "Cookie",
+	}
+	rn32AllowedHeaders = map[string]string{
+		"POST": "Content-Type,Frontend-Captcha-Token,User-Agent",
+	}
+	rn24AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn39AllowedHeaders = map[string]string{
+		"POST": "Content-Type,Frontend-Captcha-Token",
+	}
+	rn31AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn4AllowedHeaders = map[string]string{
+		"DELETE": "Authorization",
+	}
+	rn38AllowedHeaders = map[string]string{
+		"POST": "Content-Type",
+	}
+	rn5AllowedHeaders = map[string]string{
+		"DELETE": "Authorization",
+	}
+	rn43AllowedHeaders = map[string]string{
+		"GET": "Cookie",
+	}
+	rn36AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn37AllowedHeaders = map[string]string{
+		"GET": "Cookie",
+	}
+	rn16AllowedHeaders = map[string]string{
+		"GET":  "Authorization",
+		"POST": "Authorization,Content-Type",
+	}
+	rn18AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn20AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn21AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn23AllowedHeaders = map[string]string{
+		"GET":  "Authorization",
+		"POST": "Authorization",
+	}
+	rn29AllowedHeaders = map[string]string{
+		"GET":  "Authorization",
+		"POST": "Authorization,Content-Type",
+	}
+	rn10AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn11AllowedHeaders = map[string]string{
+		"POST": "Authorization",
+	}
+	rn28AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+	rn30AllowedHeaders = map[string]string{
+		"GET":  "Authorization",
+		"POST": "Authorization",
+	}
+	rn13AllowedHeaders = map[string]string{
+		"POST": "Authorization,Content-Type",
+	}
+	rn40AllowedHeaders = map[string]string{
+		"PUT": "Authorization,Content-Type",
+	}
+	rn25AllowedHeaders = map[string]string{
+		"GET":   "Authorization",
+		"PATCH": "Authorization,Content-Type",
+	}
+	rn27AllowedHeaders = map[string]string{
+		"GET": "Authorization",
+	}
+)
+
 func (s *Server) cutPrefix(path string) (string, bool) {
 	prefix := s.cfg.Prefix
 	if prefix == "" {
@@ -62,7 +154,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				case "GET":
 					s.handleGetRootRequest([0]string{}, elemIsEscaped, w, r)
 				default:
-					s.notAllowed(w, r, "GET")
+					s.notAllowed(w, r, notAllowedParams{
+						allowedMethods: "GET",
+						allowedHeaders: nil,
+						acceptPost:     "",
+						acceptPatch:    "",
+					})
 				}
 
 				return
@@ -82,7 +179,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					case "GET":
 						s.handleGetHealthRequest([0]string{}, elemIsEscaped, w, r)
 					default:
-						s.notAllowed(w, r, "GET")
+						s.notAllowed(w, r, notAllowedParams{
+							allowedMethods: "GET",
+							allowedHeaders: nil,
+							acceptPost:     "",
+							acceptPatch:    "",
+						})
 					}
 
 					return
@@ -125,7 +227,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "DELETE":
 								s.handleDeleteDiscordRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "DELETE")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "DELETE",
+									allowedHeaders: rn1AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -156,7 +263,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									case "GET":
 										s.handleDiscordLoginRequest([0]string{}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "GET")
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET",
+											allowedHeaders: nil,
+											acceptPost:     "",
+											acceptPatch:    "",
+										})
 									}
 
 									return
@@ -176,7 +288,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										case "GET":
 											s.handleDiscordLoginCallbackRequest([0]string{}, elemIsEscaped, w, r)
 										default:
-											s.notAllowed(w, r, "GET")
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: rn7AllowedHeaders,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
 										}
 
 										return
@@ -197,7 +314,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									case "GET":
 										s.handleNewDiscordRequest([0]string{}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "GET")
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET",
+											allowedHeaders: rn34AllowedHeaders,
+											acceptPost:     "",
+											acceptPatch:    "",
+										})
 									}
 
 									return
@@ -217,7 +339,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										case "GET":
 											s.handleNewDiscordCallbackRequest([0]string{}, elemIsEscaped, w, r)
 										default:
-											s.notAllowed(w, r, "GET")
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: rn35AllowedHeaders,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
 										}
 
 										return
@@ -243,7 +370,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "POST":
 								s.handleLoginRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "POST")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "POST",
+									allowedHeaders: rn32AllowedHeaders,
+									acceptPost:     "application/json",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -263,7 +395,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "GET":
 								s.handleGetOAuthProvidersRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "GET")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET",
+									allowedHeaders: rn24AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -283,7 +420,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "POST":
 								s.handleRegisterRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "POST")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "POST",
+									allowedHeaders: rn39AllowedHeaders,
+									acceptPost:     "application/json",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -302,7 +444,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "GET":
 								s.handleGetUserSessionsRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "GET")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET",
+									allowedHeaders: rn31AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -333,7 +480,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "DELETE")
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "DELETE",
+										allowedHeaders: rn4AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "",
+									})
 								}
 
 								return
@@ -355,7 +507,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "POST":
 								s.handleRefreshTokensRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "POST")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "POST",
+									allowedHeaders: rn38AllowedHeaders,
+									acceptPost:     "application/json",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -374,7 +531,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "DELETE":
 								s.handleDeleteYandexRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "DELETE")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "DELETE",
+									allowedHeaders: rn5AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -405,7 +567,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									case "GET":
 										s.handleYandexLoginRequest([0]string{}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "GET")
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET",
+											allowedHeaders: nil,
+											acceptPost:     "",
+											acceptPatch:    "",
+										})
 									}
 
 									return
@@ -425,7 +592,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										case "GET":
 											s.handleYandexLoginCallbackRequest([0]string{}, elemIsEscaped, w, r)
 										default:
-											s.notAllowed(w, r, "GET")
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: rn43AllowedHeaders,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
 										}
 
 										return
@@ -446,7 +618,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									case "GET":
 										s.handleNewYandexRequest([0]string{}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "GET")
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET",
+											allowedHeaders: rn36AllowedHeaders,
+											acceptPost:     "",
+											acceptPatch:    "",
+										})
 									}
 
 									return
@@ -466,7 +643,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										case "GET":
 											s.handleNewYandexCallbackRequest([0]string{}, elemIsEscaped, w, r)
 										default:
-											s.notAllowed(w, r, "GET")
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "GET",
+												allowedHeaders: rn37AllowedHeaders,
+												acceptPost:     "",
+												acceptPatch:    "",
+											})
 										}
 
 										return
@@ -495,7 +677,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						case "POST":
 							s.handleNewLobbyRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET,POST")
+							s.notAllowed(w, r, notAllowedParams{
+								allowedMethods: "GET,POST",
+								allowedHeaders: rn16AllowedHeaders,
+								acceptPost:     "application/json",
+								acceptPatch:    "",
+							})
 						}
 
 						return
@@ -526,7 +713,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "GET")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET",
+									allowedHeaders: rn18AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -558,7 +750,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET")
+							s.notAllowed(w, r, notAllowedParams{
+								allowedMethods: "GET",
+								allowedHeaders: rn20AllowedHeaders,
+								acceptPost:     "",
+								acceptPatch:    "",
+							})
 						}
 
 						return
@@ -592,7 +789,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "GET")
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "GET",
+										allowedHeaders: rn21AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "",
+									})
 								}
 
 								return
@@ -618,7 +820,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										args[0],
 									}, elemIsEscaped, w, r)
 								default:
-									s.notAllowed(w, r, "GET,POST")
+									s.notAllowed(w, r, notAllowedParams{
+										allowedMethods: "GET,POST",
+										allowedHeaders: rn23AllowedHeaders,
+										acceptPost:     "",
+										acceptPatch:    "",
+									})
 								}
 
 								return
@@ -643,7 +850,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 						case "POST":
 							s.handleNewSingleplayerGameRequest([0]string{}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET,POST")
+							s.notAllowed(w, r, notAllowedParams{
+								allowedMethods: "GET,POST",
+								allowedHeaders: rn29AllowedHeaders,
+								acceptPost:     "application/json",
+								acceptPatch:    "",
+							})
 						}
 
 						return
@@ -673,7 +885,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 									args[0],
 								}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "GET")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET",
+									allowedHeaders: rn10AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -707,7 +924,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "POST")
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "POST",
+											allowedHeaders: rn11AllowedHeaders,
+											acceptPost:     "",
+											acceptPatch:    "",
+										})
 									}
 
 									return
@@ -729,7 +951,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "GET")
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET",
+											allowedHeaders: rn28AllowedHeaders,
+											acceptPost:     "",
+											acceptPatch:    "",
+										})
 									}
 
 									return
@@ -754,7 +981,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 											args[0],
 										}, elemIsEscaped, w, r)
 									default:
-										s.notAllowed(w, r, "GET,POST")
+										s.notAllowed(w, r, notAllowedParams{
+											allowedMethods: "GET,POST",
+											allowedHeaders: rn30AllowedHeaders,
+											acceptPost:     "",
+											acceptPatch:    "",
+										})
 									}
 
 									return
@@ -776,7 +1008,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 												args[0],
 											}, elemIsEscaped, w, r)
 										default:
-											s.notAllowed(w, r, "POST")
+											s.notAllowed(w, r, notAllowedParams{
+												allowedMethods: "POST",
+												allowedHeaders: rn13AllowedHeaders,
+												acceptPost:     "application/json",
+												acceptPatch:    "",
+											})
 										}
 
 										return
@@ -816,7 +1053,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "PUT":
 								s.handleUpdateUserAvatarRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "PUT")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "PUT",
+									allowedHeaders: rn40AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "",
+								})
 							}
 
 							return
@@ -839,7 +1081,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							case "PATCH":
 								s.handleUpdateUserRequest([0]string{}, elemIsEscaped, w, r)
 							default:
-								s.notAllowed(w, r, "GET,PATCH")
+								s.notAllowed(w, r, notAllowedParams{
+									allowedMethods: "GET,PATCH",
+									allowedHeaders: rn25AllowedHeaders,
+									acceptPost:     "",
+									acceptPatch:    "application/json",
+								})
 							}
 
 							return
@@ -864,7 +1111,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET")
+							s.notAllowed(w, r, notAllowedParams{
+								allowedMethods: "GET",
+								allowedHeaders: rn27AllowedHeaders,
+								acceptPost:     "",
+								acceptPatch:    "",
+							})
 						}
 
 						return
@@ -881,12 +1133,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Route is route object.
 type Route struct {
-	name        string
-	summary     string
-	operationID string
-	pathPattern string
-	count       int
-	args        [1]string
+	name           string
+	summary        string
+	operationID    string
+	operationGroup string
+	pathPattern    string
+	count          int
+	args           [1]string
 }
 
 // Name returns ogen operation name.
@@ -904,6 +1157,11 @@ func (r Route) Summary() string {
 // OperationID returns OpenAPI operationId.
 func (r Route) OperationID() string {
 	return r.operationID
+}
+
+// OperationGroup returns the x-ogen-operation-group value.
+func (r Route) OperationGroup() string {
+	return r.operationGroup
 }
 
 // PathPattern returns OpenAPI path.
@@ -968,6 +1226,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					r.name = GetRootOperation
 					r.summary = "Redirect to documentation"
 					r.operationID = "getRoot"
+					r.operationGroup = ""
 					r.pathPattern = "/"
 					r.args = args
 					r.count = 0
@@ -992,6 +1251,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 						r.name = GetHealthOperation
 						r.summary = "Check API health"
 						r.operationID = "getHealth"
+						r.operationGroup = ""
 						r.pathPattern = "/health"
 						r.args = args
 						r.count = 0
@@ -1039,6 +1299,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = DeleteDiscordOperation
 								r.summary = "Delete Discord auth"
 								r.operationID = "deleteDiscord"
+								r.operationGroup = "Auth"
 								r.pathPattern = "/v1/auth/discord"
 								r.args = args
 								r.count = 0
@@ -1074,6 +1335,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = DiscordLoginOperation
 										r.summary = "Discord login"
 										r.operationID = "discordLogin"
+										r.operationGroup = "Auth"
 										r.pathPattern = "/v1/auth/discord/login"
 										r.args = args
 										r.count = 0
@@ -1098,6 +1360,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.name = DiscordLoginCallbackOperation
 											r.summary = "Discord login callback"
 											r.operationID = "discordLoginCallback"
+											r.operationGroup = "Auth"
 											r.pathPattern = "/v1/auth/discord/login/callback"
 											r.args = args
 											r.count = 0
@@ -1123,6 +1386,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = NewDiscordOperation
 										r.summary = "New Discord auth"
 										r.operationID = "newDiscord"
+										r.operationGroup = "Auth"
 										r.pathPattern = "/v1/auth/discord/new"
 										r.args = args
 										r.count = 0
@@ -1147,6 +1411,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.name = NewDiscordCallbackOperation
 											r.summary = "Discord new auth callback"
 											r.operationID = "newDiscordCallback"
+											r.operationGroup = "Auth"
 											r.pathPattern = "/v1/auth/discord/new/callback"
 											r.args = args
 											r.count = 0
@@ -1177,6 +1442,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = LoginOperation
 								r.summary = "Login user"
 								r.operationID = "login"
+								r.operationGroup = "Auth"
 								r.pathPattern = "/v1/auth/login"
 								r.args = args
 								r.count = 0
@@ -1201,6 +1467,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = GetOAuthProvidersOperation
 								r.summary = "Get all connected OAuth providers"
 								r.operationID = "getOAuthProviders"
+								r.operationGroup = "Auth"
 								r.pathPattern = "/v1/auth/providers"
 								r.args = args
 								r.count = 0
@@ -1225,6 +1492,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = RegisterOperation
 								r.summary = "Register new user"
 								r.operationID = "register"
+								r.operationGroup = "Auth"
 								r.pathPattern = "/v1/auth/register"
 								r.args = args
 								r.count = 0
@@ -1248,6 +1516,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = GetUserSessionsOperation
 								r.summary = "User sessions"
 								r.operationID = "getUserSessions"
+								r.operationGroup = "Auth"
 								r.pathPattern = "/v1/auth/sessions"
 								r.args = args
 								r.count = 0
@@ -1281,6 +1550,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.name = DeleteUserSessionOperation
 									r.summary = "Delete user session"
 									r.operationID = "deleteUserSession"
+									r.operationGroup = "Auth"
 									r.pathPattern = "/v1/auth/sessions/{id}"
 									r.args = args
 									r.count = 1
@@ -1307,6 +1577,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = RefreshTokensOperation
 								r.summary = "Get new refresh and access tokens"
 								r.operationID = "refreshTokens"
+								r.operationGroup = "Auth"
 								r.pathPattern = "/v1/auth/tokens/refresh"
 								r.args = args
 								r.count = 0
@@ -1330,6 +1601,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = DeleteYandexOperation
 								r.summary = "Delete Yandex auth"
 								r.operationID = "deleteYandex"
+								r.operationGroup = "Auth"
 								r.pathPattern = "/v1/auth/yandex"
 								r.args = args
 								r.count = 0
@@ -1365,6 +1637,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = YandexLoginOperation
 										r.summary = "Yandex login"
 										r.operationID = "yandexLogin"
+										r.operationGroup = "Auth"
 										r.pathPattern = "/v1/auth/yandex/login"
 										r.args = args
 										r.count = 0
@@ -1389,6 +1662,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.name = YandexLoginCallbackOperation
 											r.summary = "Yandex login callback"
 											r.operationID = "yandexLoginCallback"
+											r.operationGroup = "Auth"
 											r.pathPattern = "/v1/auth/yandex/login/callback"
 											r.args = args
 											r.count = 0
@@ -1414,6 +1688,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = NewYandexOperation
 										r.summary = "New Yandex auth"
 										r.operationID = "newYandex"
+										r.operationGroup = "Auth"
 										r.pathPattern = "/v1/auth/yandex/new"
 										r.args = args
 										r.count = 0
@@ -1438,6 +1713,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.name = NewYandexCallbackOperation
 											r.summary = "New Yandex auth callback"
 											r.operationID = "newYandexCallback"
+											r.operationGroup = "Auth"
 											r.pathPattern = "/v1/auth/yandex/new/callback"
 											r.args = args
 											r.count = 0
@@ -1469,6 +1745,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.name = GetLobbiesOperation
 							r.summary = "Get available lobbies"
 							r.operationID = "getLobbies"
+							r.operationGroup = "Lobbies"
 							r.pathPattern = "/v1/lobbies"
 							r.args = args
 							r.count = 0
@@ -1477,6 +1754,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.name = NewLobbyOperation
 							r.summary = "Create new lobby"
 							r.operationID = "newLobby"
+							r.operationGroup = "Lobbies"
 							r.pathPattern = "/v1/lobbies"
 							r.args = args
 							r.count = 0
@@ -1510,6 +1788,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = GetLobbyOperation
 								r.summary = "Get lobby by ID"
 								r.operationID = "getLobby"
+								r.operationGroup = "Lobbies"
 								r.pathPattern = "/v1/lobbies/{id}"
 								r.args = args
 								r.count = 1
@@ -1544,6 +1823,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.name = GetMultiplayerGameOperation
 							r.summary = "Get multiplayer game by ID"
 							r.operationID = "getMultiplayerGame"
+							r.operationGroup = "Multiplayer"
 							r.pathPattern = "/v1/multiplayer/{id}"
 							r.args = args
 							r.count = 1
@@ -1580,6 +1860,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.name = GetMultiplayerGameGuessesOperation
 									r.summary = "Gets multiplayer game guesses"
 									r.operationID = "getMultiplayerGameGuesses"
+									r.operationGroup = "Multiplayer"
 									r.pathPattern = "/v1/multiplayer/{id}/guesses"
 									r.args = args
 									r.count = 1
@@ -1604,6 +1885,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.name = GetMultiplayerRoundOperation
 									r.summary = "Get multiplayer game round"
 									r.operationID = "getMultiplayerRound"
+									r.operationGroup = "Multiplayer"
 									r.pathPattern = "/v1/multiplayer/{id}/round"
 									r.args = args
 									r.count = 1
@@ -1612,6 +1894,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 									r.name = NewMultiplayerRoundOperation
 									r.summary = "Get or generate multiplayer game round"
 									r.operationID = "newMultiplayerRound"
+									r.operationGroup = "Multiplayer"
 									r.pathPattern = "/v1/multiplayer/{id}/round"
 									r.args = args
 									r.count = 1
@@ -1639,6 +1922,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.name = GetSingleplayerGamesOperation
 							r.summary = "Get all singleplayer user games"
 							r.operationID = "getSingleplayerGames"
+							r.operationGroup = "Singleplayer"
 							r.pathPattern = "/v1/singleplayer"
 							r.args = args
 							r.count = 0
@@ -1647,6 +1931,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.name = NewSingleplayerGameOperation
 							r.summary = "Create new singleplayer game"
 							r.operationID = "newSingleplayerGame"
+							r.operationGroup = "Singleplayer"
 							r.pathPattern = "/v1/singleplayer"
 							r.args = args
 							r.count = 0
@@ -1679,6 +1964,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = GetSingleplayerGameOperation
 								r.summary = "Get singleplayer game by ID"
 								r.operationID = "getSingleplayerGame"
+								r.operationGroup = "Singleplayer"
 								r.pathPattern = "/v1/singleplayer/{id}"
 								r.args = args
 								r.count = 1
@@ -1715,6 +2001,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = EndSingleplayerGameOperation
 										r.summary = "End singleplayer game"
 										r.operationID = "endSingleplayerGame"
+										r.operationGroup = "Singleplayer"
 										r.pathPattern = "/v1/singleplayer/{id}/end"
 										r.args = args
 										r.count = 1
@@ -1739,6 +2026,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = GetSingleplayerGameGuessesOperation
 										r.summary = "Get singleplayer game guesses"
 										r.operationID = "getSingleplayerGameGuesses"
+										r.operationGroup = "Singleplayer"
 										r.pathPattern = "/v1/singleplayer/{id}/guesses"
 										r.args = args
 										r.count = 1
@@ -1762,6 +2050,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = GetSingleplayerRoundOperation
 										r.summary = "Get singleplayer game round"
 										r.operationID = "getSingleplayerRound"
+										r.operationGroup = "Singleplayer"
 										r.pathPattern = "/v1/singleplayer/{id}/round"
 										r.args = args
 										r.count = 1
@@ -1770,6 +2059,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										r.name = NewSingleplayerRoundOperation
 										r.summary = "Create singleplayer game round"
 										r.operationID = "newSingleplayerRound"
+										r.operationGroup = "Singleplayer"
 										r.pathPattern = "/v1/singleplayer/{id}/round"
 										r.args = args
 										r.count = 1
@@ -1794,6 +2084,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 											r.name = EndSingleplayerRoundOperation
 											r.summary = "End singleplayer game round"
 											r.operationID = "endSingleplayerRound"
+											r.operationGroup = "Singleplayer"
 											r.pathPattern = "/v1/singleplayer/{id}/round/end"
 											r.args = args
 											r.count = 1
@@ -1838,6 +2129,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = UpdateUserAvatarOperation
 								r.summary = "Update user avatar"
 								r.operationID = "updateUserAvatar"
+								r.operationGroup = "Users"
 								r.pathPattern = "/v1/users/avatar"
 								r.args = args
 								r.count = 0
@@ -1863,6 +2155,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = GetPrivateProfileOperation
 								r.summary = "Get current user profile"
 								r.operationID = "getPrivateProfile"
+								r.operationGroup = "Users"
 								r.pathPattern = "/v1/users/me"
 								r.args = args
 								r.count = 0
@@ -1871,6 +2164,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 								r.name = UpdateUserOperation
 								r.summary = "Update user"
 								r.operationID = "updateUser"
+								r.operationGroup = "Users"
 								r.pathPattern = "/v1/users/me"
 								r.args = args
 								r.count = 0
@@ -1898,6 +2192,7 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.name = GetPublicProfileOperation
 							r.summary = "Get user by ID"
 							r.operationID = "getPublicProfile"
+							r.operationGroup = "Users"
 							r.pathPattern = "/v1/users/{id}"
 							r.args = args
 							r.count = 1

@@ -22,10 +22,9 @@ type oauthConfig struct {
 type Config struct {
 	oauthConfig
 
-	captchaSecretKey string
-	frontendURL      url.URL
-	accessTokenTTL   time.Duration
-	refreshTokenTTL  time.Duration
+	frontendURL     url.URL
+	accessTokenTTL  time.Duration
+	refreshTokenTTL time.Duration
 }
 
 // NewConfig creates and returns new local config from general config.
@@ -39,9 +38,8 @@ func NewConfig(conf config.Config) Config {
 			discordLogin:   conf.OAuth.DiscordLogin,
 			discordNew:     conf.OAuth.DiscordNew,
 		},
-		captchaSecretKey: conf.ENV.CaptchaSecretKey,
-		frontendURL:      conf.ENV.FrontendURL,
-		accessTokenTTL:   conf.Limits.AccessTokenTTL,
-		refreshTokenTTL:  conf.Limits.RefreshTokenTTL,
+		frontendURL:     conf.ENV.FrontendURL,
+		accessTokenTTL:  conf.Limits.AccessTokenTTL,
+		refreshTokenTTL: conf.Limits.RefreshTokenTTL,
 	}
 }

@@ -2,10 +2,8 @@
 package http
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"net"
 	"net/http"
 	"time"
 
@@ -14,6 +12,9 @@ import (
 
 // ErrWrongCredentials is returned when the credentials provided for a proxy are wrong.
 var ErrWrongCredentials = errors.New("wrong credentials provided for proxy")
+
+// ErrProxyContextUnsupported indicates a proxy dialer without cancellation support.
+var ErrProxyContextUnsupported = errors.New("proxy dialer does not support context")
 
 // NewClient creates a new http client.
 func NewClient() *http.Client {
@@ -38,12 +39,15 @@ func NewClientWithSOCKS5(address, login, password string) (*http.Client, error) 
 		return nil, fmt.Errorf("error creating socks5 proxy dialer: %w", err)
 	}
 
+	contextDialer, ok := dialer.(proxy.ContextDialer)
+	if !ok {
+		return nil, ErrProxyContextUnsupported
+	}
+
 	return &http.Client{
 		Timeout: 5 * time.Second,
 		Transport: &http.Transport{
-			DialContext: func(_ context.Context, network, addr string) (net.Conn, error) {
-				return dialer.Dial(network, addr)
-			},
+			DialContext: contextDialer.DialContext,
 		},
 	}, nil
 }
