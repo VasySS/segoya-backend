@@ -25,6 +25,8 @@ func newCaptchaService(conf config.Config) (auth.CaptchaService, error) {
 		return captcha.NewCloudflareService(conf.HTTPClient, conf.ENV.CaptchaSecretKey), nil
 	case "yandex":
 		return captcha.NewYandexService(conf.HTTPClient, conf.ENV.CaptchaSecretKey), nil
+	case "cap":
+		return captcha.NewCapService(conf.HTTPClient, conf.ENV.CaptchaVerifyURL, conf.ENV.CaptchaSecretKey), nil
 	default:
 		return nil, config.ErrUnsupportedCaptchaProvider
 	}

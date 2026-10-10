@@ -2,6 +2,7 @@ package captcha_test
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -24,13 +25,14 @@ type tokenVerifier interface {
 }
 
 type verifierProvider struct {
-	endpoint   string
-	field      string
-	success    string
-	rejected   string
-	expired    string
-	wrongType  string
-	newService func(*http.Client, string) tokenVerifier
+	endpoint    string
+	field       string
+	success     string
+	rejected    string
+	expired     string
+	wrongType   string
+	jsonRequest bool
+	newService  func(*http.Client, string) tokenVerifier
 }
 
 type roundTripFunc func(*http.Request) (*http.Response, error)
@@ -81,6 +83,10 @@ func testVerifier(t *testing.T, provider verifierProvider) {
 		{name: "missing success field", body: `{}`, wantErr: true, wantCause: captcha.ErrVerificationFailed},
 		{name: "null response", body: `null`, wantErr: true, wantCause: captcha.ErrVerificationFailed},
 		{name: "wrong success type", body: provider.wrongType, wantErr: true},
+		{
+			name: "success field is null", body: `{"success":null,"status":null}`,
+			wantErr: true, wantCause: captcha.ErrVerificationFailed,
+		},
 		{name: "empty body", wantErr: true},
 		{name: "malformed json", body: `{`, wantErr: true},
 		{name: "trailing garbage", body: provider.success + "invalid", wantErr: true},
@@ -91,6 +97,10 @@ func testVerifier(t *testing.T, provider verifierProvider) {
 		},
 		{
 			name: "non-200 rejection", status: http.StatusBadRequest, body: provider.rejected,
+			wantErr: true, wantCause: captcha.ErrVerificationFailed,
+		},
+		{
+			name: "redirect with success body", status: http.StatusTemporaryRedirect, body: provider.success,
 			wantErr: true, wantCause: captcha.ErrVerificationFailed,
 		},
 		{name: "transport error", transportErr: transportErr, wantErr: true, wantCause: transportErr},
@@ -162,9 +172,7 @@ func testVerifierCase(t *testing.T, provider verifierProvider, tt verifierCase) 
 		assert.Equal(t, provider.endpoint, req.URL.String())
 		assert.Empty(t, req.URL.RawQuery)
 		assert.Equal(t, http.MethodPost, req.Method)
-		assert.Equal(t, "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
-		require.NoError(t, req.ParseForm())
-		assert.Equal(t, url.Values{"secret": {secret}, provider.field: {token}}, req.PostForm)
+		assertVerifierRequest(t, provider, req, url.Values{"secret": {secret}, provider.field: {token}})
 		assert.Equal(t, ctx.Value(contextKey{}), req.Context().Value(contextKey{}))
 
 		return verifierResponse(req.Context(), cancel, tt, &http.Response{ //nolint:contextcheck // Use the client deadline.
@@ -242,3 +250,22 @@ func assertVerifierResult(t *testing.T, tt verifierCase, err error) {
 }
 
 type contextKey struct{}
+
+func assertVerifierRequest(t *testing.T, provider verifierProvider, req *http.Request, form url.Values) {
+	t.Helper()
+
+	if provider.jsonRequest {
+		assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
+
+		var body map[string]string
+
+		require.NoError(t, json.NewDecoder(req.Body).Decode(&body))
+		assert.Equal(t, map[string]string{"secret": form.Get("secret"), provider.field: form.Get(provider.field)}, body)
+
+		return
+	}
+
+	assert.Equal(t, "application/x-www-form-urlencoded", req.Header.Get("Content-Type"))
+	require.NoError(t, req.ParseForm())
+	assert.Equal(t, form, req.PostForm)
+}

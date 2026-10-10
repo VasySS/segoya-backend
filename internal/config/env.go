@@ -37,6 +37,7 @@ type Optional struct {
 	YandexOAuth      YandexOAuth
 	CaptchaProvider  string `env:"CAPTCHA_PROVIDER"   env-default:"turnstile"`
 	CaptchaSecretKey string `env:"CAPTCHA_SECRET_KEY"`
+	CaptchaVerifyURL string `env:"CAPTCHA_VERIFY_URL"`
 	Mode             string `env:"ENV_MODE"           env-default:"production"`
 }
 

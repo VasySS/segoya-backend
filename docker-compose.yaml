@@ -91,6 +91,7 @@ services:
 
       CAPTCHA_PROVIDER: ${CAPTCHA_PROVIDER:-turnstile}
       CAPTCHA_SECRET_KEY: ${CAPTCHA_SECRET_KEY:-}
+      CAPTCHA_VERIFY_URL: ${CAPTCHA_VERIFY_URL:-}
 
       DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID}
       DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET}
@@ -109,6 +110,32 @@ services:
         condition: service_healthy
       jaeger:
         condition: service_started
+
+  cap:
+    container_name: segoya-cap
+    image: tiago2/cap:latest@sha256:8a83e06c4fde9ada7cfe15528c79885bbdfdf886863fd97c02666e40014cfa9c
+    ports:
+      - "${CAP_PORT:-3000}:3000"
+    environment:
+      ADMIN_KEY: ${CAP_ADMIN_KEY:?Set CAP_ADMIN_KEY to a random dashboard password of at least 32 characters}
+      REDIS_URL: redis://valkey:6379
+      REDIS_PREFIX: "segoya-cap:"
+      CORS_ORIGIN: ${FRONTEND_URL}
+    depends_on:
+      valkey:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - bun
+        - -e
+        - "fetch('http://127.0.0.1:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - segoya-backend-network
 
 networks:
   segoya-backend-network:

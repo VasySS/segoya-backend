@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 
@@ -15,9 +16,11 @@ import (
 
 var (
 	// ErrUnsupportedCaptchaProvider indicates an unsupported CAPTCHA_PROVIDER setting.
-	ErrUnsupportedCaptchaProvider = errors.New("CAPTCHA_PROVIDER must be turnstile or yandex")
+	ErrUnsupportedCaptchaProvider = errors.New("CAPTCHA_PROVIDER must be turnstile, yandex or cap")
 	// ErrCaptchaSecretRequired indicates a missing secret outside development mode.
 	ErrCaptchaSecretRequired = errors.New("CAPTCHA_SECRET_KEY is required outside development mode")
+	// ErrCaptchaVerifyURL indicates an invalid Cap verification endpoint.
+	ErrCaptchaVerifyURL = errors.New("CAPTCHA_VERIFY_URL must be an HTTP(S) URL without credentials, query or fragment")
 )
 
 // Config contains application configuration.
@@ -75,17 +78,38 @@ func MustInit() Config {
 // ValidateCaptcha applies the default provider and validates CAPTCHA settings before startup.
 func (c *Config) ValidateCaptcha() error {
 	if c.ENV.CaptchaProvider == "" {
-		c.ENV.CaptchaProvider = "turnstile"
+		c.ENV.CaptchaProvider = "cap"
 	}
 
 	switch c.ENV.CaptchaProvider {
-	case "turnstile", "yandex":
+	case "turnstile", "yandex", "cap":
 	default:
 		return ErrUnsupportedCaptchaProvider
 	}
 
 	if strings.TrimSpace(c.ENV.CaptchaSecretKey) == "" && c.ENV.Mode != "development" {
 		return ErrCaptchaSecretRequired
+	}
+
+	if c.ENV.CaptchaProvider == "cap" && strings.TrimSpace(c.ENV.CaptchaSecretKey) != "" {
+		return validateCaptchaVerifyURL(c.ENV.CaptchaVerifyURL)
+	}
+
+	return nil
+}
+
+func validateCaptchaVerifyURL(value string) error {
+	endpoint, err := url.Parse(value)
+	if err != nil {
+		return ErrCaptchaVerifyURL
+	}
+
+	validScheme := endpoint.Scheme == "http" || endpoint.Scheme == "https"
+
+	cleanURL := endpoint.User == nil && endpoint.RawQuery == "" && endpoint.Fragment == "" && !endpoint.ForceQuery
+
+	if !validScheme || endpoint.Hostname() == "" || !cleanURL {
+		return ErrCaptchaVerifyURL
 	}
 
 	return nil

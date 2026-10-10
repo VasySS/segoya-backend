@@ -2,6 +2,7 @@ package auth_test
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -51,11 +52,12 @@ func TestAuthentication_CaptchaSubmissions(t *testing.T) {
 	t.Parallel()
 
 	providers := []struct {
-		name       string
-		field      string
-		success    string
-		failure    string
-		newService func(*http.Client, string) auth.CaptchaService
+		name        string
+		field       string
+		success     string
+		failure     string
+		jsonRequest bool
+		newService  func(*http.Client, string) auth.CaptchaService
 	}{
 		{
 			name: "turnstile", field: "response", success: `{"success":true}`,
@@ -69,6 +71,13 @@ func TestAuthentication_CaptchaSubmissions(t *testing.T) {
 			failure: `{"status":"failed","message":"Invalid or expired Token."}`,
 			newService: func(client *http.Client, secret string) auth.CaptchaService {
 				return captcha.NewYandexService(client, secret)
+			},
+		},
+		{
+			name: "cap", field: "response", jsonRequest: true, success: `{"success":true}`,
+			failure: `{"success":false}`,
+			newService: func(client *http.Client, secret string) auth.CaptchaService {
+				return captcha.NewCapService(client, "http://cap:3000/site-key/siteverify", secret)
 			},
 		},
 	}
@@ -85,10 +94,10 @@ func TestAuthentication_CaptchaSubmissions(t *testing.T) {
 				client.Transport = authRoundTripFunc(func(req *http.Request) (*http.Response, error) {
 					verificationCalls++
 
-					require.NoError(t, req.ParseForm())
-					assert.Equal(t, "secret", req.PostForm.Get("secret"))
+					token := captchaTokenFromRequest(t, req, provider.field, provider.jsonRequest)
 					assert.Equal(t, "request metadata", req.Context().Value(requestContextKey{}))
-					tokens = append(tokens, req.PostForm.Get(provider.field))
+
+					tokens = append(tokens, token)
 
 					body := provider.failure
 					if verificationCalls == 2 || verificationCalls == 4 {
@@ -263,4 +272,25 @@ func testBusinessRejection(t *testing.T, handler *auth.Handler, operation, token
 	}
 
 	assert.IsType(t, &api.RegisterConflict{}, result)
+}
+
+func captchaTokenFromRequest(t *testing.T, req *http.Request, field string, jsonRequest bool) string {
+	t.Helper()
+
+	if jsonRequest {
+		assert.Equal(t, "application/json", req.Header.Get("Content-Type"))
+
+		var body map[string]string
+
+		require.NoError(t, json.NewDecoder(req.Body).Decode(&body))
+		assert.Equal(t, "secret", body["secret"])
+		assert.Len(t, body, 2)
+
+		return body[field]
+	}
+
+	require.NoError(t, req.ParseForm())
+	assert.Equal(t, "secret", req.PostForm.Get("secret"))
+
+	return req.PostForm.Get(field)
 }
