@@ -4,7 +4,6 @@ package captcha
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,39 +13,26 @@ import (
 
 const cloudflareCaptchaURL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 
-var (
-	// ErrTokenIsNotProvided is returned when the token for Cloudflare's captcha is not provided.
-	ErrTokenIsNotProvided = errors.New("token is not provided")
-	// ErrVerificationFailed is returned when the token did not pass verification on Cloudflare's side.
-	ErrVerificationFailed = errors.New("token did not pass cloudflare's verification")
-)
-
 // CloudflareService is a captcha checker service.
 type CloudflareService struct {
-	httpClient  *http.Client
-	frontendURL string
-	secretKey   string
+	httpClient *http.Client
+	secretKey  string
 }
 
 // NewCloudflareService creates a new captcha checker service.
 func NewCloudflareService(
 	httpClient *http.Client,
-	frontendURL, captchaSecretKey string,
+	captchaSecretKey string,
 ) *CloudflareService {
 	return &CloudflareService{
-		httpClient:  httpClient,
-		frontendURL: frontendURL,
-		secretKey:   captchaSecretKey,
+		httpClient: httpClient,
+		secretKey:  captchaSecretKey,
 	}
 }
 
 // IsTokenValid checks if the token is valid by sending it to Cloudflare.
 func (c *CloudflareService) IsTokenValid(ctx context.Context, token string) error {
-	if strings.Contains(c.frontendURL, "localhost") || c.secretKey == "" {
-		return nil
-	}
-
-	if token == "" {
+	if strings.TrimSpace(token) == "" {
 		return ErrTokenIsNotProvided
 	}
 
@@ -70,14 +56,17 @@ func (c *CloudflareService) IsTokenValid(ctx context.Context, token string) erro
 	}
 	defer resp.Body.Close() //nolint:errcheck
 
+	if resp.StatusCode != http.StatusOK {
+		return ErrVerificationFailed
+	}
+
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("error reading response body from cloudflare: %w", err)
 	}
 
 	type captchaResponse struct {
-		Success    bool     `json:"success"`
-		ErrorCodes []string `json:"error-codes"` //nolint:tagliatelle
+		Success bool `json:"success"`
 	}
 
 	var respBody captchaResponse

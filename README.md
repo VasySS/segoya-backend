@@ -54,7 +54,7 @@ docker compose up -d --build
 ### Cloud Integrations
 
 - **Cloudflare R2** - S3-compatible object storage
-- **Cloudflare Turnstile** - CAPTCHA
+- **Cloudflare Turnstile / Yandex SmartCaptcha** - CAPTCHA selected per deployment
 - **Yandex/Discord OAuth**
 
 ### Go libraries

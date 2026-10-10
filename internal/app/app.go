@@ -31,12 +31,16 @@ import (
 	"github.com/VasySS/segoya-backend/internal/usecase/panorama"
 	"github.com/VasySS/segoya-backend/internal/usecase/singleplayer"
 	"github.com/VasySS/segoya-backend/internal/usecase/user"
-	"github.com/VasySS/segoya-backend/pkg/captcha"
 	"github.com/VasySS/segoya-backend/pkg/crypto"
 )
 
 // Run creates all needed usecases and starts the application.
 func Run(ctx context.Context, conf config.Config) error {
+	captchaService, err := newCaptchaService(conf)
+	if err != nil {
+		return fmt.Errorf("invalid captcha configuration: %w", err)
+	}
+
 	closer := NewCloser()
 
 	if err := setGlobalTracer(ctx, conf.ENV.JaegerURL); err != nil {
@@ -67,11 +71,6 @@ func Run(ctx context.Context, conf config.Config) error {
 	}
 
 	cryptoService := crypto.NewService()
-	captchaService := captcha.NewCloudflareService(
-		conf.HTTPClient,
-		conf.ENV.FrontendURL.String(),
-		conf.ENV.CaptchaSecretKey,
-	)
 	tokenService := token.NewService(ctx,
 		conf.ENV.JWTSecretKey,
 		conf.Limits.AccessTokenTTL,

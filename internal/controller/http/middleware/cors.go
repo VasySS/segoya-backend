@@ -13,7 +13,7 @@ func CORS(frontendURL string) func(next http.Handler) http.Handler {
 			w.Header().Set(
 				"Access-Control-Allow-Headers",
 				"Origin, Content-Type, Accept, Authorization, X-Request-With, Set-Cookie, Cookie, Bearer, "+
-					"X-Captcha-Token",
+					"X-Captcha-Token, Frontend-Captcha-Token",
 			)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 

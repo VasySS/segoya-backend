@@ -35,6 +35,7 @@ type Optional struct {
 	Cloudflare       Cloudflare
 	DiscordOAuth     DiscordOAuth
 	YandexOAuth      YandexOAuth
+	CaptchaProvider  string `env:"CAPTCHA_PROVIDER"   env-default:"turnstile"`
 	CaptchaSecretKey string `env:"CAPTCHA_SECRET_KEY"`
 	Mode             string `env:"ENV_MODE"           env-default:"production"`
 }

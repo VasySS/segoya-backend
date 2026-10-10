@@ -2,13 +2,22 @@
 package config
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/ilyakaznacheev/cleanenv"
 
 	httpPkg "github.com/VasySS/segoya-backend/pkg/http"
+)
+
+var (
+	// ErrUnsupportedCaptchaProvider indicates an unsupported CAPTCHA_PROVIDER setting.
+	ErrUnsupportedCaptchaProvider = errors.New("CAPTCHA_PROVIDER must be turnstile or yandex")
+	// ErrCaptchaSecretRequired indicates a missing secret outside development mode.
+	ErrCaptchaSecretRequired = errors.New("CAPTCHA_SECRET_KEY is required outside development mode")
 )
 
 // Config contains application configuration.
@@ -36,6 +45,11 @@ func MustInit() Config {
 		os.Exit(1)
 	}
 
+	if err := conf.ValidateCaptcha(); err != nil {
+		slog.Error("invalid captcha configuration", slog.Any("error", err))
+		os.Exit(1)
+	}
+
 	conf.OAuth = newOAuthConfig(conf)
 	conf.Limits = newLimits()
 
@@ -56,4 +70,23 @@ func MustInit() Config {
 	}
 
 	return conf
+}
+
+// ValidateCaptcha applies the default provider and validates CAPTCHA settings before startup.
+func (c *Config) ValidateCaptcha() error {
+	if c.ENV.CaptchaProvider == "" {
+		c.ENV.CaptchaProvider = "turnstile"
+	}
+
+	switch c.ENV.CaptchaProvider {
+	case "turnstile", "yandex":
+	default:
+		return ErrUnsupportedCaptchaProvider
+	}
+
+	if strings.TrimSpace(c.ENV.CaptchaSecretKey) == "" && c.ENV.Mode != "development" {
+		return ErrCaptchaSecretRequired
+	}
+
+	return nil
 }
