@@ -557,7 +557,9 @@ func TestUsecase_DeleteSession(t *testing.T) {
 				fs.sessionRepo.On("GetSession", mock.Anything, args.userID, args.sessionID).
 					Return(user.Session{UserID: uuid.Must(uuid.NewV7()), SessionID: args.sessionID}, nil)
 			},
-			wantErr: assert.Error,
+			wantErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.ErrorIs(t, err, user.ErrSessionWrongUser)
+			},
 		},
 	}
 
@@ -575,6 +577,10 @@ func TestUsecase_DeleteSession(t *testing.T) {
 
 			err := uc.DeleteSession(t.Context(), tt.args.userID, tt.args.sessionID)
 			tt.wantErr(t, err)
+
+			if err != nil {
+				sessionRepo.AssertNotCalled(t, "DeleteSession", mock.Anything, mock.Anything, mock.Anything)
+			}
 		})
 	}
 }

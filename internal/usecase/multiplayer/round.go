@@ -57,10 +57,7 @@ func (uc Usecase) getOrGenerateRound(
 	requestTime time.Time,
 ) (multiplayer.Round, error) {
 	if existingRound, err := uc.repo.GetMultiplayerRound(ctx, game.ID, game.RoundCurrent); err == nil {
-		roundEndDelay := existingRound.EndedAt.Add(uc.cfg.RoundEndDelay)
-
-		// only return the existing round if it's not finished or if the round end delay didn't pass yet
-		if !existingRound.Finished || requestTime.Before(roundEndDelay) {
+		if existingRound.CanReuse(requestTime, uc.cfg.RoundEndDelay) {
 			return existingRound, nil
 		}
 	} else if !errors.Is(err, multiplayer.ErrRoundNotFound) {
@@ -76,12 +73,13 @@ func (uc Usecase) getOrGenerateRound(
 		return multiplayer.Round{}, fmt.Errorf("failed to create panorama: %w", err)
 	}
 
+	creation := game.PrepareNextRound(pano, requestTime, uc.cfg.RoundStartDelay)
 	dbReq := dto.NewMultiplayerRoundRequestDB{
-		GameID:     game.ID,
-		LocationID: pano.ID,
-		RoundNum:   game.RoundCurrent + 1,
-		CreatedAt:  requestTime,
-		StartedAt:  requestTime.Add(uc.cfg.RoundStartDelay),
+		GameID:     creation.GameID,
+		LocationID: creation.LocationID,
+		RoundNum:   creation.RoundNum,
+		CreatedAt:  creation.CreatedAt,
+		StartedAt:  creation.StartedAt,
 	}
 
 	round, err := uc.repo.NewMultiplayerRound(ctx, dbReq)

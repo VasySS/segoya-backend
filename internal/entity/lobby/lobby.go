@@ -25,3 +25,31 @@ type Lobby struct {
 func (l Lobby) IsFull() bool {
 	return l.CurrentPlayers >= l.MaxPlayers
 }
+
+// IsLastPlayer reports whether the next departure will leave the lobby empty.
+func (l Lobby) IsLastPlayer() bool {
+	return l.CurrentPlayers == 1
+}
+
+// ValidateStart checks whether the actor can start a game from this lobby.
+func (l Lobby) ValidateStart(actorID uuid.UUID) error {
+	if l.CreatorID != actorID {
+		return ErrOnlyCreatorCanStart
+	}
+
+	return nil
+}
+
+// WithSettings returns a copy of the lobby with settings updated by its creator.
+func (l Lobby) WithSettings(actorID uuid.UUID, settings Settings) (Lobby, error) {
+	if l.CreatorID != actorID {
+		return Lobby{}, ErrOnlyCreatorCanUpdateSettings
+	}
+
+	l.Provider = settings.Provider
+	l.MovementAllowed = settings.MovementAllowed
+	l.Rounds = settings.Rounds
+	l.TimerSeconds = settings.TimerSeconds
+
+	return l, nil
+}

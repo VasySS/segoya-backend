@@ -65,7 +65,7 @@ func (uc Usecase) DisconnectLobbyUser(
 	}
 
 	// set the lobby expiration timer if the leaving user is the last one
-	if lobbyRepo.CurrentPlayers == 1 {
+	if lobbyRepo.IsLastPlayer() {
 		if err := uc.lobbyRepo.AddLobbyExpiration(ctx, lobbyID, uc.conf.LobbyExpiration); err != nil {
 			span.RecordError(err)
 			return fmt.Errorf("error deleting lobby: %w", err)
@@ -94,8 +94,8 @@ func (uc Usecase) StartLobbyGame(
 		return uuid.UUID{}, fmt.Errorf("failed to get lobby from db: %w", err)
 	}
 
-	if lobbyRepo.CreatorID != req.Creator.ID {
-		return uuid.UUID{}, lobby.ErrOnlyCreatorCanStart
+	if err := lobbyRepo.ValidateStart(req.Creator.ID); err != nil {
+		return uuid.UUID{}, err //nolint:wrapcheck // Preserve the existing unwrapped permission error.
 	}
 
 	gameID, err := uc.mult.NewGame(ctx, dto.NewMultiplayerGameRequest{
@@ -134,24 +134,9 @@ func (uc Usecase) UpdateLobbySettings(
 		return fmt.Errorf("error getting lobby from db: %w", err)
 	}
 
-	if lobbyInfo.CreatorID != req.Creator.ID {
-		return lobby.ErrOnlyCreatorCanUpdateSettings
-	}
-
-	if req.Settings.Provider != lobbyInfo.Provider {
-		lobbyInfo.Provider = req.Settings.Provider
-	}
-
-	if req.Settings.MovementAllowed != lobbyInfo.MovementAllowed {
-		lobbyInfo.MovementAllowed = req.Settings.MovementAllowed
-	}
-
-	if req.Settings.Rounds != lobbyInfo.Rounds {
-		lobbyInfo.Rounds = req.Settings.Rounds
-	}
-
-	if req.Settings.TimerSeconds != lobbyInfo.TimerSeconds {
-		lobbyInfo.TimerSeconds = req.Settings.TimerSeconds
+	lobbyInfo, err = lobbyInfo.WithSettings(req.Creator.ID, req.Settings)
+	if err != nil {
+		return err //nolint:wrapcheck // Preserve the existing unwrapped permission error.
 	}
 
 	if err := uc.lobbyRepo.UpdateLobby(ctx, lobbyInfo); err != nil {

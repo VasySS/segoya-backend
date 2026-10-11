@@ -2,12 +2,14 @@ package singleplayer_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
@@ -168,6 +170,112 @@ func TestUsecase_NewRound(t *testing.T) {
 	}
 }
 
+func TestUsecase_NewRoundEligibilityAndReuse(t *testing.T) {
+	t.Parallel()
+
+	now := time.Date(2026, time.October, 11, 12, 0, 0, 0, time.UTC)
+	gameID := uuid.MustParse("11111111-1111-1111-1111-111111111111")
+	userID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
+	panoramaID := uuid.MustParse("33333333-3333-3333-3333-333333333333")
+	roundID := uuid.MustParse("44444444-4444-4444-4444-444444444444")
+	lookupError := errors.New("round lookup failed")
+	cfg := singleplayer.Config{RoundStartDelay: 3500 * time.Millisecond}
+
+	tests := []struct {
+		name          string
+		current       int
+		rounds        int
+		wrongUser     bool
+		roundFinished bool
+		lookupError   error
+		wantReuse     bool
+		wantErr       error
+	}{
+		{name: "reuse unfinished round", current: 1, rounds: 5, wantReuse: true},
+		{name: "create after finished round", current: 1, rounds: 5, roundFinished: true},
+		{name: "create after missing round", rounds: 5, lookupError: singleplayerEntity.ErrRoundNotFound},
+		{
+			name: "limit rejects before current round lookup", current: 5, rounds: 5,
+			wantErr: singleplayerEntity.ErrRoundMaxAmount,
+		},
+		{
+			name: "ownership rejects before limit check", current: 5, rounds: 5, wrongUser: true,
+			wantErr: singleplayerEntity.ErrGameWrongUserID,
+		},
+		{name: "zero rounds still permits first round", lookupError: singleplayerEntity.ErrRoundNotFound},
+		{name: "limit retains equality semantics", current: 6, rounds: 5, roundFinished: true},
+		{
+			name: "lookup failure prevents creation", current: 1, rounds: 5,
+			lookupError: lookupError, wantErr: lookupError,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			repo := mocks.NewRepository(t)
+			pano := mocks.NewPanoramaUsecase(t)
+			uc := singleplayer.NewUsecase(cfg, repo, pano)
+			req := dto.NewSingleplayerRoundRequest{RequestTime: now, GameID: gameID, UserID: userID}
+
+			storedGame := singleplayerEntity.Game{
+				ID: gameID, UserID: userID, Provider: game.GoogleProvider,
+				Rounds: tt.rounds, RoundCurrent: tt.current,
+			}
+			if tt.wrongUser {
+				storedGame.UserID = uuid.Nil
+			}
+
+			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
+
+			lock := repo.On("LockSingleplayerGame", mock.Anything, gameID).Return(nil).Once()
+			fetchGame := repo.On("GetSingleplayerGame", mock.Anything, gameID).Return(storedGame, nil).Once()
+			mock.InOrder(lock, fetchGame)
+
+			var want singleplayerEntity.Round
+
+			if !tt.wrongUser && !errors.Is(tt.wantErr, singleplayerEntity.ErrRoundMaxAmount) {
+				currentRound := singleplayerEntity.Round{
+					ID: roundID, GameID: gameID, RoundNum: tt.current, Finished: tt.roundFinished,
+					StartedAt: now.Add(-time.Hour),
+					Lat:       1, Lng: 2,
+				}
+				fetchRound := repo.On("GetSingleplayerRound", mock.Anything, gameID, tt.current).
+					Return(currentRound, tt.lookupError).Once()
+				mock.InOrder(fetchGame, fetchRound)
+
+				switch {
+				case tt.wantReuse:
+					want = currentRound
+				case tt.wantErr == nil:
+					want = singleplayerEntity.Round{
+						ID: roundID, GameID: gameID, RoundNum: tt.current + 1,
+						CreatedAt: now, StartedAt: now.Add(cfg.RoundStartDelay),
+					}
+					generate := pano.On("NewStreetview", mock.Anything, game.GoogleProvider).
+						Return(game.PanoramaMetadata{ID: panoramaID}, nil).Once()
+					create := repo.On("NewSingleplayerRound", mock.Anything, dto.NewSingleplayerRoundDBRequest{
+						GameID: gameID, LocationID: panoramaID, RoundNum: tt.current + 1,
+						CreatedAt: now, StartedAt: now.Add(cfg.RoundStartDelay),
+					}).Return(want, nil).Once()
+					mock.InOrder(fetchRound, generate, create)
+				}
+			}
+
+			got, err := uc.NewRound(t.Context(), req)
+			if tt.wantErr != nil {
+				require.ErrorIs(t, err, tt.wantErr)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.Equal(t, want, got)
+		})
+	}
+}
+
 func TestUsecase_GetRound(t *testing.T) {
 	t.Parallel()
 
@@ -290,8 +398,7 @@ func TestUsecase_EndRound(t *testing.T) {
 		GameID:      uuid.Must(uuid.NewV7()),
 		UserID:      uuid.Must(uuid.NewV7()),
 		Guess: game.LatLng{
-			Lat: 1,
-			Lng: 1,
+			Lat: 6.74637,
 		},
 	}
 
@@ -339,35 +446,19 @@ func TestUsecase_EndRound(t *testing.T) {
 					Return(singleplayerEntity.Round{
 						ID:        roundID,
 						GameID:    args.req.GameID,
-						Lat:       11.22,
-						Lng:       33.44,
 						Finished:  false,
 						RoundNum:  2,
 						StartedAt: args.req.RequestTime.Add(-59 * time.Second),
 					}, nil)
 
-				wantScore, wantDistance := game.CalculateScore(
-					game.GoogleProvider,
-					game.LatLng{Lat: 11.22, Lng: 33.44},
-					args.req.Guess,
-				)
-
-				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything,
-					mock.MatchedBy(func(req dto.NewSingleplayerRoundGuessRequest) bool {
-						return req.RequestTime == args.req.RequestTime &&
-							req.RoundID == roundID &&
-							req.GameID == args.req.GameID &&
-							req.Guess == args.req.Guess &&
-							req.Score == wantScore &&
-							req.Distance == wantDistance
-					}),
-				).Return(nil)
+				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything, dto.NewSingleplayerRoundGuessRequest{
+					RequestTime: args.req.RequestTime,
+					RoundID:     roundID, GameID: args.req.GameID, Guess: args.req.Guess,
+					Score: 3032, Distance: 750_000,
+				}).Return(nil)
 			},
 			want: dto.EndCurrentRoundResponse{
-				Score: func() int { s, _ := game.CalculateScore(game.GoogleProvider,
-					game.LatLng{Lat: 11.22, Lng: 33.44}, endRoundReq.Guess); return s }(),
-				Distance: func() int { _, d := game.CalculateScore(game.GoogleProvider,
-					game.LatLng{Lat: 11.22, Lng: 33.44}, endRoundReq.Guess); return d }(),
+				Score: 3032, Distance: 750_000,
 			},
 			wantErr: assert.NoError,
 		},
@@ -457,34 +548,19 @@ func TestUsecase_EndRound(t *testing.T) {
 					Return(singleplayerEntity.Round{
 						ID:        roundID,
 						GameID:    args.req.GameID,
-						Lat:       11.22,
-						Lng:       33.44,
 						Finished:  false,
 						RoundNum:  2,
 						StartedAt: args.req.RequestTime.Add(-61 * time.Second),
 					}, nil)
 
-				_, wantDistance := game.CalculateScore(
-					game.GoogleProvider,
-					game.LatLng{Lat: 11.22, Lng: 33.44},
-					endRoundReq.Guess,
-				)
-
-				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything,
-					mock.MatchedBy(func(req dto.NewSingleplayerRoundGuessRequest) bool {
-						return req.RequestTime == args.req.RequestTime &&
-							req.RoundID == roundID &&
-							req.GameID == args.req.GameID &&
-							req.Guess == args.req.Guess &&
-							req.Score == 0 &&
-							req.Distance == wantDistance
-					}),
-				).Return(nil)
+				fs.repo.On("NewSingleplayerRoundGuess", mock.Anything, dto.NewSingleplayerRoundGuessRequest{
+					RequestTime: args.req.RequestTime,
+					RoundID:     roundID, GameID: args.req.GameID, Guess: args.req.Guess,
+					Score: 0, Distance: 750_000,
+				}).Return(nil)
 			},
 			want: dto.EndCurrentRoundResponse{
-				Score: 0,
-				Distance: func() int { _, d := game.CalculateScore(game.GoogleProvider,
-					game.LatLng{Lat: 11.22, Lng: 33.44}, endRoundReq.Guess); return d }(),
+				Score: 0, Distance: 750_000,
 			},
 			wantErr: assert.NoError,
 		},
@@ -504,6 +580,59 @@ func TestUsecase_EndRound(t *testing.T) {
 			got, err := uc.EndRound(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestUsecase_EndRoundTimerBoundaries(t *testing.T) {
+	t.Parallel()
+
+	startedAt := time.Date(2026, time.October, 11, 12, 0, 0, 0, time.UTC)
+	gameID := uuid.MustParse("11111111-1111-1111-1111-111111111111")
+	userID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
+	roundID := uuid.MustParse("44444444-4444-4444-4444-444444444444")
+	guess := game.LatLng{Lat: 6.74637}
+
+	tests := []struct {
+		name         string
+		timerSeconds int
+		elapsed      time.Duration
+		wantScore    int
+	}{
+		{name: "before deadline", timerSeconds: 60, elapsed: time.Minute - time.Nanosecond, wantScore: 3032},
+		{name: "at deadline", timerSeconds: 60, elapsed: time.Minute, wantScore: 3032},
+		{name: "after deadline", timerSeconds: 60, elapsed: time.Minute + time.Nanosecond},
+		{name: "timer disabled", elapsed: time.Hour, wantScore: 3032},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			repo := mocks.NewRepository(t)
+			pano := mocks.NewPanoramaUsecase(t)
+			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, pano)
+			req := dto.EndSingleplayerRoundRequest{
+				RequestTime: startedAt.Add(tt.elapsed), GameID: gameID, UserID: userID, Guess: guess,
+			}
+
+			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
+			repo.On("GetSingleplayerGame", mock.Anything, gameID).Return(singleplayerEntity.Game{
+				ID: gameID, UserID: userID, Provider: game.GoogleProvider, TimerSeconds: tt.timerSeconds,
+				RoundCurrent: 2,
+			}, nil).Once()
+			repo.On("GetSingleplayerRound", mock.Anything, gameID, 2).Return(singleplayerEntity.Round{
+				ID: roundID, GameID: gameID, RoundNum: 2, StartedAt: startedAt,
+			}, nil).Once()
+			repo.On("NewSingleplayerRoundGuess", mock.Anything, dto.NewSingleplayerRoundGuessRequest{
+				RequestTime: req.RequestTime, RoundID: roundID, GameID: gameID, Guess: guess,
+				Score: tt.wantScore, Distance: 750_000,
+			}).Return(nil).Once()
+
+			got, err := uc.EndRound(t.Context(), req)
+			require.NoError(t, err)
+			assert.Equal(t, dto.EndCurrentRoundResponse{Score: tt.wantScore, Distance: 750_000}, got)
 		})
 	}
 }
@@ -620,6 +749,19 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 			want: nil,
 			wantErr: func(t assert.TestingT, err error, _ ...any) bool {
 				return assert.ErrorIs(t, err, singleplayerEntity.ErrGameIsStillActive)
+			},
+		},
+		{
+			name: "ownership rejects before active game check",
+			args: args{req: getRoundsReq},
+			setup: func(fs fields, args args) {
+				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+					Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) })
+				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
+					Return(singleplayerEntity.Game{ID: args.req.GameID, UserID: uuid.Nil}, nil)
+			},
+			wantErr: func(t assert.TestingT, err error, _ ...any) bool {
+				return assert.ErrorIs(t, err, singleplayerEntity.ErrGameWrongUserID)
 			},
 		},
 	}

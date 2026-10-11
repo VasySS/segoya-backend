@@ -155,11 +155,6 @@ func (uc Usecase) isUserInGame(ctx context.Context, userID, gameID uuid.UUID) er
 		return fmt.Errorf("failed to get multiplayer game users: %w", err)
 	}
 
-	for _, u := range users {
-		if u.ID == userID {
-			return nil
-		}
-	}
-
-	return multiplayer.ErrGameWrongUserID
+	// Preserve the existing unwrapped participation error.
+	return (multiplayer.Participants{Users: users}).ValidateUser(userID) //nolint:wrapcheck
 }

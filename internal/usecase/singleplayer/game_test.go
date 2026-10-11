@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
@@ -416,6 +417,60 @@ func TestUsecase_EndGame(t *testing.T) {
 
 			err := uc.EndGame(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
+		})
+	}
+}
+
+func TestUsecase_EndGameRoundCountEquality(t *testing.T) {
+	t.Parallel()
+
+	now := time.Date(2026, time.October, 11, 12, 0, 0, 0, time.UTC)
+	gameID := uuid.MustParse("11111111-1111-1111-1111-111111111111")
+	userID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
+	tests := []struct {
+		name     string
+		current  int
+		rounds   int
+		finished bool
+		wantErr  error
+	}{
+		{name: "zero counts still allow ending"},
+		{
+			name: "above round count still rejects", current: 6, rounds: 5,
+			wantErr: singleplayerEntity.ErrGameIsStillActive,
+		},
+		{name: "finished game retains repeated end write", current: 5, rounds: 5, finished: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			repo := mocks.NewRepository(t)
+			pano := mocks.NewPanoramaUsecase(t)
+			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, pano)
+			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
+			repo.On("GetSingleplayerGame", mock.Anything, gameID).Return(singleplayerEntity.Game{
+				ID: gameID, UserID: userID, RoundCurrent: tt.current, Rounds: tt.rounds, Finished: tt.finished,
+			}, nil).Once()
+
+			if tt.wantErr == nil {
+				repo.On("GetSingleplayerRound", mock.Anything, gameID, tt.current).
+					Return(singleplayerEntity.Round{Finished: true}, nil).Once()
+				repo.On("EndSingleplayerGame", mock.Anything, dto.EndSingleplayerGameRequestDB{
+					RequestTime: now, GameID: gameID,
+				}).Return(nil).Once()
+			}
+
+			err := uc.EndGame(t.Context(), dto.EndSingleplayerGameRequest{
+				RequestTime: now, GameID: gameID, UserID: userID,
+			})
+			if tt.wantErr != nil {
+				require.ErrorIs(t, err, tt.wantErr)
+			} else {
+				require.NoError(t, err)
+			}
 		})
 	}
 }

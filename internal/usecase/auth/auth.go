@@ -193,8 +193,8 @@ func (uc Usecase) DeleteSession(ctx context.Context, userID, sessionID uuid.UUID
 		return fmt.Errorf("failed to get user session: %w", err)
 	}
 
-	if session.UserID != userID {
-		return user.ErrSessionWrongUser
+	if err := session.ValidateUser(userID); err != nil {
+		return err //nolint:wrapcheck // Preserve the existing unwrapped ownership error.
 	}
 
 	if err := uc.sessionRepo.DeleteSession(ctx, userID, sessionID); err != nil {

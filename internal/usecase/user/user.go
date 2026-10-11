@@ -53,8 +53,8 @@ func (uc Usecase) UpdateAvatar(ctx context.Context, req dto.UpdateAvatarRequest)
 			return fmt.Errorf("failed to get user from db: %w", err)
 		}
 
-		if userRepo.AvatarLastUpdate.Add(uc.cfg.AvatarUpdateLimit).After(req.RequestTime) {
-			return user.ErrAvatarUpdateTooFrequent
+		if err := userRepo.ValidateAvatarUpdate(req.RequestTime, uc.cfg.AvatarUpdateLimit); err != nil {
+			return err //nolint:wrapcheck // The transaction error is wrapped below, preserving the existing message.
 		}
 
 		// buffer is needed to read file body twice - for sha256 and later for S3 upload

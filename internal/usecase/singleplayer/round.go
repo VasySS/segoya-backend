@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
-	gameEntity "github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
@@ -31,12 +30,12 @@ func (uc Usecase) NewRound(
 			return fmt.Errorf("failed to get singleplayer game: %w", err)
 		}
 
-		if game.UserID != req.UserID {
-			return singleplayer.ErrGameWrongUserID
+		if err := game.ValidateUser(req.UserID); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
-		if game.MaxRoundsReached() {
-			return singleplayer.ErrRoundMaxAmount
+		if err := game.ValidateNewRound(); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
 		round, err := uc.getOrGenerateRound(ctx, game, req.RequestTime)
@@ -62,7 +61,7 @@ func (uc Usecase) getOrGenerateRound(
 	requestTime time.Time,
 ) (singleplayer.Round, error) {
 	if existingRound, err := uc.repo.GetSingleplayerRound(ctx, game.ID, game.RoundCurrent); err == nil {
-		if !existingRound.Finished {
+		if existingRound.CanReuse() {
 			return existingRound, nil
 		}
 	} else if !errors.Is(err, singleplayer.ErrRoundNotFound) {
@@ -74,12 +73,13 @@ func (uc Usecase) getOrGenerateRound(
 		return singleplayer.Round{}, fmt.Errorf("failed to create panorama: %w", err)
 	}
 
+	creation := game.PrepareNextRound(pano, requestTime, uc.cfg.RoundStartDelay)
 	dbReq := dto.NewSingleplayerRoundDBRequest{
-		GameID:     game.ID,
-		LocationID: pano.ID,
-		RoundNum:   game.RoundCurrent + 1,
-		CreatedAt:  requestTime,
-		StartedAt:  requestTime.Add(uc.cfg.RoundStartDelay),
+		GameID:     creation.GameID,
+		LocationID: creation.LocationID,
+		RoundNum:   creation.RoundNum,
+		CreatedAt:  creation.CreatedAt,
+		StartedAt:  creation.StartedAt,
 	}
 
 	round, err := uc.repo.NewSingleplayerRound(ctx, dbReq)
@@ -110,8 +110,8 @@ func (uc Usecase) GetRound(
 			return fmt.Errorf("failed to get singleplayer game: %w", err)
 		}
 
-		if game.UserID != req.UserID {
-			return singleplayer.ErrGameWrongUserID
+		if err := game.ValidateUser(req.UserID); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
 		round, err := uc.repo.GetSingleplayerRound(ctx, game.ID, game.RoundCurrent)
@@ -147,8 +147,8 @@ func (uc Usecase) EndRound(
 			return fmt.Errorf("failed to get singleplayer game: %w", err)
 		}
 
-		if game.UserID != req.UserID {
-			return singleplayer.ErrGameWrongUserID
+		if err := game.ValidateUser(req.UserID); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
 		round, err := uc.repo.GetSingleplayerRound(ctx, game.ID, game.RoundCurrent)
@@ -156,15 +156,9 @@ func (uc Usecase) EndRound(
 			return fmt.Errorf("failed to get current round from db: %w", err)
 		}
 
-		if round.Finished {
-			return singleplayer.ErrRoundAlreadyFinished
-		}
-
-		real := gameEntity.LatLng{Lat: round.Lat, Lng: round.Lng}
-		score, distance := gameEntity.CalculateScore(game.Provider, real, req.Guess)
-
-		if round.TimerExpired(req.RequestTime, game.TimerSeconds) {
-			score = 0
+		score, distance, err := round.EvaluateGuess(game, req.RequestTime, req.Guess)
+		if err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
 		dbReq := dto.NewSingleplayerRoundGuessRequest{
@@ -210,12 +204,12 @@ func (uc Usecase) GetGameGuesses(
 			return fmt.Errorf("failed to get game from db: %w", err)
 		}
 
-		if game.UserID != req.UserID {
-			return singleplayer.ErrGameWrongUserID
+		if err := game.ValidateUser(req.UserID); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
-		if !game.Finished {
-			return singleplayer.ErrGameIsStillActive
+		if err := game.ValidateGuessesAccess(); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
 		rounds, err := uc.repo.GetSingleplayerGameGuesses(ctx, req.GameID)

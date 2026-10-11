@@ -58,12 +58,7 @@ type LobbyNewSettingsMessage struct {
 }
 
 // LobbySettingsMessage contains settings for a lobby.
-type LobbySettingsMessage struct {
-	Provider        string `json:"provider"`
-	MovementAllowed bool   `json:"movementAllowed"`
-	Rounds          int    `json:"rounds"`
-	TimerSeconds    int    `json:"timerSeconds"`
-}
+type LobbySettingsMessage = lobby.Settings
 
 // LobbyToAPI converts a lobby entity to its API representation.
 func LobbyToAPI(l lobby.Lobby) *api.Lobby {

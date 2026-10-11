@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	userEntity "github.com/VasySS/segoya-backend/internal/entity/user"
@@ -545,6 +546,76 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 
 			err := uc.UpdateAvatar(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
+		})
+	}
+}
+
+func TestUsecase_UpdateAvatarCooldownBoundaries(t *testing.T) {
+	t.Parallel()
+
+	lastUpdate := time.Date(2026, time.October, 11, 12, 0, 0, 0, time.UTC)
+	avatarBytes := []byte("new avatar")
+	avatarHash := sha256.Sum256(avatarBytes)
+	expectedHash := hex.EncodeToString(avatarHash[:])
+	profile := userEntity.PrivateProfile{
+		PublicProfile: userEntity.PublicProfile{
+			ID:         uuid.MustParse("019a553a-fc00-7000-8000-000000000001"),
+			AvatarHash: "old_hash",
+		},
+		AvatarLastUpdate: lastUpdate,
+	}
+
+	tests := []struct {
+		name   string
+		offset time.Duration
+		denied bool
+	}{
+		{name: "immediately before cooldown deadline", offset: -time.Nanosecond, denied: true},
+		{name: "at cooldown deadline"},
+		{name: "immediately after cooldown deadline", offset: time.Nanosecond},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			repo := mocks.NewRepository(t)
+			s3 := mocks.NewS3Repository(t)
+			uc := user.NewUsecase(user.Config{AvatarUpdateLimit: 5 * time.Minute}, repo, s3)
+			req := dto.UpdateAvatarRequest{
+				UserID:      profile.ID,
+				File:        bytes.NewReader(avatarBytes),
+				RequestTime: lastUpdate.Add(5*time.Minute + tt.offset),
+				MimeType:    "image/webp",
+			}
+
+			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
+			repo.On("GetUserByID", mock.Anything, profile.ID).Return(profile, nil).Once()
+
+			if !tt.denied {
+				s3.On("UploadAvatar", mock.Anything, bytes.NewBuffer(avatarBytes), expectedHash, req.MimeType).
+					Return(nil).Once()
+				repo.On("UpdateAvatar", mock.Anything, dto.UpdateAvatarRequestDB{
+					UserID:      req.UserID,
+					AvatarHash:  expectedHash,
+					RequestTime: req.RequestTime,
+				}).Return(nil).Once()
+				s3.On("DeleteAvatar", mock.Anything, profile.AvatarHash).Return(nil).Once()
+			}
+
+			err := uc.UpdateAvatar(t.Context(), req)
+			if tt.denied {
+				require.ErrorIs(t, err, userEntity.ErrAvatarUpdateTooFrequent)
+				require.EqualError(t, err, "failed to update avatar: avatar update too frequent")
+				s3.AssertNotCalled(t, "UploadAvatar", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+				repo.AssertNotCalled(t, "UpdateAvatar", mock.Anything, mock.Anything)
+				s3.AssertNotCalled(t, "DeleteAvatar", mock.Anything, mock.Anything)
+
+				return
+			}
+
+			assert.NoError(t, err)
 		})
 	}
 }

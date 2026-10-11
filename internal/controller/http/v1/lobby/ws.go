@@ -2,6 +2,7 @@ package lobby
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"time"
@@ -9,7 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
-	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 )
@@ -235,18 +236,16 @@ func (h Handler) processSettingsNew(
 		return
 	}
 
-	if !game.IsSupportedProvider(settings.Provider) {
-		session.SendError("provider field is set wrong")
-		return
-	}
+	if err := settings.Validate(); err != nil {
+		switch {
+		case errors.Is(err, lobby.ErrInvalidProvider):
+			session.SendError("provider field is set wrong")
+		case errors.Is(err, lobby.ErrInvalidRounds):
+			session.SendError("rounds must be between 1 and 10")
+		case errors.Is(err, lobby.ErrInvalidTimerSeconds):
+			session.SendError("timer must be between 10 and 600")
+		}
 
-	if settings.Rounds < 1 || settings.Rounds > 10 {
-		session.SendError("rounds must be between 1 and 10")
-		return
-	}
-
-	if settings.TimerSeconds != 0 && (settings.TimerSeconds < 10 || settings.TimerSeconds > 600) {
-		session.SendError("timer must be between 10 and 600")
 		return
 	}
 

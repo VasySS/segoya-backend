@@ -411,3 +411,50 @@ func TestUsecase_UpdateLobbySettings(t *testing.T) {
 		})
 	}
 }
+
+func TestUsecase_UpdateLobbySettingsPreservesRepositoryContract(t *testing.T) {
+	t.Parallel()
+
+	creatorID := uuid.MustParse("0199027e-ade6-784d-9d43-cc9c776a6943")
+	original := lobbyEntity.Lobby{
+		ID: "test-lobby", CreatorID: creatorID, CreatedAt: time.Date(2026, time.October, 1, 12, 0, 0, 0, time.UTC),
+		Provider: "google", MovementAllowed: true, Rounds: 5, TimerSeconds: 60,
+		CurrentPlayers: 2, MaxPlayers: 5, Private: true,
+	}
+	tests := []struct {
+		name     string
+		settings dto.LobbySettingsMessage
+		want     lobbyEntity.Lobby
+	}{
+		{
+			name:     "unchanged settings still persist",
+			settings: dto.LobbySettingsMessage{Provider: "google", MovementAllowed: true, Rounds: 5, TimerSeconds: 60},
+			want:     original,
+		},
+		{
+			name:     "validation remains at websocket entrypoint",
+			settings: dto.LobbySettingsMessage{Provider: "unknown", Rounds: 0, TimerSeconds: 9},
+			want: lobbyEntity.Lobby{
+				ID: "test-lobby", CreatorID: creatorID, CreatedAt: original.CreatedAt,
+				Provider: "unknown", Rounds: 0, TimerSeconds: 9,
+				CurrentPlayers: 2, MaxPlayers: 5, Private: true,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			lobbyRepo := mocks.NewRepository(t)
+			lobbyRepo.On("GetLobby", mock.Anything, original.ID).Return(original, nil).Once()
+			lobbyRepo.On("UpdateLobby", mock.Anything, tt.want).Return(nil).Once()
+			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil)
+
+			err := uc.UpdateLobbySettings(t.Context(), dto.UpdateLobbySettingsRequest{
+				LobbyID: original.ID, Creator: user.PublicProfile{ID: creatorID}, Settings: tt.settings,
+			})
+			assert.NoError(t, err)
+		})
+	}
+}

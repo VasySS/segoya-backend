@@ -13,9 +13,9 @@ const (
 	SeznamProvider    PanoramaProvider = "seznam"
 )
 
-// IsSupportedProvider returns true if the provider is supported.
-func IsSupportedProvider(p string) bool {
-	switch PanoramaProvider(p) {
+// IsSupported returns true if the provider is supported.
+func (p PanoramaProvider) IsSupported() bool {
+	switch p {
 	case GoogleProvider, YandexProvider, YandexAirProvider, SeznamProvider:
 		return true
 	default:

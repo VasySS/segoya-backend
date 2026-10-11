@@ -55,8 +55,8 @@ func (uc Usecase) GetGame(ctx context.Context, req dto.GetSingleplayerGameReques
 		return singleplayer.Game{}, fmt.Errorf("failed to get singleplayer game: %w", err)
 	}
 
-	if game.UserID != req.UserID {
-		return singleplayer.Game{}, singleplayer.ErrGameWrongUserID
+	if err := game.ValidateUser(req.UserID); err != nil {
+		return singleplayer.Game{}, err //nolint:wrapcheck // Preserve existing domain error wrapping.
 	}
 
 	return game, nil
@@ -73,12 +73,12 @@ func (uc Usecase) EndGame(ctx context.Context, req dto.EndSingleplayerGameReques
 			return fmt.Errorf("failed to get game from db: %w", err)
 		}
 
-		if game.UserID != req.UserID {
-			return singleplayer.ErrGameWrongUserID
+		if err := game.ValidateUser(req.UserID); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
-		if !game.AllRoundsCreated() {
-			return singleplayer.ErrGameIsStillActive
+		if err := game.ValidateEnd(); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
 		round, err := uc.repo.GetSingleplayerRound(ctx, req.GameID, game.RoundCurrent)
@@ -86,8 +86,8 @@ func (uc Usecase) EndGame(ctx context.Context, req dto.EndSingleplayerGameReques
 			return fmt.Errorf("failed to get current round from db: %w", err)
 		}
 
-		if !round.Finished {
-			return singleplayer.ErrRoundIsStillActive
+		if err := round.ValidateFinished(); err != nil {
+			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
 		if err := uc.repo.EndSingleplayerGame(ctx, dto.EndSingleplayerGameRequestDB{

@@ -24,6 +24,15 @@ type PrivateProfile struct {
 	AvatarLastUpdate time.Time `json:"-"`
 }
 
+// ValidateAvatarUpdate checks whether the avatar update cooldown has elapsed.
+func (u PrivateProfile) ValidateAvatarUpdate(requestTime time.Time, cooldown time.Duration) error {
+	if u.AvatarLastUpdate.Add(cooldown).After(requestTime) {
+		return ErrAvatarUpdateTooFrequent
+	}
+
+	return nil
+}
+
 // ToPublicProfile returns public information from PrivateProfile.
 func (u PrivateProfile) ToPublicProfile() PublicProfile {
 	return u.PublicProfile

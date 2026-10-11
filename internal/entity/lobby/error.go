@@ -13,4 +13,10 @@ var (
 	ErrOnlyCreatorCanUpdateSettings = errors.New("only creator can update settings")
 	// ErrLobbyIsFull is returned when user tries to join a lobby that is full.
 	ErrLobbyIsFull = errors.New("lobby is full")
+	// ErrInvalidProvider is returned when settings use an unsupported panorama provider.
+	ErrInvalidProvider = errors.New("invalid panorama provider")
+	// ErrInvalidRounds is returned when settings specify an invalid round count.
+	ErrInvalidRounds = errors.New("invalid rounds")
+	// ErrInvalidTimerSeconds is returned when settings specify an invalid timer duration.
+	ErrInvalidTimerSeconds = errors.New("invalid timer seconds")
 )
