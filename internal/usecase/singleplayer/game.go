@@ -55,7 +55,7 @@ func (uc Usecase) GetGame(ctx context.Context, req dto.GetSingleplayerGameReques
 		return singleplayer.Game{}, fmt.Errorf("failed to get singleplayer game: %w", err)
 	}
 
-	if err := game.ValidateUser(req.UserID); err != nil {
+	if err := game.HasUser(req.UserID); err != nil {
 		return singleplayer.Game{}, err //nolint:wrapcheck // Preserve existing domain error wrapping.
 	}
 
@@ -73,7 +73,7 @@ func (uc Usecase) EndGame(ctx context.Context, req dto.EndSingleplayerGameReques
 			return fmt.Errorf("failed to get game from db: %w", err)
 		}
 
-		if err := game.ValidateUser(req.UserID); err != nil {
+		if err := game.HasUser(req.UserID); err != nil {
 			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 

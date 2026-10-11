@@ -30,7 +30,7 @@ func (uc Usecase) NewRound(
 			return fmt.Errorf("failed to get singleplayer game: %w", err)
 		}
 
-		if err := game.ValidateUser(req.UserID); err != nil {
+		if err := game.HasUser(req.UserID); err != nil {
 			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
@@ -110,7 +110,7 @@ func (uc Usecase) GetRound(
 			return fmt.Errorf("failed to get singleplayer game: %w", err)
 		}
 
-		if err := game.ValidateUser(req.UserID); err != nil {
+		if err := game.HasUser(req.UserID); err != nil {
 			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
@@ -147,7 +147,7 @@ func (uc Usecase) EndRound(
 			return fmt.Errorf("failed to get singleplayer game: %w", err)
 		}
 
-		if err := game.ValidateUser(req.UserID); err != nil {
+		if err := game.HasUser(req.UserID); err != nil {
 			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 
@@ -204,7 +204,7 @@ func (uc Usecase) GetGameGuesses(
 			return fmt.Errorf("failed to get game from db: %w", err)
 		}
 
-		if err := game.ValidateUser(req.UserID); err != nil {
+		if err := game.HasUser(req.UserID); err != nil {
 			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}
 

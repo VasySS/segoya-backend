@@ -15,8 +15,8 @@ type Session struct {
 	LastActive   time.Time `json:"lastActive"`
 }
 
-// ValidateUser checks that the session belongs to the user.
-func (s Session) ValidateUser(userID uuid.UUID) error {
+// HasUser checks that the session belongs to the user.
+func (s Session) HasUser(userID uuid.UUID) error {
 	if s.UserID != userID {
 		return ErrSessionWrongUser
 	}

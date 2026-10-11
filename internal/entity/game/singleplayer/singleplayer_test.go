@@ -12,7 +12,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
-func TestGame_ValidateUser(t *testing.T) {
+func TestGame_HasUser(t *testing.T) {
 	t.Parallel()
 
 	ownerID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
@@ -32,7 +32,7 @@ func TestGame_ValidateUser(t *testing.T) {
 			t.Parallel()
 
 			g := singleplayer.Game{UserID: tt.ownerID}
-			assert.ErrorIs(t, g.ValidateUser(tt.userID), tt.wantErr)
+			assert.ErrorIs(t, g.HasUser(tt.userID), tt.wantErr)
 		})
 	}
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
-func TestSession_ValidateUser(t *testing.T) {
+func TestSession_HasUser(t *testing.T) {
 	t.Parallel()
 
 	ownerID := uuid.MustParse("019a553a-fc00-7000-8000-000000000001")
@@ -33,7 +33,7 @@ func TestSession_ValidateUser(t *testing.T) {
 
 			session := user.Session{UserID: tt.ownerID}
 
-			err := session.ValidateUser(tt.userID)
+			err := session.HasUser(tt.userID)
 			if tt.wantErr != nil {
 				assert.ErrorIs(t, err, tt.wantErr)
 

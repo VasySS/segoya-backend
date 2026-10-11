@@ -156,5 +156,5 @@ func (uc Usecase) isUserInGame(ctx context.Context, userID, gameID uuid.UUID) er
 	}
 
 	// Preserve the existing unwrapped participation error.
-	return (multiplayer.Participants{Users: users}).ValidateUser(userID) //nolint:wrapcheck
+	return (multiplayer.Participants{Users: users}).HasUser(userID) //nolint:wrapcheck
 }

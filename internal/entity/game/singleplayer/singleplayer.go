@@ -39,8 +39,8 @@ type Game struct {
 	EndedAt         time.Time             `db:"ended_at"         json:"endedAt"`
 }
 
-// ValidateUser checks that the game belongs to the user.
-func (g Game) ValidateUser(userID uuid.UUID) error {
+// HasUser checks that the game belongs to the user.
+func (g Game) HasUser(userID uuid.UUID) error {
 	if g.UserID != userID {
 		return ErrGameWrongUserID
 	}

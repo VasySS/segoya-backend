@@ -80,8 +80,8 @@ type Participants struct {
 	Users []user.MultiplayerUser
 }
 
-// ValidateUser checks whether a user is a participant of the game.
-func (p Participants) ValidateUser(userID uuid.UUID) error {
+// HasUser checks whether a user is a participant of the game.
+func (p Participants) HasUser(userID uuid.UUID) error {
 	for _, participant := range p.Users {
 		if participant.ID == userID {
 			return nil

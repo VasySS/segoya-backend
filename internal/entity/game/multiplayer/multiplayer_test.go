@@ -89,7 +89,7 @@ func TestGame_PrepareNextRound(t *testing.T) {
 	}, currentGame.PrepareNextRound(panorama, requestTime, 5*time.Second))
 }
 
-func TestParticipants_ValidateUser(t *testing.T) {
+func TestParticipants_HasUser(t *testing.T) {
 	t.Parallel()
 
 	userID := uuid.New()
@@ -118,7 +118,7 @@ func TestParticipants_ValidateUser(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := tt.participants.ValidateUser(userID)
+			err := tt.participants.HasUser(userID)
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
 				return
