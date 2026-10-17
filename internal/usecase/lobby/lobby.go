@@ -13,9 +13,20 @@ func (uc Usecase) NewLobby(ctx context.Context, req dto.NewLobbyRequest) (string
 	ctx, span := uc.tracer.Start(ctx, "NewLobby")
 	defer span.End()
 
+	value := lobby.Lobby{
+		Provider:     req.Provider,
+		Rounds:       req.Rounds,
+		TimerSeconds: req.TimerSeconds,
+		MaxPlayers:   req.MaxPlayers,
+	}
+	if err := value.Validate(); err != nil {
+		return "", fmt.Errorf("validate game settings and state: %w", err)
+	}
+
 	id := uc.rnd.NewRandomHexString(uc.conf.LobbyIDLength)
 
 	dbReq := dto.NewLobbyRequestDB{
+		Expiration:      uc.conf.LobbyExpiration,
 		ID:              id,
 		RequestTime:     req.RequestTime,
 		MaxPlayers:      req.MaxPlayers,
@@ -36,11 +47,6 @@ func (uc Usecase) NewLobby(ctx context.Context, req dto.NewLobbyRequest) (string
 			span.RecordError(err)
 			return "", fmt.Errorf("failed to create lobby: %w", err)
 		}
-	}
-
-	if err := uc.lobbyRepo.AddLobbyExpiration(ctx, id, uc.conf.LobbyExpiration); err != nil {
-		span.RecordError(err)
-		return "", fmt.Errorf("failed to add lobby expiration: %w", err)
 	}
 
 	return id, nil

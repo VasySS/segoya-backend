@@ -24,8 +24,8 @@ type Usecase interface {
 	GetLobby(ctx context.Context, id string) (lobby.Lobby, error)
 	UpdateLobbySettings(ctx context.Context, req dto.UpdateLobbySettingsRequest) error
 	GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) ([]lobby.Lobby, int, error)
-	ConnectLobbyUser(ctx context.Context, lobbyID string, userID uuid.UUID) (user.PublicProfile, error)
-	DisconnectLobbyUser(ctx context.Context, lobbyID string, userID uuid.UUID) error
+	ConnectLobbyUser(ctx context.Context, lobbyID string, userID uuid.UUID, sessionID string) (user.PublicProfile, error)
+	DisconnectLobbyUser(ctx context.Context, lobbyID string, userID uuid.UUID, sessionID string) error
 	StartLobbyGame(ctx context.Context, req dto.StartLobbyGameRequest) (uuid.UUID, error)
 }
 

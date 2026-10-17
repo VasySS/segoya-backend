@@ -74,7 +74,7 @@ func TestCalculateScore(t *testing.T) {
 			wantDistance: 750_000,
 		},
 		{
-			name: "zero score and distance",
+			name: "zero coordinates scored normally",
 			args: args{
 				provider: "google",
 				realLat:  11.11,
@@ -82,8 +82,8 @@ func TestCalculateScore(t *testing.T) {
 				userLat:  0.0,
 				userLng:  0.0,
 			},
-			wantScore:    0,
-			wantDistance: 0,
+			wantScore:    6,
+			wantDistance: 2747733,
 		},
 	}
 
@@ -91,9 +91,9 @@ func TestCalculateScore(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			real := game.LatLng{Lat: tt.args.realLat, Lng: tt.args.realLng}
+			location := game.LatLng{Lat: tt.args.realLat, Lng: tt.args.realLng}
 			guess := game.LatLng{Lat: tt.args.userLat, Lng: tt.args.userLng}
-			score, distance := game.CalculateScore(tt.args.provider, real, guess)
+			score, distance := game.CalculateScore(tt.args.provider, location, guess)
 
 			assert.Equal(t, tt.wantScore, score)
 			assert.Equal(t, tt.wantDistance, distance)

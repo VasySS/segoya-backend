@@ -56,6 +56,10 @@ func (uc Usecase) getOrGenerateRound(
 	game multiplayer.Game,
 	requestTime time.Time,
 ) (multiplayer.Round, error) {
+	if err := game.Validate(); err != nil {
+		return multiplayer.Round{}, fmt.Errorf("validate game settings and state: %w", err)
+	}
+
 	if existingRound, err := uc.repo.GetMultiplayerRound(ctx, game.ID, game.RoundCurrent); err == nil {
 		if existingRound.CanReuse(requestTime, uc.cfg.RoundEndDelay) {
 			return existingRound, nil
@@ -73,7 +77,11 @@ func (uc Usecase) getOrGenerateRound(
 		return multiplayer.Round{}, fmt.Errorf("failed to create panorama: %w", err)
 	}
 
-	creation := game.PrepareNextRound(pano, requestTime, uc.cfg.RoundStartDelay)
+	creation, err := game.PrepareNextRound(pano, requestTime, uc.cfg.RoundStartDelay)
+	if err != nil {
+		return multiplayer.Round{}, fmt.Errorf("prepare next round: %w", err)
+	}
+
 	dbReq := dto.NewMultiplayerRoundRequestDB{
 		GameID:     creation.GameID,
 		LocationID: creation.LocationID,

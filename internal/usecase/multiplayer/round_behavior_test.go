@@ -73,7 +73,8 @@ func TestUsecase_NewRoundReuseBoundaries(t *testing.T) {
 				UserID:      uuid.New(),
 			}
 			currentGame := multiplayerEntity.Game{
-				ID: req.GameID, Provider: game.GoogleProvider, Rounds: 5, RoundCurrent: tt.currentRound,
+				Players: 2,
+				ID:      req.GameID, Provider: game.GoogleProvider, Rounds: 5, RoundCurrent: tt.currentRound,
 			}
 			currentRound := multiplayerEntity.Round{
 				ID: uuid.New(), GameID: req.GameID, RoundNum: tt.currentRound, Finished: tt.finished, EndedAt: endedAt,
@@ -161,7 +162,7 @@ func TestUsecase_EndRoundBoundaries(t *testing.T) {
 		},
 		{
 			name: "extra guesses reject before timer", requestTime: boundary.Add(-time.Nanosecond),
-			timerSeconds: 30, guessesCount: 3, wantErr: multiplayerEntity.ErrRoundIsStillActive,
+			timerSeconds: 30, guessesCount: 3, wantErr: game.ErrInvalidState,
 		},
 		{name: "final round also ends game", requestTime: boundary, timerSeconds: 30, finalRound: true},
 		{
@@ -179,7 +180,8 @@ func TestUsecase_EndRoundBoundaries(t *testing.T) {
 			req := dto.EndMultiplayerRoundRequest{RequestTime: tt.requestTime, GameID: uuid.New(), UserID: uuid.New()}
 
 			currentGame := multiplayerEntity.Game{
-				ID: req.GameID, Rounds: 5, RoundCurrent: 2, TimerSeconds: tt.timerSeconds, Players: 2,
+				Provider: "google",
+				ID:       req.GameID, Rounds: 5, RoundCurrent: 2, TimerSeconds: tt.timerSeconds, Players: 2,
 			}
 			if tt.finalRound {
 				currentGame.RoundCurrent = currentGame.Rounds
@@ -252,15 +254,22 @@ func TestUsecase_NewRoundGuessFixedScore(t *testing.T) {
 				RequestTime: time.Date(2026, time.October, 11, 12, 0, 0, 0, time.UTC),
 				GameID:      uuid.New(),
 				UserID:      uuid.New(),
-				Guess:       game.LatLng{Lat: 6.74637},
+				Guess:       &game.LatLng{Lat: 6.74637},
 			}
-			currentGame := multiplayerEntity.Game{ID: req.GameID, RoundCurrent: 2, Provider: game.GoogleProvider}
+			currentGame := multiplayerEntity.Game{
+				Players:      2,
+				Rounds:       2,
+				ID:           req.GameID,
+				RoundCurrent: 2,
+				Provider:     game.GoogleProvider,
+			}
 			currentRound := multiplayerEntity.Round{ID: uuid.New(), RoundNum: 2, Finished: finished}
 
 			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
 
-			getGame := repo.On("GetMultiplayerGame", mock.Anything, req.GameID).Return(currentGame, nil).Once()
+			getGame := repo.On("LockMultiplayerGame", mock.Anything, req.GameID).Return(nil).Once()
+			repo.On("GetMultiplayerGame", mock.Anything, req.GameID).Return(currentGame, nil).Once()
 			members := repo.On("GetMultiplayerGameUsers", mock.Anything, req.GameID).
 				Return([]user.MultiplayerUser{{PublicProfile: user.PublicProfile{ID: req.UserID}}}, nil).Once()
 			getRound := repo.On("GetMultiplayerRound", mock.Anything, req.GameID, currentGame.RoundCurrent).

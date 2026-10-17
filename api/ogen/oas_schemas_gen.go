@@ -1079,13 +1079,14 @@ func (*NewDiscordTemporaryRedirect) newDiscordRes() {}
 
 // Ref: #/NewLobby
 type NewLobby struct {
-	CreatorID       uuid.UUID `json:"creatorID"`
-	MaxPlayers      int       `json:"maxPlayers"`
-	Rounds          int       `json:"rounds"`
-	Provider        Provider  `json:"provider"`
-	TimerSeconds    OptInt    `json:"timerSeconds"`
-	MovementAllowed bool      `json:"movementAllowed"`
-	Private         bool      `json:"private"`
+	CreatorID  uuid.UUID `json:"creatorID"`
+	MaxPlayers int       `json:"maxPlayers"`
+	Rounds     int       `json:"rounds"`
+	Provider   Provider  `json:"provider"`
+	// Zero or omitted disables the timer; otherwise 10-600 seconds.
+	TimerSeconds    OptInt `json:"timerSeconds"`
+	MovementAllowed bool   `json:"movementAllowed"`
+	Private         bool   `json:"private"`
 }
 
 // GetCreatorID returns the value of CreatorID.
@@ -1220,7 +1221,8 @@ func (*NewSingleplayerGameInternalServerError) newSingleplayerGameRes() {}
 
 // Ref: #/NewSingleplayerGameRequest
 type NewSingleplayerGameRequest struct {
-	Rounds          int      `json:"rounds"`
+	Rounds int `json:"rounds"`
+	// Zero or omitted disables the timer; otherwise 10-600 seconds.
 	TimerSeconds    OptInt   `json:"timerSeconds"`
 	MovementAllowed bool     `json:"movementAllowed"`
 	Provider        Provider `json:"provider"`
@@ -1346,6 +1348,51 @@ func (s *NewYandexTemporaryRedirect) SetSetCookie(val string) {
 }
 
 func (*NewYandexTemporaryRedirect) newYandexRes() {}
+
+// NewNilLatLng returns new NilLatLng with value set to v.
+func NewNilLatLng(v LatLng) NilLatLng {
+	return NilLatLng{
+		Value: v,
+	}
+}
+
+// NilLatLng is nullable LatLng.
+type NilLatLng struct {
+	Value LatLng
+	Null  bool
+}
+
+// SetTo sets value to v.
+func (o *NilLatLng) SetTo(v LatLng) {
+	o.Null = false
+	o.Value = v
+}
+
+// IsNull returns true if value is Null.
+func (o NilLatLng) IsNull() bool { return o.Null }
+
+// SetToNull sets value to null.
+func (o *NilLatLng) SetToNull() {
+	o.Null = true
+	var v LatLng
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o NilLatLng) Get() (v LatLng, ok bool) {
+	if o.Null {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o NilLatLng) Or(d LatLng) LatLng {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewOptInt returns new OptInt with value set to v.
 func NewOptInt(v int) OptInt {
@@ -1932,16 +1979,16 @@ func (*SingleplayerRound) newSingleplayerRoundRes() {}
 
 // Ref: #/SingleplayerRoundGuess
 type SingleplayerRoundGuess struct {
-	Guess LatLng `json:"guess"`
+	Guess NilLatLng `json:"guess"`
 }
 
 // GetGuess returns the value of Guess.
-func (s *SingleplayerRoundGuess) GetGuess() LatLng {
+func (s *SingleplayerRoundGuess) GetGuess() NilLatLng {
 	return s.Guess
 }
 
 // SetGuess sets the value of Guess.
-func (s *SingleplayerRoundGuess) SetGuess(val LatLng) {
+func (s *SingleplayerRoundGuess) SetGuess(val NilLatLng) {
 	s.Guess = val
 }
 

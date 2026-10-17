@@ -1,12 +1,15 @@
 package lobby_test
 
 import (
+	"errors"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	lobbyEntity "github.com/VasySS/segoya-backend/internal/entity/lobby"
@@ -18,168 +21,47 @@ import (
 func TestUsecase_LobbyUserConnect(t *testing.T) {
 	t.Parallel()
 
-	type fields struct {
-		lobbyRepo *mocks.Repository
-		userRepo  *mocks.UserRepository
-	}
+	userID := uuid.New()
 
-	type args struct {
-		lobbyID string
-		userID  uuid.UUID
-	}
-
-	userID := uuid.Must(uuid.NewV7())
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		want    user.PublicProfile
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successfully connect user to lobby",
-			args: args{
-				lobbyID: "1234567890",
-				userID:  userID,
-			},
-			setup: func(fs fields, args args) {
-				fs.lobbyRepo.On("GetLobby", mock.Anything, args.lobbyID).
-					Return(lobbyEntity.Lobby{
-						ID:             args.lobbyID,
-						CurrentPlayers: 4,
-						MaxPlayers:     5,
-					}, nil)
-				fs.lobbyRepo.On("IncrementLobbyPlayers", mock.Anything, args.lobbyID).
-					Return(nil)
-				fs.lobbyRepo.On("DeleteLobbyExpiration", mock.Anything, args.lobbyID).
-					Return(nil)
-				fs.userRepo.On("GetUserByID", mock.Anything, args.userID).
-					Return(user.PrivateProfile{PublicProfile: user.PublicProfile{ID: args.userID}}, nil)
-			},
-			want:    user.PublicProfile{ID: userID},
-			wantErr: assert.NoError,
-		},
-		{
-			name: "trying to connect to full lobby",
-			args: args{
-				lobbyID: "1234567890",
-				userID:  userID,
-			},
-			setup: func(fs fields, args args) {
-				fs.lobbyRepo.On("GetLobby", mock.Anything, args.lobbyID).
-					Return(lobbyEntity.Lobby{
-						ID:             args.lobbyID,
-						CurrentPlayers: 5,
-						MaxPlayers:     5,
-					}, nil)
-			},
-			want:    user.PublicProfile{},
-			wantErr: assert.Error,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, failed := range []bool{false, true} {
+		t.Run(strconv.FormatBool(failed), func(t *testing.T) {
 			t.Parallel()
-
-			lobbyRepo := mocks.NewRepository(t)
 			userRepo := mocks.NewUserRepository(t)
-			fs := fields{
-				lobbyRepo: lobbyRepo,
-				userRepo:  userRepo,
+			repo := mocks.NewRepository(t)
+			profile := user.PrivateProfile{PublicProfile: user.PublicProfile{ID: userID}}
+
+			var profileErr error
+			if failed {
+				profileErr = errors.New("profile unavailable")
 			}
-			tt.setup(fs, tt.args)
 
-			uc := lobby.NewUsecase(lobby.Config{}, nil, userRepo, lobbyRepo, nil)
+			userRepo.On("GetUserByID", mock.Anything, userID).Return(profile, profileErr).Once()
 
-			got, err := uc.ConnectLobbyUser(t.Context(), tt.args.lobbyID, tt.args.userID)
-			tt.wantErr(t, err)
-			assert.Equal(t, tt.want, got)
+			if !failed {
+				repo.On("AdmitLobbyUser", mock.Anything, "lobby", userID, "session").Return(nil).Once()
+			}
+
+			uc := lobby.NewUsecase(lobby.Config{}, nil, userRepo, repo, nil)
+
+			got, err := uc.ConnectLobbyUser(t.Context(), "lobby", userID, "session")
+			if failed {
+				require.Error(t, err)
+				repo.AssertNotCalled(t, "AdmitLobbyUser", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, profile.ToPublicProfile(), got)
+			}
 		})
 	}
 }
 
 func TestUsecase_LobbyUserDisconnect(t *testing.T) {
 	t.Parallel()
-
-	type fields struct {
-		conf      lobby.Config
-		lobbyRepo *mocks.Repository
-	}
-
-	type args struct {
-		lobbyID string
-		_       int
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successfully disconnect user from lobby (last user)",
-			args: args{
-				lobbyID: "1234567890",
-			},
-			setup: func(fs fields, args args) {
-				fs.lobbyRepo.On("GetLobby", mock.Anything, args.lobbyID).
-					Return(lobbyEntity.Lobby{
-						ID:             args.lobbyID,
-						CurrentPlayers: 1,
-						MaxPlayers:     5,
-					}, nil)
-
-				fs.lobbyRepo.On("AddLobbyExpiration", mock.Anything, args.lobbyID, fs.conf.LobbyExpiration).
-					Return(nil)
-
-				fs.lobbyRepo.On("DecrementLobbyPlayers", mock.Anything, args.lobbyID).
-					Return(nil)
-			},
-			wantErr: assert.NoError,
-		},
-		{
-			name: "successfully disconnect user from lobby (not last user)",
-			args: args{
-				lobbyID: "1234567890",
-			},
-			setup: func(fs fields, args args) {
-				fs.lobbyRepo.On("GetLobby", mock.Anything, args.lobbyID).
-					Return(lobbyEntity.Lobby{
-						ID:             args.lobbyID,
-						CurrentPlayers: 2,
-						MaxPlayers:     5,
-					}, nil)
-
-				fs.lobbyRepo.On("DecrementLobbyPlayers", mock.Anything, args.lobbyID).
-					Return(nil)
-			},
-			wantErr: assert.NoError,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			lobbyRepo := mocks.NewRepository(t)
-			conf := lobby.Config{
-				LobbyExpiration: 3 * time.Minute,
-			}
-			fs := fields{
-				conf:      conf,
-				lobbyRepo: lobbyRepo,
-			}
-			tt.setup(fs, tt.args)
-
-			uc := lobby.NewUsecase(conf, nil, nil, lobbyRepo, nil)
-
-			err := uc.DisconnectLobbyUser(t.Context(), tt.args.lobbyID, uuid.Nil)
-			tt.wantErr(t, err)
-		})
-	}
+	repo := mocks.NewRepository(t)
+	userID := uuid.New()
+	repo.On("ReleaseLobbyUser", mock.Anything, "lobby", userID, "session", 3*time.Minute).Return(nil).Once()
+	uc := lobby.NewUsecase(lobby.Config{LobbyExpiration: 3 * time.Minute}, nil, nil, repo, nil)
+	assert.NoError(t, uc.DisconnectLobbyUser(t.Context(), "lobby", userID, "session"))
 }
 
 func TestUsecase_LobbyGameStart(t *testing.T) {
@@ -425,6 +307,7 @@ func TestUsecase_UpdateLobbySettingsPreservesRepositoryContract(t *testing.T) {
 		name     string
 		settings dto.LobbySettingsMessage
 		want     lobbyEntity.Lobby
+		wantErr  error
 	}{
 		{
 			name:     "unchanged settings still persist",
@@ -432,7 +315,8 @@ func TestUsecase_UpdateLobbySettingsPreservesRepositoryContract(t *testing.T) {
 			want:     original,
 		},
 		{
-			name:     "validation remains at websocket entrypoint",
+			name:     "invalid settings rejected by usecase",
+			wantErr:  lobbyEntity.ErrInvalidProvider,
 			settings: dto.LobbySettingsMessage{Provider: "unknown", Rounds: 0, TimerSeconds: 9},
 			want: lobbyEntity.Lobby{
 				ID: "test-lobby", CreatorID: creatorID, CreatedAt: original.CreatedAt,
@@ -448,13 +332,17 @@ func TestUsecase_UpdateLobbySettingsPreservesRepositoryContract(t *testing.T) {
 
 			lobbyRepo := mocks.NewRepository(t)
 			lobbyRepo.On("GetLobby", mock.Anything, original.ID).Return(original, nil).Once()
-			lobbyRepo.On("UpdateLobby", mock.Anything, tt.want).Return(nil).Once()
+
+			if tt.wantErr == nil {
+				lobbyRepo.On("UpdateLobby", mock.Anything, tt.want).Return(nil).Once()
+			}
+
 			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil)
 
 			err := uc.UpdateLobbySettings(t.Context(), dto.UpdateLobbySettingsRequest{
 				LobbyID: original.ID, Creator: user.PublicProfile{ID: creatorID}, Settings: tt.settings,
 			})
-			assert.NoError(t, err)
+			assert.ErrorIs(t, err, tt.wantErr)
 		})
 	}
 }

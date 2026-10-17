@@ -342,6 +342,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
 					Return(multiplayerEntity.Game{
+						Provider: "google", Players: 2,
 						ID:           args.req.GameID,
 						Rounds:       5,
 						RoundCurrent: 5,
@@ -376,6 +377,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
 					Return(multiplayerEntity.Game{
+						Provider: "google", Players: 2,
 						ID:           args.req.GameID,
 						RoundCurrent: 4,
 						Rounds:       5,
@@ -409,6 +411,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
 					Return(multiplayerEntity.Game{
+						Provider: "google", Players: 2,
 						ID:           args.req.GameID,
 						RoundCurrent: 5,
 						Rounds:       5,

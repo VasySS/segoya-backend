@@ -23,7 +23,7 @@ func TestGame_RoundPredicates(t *testing.T) {
 		wantComplete  bool
 	}{
 		{name: "zero game"},
-		{name: "finished zero game", game: multiplayer.Game{Finished: true}, wantComplete: true},
+		{name: "finished zero game", game: multiplayer.Game{Finished: true}},
 		{name: "no rounds created", game: multiplayer.Game{Rounds: 5}},
 		{name: "rounds remain", game: multiplayer.Game{Rounds: 5, RoundCurrent: 4, Finished: true}},
 		{name: "last round active", game: multiplayer.Game{Rounds: 5, RoundCurrent: 5}, wantMaxRounds: true},
@@ -31,10 +31,10 @@ func TestGame_RoundPredicates(t *testing.T) {
 			name: "last round finished", game: multiplayer.Game{Rounds: 5, RoundCurrent: 5, Finished: true},
 			wantMaxRounds: true, wantComplete: true,
 		},
-		{name: "excess rounds active", game: multiplayer.Game{Rounds: 5, RoundCurrent: 6}},
+		{name: "excess rounds active", game: multiplayer.Game{Rounds: 5, RoundCurrent: 6}, wantMaxRounds: true},
 		{
 			name: "excess rounds finished", game: multiplayer.Game{Rounds: 5, RoundCurrent: 6, Finished: true},
-			wantComplete: true,
+			wantMaxRounds: true,
 		},
 	}
 
@@ -42,6 +42,8 @@ func TestGame_RoundPredicates(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			tt.game.Provider = game.GoogleProvider
+			tt.game.Players = 2
 			assert.Equal(t, tt.wantMaxRounds, tt.game.MaxRoundsReached())
 			assert.Equal(t, tt.wantComplete, tt.game.IsComplete())
 		})
@@ -57,7 +59,7 @@ func TestGame_IsFinalRound(t *testing.T) {
 		roundNumber int
 		want        bool
 	}{
-		{name: "zero rounds", want: true},
+		{name: "zero rounds"},
 		{name: "round remains", rounds: 5, roundNumber: 4},
 		{name: "final round", rounds: 5, roundNumber: 5, want: true},
 		{name: "excess round", rounds: 5, roundNumber: 6},
@@ -77,16 +79,18 @@ func TestGame_PrepareNextRound(t *testing.T) {
 	t.Parallel()
 
 	requestTime := time.Date(2026, time.October, 11, 12, 0, 0, 0, time.UTC)
-	currentGame := multiplayer.Game{ID: uuid.New(), RoundCurrent: 2}
+	currentGame := multiplayer.Game{ID: uuid.New(), RoundCurrent: 2, Rounds: 5, Provider: game.GoogleProvider, Players: 2}
 	panorama := game.PanoramaMetadata{ID: uuid.New()}
 
+	creation, err := currentGame.PrepareNextRound(panorama, requestTime, 5*time.Second)
+	require.NoError(t, err)
 	assert.Equal(t, game.RoundCreation{
 		GameID:     currentGame.ID,
 		LocationID: panorama.ID,
 		RoundNum:   3,
 		CreatedAt:  requestTime,
 		StartedAt:  requestTime.Add(5 * time.Second),
-	}, currentGame.PrepareNextRound(panorama, requestTime, 5*time.Second))
+	}, creation)
 }
 
 func TestParticipants_HasUser(t *testing.T) {
@@ -170,7 +174,7 @@ func TestRound_EvaluateGuess(t *testing.T) {
 		wantErr      error
 	}{
 		{name: "perfect guess", round: multiplayer.Round{Lat: 1}, guess: game.LatLng{Lat: 1}, wantScore: 5000},
-		{name: "zero coordinate guess"},
+		{name: "zero coordinate guess", wantScore: 5000},
 		{name: "distant guess", guess: game.LatLng{Lat: 6.74637}, wantScore: 3032, wantDistance: 750000},
 		{
 			name: "finished round rejects", round: multiplayer.Round{Finished: true},
@@ -182,7 +186,7 @@ func TestRound_EvaluateGuess(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			score, distance, err := tt.round.EvaluateGuess(game.GoogleProvider, tt.guess)
+			score, distance, err := tt.round.EvaluateGuess(game.GoogleProvider, tt.round.StartedAt, &tt.guess)
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
 			} else {
@@ -268,10 +272,10 @@ func TestRound_ValidateEnd(t *testing.T) {
 		{name: "at timer ends", requestTime: boundary, timerSeconds: 30, players: 2, guessesCount: 1},
 		{name: "after timer ends", requestTime: boundary.Add(time.Nanosecond), timerSeconds: 30, players: 2},
 		{name: "all guessed ends early", requestTime: startedAt, timerSeconds: 30, players: 2, guessesCount: 2},
-		{name: "zero players ends early", requestTime: startedAt, timerSeconds: 30},
+		{name: "zero players rejected", requestTime: startedAt, timerSeconds: 30, wantErr: game.ErrInvalidPlayers},
 		{
 			name: "extra guesses reject early", requestTime: startedAt, timerSeconds: 30, players: 2,
-			guessesCount: 3, wantErr: multiplayer.ErrRoundIsStillActive,
+			guessesCount: 3, wantErr: game.ErrInvalidState,
 		},
 	}
 

@@ -30,73 +30,75 @@ const (
 	lobbyCurrentPlayersField  = "currentPlayers"
 )
 
-// NewLobby creates new lobby in the database.
+// NewLobby atomically creates an empty public lobby and its expiration.
 func (r *Repository) NewLobby(ctx context.Context, req dto.NewLobbyRequestDB) error {
-	ctx, span := r.tracer.Start(ctx, "NewLobby")
-	defer span.End()
-
-	key := lobbyPrefix + req.ID
-	fields := map[string]string{
-		lobbyIDField:              req.ID,
-		lobbyCreatorIDField:       req.CreatorID.String(),
-		lobbyCreatedAtField:       req.RequestTime.Format(time.RFC3339),
-		lobbyRoundsField:          strconv.Itoa(req.Rounds),
-		lobbyProviderField:        req.Provider,
-		lobbyTimerSecondsField:    strconv.Itoa(req.TimerSeconds),
-		lobbyMovementAllowedField: strconv.FormatBool(req.MovementAllowed),
-		lobbyMaxPlayersField:      strconv.Itoa(req.MaxPlayers),
-		lobbyCurrentPlayersField:  "0",
-		lobbyPrivateField:         "false",
-	}
-
-	cmd := r.valkey.B().Hset().Key(key).FieldValue()
-	for field, value := range fields {
-		cmd = cmd.FieldValue(field, value)
-	}
-
-	if err := r.valkey.Do(ctx, cmd.Build()).Error(); err != nil {
-		return fmt.Errorf("failed to create lobby: %w", err)
-	}
-
-	addSorted := r.valkey.B().Zadd().Key(lobbiesPrefix).ScoreMember().
-		ScoreMember(float64(req.RequestTime.Unix()), req.ID)
-
-	if err := r.valkey.Do(ctx, addSorted.Build()).Error(); err != nil {
-		return fmt.Errorf("failed to add lobby to sorted set: %w", err)
-	}
-
-	return nil
+	return r.createLobby(ctx, req, false)
 }
 
-// NewPrivateLobby creates new private lobby in the database (excluded from GetLobbies pagination).
+// NewPrivateLobby atomically creates an empty private lobby and its expiration.
 func (r *Repository) NewPrivateLobby(ctx context.Context, req dto.NewLobbyRequestDB) error {
-	ctx, span := r.tracer.Start(ctx, "NewPrivateLobby")
-	defer span.End()
+	return r.createLobby(ctx, req, true)
+}
 
-	key := lobbyPrivatePrefix + req.ID
+func (r *Repository) createLobby(ctx context.Context, req dto.NewLobbyRequestDB, private bool) error {
+	value := lobby.Lobby{
+		Provider:     req.Provider,
+		Rounds:       req.Rounds,
+		TimerSeconds: req.TimerSeconds,
+		MaxPlayers:   req.MaxPlayers,
+	}
+	if err := value.Validate(); err != nil {
+		return fmt.Errorf("validate game settings and state: %w", err)
+	}
+
+	ttl := req.Expiration
+	if ttl <= 0 {
+		ttl = 3 * time.Minute
+	}
+
+	key := lobbyPrefix + req.ID
+	if private {
+		key = lobbyPrivatePrefix + req.ID
+	}
+
 	fields := map[string]string{
 		lobbyIDField:              req.ID,
 		lobbyCreatorIDField:       req.CreatorID.String(),
-		lobbyCreatedAtField:       req.RequestTime.Format(time.RFC3339),
+		lobbyCreatedAtField:       req.RequestTime.Format(time.RFC3339Nano),
 		lobbyRoundsField:          strconv.Itoa(req.Rounds),
 		lobbyProviderField:        req.Provider,
 		lobbyTimerSecondsField:    strconv.Itoa(req.TimerSeconds),
 		lobbyMovementAllowedField: strconv.FormatBool(req.MovementAllowed),
 		lobbyMaxPlayersField:      strconv.Itoa(req.MaxPlayers),
-		lobbyCurrentPlayersField:  "0",
-		lobbyPrivateField:         "true",
+		lobbyCurrentPlayersField:  "0", lobbyPrivateField: strconv.FormatBool(private),
 	}
 
-	cmd := r.valkey.B().Hset().Key(key).FieldValue()
-	for field, value := range fields {
-		cmd = cmd.FieldValue(field, value)
-	}
+	return r.runLobbyTransaction(ctx, req.ID, func(client valkey.DedicatedClient) (valkey.Commands, error) {
+		exists, err := client.Do(ctx, client.B().Exists().Key(key).Build()).AsBool()
+		if err != nil {
+			return nil, fmt.Errorf("check lobby existence: %w", err)
+		}
 
-	if err := r.valkey.Do(ctx, cmd.Build()).Error(); err != nil {
-		return fmt.Errorf("failed to create private lobby: %w", err)
-	}
+		if exists {
+			return nil, errLobbyAlreadyExists
+		}
 
-	return nil
+		setFields := client.B().Hset().Key(key).FieldValue()
+		for field, value := range fields {
+			setFields = setFields.FieldValue(field, value)
+		}
+
+		commands := valkey.Commands{
+			setFields.Build(),
+			client.B().Pexpire().Key(key).Milliseconds(ttl.Milliseconds()).Build(),
+		}
+		if !private {
+			commands = append(commands, client.B().Zadd().Key(lobbiesPrefix).
+				ScoreMember().ScoreMember(float64(req.RequestTime.Unix()), req.ID).Build())
+		}
+
+		return commands, nil
+	})
 }
 
 // GetLobby gets lobby from the database (public or private).
@@ -124,70 +126,29 @@ func (r *Repository) GetLobby(ctx context.Context, id string) (lobby.Lobby, erro
 }
 
 // UpdateLobby updates lobby in the database.
-func (r *Repository) UpdateLobby(ctx context.Context, lobbyInfo lobby.Lobby) error {
-	ctx, span := r.tracer.Start(ctx, "UpdateLobby")
-	defer span.End()
-
-	key, err := r.getLobbyKey(ctx, lobbyInfo.ID)
-	if err != nil {
-		return err
+func (r *Repository) UpdateLobby(ctx context.Context, info lobby.Lobby) error {
+	if err := info.Validate(); err != nil {
+		return fmt.Errorf("validate game settings and state: %w", err)
 	}
 
-	fields := map[string]string{
-		lobbyRoundsField:          strconv.Itoa(lobbyInfo.Rounds),
-		lobbyProviderField:        lobbyInfo.Provider,
-		lobbyTimerSecondsField:    strconv.Itoa(lobbyInfo.TimerSeconds),
-		lobbyMovementAllowedField: strconv.FormatBool(lobbyInfo.MovementAllowed),
-	}
+	return r.runLobbyTransaction(ctx, info.ID, func(client valkey.DedicatedClient) (valkey.Commands, error) {
+		key, data, err := readWatchedLobby(ctx, client, info.ID)
+		if err != nil {
+			return nil, err
+		}
 
-	cmd := r.valkey.B().Hset().Key(key).FieldValue()
-	for field, value := range fields {
-		cmd = cmd.FieldValue(field, value)
-	}
+		if data[lobbyCreatorIDField] != info.CreatorID.String() {
+			return nil, lobby.ErrOnlyCreatorCanUpdateSettings
+		}
 
-	if err := r.valkey.Do(ctx, cmd.Build()).Error(); err != nil {
-		return fmt.Errorf("failed to update lobby: %w", err)
-	}
-
-	return nil
-}
-
-// IncrementLobbyPlayers increments current amount of players in the lobby.
-func (r *Repository) IncrementLobbyPlayers(ctx context.Context, id string) error {
-	ctx, span := r.tracer.Start(ctx, "IncrementLobbyPlayers")
-	defer span.End()
-
-	key, err := r.getLobbyKey(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	cmd := r.valkey.B().Hincrby().Key(key).Field(lobbyCurrentPlayersField).Increment(1).Build()
-
-	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
-		return fmt.Errorf("failed to increment current players: %w", err)
-	}
-
-	return nil
-}
-
-// DecrementLobbyPlayers decrements current amount of players in the lobby.
-func (r *Repository) DecrementLobbyPlayers(ctx context.Context, id string) error {
-	ctx, span := r.tracer.Start(ctx, "DecrementLobbyPlayers")
-	defer span.End()
-
-	key, err := r.getLobbyKey(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	cmd := r.valkey.B().Hincrby().Key(key).Field(lobbyCurrentPlayersField).Increment(-1).Build()
-
-	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
-		return fmt.Errorf("failed to decrement current players: %w", err)
-	}
-
-	return nil
+		return valkey.Commands{
+			client.B().Hset().Key(key).FieldValue().
+				FieldValue(lobbyRoundsField, strconv.Itoa(info.Rounds)).
+				FieldValue(lobbyProviderField, info.Provider).
+				FieldValue(lobbyTimerSecondsField, strconv.Itoa(info.TimerSeconds)).
+				FieldValue(lobbyMovementAllowedField, strconv.FormatBool(info.MovementAllowed)).Build(),
+		}, nil
+	})
 }
 
 // DeleteLobby deletes lobby from the database (key and from sorted set).
@@ -209,44 +170,6 @@ func (r *Repository) DeleteLobby(ctx context.Context, id string) error {
 	sortedSetRemoveCmd := r.valkey.B().Zrem().Key(lobbiesPrefix).Member(id).Build()
 	if err := r.valkey.Do(ctx, sortedSetRemoveCmd).Error(); err != nil {
 		return fmt.Errorf("failed to remove lobby from sorted set: %w", err)
-	}
-
-	return nil
-}
-
-// AddLobbyExpiration sets expiration for the lobby.
-func (r *Repository) AddLobbyExpiration(ctx context.Context, id string, ttl time.Duration) error {
-	ctx, span := r.tracer.Start(ctx, "AddLobbyExpiration")
-	defer span.End()
-
-	key, err := r.getLobbyKey(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	keyCmd := r.valkey.B().Expire().Key(key).Seconds(int64(ttl.Seconds())).Build()
-
-	if err := r.valkey.Do(ctx, keyCmd).Error(); err != nil {
-		return fmt.Errorf("failed to set lobby expiration: %w", err)
-	}
-
-	return nil
-}
-
-// DeleteLobbyExpiration deletes expiration for the lobby.
-func (r *Repository) DeleteLobbyExpiration(ctx context.Context, id string) error {
-	ctx, span := r.tracer.Start(ctx, "DeleteLobbyExpiration")
-	defer span.End()
-
-	key, err := r.getLobbyKey(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	cmd := r.valkey.B().Persist().Key(key).Build()
-
-	if err := r.valkey.Do(ctx, cmd).Error(); err != nil {
-		return fmt.Errorf("failed to delete lobby expiration: %w", err)
 	}
 
 	return nil

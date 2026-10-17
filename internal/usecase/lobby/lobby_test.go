@@ -73,6 +73,7 @@ func TestUsecase_NewLobby(t *testing.T) {
 
 				fs.lobbyRepo.On("NewLobby", mock.Anything, dto.NewLobbyRequestDB{
 					ID:              lobbyID,
+					Expiration:      fs.conf.LobbyExpiration,
 					CreatorID:       args.req.CreatorID,
 					RequestTime:     args.req.RequestTime,
 					Rounds:          args.req.Rounds,
@@ -81,9 +82,6 @@ func TestUsecase_NewLobby(t *testing.T) {
 					TimerSeconds:    args.req.TimerSeconds,
 					MovementAllowed: args.req.MovementAllowed,
 				}).Return(nil)
-
-				fs.lobbyRepo.On("AddLobbyExpiration", mock.Anything, lobbyID, mock.AnythingOfType("time.Duration")).
-					Return(nil)
 			},
 			want:    "1234567890",
 			wantErr: assert.NoError,
@@ -101,6 +99,7 @@ func TestUsecase_NewLobby(t *testing.T) {
 
 				fs.lobbyRepo.On("NewPrivateLobby", mock.Anything, dto.NewLobbyRequestDB{
 					ID:              lobbyID,
+					Expiration:      fs.conf.LobbyExpiration,
 					CreatorID:       args.req.CreatorID,
 					RequestTime:     args.req.RequestTime,
 					Rounds:          args.req.Rounds,
@@ -109,9 +108,6 @@ func TestUsecase_NewLobby(t *testing.T) {
 					TimerSeconds:    args.req.TimerSeconds,
 					MovementAllowed: args.req.MovementAllowed,
 				}).Return(nil)
-
-				fs.lobbyRepo.On("AddLobbyExpiration", mock.Anything, lobbyID, mock.AnythingOfType("time.Duration")).
-					Return(nil)
 			},
 			want:    "112233",
 			wantErr: assert.NoError,

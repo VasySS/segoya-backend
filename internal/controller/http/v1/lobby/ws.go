@@ -1,6 +1,7 @@
 package lobby
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
@@ -60,13 +62,28 @@ func (h Handler) HandleWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// handleWSConnect handles a new websocket connection request.
+// lobbyAdmission keeps the reservation available even when initialization fails.
+type lobbyAdmission struct {
+	LobbyID   string
+	UserID    uuid.UUID
+	SessionID string
+}
+
+const lobbyAdmissionKey = "lobbyAdmission"
+
+// handleWSConnect admits the socket before exposing it to lobby broadcasts.
 func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 	req := session.Request()
 	ctx := req.Context()
-
 	lobbyID := chi.URLParam(req, "id")
-	session.SetBroadcastID(lobbyID)
+
+	connected := false
+
+	defer func() {
+		if !connected {
+			_ = session.Close()
+		}
+	}()
 
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {
@@ -74,42 +91,44 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		return
 	}
 
-	lobbyUsers := h.getLobbyUsers(lobbyID)
+	ticket := lobbyAdmission{LobbyID: lobbyID, UserID: claims.UserID, SessionID: session.ID()}
+	session.Set(lobbyAdmissionKey, ticket)
 
-	// prevent duplicate connections for the same user
-	for _, u := range lobbyUsers {
-		if u.Username == claims.Username {
-			session.SendError("a connection to this lobby already exists for user")
-			_ = session.Close()
-
-			return
-		}
-	}
-
-	userProfile, err := h.uc.ConnectLobbyUser(ctx, lobbyID, claims.UserID)
+	userProfile, err := h.uc.ConnectLobbyUser(ctx, lobbyID, claims.UserID, ticket.SessionID)
 	if err != nil {
+		// Admission may have succeeded even when the Valkey reply was lost.
+		h.releaseAdmission(session, ticket)
 		slog.Error("error connecting user to lobby", slog.Any("error", err))
 		session.SendError("error connecting to lobby")
 
 		return
 	}
 
-	session.Set(dto.LobbyUserProfileKey, userProfile)
-
-	if err := session.SendMessage(
-		dto.LobbyMessageTypeConnectedUsers,
-		map[string]any{"users": lobbyUsers},
-	); err != nil {
-		slog.Error("error sending connected users", slog.Any("error", err))
+	if err := session.SendMessage(dto.LobbyMessageTypeConnectedUsers,
+		map[string]any{"users": h.getLobbyUsers(lobbyID)}); err != nil {
+		h.releaseAdmission(session, ticket)
 		session.SendError("error connecting to lobby")
 
 		return
 	}
 
+	session.Set(dto.LobbyUserProfileKey, userProfile)
+	session.SetBroadcastID(lobbyID)
+
+	connected = true
 	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
 		Type:    dto.LobbyMessageTypeUserConnected,
 		Payload: map[string]any{"user": userProfile},
 	})
+}
+
+func (h Handler) releaseAdmission(session transport.WebSocketSession, ticket lobbyAdmission) {
+	ctx, cancel := context.WithTimeout(context.WithoutCancel(session.Request().Context()), 5*time.Second)
+	defer cancel()
+
+	if err := h.uc.DisconnectLobbyUser(ctx, ticket.LobbyID, ticket.UserID, ticket.SessionID); err != nil {
+		slog.Error("error releasing lobby admission", slog.Any("error", err))
+	}
 }
 
 // handleWSMessage processes all incoming websocket messages from connected users.
@@ -123,6 +142,12 @@ func (h Handler) handleWSMessage(
 		return
 	}
 
+	profile, admitted := getUser(session)
+	if !admitted {
+		session.SendError("error getting user profile")
+		return
+	}
+
 	switch message.Type {
 	case dto.LobbyMessageTypeChatInput:
 		var chatInput dto.LobbyChatInputMessage
@@ -131,6 +156,7 @@ func (h Handler) handleWSMessage(
 			return
 		}
 
+		chatInput.Message.Username = profile.Username
 		h.processChatMsg(lobbyID, chatInput.Message)
 	case dto.LobbyMessageTypeGameStart:
 		h.processGameStart(session, lobbyID)
@@ -149,24 +175,25 @@ func (h Handler) handleWSMessage(
 
 // handleWSDisconnect handles user disconnection from a lobby.
 func (h Handler) handleWSDisconnect(session transport.WebSocketSession) {
-	req := session.Request()
-	ctx := req.Context()
+	value, ok := session.Get(lobbyAdmissionKey)
+	if !ok {
+		return
+	}
 
-	// most of the time this will return ok==false if user tried to create a duplicate connection
+	ticket, ok := value.(lobbyAdmission)
+	if !ok {
+		return
+	}
+
+	h.releaseAdmission(session, ticket)
+
 	lobbyID, ok := session.GetBroadcastID()
 	if !ok {
-		slog.Debug("error in lobby disconnect: lobby id not found in session")
 		return
 	}
 
 	userProfile, ok := getUser(session)
 	if !ok {
-		slog.Debug("error in lobby disconnect: user not found in session")
-		return
-	}
-
-	if err := h.uc.DisconnectLobbyUser(ctx, lobbyID, userProfile.ID); err != nil {
-		slog.Debug("error disconnecting user from lobby", slog.Any("error", err))
 		return
 	}
 

@@ -25,7 +25,7 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 		RequestTime: time.Now().UTC(),
 		UserID:      uuid.Must(uuid.NewV7()),
 		GameID:      uuid.Must(uuid.NewV7()),
-		Guess: game.LatLng{
+		Guess: &game.LatLng{
 			Lat: 1.0,
 			Lng: 2.0,
 		},
@@ -52,12 +52,14 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 				req: saveGuessReq,
 			},
 			setup: func(fs fields, args args) {
+				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).Return(nil).Once()
 				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 					Return(func(ctx context.Context, fn repository.TxFunc) error {
 						return fn(ctx)
 					})
 
 				gameResponse := multiplayerEntity.Game{
+					Players: 2, Rounds: 2,
 					ID:           args.req.GameID,
 					RoundCurrent: 2,
 					Provider:     "google",
@@ -92,7 +94,7 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 				wantScore, wantDistance := game.CalculateScore(
 					gameResponse.Provider,
 					game.LatLng{Lat: roundResponse.Lat, Lng: roundResponse.Lng},
-					args.req.Guess,
+					*args.req.Guess,
 				)
 
 				fs.repo.On("NewMultiplayerRoundGuess", mock.Anything, dto.NewMultiplayerRoundGuessRequestDB{
@@ -113,12 +115,14 @@ func TestUsecase_NewMultiplayerRoundGuess(t *testing.T) {
 				req: saveGuessReq,
 			},
 			setup: func(fs fields, args args) {
+				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).Return(nil).Once()
 				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 					Return(func(ctx context.Context, fn repository.TxFunc) error {
 						return fn(ctx)
 					})
 
 				gameResponse := multiplayerEntity.Game{
+					Players: 2, Rounds: 2,
 					ID:           args.req.GameID,
 					RoundCurrent: 2,
 					Provider:     "google",
@@ -234,7 +238,9 @@ func TestUsecase_EndRound(t *testing.T) {
 				req: endRoundRequest,
 			},
 			setup: func(fs fields, args args) {
+				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).Return(nil).Once()
 				mockGame := multiplayerEntity.Game{
+					Rounds:       5,
 					ID:           args.req.GameID,
 					RoundCurrent: 1,
 					TimerSeconds: 30,
@@ -266,6 +272,7 @@ func TestUsecase_EndRound(t *testing.T) {
 				req: endRoundRequest,
 			},
 			setup: func(fs fields, args args) {
+				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).Return(nil).Once()
 				mockGame := multiplayerEntity.Game{
 					ID:           args.req.GameID,
 					RoundCurrent: 5,
@@ -304,7 +311,9 @@ func TestUsecase_EndRound(t *testing.T) {
 				req: endRoundRequest,
 			},
 			setup: func(fs fields, args args) {
+				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).Return(nil).Once()
 				mockGame := multiplayerEntity.Game{
+					Rounds:       5,
 					ID:           args.req.GameID,
 					RoundCurrent: 1,
 					TimerSeconds: 30,
@@ -331,7 +340,9 @@ func TestUsecase_EndRound(t *testing.T) {
 				req: endRoundRequest,
 			},
 			setup: func(fs fields, args args) {
+				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).Return(nil).Once()
 				mockGame := multiplayerEntity.Game{
+					Rounds:       5,
 					ID:           args.req.GameID,
 					RoundCurrent: 1,
 					TimerSeconds: 30,

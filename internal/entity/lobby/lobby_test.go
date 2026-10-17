@@ -64,7 +64,7 @@ func TestLobby_ValidateStart(t *testing.T) {
 	t.Parallel()
 
 	creatorID := uuid.MustParse("0199027e-ade6-784d-9d43-cc9c776a6943")
-	value := lobby.Lobby{CreatorID: creatorID}
+	value := lobby.Lobby{CreatorID: creatorID, Provider: "google", Rounds: 5, MaxPlayers: 5, CurrentPlayers: 2}
 	tests := []struct {
 		name    string
 		actorID uuid.UUID
@@ -117,13 +117,9 @@ func TestLobby_WithSettings(t *testing.T) {
 			settings: lobby.Settings{Provider: "yandex", Rounds: 5, TimerSeconds: 30}, want: original,
 		},
 		{
-			name: "validation remains an entrypoint responsibility", actorID: creatorID,
+			name: "invalid settings rejected", actorID: creatorID,
 			settings: lobby.Settings{Provider: "unknown", Rounds: 0, TimerSeconds: 9},
-			want: lobby.Lobby{
-				ID: "test-lobby", CreatorID: creatorID, CreatedAt: original.CreatedAt,
-				Provider: "unknown", Rounds: 0, TimerSeconds: 9,
-				CurrentPlayers: 2, MaxPlayers: 5, Private: true,
-			},
+			wantErr:  lobby.ErrInvalidProvider,
 		},
 		{
 			name: "noncreator cannot change settings", actorID: uuid.MustParse("0199027e-ade6-784d-9d43-cc9c776a6944"),

@@ -9,6 +9,7 @@ import (
 
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
@@ -132,10 +133,16 @@ func (h Handler) EndSingleplayerRound(
 		RequestTime: time.Now().UTC(),
 		GameID:      params.ID,
 		UserID:      claims.UserID,
-		Guess:       dto.LatLngAPIToEntity(&req.Guess),
+		Guess:       dto.LatLngAPIToEntity(req.Guess),
 	})
 
 	switch {
+	case errors.Is(err, game.ErrRoundNotStarted), errors.Is(err, game.ErrInvalidCoordinates):
+		return &api.EndSingleplayerRoundBadRequest{
+			Title:  "Invalid guess",
+			Status: http.StatusBadRequest,
+			Detail: err.Error(),
+		}, nil
 	case errors.Is(err, singleplayer.ErrRoundAlreadyFinished):
 		return &api.EndSingleplayerRoundBadRequest{
 			Title:  "Round already finished",

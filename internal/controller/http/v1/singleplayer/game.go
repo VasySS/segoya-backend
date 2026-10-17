@@ -9,6 +9,7 @@ import (
 
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
@@ -27,6 +28,13 @@ func (h Handler) NewSingleplayerGame(
 	}
 
 	timerSeconds, _ := req.TimerSeconds.Get()
+	if err := game.ValidateSettings(game.PanoramaProvider(req.Provider), req.Rounds, timerSeconds); err != nil {
+		return &api.NewSingleplayerGameBadRequest{
+			Title:  "Invalid settings",
+			Status: http.StatusBadRequest,
+			Detail: err.Error(),
+		}, nil
+	}
 
 	gameID, err := h.uc.NewGame(ctx, dto.NewSingleplayerGameRequest{
 		RequestTime:     time.Now().UTC(),

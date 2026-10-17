@@ -1,6 +1,7 @@
 package multiplayer
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
@@ -36,18 +38,8 @@ func getGameUser(s transport.WebSocketSession) (user.MultiplayerUser, bool) {
 }
 
 // getGameUsers retrieves the list of users currently connected to the game.
-func (h Handler) getGameUsers(s transport.WebSocketSession) ([]user.MultiplayerUser, error) {
-	ctx := s.Request().Context()
-
-	gameID, ok := s.GetBroadcastID()
-	if !ok {
-		return nil, ErrGameIDNotFound
-	}
-
-	gameUUID, err := uuid.Parse(gameID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse game uuid: %w", err)
-	}
+func (h Handler) getGameUsers(ctx context.Context, gameUUID uuid.UUID) ([]user.MultiplayerUser, error) {
+	gameID := gameUUID.String()
 
 	users, err := h.uc.GetGameUsers(ctx, gameUUID)
 	if err != nil {
@@ -86,6 +78,14 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 	req := session.Request()
 	ctx := req.Context()
 
+	connected := false
+
+	defer func() {
+		if !connected {
+			_ = session.Close()
+		}
+	}()
+
 	gameID := chi.URLParam(req, "id")
 
 	gameUUID, err := uuid.Parse(gameID)
@@ -94,28 +94,10 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		return
 	}
 
-	session.SetBroadcastID(gameID)
-
 	claims, ok := h.ts.FromContext(ctx)
 	if !ok {
 		session.SendError("error authorizing user")
 		return
-	}
-
-	gameUsers, err := h.getGameUsers(session)
-	if err != nil {
-		session.SendError("error getting game users")
-		return
-	}
-
-	// prevent duplicate connections for the same user
-	for _, u := range gameUsers {
-		if u.Username == claims.Username && u.Connected {
-			session.SendError("a connection to this game already exists for user")
-			_ = session.Close()
-
-			return
-		}
 	}
 
 	userProfile, err := h.uc.GetGameUser(ctx, claims.UserID, gameUUID)
@@ -124,15 +106,29 @@ func (h Handler) handleWSConnect(session transport.WebSocketSession) {
 		return
 	}
 
-	session.Set(dto.MultiplayerUserProfileKey, userProfile)
-
-	err = session.SendMessage(dto.MultiplayerMessageConnectedUsers, map[string]any{"users": gameUsers})
+	gameUsers, err := h.getGameUsers(ctx, gameUUID)
 	if err != nil {
 		session.SendError("error getting game users")
 		return
 	}
 
-	_ = h.ws.Broadcast(gameID, transport.WebSocketMessageOutput{
+	for _, u := range gameUsers {
+		if u.ID == claims.UserID && u.Connected {
+			session.SendError("a connection to this game already exists for user")
+			return
+		}
+	}
+
+	if err := session.SendMessage(dto.MultiplayerMessageConnectedUsers, map[string]any{"users": gameUsers}); err != nil {
+		session.SendError("error getting game users")
+		return
+	}
+
+	session.Set(dto.MultiplayerUserProfileKey, userProfile)
+	session.SetBroadcastID(gameUUID.String())
+
+	connected = true
+	_ = h.ws.Broadcast(gameUUID.String(), transport.WebSocketMessageOutput{
 		Type:    dto.MultiplayerMessageUserConnected,
 		Payload: map[string]any{"user": userProfile},
 	})
@@ -149,11 +145,16 @@ func (h Handler) handleWSMessage(
 		return
 	}
 
+	if _, admitted := getGameUser(session); !admitted {
+		session.SendError("user is not admitted to game")
+		return
+	}
+
 	switch message.Type {
 	case dto.MultiplayerMessageUserGuess:
 		var guess dto.MultiplayerUserGuessMessage
 		if err := json.Unmarshal(message.Payload, &guess); err != nil {
-			session.SendError("error unmarshalling msg")
+			session.SendError("invalid guess: use guess:null or an object with valid lat and lng")
 			return
 		}
 
@@ -211,12 +212,20 @@ func (h Handler) processUserGuess(
 		UserID:      userProfile.ID,
 		Guess:       message.Guess,
 	})
-	if errors.Is(err, multiplayer.ErrRoundAlreadyFinished) {
+
+	switch {
+	case errors.Is(err, game.ErrRoundNotStarted):
+		session.SendError("round has not started")
+		return
+	case errors.Is(err, game.ErrInvalidCoordinates):
+		session.SendError("invalid coordinates")
+		return
+	case errors.Is(err, multiplayer.ErrRoundAlreadyFinished):
 		session.SendError("round already finished")
 		slog.Debug("round already finished")
 
 		return
-	} else if err != nil {
+	case err != nil:
 		session.SendError("error saving guess")
 		slog.Debug("error saving guess", slog.Any("error", err))
 
@@ -258,10 +267,12 @@ func (h Handler) processRoundEnd(
 		GameID:      gameUUID,
 		UserID:      userProfile.ID,
 	})
-	if errors.Is(err, multiplayer.ErrRoundIsStillActive) {
+
+	switch {
+	case errors.Is(err, multiplayer.ErrRoundIsStillActive):
 		// TODO - just ignore?
 		return
-	} else if err != nil {
+	case err != nil:
 		slog.Error("error ending round (ws)", slog.Any("error", err))
 		return
 	}

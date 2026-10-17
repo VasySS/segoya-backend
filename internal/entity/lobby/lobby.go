@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 )
 
 // Lobby struct contains lobby information, including game details.
@@ -37,6 +39,14 @@ func (l Lobby) ValidateStart(actorID uuid.UUID) error {
 		return ErrOnlyCreatorCanStart
 	}
 
+	if err := l.Validate(); err != nil {
+		return err
+	}
+
+	if l.CurrentPlayers < 2 {
+		return ErrInvalidPlayers
+	}
+
 	return nil
 }
 
@@ -46,10 +56,29 @@ func (l Lobby) WithSettings(actorID uuid.UUID, settings Settings) (Lobby, error)
 		return Lobby{}, ErrOnlyCreatorCanUpdateSettings
 	}
 
+	if err := settings.Validate(); err != nil {
+		return Lobby{}, err
+	}
+
 	l.Provider = settings.Provider
 	l.MovementAllowed = settings.MovementAllowed
 	l.Rounds = settings.Rounds
 	l.TimerSeconds = settings.TimerSeconds
 
 	return l, nil
+}
+
+// Validate checks settings and lobby capacity, including persisted player counts.
+//
+//nolint:wrapcheck // Domain validation returns shared sentinel errors.
+func (l Lobby) Validate() error {
+	if err := game.ValidateSettings(game.PanoramaProvider(l.Provider), l.Rounds, l.TimerSeconds); err != nil {
+		return err
+	}
+
+	if l.MaxPlayers < 2 || l.MaxPlayers > 10 || l.CurrentPlayers < 0 || l.CurrentPlayers > l.MaxPlayers {
+		return ErrInvalidPlayers
+	}
+
+	return nil
 }

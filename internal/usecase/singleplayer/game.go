@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
@@ -14,6 +15,10 @@ import (
 func (uc Usecase) NewGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (uuid.UUID, error) {
 	ctx, span := uc.tracer.Start(ctx, "NewGame")
 	defer span.End()
+
+	if err := game.ValidateSettings(game.PanoramaProvider(req.Provider), req.Rounds, req.TimerSeconds); err != nil {
+		return uuid.Nil, fmt.Errorf("validate game settings and state: %w", err)
+	}
 
 	var response uuid.UUID
 

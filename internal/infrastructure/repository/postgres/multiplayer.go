@@ -176,10 +176,12 @@ func (r *Repository) GetMultiplayerGameUser(
 					)
 			) AS guessed
 		FROM user_info AS u
-		JOIN multiplayer_round AS mr
-			ON mr.game_id = @game_id
+		JOIN multiplayer_game_user AS mgu
+			ON mgu.user_id = u.id AND mgu.game_id = @game_id
+		LEFT JOIN multiplayer_round AS mr
+			ON mr.game_id = mgu.game_id
 		LEFT JOIN multiplayer_round_user AS mru
-			ON mru.round_id = mr.id
+			ON mru.round_id = mr.id AND mru.user_id = u.id
 		WHERE u.id = @user_id
 		GROUP BY u.id
 	`
@@ -190,7 +192,9 @@ func (r *Repository) GetMultiplayerGameUser(
 		"user_id": userID.String(),
 		"game_id": gameID.String(),
 	})
-	if err != nil {
+	if pgxscan.NotFound(err) {
+		return user.MultiplayerUser{}, multiplayer.ErrGameWrongUserID
+	} else if err != nil {
 		return user.MultiplayerUser{}, fmt.Errorf("failed to get user: %w", err)
 	}
 

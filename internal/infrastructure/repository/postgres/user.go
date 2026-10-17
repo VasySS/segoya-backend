@@ -109,6 +109,39 @@ func (r *Repository) GetUserByID(ctx context.Context, userID uuid.UUID) (user.Pr
 	return u, nil
 }
 
+// GetUserByIDForUpdate reads the profile while holding its row lock until transaction completion.
+func (r *Repository) GetUserByIDForUpdate(ctx context.Context, userID uuid.UUID) (user.PrivateProfile, error) {
+	tx := r.txManager.GetQueryEngine(ctx)
+
+	ctx, span := r.tracer.Start(ctx, "GetUserByIDForUpdate")
+	defer span.End()
+
+	query := `
+		SELECT
+			id,
+			username,
+			password,
+			name,
+			COALESCE(avatar_hash, '') AS avatar_hash,
+			COALESCE(avatar_last_update, '0001-01-01') AS avatar_last_update,
+			register_date
+		FROM user_info
+		WHERE id = @id
+		FOR UPDATE
+	`
+
+	var u user.PrivateProfile
+
+	err := pgxscan.Get(ctx, tx, &u, query, pgx.NamedArgs{"id": userID.String()})
+	if pgxscan.NotFound(err) {
+		return user.PrivateProfile{}, user.ErrUserNotFound
+	} else if err != nil {
+		return u, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return u, nil
+}
+
 // UpdateAvatar updates user's avatar hash.
 func (r *Repository) UpdateAvatar(ctx context.Context, req dto.UpdateAvatarRequestDB) error {
 	tx := r.txManager.GetQueryEngine(ctx)

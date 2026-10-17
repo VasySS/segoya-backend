@@ -62,6 +62,7 @@ func TestUsecase_NewRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       args.req.UserID,
 						Rounds:       5,
@@ -112,6 +113,7 @@ func TestUsecase_NewRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       uuid.Must(uuid.NewV7()),
 						Rounds:       5,
@@ -140,6 +142,7 @@ func TestUsecase_NewRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       args.req.UserID,
 						Rounds:       5,
@@ -202,8 +205,8 @@ func TestUsecase_NewRoundEligibilityAndReuse(t *testing.T) {
 			name: "ownership rejects before limit check", current: 5, rounds: 5, wrongUser: true,
 			wantErr: singleplayerEntity.ErrGameWrongUserID,
 		},
-		{name: "zero rounds still permits first round", lookupError: singleplayerEntity.ErrRoundNotFound},
-		{name: "limit retains equality semantics", current: 6, rounds: 5, roundFinished: true},
+		{name: "zero rounds rejected", wantErr: game.ErrInvalidRounds},
+		{name: "excess rounds rejected", current: 6, rounds: 5, wantErr: game.ErrInvalidState},
 		{
 			name: "lookup failure prevents creation", current: 1, rounds: 5,
 			lookupError: lookupError, wantErr: lookupError,
@@ -236,7 +239,10 @@ func TestUsecase_NewRoundEligibilityAndReuse(t *testing.T) {
 
 			var want singleplayerEntity.Round
 
-			if !tt.wrongUser && !errors.Is(tt.wantErr, singleplayerEntity.ErrRoundMaxAmount) {
+			if !tt.wrongUser &&
+				!errors.Is(tt.wantErr, singleplayerEntity.ErrRoundMaxAmount) &&
+				!errors.Is(tt.wantErr, game.ErrInvalidRounds) &&
+				!errors.Is(tt.wantErr, game.ErrInvalidState) {
 				currentRound := singleplayerEntity.Round{
 					ID: roundID, GameID: gameID, RoundNum: tt.current, Finished: tt.roundFinished,
 					StartedAt: now.Add(-time.Hour),
@@ -319,6 +325,7 @@ func TestUsecase_GetRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       args.req.UserID,
 						Rounds:       5,
@@ -358,6 +365,7 @@ func TestUsecase_GetRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       uuid.Must(uuid.NewV7()),
 						Rounds:       5,
@@ -397,7 +405,7 @@ func TestUsecase_EndRound(t *testing.T) {
 		RequestTime: time.Now().UTC(),
 		GameID:      uuid.Must(uuid.NewV7()),
 		UserID:      uuid.Must(uuid.NewV7()),
-		Guess: game.LatLng{
+		Guess: &game.LatLng{
 			Lat: 6.74637,
 		},
 	}
@@ -475,6 +483,7 @@ func TestUsecase_EndRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       args.req.UserID,
 						Rounds:       5,
@@ -508,6 +517,7 @@ func TestUsecase_EndRound(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       uuid.Must(uuid.NewV7()),
 						Rounds:       5,
@@ -613,20 +623,21 @@ func TestUsecase_EndRoundTimerBoundaries(t *testing.T) {
 			pano := mocks.NewPanoramaUsecase(t)
 			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, pano)
 			req := dto.EndSingleplayerRoundRequest{
-				RequestTime: startedAt.Add(tt.elapsed), GameID: gameID, UserID: userID, Guess: guess,
+				RequestTime: startedAt.Add(tt.elapsed), GameID: gameID, UserID: userID, Guess: &guess,
 			}
 
 			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
 			repo.On("GetSingleplayerGame", mock.Anything, gameID).Return(singleplayerEntity.Game{
-				ID: gameID, UserID: userID, Provider: game.GoogleProvider, TimerSeconds: tt.timerSeconds,
+				Rounds: 2,
+				ID:     gameID, UserID: userID, Provider: game.GoogleProvider, TimerSeconds: tt.timerSeconds,
 				RoundCurrent: 2,
 			}, nil).Once()
 			repo.On("GetSingleplayerRound", mock.Anything, gameID, 2).Return(singleplayerEntity.Round{
 				ID: roundID, GameID: gameID, RoundNum: 2, StartedAt: startedAt,
 			}, nil).Once()
 			repo.On("NewSingleplayerRoundGuess", mock.Anything, dto.NewSingleplayerRoundGuessRequest{
-				RequestTime: req.RequestTime, RoundID: roundID, GameID: gameID, Guess: guess,
+				RequestTime: req.RequestTime, RoundID: roundID, GameID: gameID, Guess: &guess,
 				Score: tt.wantScore, Distance: 750_000,
 			}).Return(nil).Once()
 
@@ -688,6 +699,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       args.req.UserID,
 						Rounds:       2,
@@ -714,6 +726,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       uuid.Must(uuid.NewV7()),
 						Rounds:       2,
@@ -739,6 +752,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
 					Return(singleplayerEntity.Game{
+						Provider:     "google",
 						ID:           args.req.GameID,
 						UserID:       args.req.UserID,
 						Rounds:       2,
@@ -758,7 +772,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 					Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) })
 				fs.repo.On("GetSingleplayerGame", mock.Anything, args.req.GameID).
-					Return(singleplayerEntity.Game{ID: args.req.GameID, UserID: uuid.Nil}, nil)
+					Return(singleplayerEntity.Game{Provider: "google", Rounds: 5, ID: args.req.GameID, UserID: uuid.Nil}, nil)
 			},
 			wantErr: func(t assert.TestingT, err error, _ ...any) bool {
 				return assert.ErrorIs(t, err, singleplayerEntity.ErrGameWrongUserID)

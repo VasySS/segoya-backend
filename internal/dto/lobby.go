@@ -104,6 +104,7 @@ type NewLobbyRequest struct {
 
 // NewLobbyRequestDB is a request to create a new lobby in the database.
 type NewLobbyRequestDB struct {
+	Expiration      time.Duration
 	RequestTime     time.Time
 	ID              string
 	CreatorID       uuid.UUID

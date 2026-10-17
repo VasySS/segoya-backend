@@ -113,6 +113,7 @@ func TestUsecase_NewGame(t *testing.T) {
 			name: "error creating game - tx error",
 			args: args{
 				req: dto.NewSingleplayerGameRequest{
+					Provider: "google", Rounds: 5,
 					UserID:      uuid.Must(uuid.NewV7()),
 					RequestTime: now,
 				},
@@ -128,6 +129,7 @@ func TestUsecase_NewGame(t *testing.T) {
 			name: "error creating round - game lock error",
 			args: args{
 				req: dto.NewSingleplayerGameRequest{
+					Provider: "google", Rounds: 5,
 					UserID:      uuid.Must(uuid.NewV7()),
 					RequestTime: now,
 				},
@@ -174,6 +176,7 @@ func TestUsecase_GetGame(t *testing.T) {
 	t.Parallel()
 
 	validGame := singleplayerEntity.Game{
+		Provider:     "google",
 		ID:           uuid.Must(uuid.NewV7()),
 		UserID:       uuid.Must(uuid.NewV7()),
 		RoundCurrent: 1,
@@ -267,6 +270,7 @@ func TestUsecase_EndGame(t *testing.T) {
 	t.Parallel()
 
 	validGame := singleplayerEntity.Game{
+		Provider:     "google",
 		ID:           uuid.Must(uuid.NewV7()),
 		UserID:       uuid.Must(uuid.NewV7()),
 		RoundCurrent: 5,
@@ -434,10 +438,10 @@ func TestUsecase_EndGameRoundCountEquality(t *testing.T) {
 		finished bool
 		wantErr  error
 	}{
-		{name: "zero counts still allow ending"},
+		{name: "zero counts rejected", wantErr: game.ErrInvalidRounds},
 		{
 			name: "above round count still rejects", current: 6, rounds: 5,
-			wantErr: singleplayerEntity.ErrGameIsStillActive,
+			wantErr: game.ErrInvalidState,
 		},
 		{name: "finished game retains repeated end write", current: 5, rounds: 5, finished: true},
 	}
@@ -452,7 +456,8 @@ func TestUsecase_EndGameRoundCountEquality(t *testing.T) {
 			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
 			repo.On("GetSingleplayerGame", mock.Anything, gameID).Return(singleplayerEntity.Game{
-				ID: gameID, UserID: userID, RoundCurrent: tt.current, Rounds: tt.rounds, Finished: tt.finished,
+				Provider: "google",
+				ID:       gameID, UserID: userID, RoundCurrent: tt.current, Rounds: tt.rounds, Finished: tt.finished,
 			}, nil).Once()
 
 			if tt.wantErr == nil {

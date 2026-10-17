@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
 )
 
@@ -16,9 +17,17 @@ func (uc Usecase) NewRoundGuess(ctx context.Context, req dto.NewMultiplayerRound
 	defer span.End()
 
 	err := uc.repo.RunTx(ctx, func(ctx context.Context) error {
+		if err := uc.repo.LockMultiplayerGame(ctx, req.GameID); err != nil {
+			return fmt.Errorf("failed to lock game: %w", err)
+		}
+
 		multiplayerGame, err := uc.repo.GetMultiplayerGame(ctx, req.GameID)
 		if err != nil {
 			return fmt.Errorf("failed to get game: %w", err)
+		}
+
+		if err := multiplayerGame.Validate(); err != nil {
+			return fmt.Errorf("validate game settings and state: %w", err)
 		}
 
 		if err := uc.isUserInGame(ctx, req.UserID, req.GameID); err != nil {
@@ -30,9 +39,14 @@ func (uc Usecase) NewRoundGuess(ctx context.Context, req dto.NewMultiplayerRound
 			return fmt.Errorf("failed to get current round: %w", err)
 		}
 
-		score, distance, err := round.EvaluateGuess(multiplayerGame.Provider, req.Guess)
+		score, distance, err := round.EvaluateGuess(multiplayerGame.Provider, req.RequestTime, req.Guess)
 		if err != nil {
 			return err //nolint:wrapcheck // Preserve the existing unwrapped round error.
+		}
+
+		coordinates := game.LatLng{}
+		if req.Guess != nil {
+			coordinates = *req.Guess
 		}
 
 		err = uc.repo.NewMultiplayerRoundGuess(ctx, dto.NewMultiplayerRoundGuessRequestDB{
@@ -41,8 +55,8 @@ func (uc Usecase) NewRoundGuess(ctx context.Context, req dto.NewMultiplayerRound
 			UserID:      req.UserID,
 			Score:       score,
 			Distance:    distance,
-			Lat:         req.Guess.Lat,
-			Lng:         req.Guess.Lng,
+			Lat:         coordinates.Lat,
+			Lng:         coordinates.Lng,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to set user guess: %w", err)
@@ -124,6 +138,10 @@ func (uc Usecase) lockGameAndGetData(ctx context.Context, gameID, userID uuid.UU
 	g, err := uc.repo.GetMultiplayerGame(ctx, gameID)
 	if err != nil {
 		return multiplayer.Game{}, multiplayer.Round{}, nil, fmt.Errorf("failed to get game: %w", err)
+	}
+
+	if err := g.Validate(); err != nil {
+		return multiplayer.Game{}, multiplayer.Round{}, nil, fmt.Errorf("validate game settings and state: %w", err)
 	}
 
 	r, err := uc.repo.GetMultiplayerRound(ctx, g.ID, g.RoundCurrent)

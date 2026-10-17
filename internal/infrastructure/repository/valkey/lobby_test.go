@@ -167,7 +167,7 @@ func (s *LobbyTestSuite) TestUpdateLobby() {
 	oldLobby, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
 	s.Require().NoError(err)
 
-	newProvider := gofakeit.LetterN(5)
+	newProvider := "yandex"
 	newRounds := gofakeit.IntRange(1, 10)
 	newTimerSeconds := gofakeit.IntRange(10, 60)
 	newMovementAllowed := gofakeit.Bool()
@@ -261,7 +261,7 @@ func (s *LobbyTestSuite) TestIncrementLobbyPlayers() {
 	s.Require().NoError(err)
 
 	for range 2 {
-		err = s.valkeyRepo.IncrementLobbyPlayers(s.ctx, req.ID)
+		err = s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, uuid.New(), "session")
 		s.Require().NoError(err)
 	}
 
@@ -287,12 +287,17 @@ func (s *LobbyTestSuite) TestDecrementLobbyPlayers() {
 	err := s.valkeyRepo.NewLobby(s.ctx, req)
 	s.Require().NoError(err)
 
-	for range 2 {
-		err = s.valkeyRepo.IncrementLobbyPlayers(s.ctx, req.ID)
+	for i := range 2 {
+		id, session := uuid.New(), "session"
+		if i == 0 {
+			id, session = creatorUUID, "creator"
+		}
+
+		err = s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, id, session)
 		s.Require().NoError(err)
 	}
 
-	err = s.valkeyRepo.DecrementLobbyPlayers(s.ctx, req.ID)
+	err = s.valkeyRepo.ReleaseLobbyUser(s.ctx, req.ID, creatorUUID, "creator", 3*time.Minute)
 	s.Require().NoError(err)
 
 	l, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
@@ -328,11 +333,12 @@ func (s *LobbyTestSuite) TestDeleteLobby() {
 	s.Equal(lobby.ErrNotFound, err)
 }
 
-func (s *LobbyTestSuite) TestAddLobbyExpiration() {
+func (s *LobbyTestSuite) TestInitialLobbyExpiration() {
 	creatorUUID, _ := uuid.NewV7()
 
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
+		Expiration:      2 * time.Second,
 		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
@@ -343,9 +349,6 @@ func (s *LobbyTestSuite) TestAddLobbyExpiration() {
 	}
 
 	err := s.valkeyRepo.NewLobby(s.ctx, req)
-	s.Require().NoError(err)
-
-	err = s.valkeyRepo.AddLobbyExpiration(s.ctx, req.ID, 2*time.Second)
 	s.Require().NoError(err)
 
 	_, err = s.valkeyRepo.GetLobby(s.ctx, req.ID)
@@ -362,6 +365,7 @@ func (s *LobbyTestSuite) TestDeleteLobbyExpiration() {
 
 	req := dto.NewLobbyRequestDB{
 		ID:              gofakeit.UUID(),
+		Expiration:      2 * time.Second,
 		CreatorID:       creatorUUID,
 		RequestTime:     time.Now().UTC(),
 		Rounds:          gofakeit.IntRange(1, 10),
@@ -374,10 +378,7 @@ func (s *LobbyTestSuite) TestDeleteLobbyExpiration() {
 	err := s.valkeyRepo.NewLobby(s.ctx, req)
 	s.Require().NoError(err)
 
-	err = s.valkeyRepo.AddLobbyExpiration(s.ctx, req.ID, 2*time.Second)
-	s.Require().NoError(err)
-
-	err = s.valkeyRepo.DeleteLobbyExpiration(s.ctx, req.ID)
+	err = s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, creatorUUID, "creator")
 	s.Require().NoError(err)
 
 	time.Sleep(3 * time.Second)

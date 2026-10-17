@@ -192,7 +192,7 @@ func (s *SingleplayerTestSuite) TestSetSingleplayerGuess() {
 		RequestTime: time.Now().UTC(),
 		RoundID:     firstRound.ID,
 		GameID:      newGame.ID,
-		Guess: game.LatLng{
+		Guess: &game.LatLng{
 			Lat: gofakeit.Latitude(),
 			Lng: gofakeit.Longitude(),
 		},
@@ -225,7 +225,7 @@ func (s *SingleplayerTestSuite) TestSingleplayerRoundsWithGuesses() {
 			RequestTime: time.Now().UTC(),
 			RoundID:     newRound.ID,
 			GameID:      newGame.ID,
-			Guess: game.LatLng{
+			Guess: &game.LatLng{
 				Lat: gofakeit.Latitude(),
 				Lng: gofakeit.Longitude(),
 			},

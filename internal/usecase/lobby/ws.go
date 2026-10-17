@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
-	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
@@ -16,34 +15,20 @@ func (uc Usecase) ConnectLobbyUser(
 	ctx context.Context,
 	lobbyID string,
 	userID uuid.UUID,
+	sessionID string,
 ) (user.PublicProfile, error) {
 	ctx, span := uc.tracer.Start(ctx, "ConnectLobbyUser")
 	defer span.End()
-
-	lobbyRepo, err := uc.lobbyRepo.GetLobby(ctx, lobbyID)
-	if err != nil {
-		span.RecordError(err)
-		return user.PublicProfile{}, fmt.Errorf("error getting lobby: %w", err)
-	}
-
-	if lobbyRepo.IsFull() {
-		return user.PublicProfile{}, lobby.ErrLobbyIsFull
-	}
-
-	if err := uc.lobbyRepo.IncrementLobbyPlayers(ctx, lobbyID); err != nil {
-		span.RecordError(err)
-		return user.PublicProfile{}, fmt.Errorf("error incrementing current players: %w", err)
-	}
-
-	if err := uc.lobbyRepo.DeleteLobbyExpiration(ctx, lobbyID); err != nil {
-		span.RecordError(err)
-		return user.PublicProfile{}, fmt.Errorf("error deleting lobby expiration: %w", err)
-	}
 
 	userRepo, err := uc.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
 		span.RecordError(err)
 		return user.PublicProfile{}, fmt.Errorf("error getting user profile: %w", err)
+	}
+
+	if err := uc.lobbyRepo.AdmitLobbyUser(ctx, lobbyID, userID, sessionID); err != nil {
+		span.RecordError(err)
+		return user.PublicProfile{}, fmt.Errorf("error admitting lobby user: %w", err)
 	}
 
 	return userRepo.ToPublicProfile(), nil
@@ -53,28 +38,15 @@ func (uc Usecase) ConnectLobbyUser(
 func (uc Usecase) DisconnectLobbyUser(
 	ctx context.Context,
 	lobbyID string,
-	_ uuid.UUID,
+	userID uuid.UUID,
+	sessionID string,
 ) error {
 	ctx, span := uc.tracer.Start(ctx, "DisconnectLobbyUser")
 	defer span.End()
 
-	lobbyRepo, err := uc.lobbyRepo.GetLobby(ctx, lobbyID)
-	if err != nil {
+	if err := uc.lobbyRepo.ReleaseLobbyUser(ctx, lobbyID, userID, sessionID, uc.conf.LobbyExpiration); err != nil {
 		span.RecordError(err)
-		return fmt.Errorf("error getting lobby from db: %w", err)
-	}
-
-	// set the lobby expiration timer if the leaving user is the last one
-	if lobbyRepo.IsLastPlayer() {
-		if err := uc.lobbyRepo.AddLobbyExpiration(ctx, lobbyID, uc.conf.LobbyExpiration); err != nil {
-			span.RecordError(err)
-			return fmt.Errorf("error deleting lobby: %w", err)
-		}
-	}
-
-	if err := uc.lobbyRepo.DecrementLobbyPlayers(ctx, lobbyID); err != nil {
-		span.RecordError(err)
-		return fmt.Errorf("error decrementing current players: %w", err)
+		return fmt.Errorf("error releasing lobby user: %w", err)
 	}
 
 	return nil

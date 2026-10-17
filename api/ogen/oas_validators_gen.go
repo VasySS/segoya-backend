@@ -916,7 +916,7 @@ func (s *NewLobby) Validate() error {
 			if err := func() error {
 				if err := (validate.Int{
 					MinSet:        true,
-					Min:           10,
+					Min:           0,
 					MaxSet:        true,
 					Max:           600,
 					MinExclusive:  false,
@@ -1033,7 +1033,7 @@ func (s *NewSingleplayerGameRequest) Validate() error {
 			if err := func() error {
 				if err := (validate.Int{
 					MinSet:        true,
-					Min:           10,
+					Min:           0,
 					MaxSet:        true,
 					Max:           600,
 					MinExclusive:  false,
@@ -1448,8 +1448,15 @@ func (s *SingleplayerRoundGuess) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
-		if err := s.Guess.Validate(); err != nil {
-			return err
+		if value, ok := s.Guess.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
 		}
 		return nil
 	}(); err != nil {

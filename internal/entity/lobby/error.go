@@ -1,6 +1,10 @@
 package lobby
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/VasySS/segoya-backend/internal/entity/game"
+)
 
 var (
 	// ErrNotFound is returned when the lobby is not found in the database.
@@ -14,9 +18,11 @@ var (
 	// ErrLobbyIsFull is returned when user tries to join a lobby that is full.
 	ErrLobbyIsFull = errors.New("lobby is full")
 	// ErrInvalidProvider is returned when settings use an unsupported panorama provider.
-	ErrInvalidProvider = errors.New("invalid panorama provider")
+	ErrInvalidProvider = game.ErrInvalidProvider
 	// ErrInvalidRounds is returned when settings specify an invalid round count.
-	ErrInvalidRounds = errors.New("invalid rounds")
+	ErrInvalidRounds = game.ErrInvalidRounds
 	// ErrInvalidTimerSeconds is returned when settings specify an invalid timer duration.
-	ErrInvalidTimerSeconds = errors.New("invalid timer seconds")
+	ErrInvalidTimerSeconds = game.ErrInvalidTimerSeconds
+	ErrInvalidPlayers      = game.ErrInvalidPlayers
+	ErrAlreadyConnected    = errors.New("user already connected to lobby")
 )

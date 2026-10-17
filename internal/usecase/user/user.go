@@ -48,7 +48,7 @@ func (uc Usecase) UpdateAvatar(ctx context.Context, req dto.UpdateAvatarRequest)
 	defer span.End()
 
 	err := uc.repo.RunTx(ctx, func(ctx context.Context) error {
-		userRepo, err := uc.repo.GetUserByID(ctx, req.UserID)
+		userRepo, err := uc.repo.GetUserByIDForUpdate(ctx, req.UserID)
 		if err != nil {
 			return fmt.Errorf("failed to get user from db: %w", err)
 		}

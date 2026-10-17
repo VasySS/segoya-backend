@@ -305,7 +305,7 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 						return fn(ctx)
 					})
 
-				f.repo.On("GetUserByID", mock.Anything, a.req.UserID).
+				f.repo.On("GetUserByIDForUpdate", mock.Anything, a.req.UserID).
 					Return(userEntity.PrivateProfile{
 						PublicProfile:    userPublicProfile,
 						AvatarLastUpdate: a.req.RequestTime.Add(-301 * time.Second),
@@ -342,7 +342,7 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 						return fn(ctx)
 					})
 
-				f.repo.On("GetUserByID", mock.Anything, a.req.UserID).
+				f.repo.On("GetUserByIDForUpdate", mock.Anything, a.req.UserID).
 					Return(userEntity.PrivateProfile{}, errors.New("user not found"))
 			},
 			args: args{
@@ -365,7 +365,7 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 						return fn(ctx)
 					})
 
-				f.repo.On("GetUserByID", mock.Anything, a.req.UserID).
+				f.repo.On("GetUserByIDForUpdate", mock.Anything, a.req.UserID).
 					Return(userEntity.PrivateProfile{
 						PublicProfile:    userPublicProfile,
 						AvatarLastUpdate: a.req.RequestTime.Add(-299 * time.Second),
@@ -391,7 +391,7 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 						return fn(ctx)
 					})
 
-				f.repo.On("GetUserByID", mock.Anything, a.req.UserID).
+				f.repo.On("GetUserByIDForUpdate", mock.Anything, a.req.UserID).
 					Return(userEntity.PrivateProfile{
 						PublicProfile:    userPublicProfile,
 						AvatarLastUpdate: a.req.RequestTime.Add(-48 * time.Hour),
@@ -417,7 +417,7 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 						return fn(ctx)
 					})
 
-				f.repo.On("GetUserByID", mock.Anything, a.req.UserID).
+				f.repo.On("GetUserByIDForUpdate", mock.Anything, a.req.UserID).
 					Return(userEntity.PrivateProfile{
 						PublicProfile:    userPublicProfile,
 						AvatarLastUpdate: a.req.RequestTime.Add(-301 * time.Second),
@@ -447,7 +447,7 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 						return fn(ctx)
 					})
 
-				f.repo.On("GetUserByID", mock.Anything, a.req.UserID).
+				f.repo.On("GetUserByIDForUpdate", mock.Anything, a.req.UserID).
 					Return(userEntity.PrivateProfile{
 						PublicProfile:    userPublicProfile,
 						AvatarLastUpdate: a.req.RequestTime.Add(-1 * time.Hour),
@@ -480,7 +480,7 @@ func TestUsecase_UpdateUserAvatar(t *testing.T) {
 						return fn(ctx)
 					})
 
-				f.repo.On("GetUserByID", mock.Anything, a.req.UserID).
+				f.repo.On("GetUserByIDForUpdate", mock.Anything, a.req.UserID).
 					Return(userEntity.PrivateProfile{
 						PublicProfile:    userPublicProfile,
 						AvatarLastUpdate: a.req.RequestTime.Add(-24 * time.Hour),
@@ -591,7 +591,7 @@ func TestUsecase_UpdateAvatarCooldownBoundaries(t *testing.T) {
 
 			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
-			repo.On("GetUserByID", mock.Anything, profile.ID).Return(profile, nil).Once()
+			repo.On("GetUserByIDForUpdate", mock.Anything, profile.ID).Return(profile, nil).Once()
 
 			if !tt.denied {
 				s3.On("UploadAvatar", mock.Anything, bytes.NewBuffer(avatarBytes), expectedHash, req.MimeType).

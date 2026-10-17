@@ -33,7 +33,7 @@ const (
 
 // MultiplayerUserGuessMessage is an incoming message with a user guess.
 type MultiplayerUserGuessMessage struct {
-	Guess game.LatLng `json:"guess"`
+	Guess *game.LatLng `json:"guess"`
 }
 
 // MultiplayerGameToAPI converts a multiplayer game entity to the API model.
@@ -111,7 +111,7 @@ type NewMultiplayerRoundGuessRequest struct {
 	RequestTime time.Time
 	UserID      uuid.UUID
 	GameID      uuid.UUID
-	Guess       game.LatLng
+	Guess       *game.LatLng
 }
 
 // NewMultiplayerRoundGuessRequestDB is a request to create a new multiplayer round guess in the database.

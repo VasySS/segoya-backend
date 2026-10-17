@@ -11,12 +11,12 @@ import (
 
 // MaxRoundsReached returns true if all rounds have been created.
 func (g Game) MaxRoundsReached() bool {
-	return g.RoundCurrent != 0 && g.RoundCurrent == g.Rounds
+	return g.Rounds > 0 && g.RoundCurrent >= g.Rounds
 }
 
 // AllRoundsCreated returns true if all rounds have been created.
 func (g Game) AllRoundsCreated() bool {
-	return g.RoundCurrent == g.Rounds
+	return g.Validate() == nil && g.RoundCurrent == g.Rounds
 }
 
 // TimerExpired returns true if the timer is enabled and has expired.
@@ -50,8 +50,16 @@ func (g Game) HasUser(userID uuid.UUID) error {
 
 // ValidateNewRound checks that another round can be created.
 func (g Game) ValidateNewRound() error {
+	if err := g.Validate(); err != nil {
+		return err
+	}
+
 	if g.MaxRoundsReached() {
 		return ErrRoundMaxAmount
+	}
+
+	if g.Finished {
+		return game.ErrInvalidState
 	}
 
 	return nil
@@ -59,6 +67,10 @@ func (g Game) ValidateNewRound() error {
 
 // ValidateEnd checks that all rounds have been created before ending the game.
 func (g Game) ValidateEnd() error {
+	if err := g.Validate(); err != nil {
+		return err
+	}
+
 	if !g.AllRoundsCreated() {
 		return ErrGameIsStillActive
 	}
@@ -68,6 +80,10 @@ func (g Game) ValidateEnd() error {
 
 // ValidateGuessesAccess checks that the game has finished before showing its guesses.
 func (g Game) ValidateGuessesAccess() error {
+	if err := g.Validate(); err != nil {
+		return err
+	}
+
 	if !g.Finished {
 		return ErrGameIsStillActive
 	}
@@ -80,14 +96,29 @@ func (g Game) PrepareNextRound(
 	panorama game.PanoramaMetadata,
 	requestTime time.Time,
 	startDelay time.Duration,
-) game.RoundCreation {
+) (game.RoundCreation, error) {
+	if err := g.ValidateNewRound(); err != nil {
+		return game.RoundCreation{}, err
+	}
+
 	return game.RoundCreation{
 		GameID:     g.ID,
 		LocationID: panorama.ID,
 		RoundNum:   g.RoundCurrent + 1,
 		CreatedAt:  requestTime,
 		StartedAt:  requestTime.Add(startDelay),
+	}, nil
+}
+
+// Validate checks game settings and persisted round state.
+//
+//nolint:wrapcheck // Domain validation returns shared sentinel errors.
+func (g Game) Validate() error {
+	if err := game.ValidateSettings(g.Provider, g.Rounds, g.TimerSeconds); err != nil {
+		return err
 	}
+
+	return game.ValidateRoundState(g.Rounds, g.RoundCurrent, g.Finished)
 }
 
 // Round struct contains singleplayer round information.
@@ -119,14 +150,32 @@ func (r Round) ValidateFinished() error {
 }
 
 // EvaluateGuess returns the score and distance, applying the penalty for a late guess.
-func (r Round) EvaluateGuess(g Game, requestTime time.Time, coordinates game.LatLng) (int, int, error) {
+//
+//nolint:wrapcheck // Domain validation returns shared sentinel errors.
+func (r Round) EvaluateGuess(g Game, requestTime time.Time, coordinates *game.LatLng) (int, int, error) {
 	if r.Finished {
 		return 0, 0, ErrRoundAlreadyFinished
 	}
 
+	if requestTime.Before(r.StartedAt) {
+		return 0, 0, game.ErrRoundNotStarted
+	}
+
+	if coordinates == nil {
+		return 0, 0, nil
+	}
+
+	if err := coordinates.Validate(); err != nil {
+		return 0, 0, err
+	}
+
+	if !g.Provider.IsSupported() {
+		return 0, 0, game.ErrInvalidProvider
+	}
+
 	location := game.LatLng{Lat: r.Lat, Lng: r.Lng}
 
-	score, distance := game.CalculateScore(g.Provider, location, coordinates)
+	score, distance := game.CalculateScore(g.Provider, location, *coordinates)
 	if r.TimerExpired(requestTime, g.TimerSeconds) {
 		score = 0
 	}

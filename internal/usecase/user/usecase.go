@@ -28,6 +28,7 @@ type S3Repository interface {
 type Repository interface {
 	repository.TxManager
 	GetUserByID(ctx context.Context, id uuid.UUID) (user.PrivateProfile, error)
+	GetUserByIDForUpdate(ctx context.Context, id uuid.UUID) (user.PrivateProfile, error)
 	UpdateUser(ctx context.Context, updateInfo dto.UpdateUserRequest) error
 	UpdateAvatar(ctx context.Context, req dto.UpdateAvatarRequestDB) error
 }

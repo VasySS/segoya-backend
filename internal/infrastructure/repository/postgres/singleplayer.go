@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
 )
 
@@ -380,10 +381,15 @@ func (r *Repository) NewSingleplayerRoundGuess(
 		WHERE id = @round_id
 	`
 
+	coordinates := game.LatLng{}
+	if req.Guess != nil {
+		coordinates = *req.Guess
+	}
+
 	_, err := tx.Exec(ctx, combinedQuery, pgx.NamedArgs{
 		"round_id":   req.RoundID.String(),
-		"lat":        req.Guess.Lat,
-		"lng":        req.Guess.Lng,
+		"lat":        coordinates.Lat,
+		"lng":        coordinates.Lng,
 		"score":      req.Score,
 		"distance":   req.Distance,
 		"created_at": req.RequestTime,

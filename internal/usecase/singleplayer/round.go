@@ -73,7 +73,11 @@ func (uc Usecase) getOrGenerateRound(
 		return singleplayer.Round{}, fmt.Errorf("failed to create panorama: %w", err)
 	}
 
-	creation := game.PrepareNextRound(pano, requestTime, uc.cfg.RoundStartDelay)
+	creation, err := game.PrepareNextRound(pano, requestTime, uc.cfg.RoundStartDelay)
+	if err != nil {
+		return singleplayer.Round{}, fmt.Errorf("prepare next round: %w", err)
+	}
+
 	dbReq := dto.NewSingleplayerRoundDBRequest{
 		GameID:     creation.GameID,
 		LocationID: creation.LocationID,
@@ -149,6 +153,10 @@ func (uc Usecase) EndRound(
 
 		if err := game.HasUser(req.UserID); err != nil {
 			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
+		}
+
+		if err := game.Validate(); err != nil {
+			return fmt.Errorf("validate game settings and state: %w", err)
 		}
 
 		round, err := uc.repo.GetSingleplayerRound(ctx, game.ID, game.RoundCurrent)

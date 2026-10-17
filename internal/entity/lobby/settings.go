@@ -11,18 +11,8 @@ type Settings struct {
 }
 
 // Validate checks the provider, round count, and timer duration in that order.
+//
+//nolint:wrapcheck // Domain validation returns shared sentinel errors.
 func (s Settings) Validate() error {
-	if !game.PanoramaProvider(s.Provider).IsSupported() {
-		return ErrInvalidProvider
-	}
-
-	if s.Rounds < 1 || s.Rounds > 10 {
-		return ErrInvalidRounds
-	}
-
-	if s.TimerSeconds != 0 && (s.TimerSeconds < 10 || s.TimerSeconds > 600) {
-		return ErrInvalidTimerSeconds
-	}
-
-	return nil
+	return game.ValidateSettings(game.PanoramaProvider(s.Provider), s.Rounds, s.TimerSeconds)
 }

@@ -131,7 +131,7 @@ type EndSingleplayerRoundRequest struct {
 	RequestTime time.Time
 	GameID      uuid.UUID
 	UserID      uuid.UUID
-	Guess       game.LatLng
+	Guess       *game.LatLng
 }
 
 // NewSingleplayerRoundGuessRequest represents a request to create a new singleplayer round guess.
@@ -139,7 +139,7 @@ type NewSingleplayerRoundGuessRequest struct {
 	RequestTime time.Time
 	RoundID     uuid.UUID
 	GameID      uuid.UUID
-	Guess       game.LatLng
+	Guess       *game.LatLng
 	Score       int
 	Distance    int
 }

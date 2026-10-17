@@ -49,15 +49,15 @@ func TestGame_ValidateNewRound(t *testing.T) {
 		{name: "first round", rounds: 5},
 		{name: "below limit", current: 4, rounds: 5},
 		{name: "at limit", current: 5, rounds: 5, wantErr: singleplayer.ErrRoundMaxAmount},
-		{name: "above limit retains equality semantics", current: 6, rounds: 5},
-		{name: "zero round count permits first round"},
+		{name: "above limit rejects invalid state", current: 6, rounds: 5, wantErr: game.ErrInvalidState},
+		{name: "zero round count rejected", wantErr: game.ErrInvalidRounds},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			g := singleplayer.Game{RoundCurrent: tt.current, Rounds: tt.rounds}
+			g := singleplayer.Game{Provider: game.GoogleProvider, RoundCurrent: tt.current, Rounds: tt.rounds}
 			assert.ErrorIs(t, g.ValidateNewRound(), tt.wantErr)
 		})
 	}
@@ -75,11 +75,11 @@ func TestGame_ValidateEnd(t *testing.T) {
 	}{
 		{name: "all rounds created", current: 5, rounds: 5},
 		{name: "missing rounds", current: 4, rounds: 5, wantErr: singleplayer.ErrGameIsStillActive},
-		{name: "above count", current: 6, rounds: 5, wantErr: singleplayer.ErrGameIsStillActive},
-		{name: "zero counts retain equality semantics"},
+		{name: "above count", current: 6, rounds: 5, wantErr: game.ErrInvalidState},
+		{name: "zero counts rejected", wantErr: game.ErrInvalidRounds},
 		{
 			name: "finished game does not bypass count", current: 4, rounds: 5, finished: true,
-			wantErr: singleplayer.ErrGameIsStillActive,
+			wantErr: game.ErrInvalidState,
 		},
 	}
 
@@ -87,7 +87,12 @@ func TestGame_ValidateEnd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			g := singleplayer.Game{RoundCurrent: tt.current, Rounds: tt.rounds, Finished: tt.finished}
+			g := singleplayer.Game{
+				Provider:     game.GoogleProvider,
+				RoundCurrent: tt.current,
+				Rounds:       tt.rounds,
+				Finished:     tt.finished,
+			}
 			assert.ErrorIs(t, g.ValidateEnd(), tt.wantErr)
 		})
 	}
@@ -109,7 +114,7 @@ func TestGame_ValidateGuessesAccess(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			g := singleplayer.Game{Finished: tt.finished}
+			g := singleplayer.Game{Provider: game.GoogleProvider, Rounds: 1, RoundCurrent: 1, Finished: tt.finished}
 			assert.ErrorIs(t, g.ValidateGuessesAccess(), tt.wantErr)
 		})
 	}
@@ -135,9 +140,10 @@ func TestGame_PrepareNextRound(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			g := singleplayer.Game{ID: gameID, RoundCurrent: tt.current}
+			g := singleplayer.Game{Provider: game.GoogleProvider, Rounds: 5, ID: gameID, RoundCurrent: tt.current}
 			original := g
-			got := g.PrepareNextRound(panorama, now, tt.delay)
+			got, err := g.PrepareNextRound(panorama, now, tt.delay)
+			require.NoError(t, err)
 			assert.Equal(t, game.RoundCreation{
 				GameID: gameID, LocationID: panorama.ID, RoundNum: tt.current + 1,
 				CreatedAt: now, StartedAt: now.Add(tt.delay),
@@ -240,7 +246,7 @@ func TestRound_EvaluateGuess(t *testing.T) {
 			location: game.LatLng{Lat: 11.22, Lng: 22.33}, guess: game.LatLng{Lat: 11.22, Lng: 22.33},
 			wantScore: 5000,
 		},
-		{name: "empty guess", provider: game.GoogleProvider},
+		{name: "perfect zero guess", provider: game.GoogleProvider, wantScore: 5000},
 		{
 			name: "finished round rejects guess", provider: game.GoogleProvider, guess: game.LatLng{Lat: 6.74637},
 			finished: true, wantErr: singleplayer.ErrRoundAlreadyFinished,
@@ -255,7 +261,7 @@ func TestRound_EvaluateGuess(t *testing.T) {
 			round := singleplayer.Round{
 				Lat: tt.location.Lat, Lng: tt.location.Lng, StartedAt: startedAt, Finished: tt.finished,
 			}
-			score, distance, err := round.EvaluateGuess(g, startedAt.Add(tt.elapsed), tt.guess)
+			score, distance, err := round.EvaluateGuess(g, startedAt.Add(tt.elapsed), &tt.guess)
 			require.ErrorIs(t, err, tt.wantErr)
 			assert.Equal(t, tt.wantScore, score)
 			assert.Equal(t, tt.wantDistance, distance)

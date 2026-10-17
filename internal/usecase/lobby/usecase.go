@@ -27,10 +27,8 @@ type Repository interface {
 	UpdateLobby(ctx context.Context, lobbyInfo lobby.Lobby) error
 	DeleteLobby(ctx context.Context, id string) error
 	GetLobbies(ctx context.Context, req dto.GetLobbiesRequest) ([]lobby.Lobby, int, error)
-	IncrementLobbyPlayers(ctx context.Context, id string) error
-	DecrementLobbyPlayers(ctx context.Context, id string) error
-	AddLobbyExpiration(ctx context.Context, id string, ttl time.Duration) error
-	DeleteLobbyExpiration(ctx context.Context, id string) error
+	AdmitLobbyUser(ctx context.Context, id string, userID uuid.UUID, sessionID string) error
+	ReleaseLobbyUser(ctx context.Context, id string, userID uuid.UUID, sessionID string, ttl time.Duration) error
 }
 
 // UserRepository defines methods for retrieving user data from the repository layer.
