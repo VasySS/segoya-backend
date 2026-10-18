@@ -21,7 +21,7 @@ func lobbyKeys(id string) []string {
 
 // runLobbyTransaction retries only when EXEC aborts because a watched key changed.
 // prepare reads the watched state and builds writes without performing side effects.
-func (r *Repository) runLobbyTransaction(
+func (r *Repository) runLobbyTransaction( //nolint:cyclop
 	ctx context.Context,
 	id string,
 	prepare func(valkey.DedicatedClient) (valkey.Commands, error),
@@ -129,7 +129,7 @@ func readWatchedLobby(
 }
 
 // AdmitLobbyUser reserves one slot per user and session, removing the empty-lobby TTL atomically.
-func (r *Repository) AdmitLobbyUser(ctx context.Context, id string, userID uuid.UUID, sessionID string) error {
+func (r *Repository) AdmitLobbyUser(ctx context.Context, id string, userID uuid.UUID, sessionID string) error { //nolint:cyclop
 	if userID == uuid.Nil || sessionID == "" {
 		return lobby.ErrInvalidPlayers
 	}

@@ -45,7 +45,6 @@ func NewService(
 	httpClient *http.Client,
 ) *Service {
 	// jwkSet := newCachedJWKSet(ctx, discordOAuthKeysURL, httpClient)
-
 	return &Service{
 		jwtSecret:       []byte(jwtSecret),
 		accessTokenTTL:  accessTokenTTL,
