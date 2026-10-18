@@ -129,7 +129,9 @@ func readWatchedLobby(
 }
 
 // AdmitLobbyUser reserves one slot per user and session, removing the empty-lobby TTL atomically.
-func (r *Repository) AdmitLobbyUser(ctx context.Context, id string, userID uuid.UUID, sessionID string) error { //nolint:cyclop
+//
+//nolint:cyclop
+func (r *Repository) AdmitLobbyUser(ctx context.Context, id string, userID uuid.UUID, sessionID string) error {
 	if userID == uuid.Nil || sessionID == "" {
 		return lobby.ErrInvalidPlayers
 	}
