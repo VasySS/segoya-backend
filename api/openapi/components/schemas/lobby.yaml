@@ -19,9 +19,11 @@ NewLobby:
       description: Zero or omitted disables the timer; otherwise 10-600 seconds.
       minimum: 0
       maximum: 600
-      not:
-        minimum: 1
-        maximum: 9
+      allOf:
+        - not:
+            type: integer
+            minimum: 1
+            maximum: 9
     movementAllowed:
       type: boolean
     private:
