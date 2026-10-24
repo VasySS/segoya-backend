@@ -1,20 +1,15 @@
+//go:build integration
+
 package postgres_test
 
 import (
-	"context"
 	"testing"
-	"time"
 
-	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
-	postgresRepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/postgres"
-	"github.com/VasySS/segoya-backend/migrations/tables"
-	"github.com/VasySS/segoya-backend/tests/containers"
 )
 
 func TestUserTestSuite(t *testing.T) {
@@ -23,62 +18,10 @@ func TestUserTestSuite(t *testing.T) {
 	suite.Run(t, new(UserTestSuite))
 }
 
-type UserTestSuite struct {
-	suite.Suite
-
-	ctx               context.Context
-	postgresContainer *containers.PostgresContainer
-	postgresRepo      *postgresRepo.Repository
-}
-
-func (s *UserTestSuite) SetupSuite() {
-	s.ctx = context.Background()
-
-	postgresContainer, err := containers.NewPostgresContainer(s.ctx)
-	s.Require().NoError(err)
-
-	s.postgresContainer = postgresContainer
-
-	migrationsPool, err := pgxpool.New(s.ctx, postgresContainer.ConnectionString)
-	s.Require().NoError(err)
-
-	err = tables.RunGooseMigrations(s.ctx, migrationsPool, "up")
-	s.Require().NoError(err)
-
-	// testcontainers lib needs all connections to db to be closed
-	migrationsPool.Close()
-
-	// save db state with all migrations applied
-	err = s.postgresContainer.Snapshot(s.ctx)
-	s.Require().NoError(err)
-}
-
-func (s *UserTestSuite) TearDownSuite() {
-	err := s.postgresContainer.Terminate(s.ctx)
-	s.Require().NoError(err)
-}
-
-func (s *UserTestSuite) SetupTest() {
-	// restore db state with migrations only
-	err := s.postgresContainer.Restore(s.ctx)
-	s.Require().NoError(err)
-
-	pool, err := pgxpool.New(s.ctx, s.postgresContainer.ConnectionString)
-	s.Require().NoError(err)
-
-	txManger := postgresRepo.NewTxManager(pool)
-	repo := postgresRepo.New(txManger)
-
-	s.postgresRepo = repo
-}
+type UserTestSuite struct{ postgresTestSuite }
 
 func (s *UserTestSuite) TestNewUser() {
-	req := dto.RegisterRequestDB{
-		RequestTime: time.Now().UTC(),
-		Username:    gofakeit.Username(),
-		Name:        gofakeit.Name(),
-		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
-	}
+	req := s.newUserRequest()
 
 	err := s.postgresRepo.NewUser(s.ctx, req)
 	s.Require().NoError(err)
@@ -89,7 +32,7 @@ func (s *UserTestSuite) TestNewUser() {
 	s.Equal(req.Username, u.Username)
 	s.Equal(req.Name, u.Name)
 	s.Equal(req.Password, u.Password)
-	s.WithinDuration(req.RequestTime, u.RegisterDate, 5*time.Millisecond)
+	s.Equal(req.RequestTime, u.RegisterDate)
 	s.Empty(u.AvatarHash)
 	s.Empty(u.AvatarLastUpdate)
 
@@ -98,12 +41,7 @@ func (s *UserTestSuite) TestNewUser() {
 }
 
 func (s *UserTestSuite) TestGetUserByUsername() {
-	req := dto.RegisterRequestDB{
-		RequestTime: time.Now().UTC(),
-		Username:    gofakeit.Username(),
-		Name:        gofakeit.Name(),
-		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
-	}
+	req := s.newUserRequest()
 
 	_, err := s.postgresRepo.GetUserByUsername(s.ctx, req.Username)
 	s.Require().Error(err)
@@ -118,7 +56,7 @@ func (s *UserTestSuite) TestGetUserByUsername() {
 	s.Equal(req.Username, u.Username)
 	s.Equal(req.Name, u.Name)
 	s.Equal(req.Password, u.Password)
-	s.WithinDuration(req.RequestTime, u.RegisterDate, 5*time.Millisecond)
+	s.Equal(req.RequestTime, u.RegisterDate)
 	s.Empty(u.AvatarHash)
 	s.Empty(u.AvatarLastUpdate)
 }
@@ -127,12 +65,7 @@ func (s *UserTestSuite) TestGetUserByID() {
 	_, err := s.postgresRepo.GetUserByID(s.ctx, uuid.New())
 	s.Require().ErrorIs(err, user.ErrUserNotFound)
 
-	req := dto.RegisterRequestDB{
-		RequestTime: time.Now().UTC(),
-		Username:    gofakeit.Username(),
-		Name:        gofakeit.Name(),
-		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
-	}
+	req := s.newUserRequest()
 
 	err = s.postgresRepo.NewUser(s.ctx, req)
 	s.Require().NoError(err)
@@ -146,18 +79,13 @@ func (s *UserTestSuite) TestGetUserByID() {
 	s.Equal(req.Username, u.Username)
 	s.Equal(req.Name, u.Name)
 	s.Equal(req.Password, u.Password)
-	s.WithinDuration(req.RequestTime, u.RegisterDate, 5*time.Millisecond)
+	s.Equal(req.RequestTime, u.RegisterDate)
 	s.Empty(u.AvatarHash)
 	s.Empty(u.AvatarLastUpdate)
 }
 
 func (s *UserTestSuite) TestUpdateUser() {
-	req := dto.RegisterRequestDB{
-		RequestTime: time.Now().UTC(),
-		Username:    gofakeit.Username(),
-		Name:        gofakeit.Name(),
-		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
-	}
+	req := s.newUserRequest()
 
 	err := s.postgresRepo.NewUser(s.ctx, req)
 	s.Require().NoError(err)
@@ -169,7 +97,7 @@ func (s *UserTestSuite) TestUpdateUser() {
 
 	updateReq := dto.UpdateUserRequest{
 		UserID: newUser.ID,
-		Name:   gofakeit.Name(),
+		Name:   "Updated player",
 	}
 
 	err = s.postgresRepo.UpdateUser(s.ctx, updateReq)
@@ -182,12 +110,7 @@ func (s *UserTestSuite) TestUpdateUser() {
 }
 
 func (s *UserTestSuite) TestUpdateAvatar() {
-	newUserReq := dto.RegisterRequestDB{
-		RequestTime: time.Now().UTC(),
-		Username:    gofakeit.Username(),
-		Name:        gofakeit.Name(),
-		Password:    gofakeit.LetterN(60), // emulating bcrypt hash
-	}
+	newUserReq := s.newUserRequest()
 
 	err := s.postgresRepo.NewUser(s.ctx, newUserReq)
 	s.Require().NoError(err)
@@ -197,9 +120,9 @@ func (s *UserTestSuite) TestUpdateAvatar() {
 	s.Empty(newUser.AvatarHash)
 
 	req := dto.UpdateAvatarRequestDB{
-		RequestTime: time.Now().UTC(),
+		RequestTime: fixtureTime(),
 		UserID:      newUser.ID,
-		AvatarHash:  gofakeit.UUID(),
+		AvatarHash:  "updated-avatar-hash",
 	}
 
 	err = s.postgresRepo.UpdateAvatar(s.ctx, req)
@@ -208,5 +131,5 @@ func (s *UserTestSuite) TestUpdateAvatar() {
 	updatedUser, err := s.postgresRepo.GetUserByID(s.ctx, newUser.ID)
 	s.Require().NoError(err)
 	s.Equal(req.AvatarHash, updatedUser.AvatarHash)
-	s.WithinDuration(req.RequestTime, updatedUser.AvatarLastUpdate, 5*time.Millisecond)
+	s.Equal(req.RequestTime, updatedUser.AvatarLastUpdate)
 }

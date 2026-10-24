@@ -1,388 +1,202 @@
+//go:build integration
+
 package valkey_test
 
 import (
-	"context"
+	"errors"
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/valkey-io/valkey-go"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
-	valkeyRepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/valkey"
-	"github.com/VasySS/segoya-backend/tests/containers"
 )
 
 func TestLobbyTestSuite(t *testing.T) {
 	t.Parallel()
-
 	suite.Run(t, new(LobbyTestSuite))
 }
 
-type LobbyTestSuite struct {
-	suite.Suite
+type LobbyTestSuite struct{ valkeyTestSuite }
 
-	ctx             context.Context
-	valkeyContainer *containers.ValkeyContainer
-	valkeyRepo      *valkeyRepo.Repository
-}
-
-func (s *LobbyTestSuite) SetupSuite() {
-	s.ctx = context.Background()
-
-	valkeyContainer, err := containers.NewValkeyContainer(s.ctx)
-	s.Require().NoError(err)
-
-	valkeyClient, err := valkey.NewClient(valkey.MustParseURL(valkeyContainer.ConnectionString))
-	s.Require().NoError(err)
-
-	repo := valkeyRepo.New(s.ctx, valkeyClient)
-
-	s.valkeyContainer = valkeyContainer
-	s.valkeyRepo = repo
-}
-
-func (s *LobbyTestSuite) TearDownSuite() {
-	err := s.valkeyContainer.Terminate(s.ctx)
-	s.Require().NoError(err)
-}
-
-func (s *LobbyTestSuite) TestNewLobby() {
-	creatorUUID, _ := uuid.NewV7()
-
-	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "google",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: true,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
+func (s *LobbyTestSuite) TestLobbyRoundTrip() {
+	for _, tc := range []struct {
+		name    string
+		private bool
+	}{
+		{name: "public"}, {name: "private", private: true},
+	} {
+		s.Run(tc.name, func() {
+			req := s.newLobby(tc.private)
+			got, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+			s.Require().NoError(err)
+			s.Equal(lobby.Lobby{
+				ID: req.ID, CreatorID: req.CreatorID, CreatedAt: req.RequestTime,
+				Provider: req.Provider, Rounds: req.Rounds, TimerSeconds: req.TimerSeconds,
+				MaxPlayers: req.MaxPlayers, MovementAllowed: req.MovementAllowed, Private: tc.private,
+			}, got)
+		})
 	}
 
-	err := s.valkeyRepo.NewLobby(s.ctx, req)
-	s.Require().NoError(err)
-
-	l, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
-	s.Equal(req.ID, l.ID)
-	s.Equal(req.CreatorID, l.CreatorID)
-	s.WithinDuration(req.RequestTime, l.CreatedAt, 1*time.Second)
-	s.Equal(req.Rounds, l.Rounds)
-	s.Equal(req.Provider, l.Provider)
-	s.Equal(req.TimerSeconds, l.TimerSeconds)
-	s.Equal(req.MovementAllowed, l.MovementAllowed)
-	s.Equal(req.MaxPlayers, l.MaxPlayers)
-	s.Equal(0, l.CurrentPlayers)
-	s.False(l.Private)
+	_, err := s.valkeyRepo.GetLobby(s.ctx, "missing")
+	s.ErrorIs(err, lobby.ErrNotFound)
 }
 
-func (s *LobbyTestSuite) TestNewPrivateLobby() {
-	creatorUUID, _ := uuid.NewV7()
+func (s *LobbyTestSuite) TestUpdateLobbyPreservesMembershipAndIdentity() {
+	for _, tc := range []struct {
+		name    string
+		private bool
+	}{
+		{name: "public"}, {name: "private", private: true},
+	} {
+		s.Run(tc.name, func() {
+			req := s.newLobby(tc.private)
+			s.Require().NoError(s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, req.CreatorID, "creator-session"))
+			original, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+			s.Require().NoError(err)
 
-	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "yandex",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: false,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
-	}
+			updated := original
+			updated.Provider, updated.Rounds, updated.TimerSeconds, updated.MovementAllowed = "yandex", 5, 60, false
+			s.Require().NoError(s.valkeyRepo.UpdateLobby(s.ctx, updated))
+			got, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+			s.Require().NoError(err)
+			s.Equal(updated, got)
+			s.Require().NoError(s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, req.CreatorID, "creator-session"))
 
-	err := s.valkeyRepo.NewPrivateLobby(s.ctx, req)
-	s.Require().NoError(err)
-
-	l, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
-	s.Equal(req.ID, l.ID)
-	s.Equal(req.CreatorID, l.CreatorID)
-	s.WithinDuration(req.RequestTime, l.CreatedAt, 1*time.Second)
-	s.Equal(req.Rounds, l.Rounds)
-	s.Equal(req.Provider, l.Provider)
-	s.Equal(req.TimerSeconds, l.TimerSeconds)
-	s.Equal(req.MovementAllowed, l.MovementAllowed)
-	s.Equal(req.MaxPlayers, l.MaxPlayers)
-	s.Equal(0, l.CurrentPlayers)
-	s.True(l.Private)
-}
-
-func (s *LobbyTestSuite) TestGetLobby() {
-	creatorUUID, _ := uuid.NewV7()
-
-	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "google",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: true,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
-	}
-
-	err := s.valkeyRepo.NewLobby(s.ctx, req)
-	s.Require().NoError(err)
-
-	l, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
-
-	s.Equal(req.ID, l.ID)
-	s.Equal(req.CreatorID, l.CreatorID)
-	s.Equal(req.Rounds, l.Rounds)
-	s.Equal(req.Provider, l.Provider)
-	s.Equal(req.TimerSeconds, l.TimerSeconds)
-	s.Equal(req.MovementAllowed, l.MovementAllowed)
-	s.Equal(req.MaxPlayers, l.MaxPlayers)
-	s.Equal(0, l.CurrentPlayers)
-	s.WithinDuration(req.RequestTime, l.CreatedAt, 1*time.Second)
-
-	_, err = s.valkeyRepo.GetLobby(s.ctx, "nonexistent")
-	s.Require().Error(err)
-	s.Equal(lobby.ErrNotFound, err)
-}
-
-func (s *LobbyTestSuite) TestUpdateLobby() {
-	creatorUUID, _ := uuid.NewV7()
-
-	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "google",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: true,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
-	}
-
-	err := s.valkeyRepo.NewLobby(s.ctx, req)
-	s.Require().NoError(err)
-
-	oldLobby, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
-
-	newProvider := "yandex"
-	newRounds := gofakeit.IntRange(1, 10)
-	newTimerSeconds := gofakeit.IntRange(10, 60)
-	newMovementAllowed := gofakeit.Bool()
-
-	err = s.valkeyRepo.UpdateLobby(s.ctx, lobby.Lobby{
-		ID:              oldLobby.ID,
-		CreatorID:       oldLobby.CreatorID,
-		CreatedAt:       oldLobby.CreatedAt,
-		Rounds:          newRounds,
-		Provider:        newProvider,
-		TimerSeconds:    newTimerSeconds,
-		MovementAllowed: newMovementAllowed,
-		MaxPlayers:      oldLobby.MaxPlayers,
-		CurrentPlayers:  oldLobby.CurrentPlayers,
-	})
-	s.Require().NoError(err)
-
-	updatedLobby, err := s.valkeyRepo.GetLobby(s.ctx, oldLobby.ID)
-	s.Require().NoError(err)
-	s.Equal(oldLobby.ID, updatedLobby.ID)
-	s.Equal(oldLobby.CreatorID, updatedLobby.CreatorID)
-	s.Equal(oldLobby.CreatedAt, updatedLobby.CreatedAt)
-	s.Equal(oldLobby.MaxPlayers, updatedLobby.MaxPlayers)
-	s.Equal(oldLobby.CurrentPlayers, updatedLobby.CurrentPlayers)
-
-	s.Equal(newRounds, updatedLobby.Rounds)
-	s.Equal(newProvider, updatedLobby.Provider)
-	s.Equal(newTimerSeconds, updatedLobby.TimerSeconds)
-	s.Equal(newMovementAllowed, updatedLobby.MovementAllowed)
-}
-
-func (s *LobbyTestSuite) TestGetLobbies() {
-	newLobbyIDs := make([]string, 0, 3)
-
-	for range 3 {
-		creatorUUID, _ := uuid.NewV7()
-
-		req := dto.NewLobbyRequestDB{
-			ID:              gofakeit.UUID(),
-			CreatorID:       creatorUUID,
-			RequestTime:     time.Now().UTC(),
-			Rounds:          gofakeit.IntRange(1, 10),
-			Provider:        "google",
-			TimerSeconds:    gofakeit.IntRange(10, 60),
-			MovementAllowed: true,
-			MaxPlayers:      gofakeit.IntRange(2, 10),
-		}
-
-		err := s.valkeyRepo.NewLobby(s.ctx, req)
-		s.Require().NoError(err)
-
-		newLobbyIDs = append(newLobbyIDs, req.ID)
-	}
-
-	lobbies, total, err := s.valkeyRepo.GetLobbies(s.ctx, dto.GetLobbiesRequest{
-		Page:     1,
-		PageSize: 3,
-	})
-	s.Require().NoError(err)
-	s.Require().Len(lobbies, 3)
-	s.GreaterOrEqual(total, 3)
-
-	gotLobbyIDs := make([]string, len(lobbies))
-	for i, l := range lobbies {
-		gotLobbyIDs[i] = l.ID
-
-		// all lobbies should be public in pagination
-		s.False(l.Private)
-	}
-
-	for _, id := range newLobbyIDs {
-		s.Contains(gotLobbyIDs, id)
+			updated.CreatorID = uuid.New()
+			s.Require().ErrorIs(s.valkeyRepo.UpdateLobby(s.ctx, updated), lobby.ErrOnlyCreatorCanUpdateSettings)
+			got, err = s.valkeyRepo.GetLobby(s.ctx, req.ID)
+			s.Require().NoError(err)
+			s.Equal(original.CreatorID, got.CreatorID)
+			s.Equal(1, got.CurrentPlayers)
+		})
 	}
 }
 
-func (s *LobbyTestSuite) TestIncrementLobbyPlayers() {
-	creatorUUID, _ := uuid.NewV7()
+func (s *LobbyTestSuite) TestGetLobbiesPagination() {
+	lobbies, total, err := s.valkeyRepo.GetLobbies(s.ctx, dto.GetLobbiesRequest{Page: 1, PageSize: 2})
+	s.Require().NoError(err)
+	s.Empty(lobbies)
+	s.Zero(total)
 
-	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "google",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: true,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
+	// Distinct seconds make the sorted-set order explicit, independent of IDs.
+	expected := []string{"public-3", "public-2", "public-1"}
+	for i := 1; i <= 3; i++ {
+		s.Require().NoError(s.valkeyRepo.NewLobby(s.ctx, dto.NewLobbyRequestDB{
+			ID: expected[3-i], CreatorID: uuid.New(), RequestTime: fixtureTime().Add(time.Duration(i) * time.Second),
+			Provider: "google", Rounds: 3, MaxPlayers: 2,
+		}))
 	}
 
-	err := s.valkeyRepo.NewLobby(s.ctx, req)
-	s.Require().NoError(err)
+	s.newLobby(true)
 
-	for range 2 {
-		err = s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, uuid.New(), "session")
-		s.Require().NoError(err)
+	for _, tc := range []struct {
+		name string
+		page int
+		ids  []string
+	}{
+		{name: "first page", page: 1, ids: expected[:2]},
+		{name: "partial last page", page: 2, ids: expected[2:]},
+	} {
+		s.Run(tc.name, func() {
+			got, count, err := s.valkeyRepo.GetLobbies(s.ctx, dto.GetLobbiesRequest{Page: tc.page, PageSize: 2})
+			s.Require().NoError(err)
+			s.Equal(3, count)
+
+			ids := make([]string, 0, len(got))
+			for _, value := range got {
+				ids = append(ids, value.ID)
+				s.False(value.Private)
+			}
+
+			s.Equal(tc.ids, ids)
+		})
 	}
-
-	l, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+	// The existing repository returns zero total when the requested page is empty.
+	// Keep that behavior separate from the total asserted on populated pages.
+	empty, _, err := s.valkeyRepo.GetLobbies(s.ctx, dto.GetLobbiesRequest{Page: 3, PageSize: 2})
 	s.Require().NoError(err)
-	s.Equal(2, l.CurrentPlayers)
+	s.Empty(empty)
 }
 
-func (s *LobbyTestSuite) TestDecrementLobbyPlayers() {
-	creatorUUID, _ := uuid.NewV7()
+func (s *LobbyTestSuite) TestMembershipUsesMatchingSession() {
+	req := s.newLobby(false)
+	other := uuid.New()
 
-	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "google",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: true,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
-	}
-
-	err := s.valkeyRepo.NewLobby(s.ctx, req)
+	s.Require().NoError(s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, req.CreatorID, "creator"))
+	s.Require().NoError(s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, other, "other"))
+	s.Require().ErrorIs(s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, uuid.New(), "extra"), lobby.ErrLobbyIsFull)
+	s.Require().NoError(s.valkeyRepo.ReleaseLobbyUser(s.ctx, req.ID, req.CreatorID, "stale", time.Minute))
+	got, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
 	s.Require().NoError(err)
-
-	for i := range 2 {
-		id, session := uuid.New(), "session"
-		if i == 0 {
-			id, session = creatorUUID, "creator"
-		}
-
-		err = s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, id, session)
-		s.Require().NoError(err)
-	}
-
-	err = s.valkeyRepo.ReleaseLobbyUser(s.ctx, req.ID, creatorUUID, "creator", 3*time.Minute)
+	s.Equal(2, got.CurrentPlayers)
+	s.Require().NoError(s.valkeyRepo.ReleaseLobbyUser(s.ctx, req.ID, req.CreatorID, "creator", time.Minute))
+	s.Require().NoError(s.valkeyRepo.ReleaseLobbyUser(s.ctx, req.ID, req.CreatorID, "creator", time.Minute))
+	got, err = s.valkeyRepo.GetLobby(s.ctx, req.ID)
 	s.Require().NoError(err)
-
-	l, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
-	s.Equal(1, l.CurrentPlayers)
+	s.Equal(1, got.CurrentPlayers)
 }
 
-func (s *LobbyTestSuite) TestDeleteLobby() {
-	creatorUUID, _ := uuid.NewV7()
-
-	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "google",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: true,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
+func (s *LobbyTestSuite) TestDeleteLobbyRemovesPublicIndex() {
+	for _, tc := range []struct {
+		name    string
+		private bool
+	}{
+		{name: "public"}, {name: "private", private: true},
+	} {
+		s.Run(tc.name, func() {
+			req := s.newLobby(tc.private)
+			s.Require().NoError(s.valkeyRepo.DeleteLobby(s.ctx, req.ID))
+			_, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+			s.ErrorIs(err, lobby.ErrNotFound)
+		})
 	}
 
-	err := s.valkeyRepo.NewLobby(s.ctx, req)
+	got, total, err := s.valkeyRepo.GetLobbies(s.ctx, dto.GetLobbiesRequest{Page: 1, PageSize: 10})
 	s.Require().NoError(err)
-
-	l, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
-	s.Equal(req.ID, l.ID)
-
-	err = s.valkeyRepo.DeleteLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
-
-	_, err = s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Equal(lobby.ErrNotFound, err)
+	s.Empty(got)
+	s.Zero(total)
 }
 
 func (s *LobbyTestSuite) TestInitialLobbyExpiration() {
-	creatorUUID, _ := uuid.NewV7()
-
 	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		Expiration:      2 * time.Second,
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "google",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: true,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
+		ID: uuid.NewString(), CreatorID: uuid.New(), RequestTime: fixtureTime(),
+		Provider: "google", Rounds: 3, MaxPlayers: 2, Expiration: time.Second,
 	}
-
-	err := s.valkeyRepo.NewLobby(s.ctx, req)
-	s.Require().NoError(err)
-
-	_, err = s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
-
-	time.Sleep(3 * time.Second)
-
-	_, err = s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Equal(lobby.ErrNotFound, err)
+	s.Require().NoError(s.valkeyRepo.NewLobby(s.ctx, req))
+	s.Positive(s.ttl("lobby:" + req.ID))
+	s.Eventually(func() bool {
+		_, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+		return errors.Is(err, lobby.ErrNotFound)
+	}, 3*time.Second, 20*time.Millisecond)
 }
 
-func (s *LobbyTestSuite) TestDeleteLobbyExpiration() {
-	creatorUUID, _ := uuid.NewV7()
+func (s *LobbyTestSuite) TestAdmissionAndLastReleaseChangeExpiration() {
+	req := s.newLobby(false)
+	key := "lobby:" + req.ID
+	s.Positive(s.ttl(key))
+	s.Require().NoError(s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, req.CreatorID, "creator"))
+	s.EqualValues(-1, s.ttl(key))
+	s.Require().NoError(s.valkeyRepo.ReleaseLobbyUser(s.ctx, req.ID, req.CreatorID, "creator", time.Minute))
+	s.Positive(s.ttl(key))
+	s.LessOrEqual(s.ttl(key), int64(time.Minute/time.Millisecond))
+}
+
+func (s *LobbyTestSuite) newLobby(private bool) dto.NewLobbyRequestDB {
+	s.T().Helper()
 
 	req := dto.NewLobbyRequestDB{
-		ID:              gofakeit.UUID(),
-		Expiration:      2 * time.Second,
-		CreatorID:       creatorUUID,
-		RequestTime:     time.Now().UTC(),
-		Rounds:          gofakeit.IntRange(1, 10),
-		Provider:        "google",
-		TimerSeconds:    gofakeit.IntRange(10, 60),
-		MovementAllowed: true,
-		MaxPlayers:      gofakeit.IntRange(2, 10),
+		ID: uuid.NewString(), CreatorID: uuid.New(), RequestTime: fixtureTime(),
+		Provider: "google", Rounds: 3, TimerSeconds: 30, MaxPlayers: 2,
+		MovementAllowed: true, Expiration: time.Minute,
+	}
+	if private {
+		s.Require().NoError(s.valkeyRepo.NewPrivateLobby(s.ctx, req))
+	} else {
+		s.Require().NoError(s.valkeyRepo.NewLobby(s.ctx, req))
 	}
 
-	err := s.valkeyRepo.NewLobby(s.ctx, req)
-	s.Require().NoError(err)
-
-	err = s.valkeyRepo.AdmitLobbyUser(s.ctx, req.ID, creatorUUID, "creator")
-	s.Require().NoError(err)
-
-	time.Sleep(3 * time.Second)
-
-	_, err = s.valkeyRepo.GetLobby(s.ctx, req.ID)
-	s.Require().NoError(err)
+	return req
 }

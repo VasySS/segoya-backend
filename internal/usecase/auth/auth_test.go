@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/oauth2"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
@@ -15,140 +17,133 @@ import (
 	"github.com/VasySS/segoya-backend/internal/usecase/auth/mocks"
 )
 
+type authHarness struct {
+	uc       *auth.Usecase
+	users    *mocks.UserRepository
+	sessions *mocks.SessionRepository
+	tokens   *mocks.TokenService
+	crypto   *mocks.CryptoService
+	config   auth.Config
+	now      time.Time
+	profile  user.PrivateProfile
+	session  uuid.UUID
+}
+
+func newAuthHarness(t *testing.T) *authHarness {
+	t.Helper()
+	h := &authHarness{
+		users: mocks.NewUserRepository(t), sessions: mocks.NewSessionRepository(t),
+		tokens: mocks.NewTokenService(t), crypto: mocks.NewCryptoService(t),
+		now:     time.Date(2026, time.October, 11, 12, 0, 0, 0, time.UTC),
+		session: uuid.MustParse("019a553a-fc00-7000-8000-000000000002"),
+		profile: user.PrivateProfile{
+			PublicProfile: user.PublicProfile{
+				ID:       uuid.MustParse("019a553a-fc00-7000-8000-000000000001"),
+				Username: "alice",
+				Name:     "Alice",
+			},
+			Password: "password-hash",
+		},
+		config: auth.Config{
+			RefreshTokenTTL: 24 * time.Hour,
+			DiscordNew:      oauth2.Config{ClientID: "discord-link", RedirectURL: "https://app.example/discord/link"},
+			DiscordLogin:    oauth2.Config{ClientID: "discord-login", RedirectURL: "https://app.example/discord/login"},
+			YandexNew:       oauth2.Config{ClientID: "yandex-link", RedirectURL: "https://app.example/yandex/link"},
+			YandexLogin:     oauth2.Config{ClientID: "yandex-login", RedirectURL: "https://app.example/yandex/login"},
+		},
+	}
+	h.uc = auth.NewUsecase(h.config, h.crypto, h.tokens, h.users, h.sessions)
+
+	return h
+}
+
+func (h *authHarness) accessClaims() user.AccessTokenClaims {
+	return user.AccessTokenClaims{
+		SessionID: h.session,
+		UserID:    h.profile.ID,
+		Username:  h.profile.Username,
+		Name:      h.profile.Name,
+	}
+}
+
+func (h *authHarness) refreshClaims() user.RefreshTokenClaims {
+	return user.RefreshTokenClaims{SessionID: h.session, UserID: h.profile.ID, Username: h.profile.Username}
+}
+
 func TestUsecase_Login(t *testing.T) {
 	t.Parallel()
 
-	loginReq := dto.LoginRequest{
-		RequestTime: time.Now().UTC(),
-		Username:    "username",
-		Password:    "password",
-		UserAgent:   "userAgent",
-	}
+	for _, failure := range []string{"", "lookup", "password", "access token", "refresh token", "session"} {
+		name := failure + " failure"
+		if failure == "" {
+			name = "success"
+		}
 
-	type fields struct {
-		conf          auth.Config
-		cryptoService *mocks.CryptoService
-		tokenService  *mocks.TokenService
-		userRepo      *mocks.UserRepository
-		sessionRepo   *mocks.SessionRepository
-	}
-
-	type args struct {
-		req dto.LoginRequest
-	}
-
-	tests := []struct {
-		name             string
-		args             args
-		setup            func(fields, args)
-		wantAccessToken  string
-		wantRefreshToken string
-		wantErr          assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successful login",
-			args: args{
-				req: loginReq,
-			},
-			setup: func(fs fields, args args) {
-				userDB := user.PrivateProfile{
-					PublicProfile: user.PublicProfile{
-						ID:       uuid.Must(uuid.NewV7()),
-						Username: "username",
-						Name:     "name",
-					},
-					Password: "some_password_hash",
-				}
-
-				fs.userRepo.On("GetUserByUsername", mock.Anything, args.req.Username).
-					Return(userDB, nil)
-
-				fs.cryptoService.On("CompareHashAndPassword", userDB.Password, args.req.Password).
-					Return(nil)
-
-				generatedSessionID := uuid.Must(uuid.NewV7())
-
-				fs.cryptoService.On("NewUUID7").Return(generatedSessionID)
-
-				fs.tokenService.On("NewAccessToken", mock.Anything, user.AccessTokenClaims{
-					SessionID: generatedSessionID,
-					UserID:    userDB.ID,
-					Username:  userDB.Username,
-					Name:      userDB.Name,
-				}).Return("accessToken", nil)
-
-				fs.tokenService.On("NewRefreshToken", mock.Anything, user.RefreshTokenClaims{
-					SessionID: generatedSessionID,
-					UserID:    userDB.ID,
-					Username:  userDB.Username,
-				}).Return("refreshToken", nil)
-
-				fs.sessionRepo.On("NewSession", mock.Anything, dto.NewSessionRequest{
-					RequestTime:  args.req.RequestTime,
-					UserID:       userDB.ID,
-					SessionID:    generatedSessionID,
-					RefreshToken: "refreshToken",
-					UA:           args.req.UserAgent,
-					Expiration:   fs.conf.RefreshTokenTTL,
-				}).Return(nil)
-			},
-			wantAccessToken:  "accessToken",
-			wantRefreshToken: "refreshToken",
-			wantErr:          assert.NoError,
-		},
-		{
-			name: "login with wrong password",
-			args: args{
-				req: loginReq,
-			},
-			setup: func(fs fields, args args) {
-				userDB := user.PrivateProfile{
-					PublicProfile: user.PublicProfile{
-						ID:       uuid.Must(uuid.NewV7()),
-						Username: "username",
-						Name:     "name",
-					},
-					Password: "some_pass_hash",
-				}
-
-				fs.userRepo.On("GetUserByUsername", mock.Anything, args.req.Username).
-					Return(userDB, nil)
-
-				fs.cryptoService.On("CompareHashAndPassword", userDB.Password, args.req.Password).
-					Return(user.ErrWrongPassword)
-			},
-			wantAccessToken:  "",
-			wantRefreshToken: "",
-			wantErr: func(tt assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(tt, err, user.ErrWrongPassword)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
+			h := newAuthHarness(t)
+			cause := errors.New("dependency unavailable")
+			req := dto.LoginRequest{RequestTime: h.now, Username: h.profile.Username, Password: "password", UserAgent: "browser"}
+			setup := func() {
+				if failure == "lookup" {
+					h.users.On("GetUserByUsername", mock.Anything, req.Username).Return(user.PrivateProfile{}, cause).Once()
+					return
+				}
 
-			userRepo := mocks.NewUserRepository(t)
-			sessionRepo := mocks.NewSessionRepository(t)
-			tokenService := mocks.NewTokenService(t)
-			crypt := mocks.NewCryptoService(t)
-			conf := auth.Config{RefreshTokenTTL: time.Hour * 24}
-			fs := fields{
-				conf:          conf,
-				cryptoService: crypt,
-				tokenService:  tokenService,
-				userRepo:      userRepo,
-				sessionRepo:   sessionRepo,
+				h.users.On("GetUserByUsername", mock.Anything, req.Username).Return(h.profile, nil).Once()
+
+				if failure == "password" {
+					h.crypto.On("CompareHashAndPassword", h.profile.Password, req.Password).Return(cause).Once()
+					return
+				}
+
+				h.crypto.On("CompareHashAndPassword", h.profile.Password, req.Password).Return(nil).Once()
+				h.crypto.On("NewUUID7").Return(h.session).Once()
+
+				if failure == "access token" {
+					h.tokens.On("NewAccessToken", h.now, h.accessClaims()).Return("", cause).Once()
+					return
+				}
+
+				h.tokens.On("NewAccessToken", h.now, h.accessClaims()).Return("access", nil).Once()
+
+				if failure == "refresh token" {
+					h.tokens.On("NewRefreshToken", h.now, h.refreshClaims()).Return("", cause).Once()
+					return
+				}
+
+				h.tokens.On("NewRefreshToken", h.now, h.refreshClaims()).Return("refresh", nil).Once()
+
+				var sessionErr error
+				if failure == "session" {
+					sessionErr = cause
+				}
+
+				h.sessions.On("NewSession", mock.Anything, dto.NewSessionRequest{
+					RequestTime: h.now, UserID: h.profile.ID, SessionID: h.session,
+					RefreshToken: "refresh", UA: req.UserAgent, Expiration: h.config.RefreshTokenTTL,
+				}).Return(sessionErr).Once()
 			}
-			tt.setup(fs, tt.args)
+			setup()
 
-			uc := auth.NewUsecase(fs.conf, fs.cryptoService, fs.tokenService, fs.userRepo, fs.sessionRepo)
+			access, refresh, err := h.uc.Login(t.Context(), req)
 
-			accessToken, refreshToken, err := uc.Login(t.Context(), tt.args.req)
-			tt.wantErr(t, err)
-			assert.Equal(t, tt.wantAccessToken, accessToken)
-			assert.Equal(t, tt.wantRefreshToken, refreshToken)
+			if failure != "" {
+				want := cause
+				if failure == "password" {
+					want = user.ErrWrongPassword
+				}
+
+				require.ErrorIs(t, err, want)
+				assert.Empty(t, access)
+				assert.Empty(t, refresh)
+
+				return
+			}
+
+			require.NoError(t, err)
+			assert.Equal(t, "access", access)
+			assert.Equal(t, "refresh", refresh)
 		})
 	}
 }
@@ -156,86 +151,58 @@ func TestUsecase_Login(t *testing.T) {
 func TestUsecase_Register(t *testing.T) {
 	t.Parallel()
 
-	registerReq := dto.RegisterRequest{
-		RequestTime: time.Now().UTC(),
-		Username:    "username",
-		Name:        "name",
-		Password:    "password",
-	}
-
-	type fields struct {
-		conf         auth.Config
-		cryptService *mocks.CryptoService
-		tokenService *mocks.TokenService
-		userRepo     *mocks.UserRepository
-		sessionRepo  *mocks.SessionRepository
-	}
-
-	type args struct {
-		req dto.RegisterRequest
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successfully register user",
-			args: args{
-				req: registerReq,
-			},
-			setup: func(fs fields, args args) {
-				fs.userRepo.On("GetUserByUsername", mock.Anything, args.req.Username).
-					//nolint:gosec
-					Return(user.PrivateProfile{
-						Password: "some_hash_from_db",
-					}, user.ErrUserNotFound)
-
-				fs.cryptService.On("GenerateHashFromPassword", args.req.Password).
-					Return("some_hash", nil)
-
-				fs.userRepo.On("NewUser", mock.Anything, dto.RegisterRequestDB{
-					RequestTime: args.req.RequestTime,
-					Username:    args.req.Username,
-					Name:        args.req.Name,
-					Password:    "some_hash",
-				}).Return(nil)
-			},
-			wantErr: assert.NoError,
-		},
-		{
-			name: "trying to register user with existing username",
-			args: args{
-				req: registerReq,
-			},
-			setup: func(fs fields, args args) {
-				fs.userRepo.On("GetUserByUsername", mock.Anything, args.req.Username).
-					Return(user.PrivateProfile{}, user.ErrAlreadyExists)
-			},
-			wantErr: func(tt assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(tt, err, user.ErrAlreadyExists)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, scenario := range []string{
+		"success",
+		"lookup failure",
+		"hash failure",
+		"insert failure",
+		"existing username",
+		"username claimed after lookup",
+	} {
+		t.Run(scenario, func(t *testing.T) {
 			t.Parallel()
+			h := newAuthHarness(t)
+			cause := errors.New("dependency unavailable")
+			req := dto.RegisterRequest{RequestTime: h.now, Username: "alice", Name: "Alice", Password: "password"}
 
-			userRepo := mocks.NewUserRepository(t)
-			rnd := mocks.NewCryptoService(t)
-			fs := fields{
-				cryptService: rnd,
-				userRepo:     userRepo,
+			var want error
+
+			switch scenario {
+			case "lookup failure":
+				h.users.On("GetUserByUsername", mock.Anything, req.Username).Return(user.PrivateProfile{}, cause).Once()
+				want = cause
+			default:
+				// Existing users are returned with nil error; NewUser enforces uniqueness.
+				if scenario == "existing username" {
+					h.users.On("GetUserByUsername", mock.Anything, req.Username).Return(h.profile, nil).Once()
+				} else {
+					h.users.On("GetUserByUsername", mock.Anything, req.Username).
+						Return(user.PrivateProfile{}, user.ErrUserNotFound).Once()
+				}
+
+				if scenario == "hash failure" {
+					h.crypto.On("GenerateHashFromPassword", req.Password).Return("", cause).Once()
+					want = cause
+
+					break
+				}
+
+				h.crypto.On("GenerateHashFromPassword", req.Password).Return("hash", nil).Once()
+
+				if scenario == "insert failure" {
+					want = cause
+				}
+
+				if scenario == "existing username" || scenario == "username claimed after lookup" {
+					want = user.ErrAlreadyExists
+				}
+
+				h.users.On("NewUser", mock.Anything, dto.RegisterRequestDB{
+					RequestTime: h.now, Username: req.Username, Name: req.Name, Password: "hash",
+				}).Return(want).Once()
 			}
-			tt.setup(fs, tt.args)
 
-			uc := auth.NewUsecase(fs.conf, fs.cryptService, fs.tokenService, fs.userRepo, fs.sessionRepo)
-
-			err := uc.Register(t.Context(), tt.args.req)
-			tt.wantErr(t, err)
+			require.ErrorIs(t, h.uc.Register(t.Context(), req), want)
 		})
 	}
 }
@@ -243,139 +210,88 @@ func TestUsecase_Register(t *testing.T) {
 func TestUsecase_RefreshTokens(t *testing.T) {
 	t.Parallel()
 
-	type fields struct {
-		conf         auth.Config
-		tokenService *mocks.TokenService
-		userRepo     *mocks.UserRepository
-		sessionRepo  *mocks.SessionRepository
-	}
+	for _, failure := range []string{
+		"",
+		"parse",
+		"session lookup",
+		"user lookup",
+		"access token",
+		"refresh token",
+		"session update",
+	} {
+		name := failure + " failure"
+		if failure == "" {
+			name = "success"
+		}
 
-	type args struct {
-		req dto.TokensRefreshRequest
-	}
-
-	tests := []struct {
-		name             string
-		args             args
-		setup            func(fields, args)
-		wantAccessToken  string
-		wantRefreshToken string
-		wantErr          assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successfully refresh tokens",
-			args: args{
-				req: dto.TokensRefreshRequest{
-					RequestTime:  time.Now().UTC(),
-					RefreshToken: "refresh_token",
-				},
-			},
-			setup: func(fs fields, args args) {
-				refreshTokenClaims := user.RefreshTokenClaims{
-					SessionID: uuid.Must(uuid.NewV7()),
-					UserID:    uuid.Must(uuid.NewV7()),
-					Username:  "username",
-				}
-
-				fs.tokenService.On("ParseRefreshToken", args.req.RefreshToken).
-					Return(refreshTokenClaims, nil)
-
-				existingSession := user.Session{
-					UserID:       refreshTokenClaims.UserID,
-					RefreshToken: "refresh_token",
-					SessionID:    refreshTokenClaims.SessionID,
-					UA:           "some_user_agent",
-				}
-
-				fs.sessionRepo.On("GetSession", mock.Anything,
-					refreshTokenClaims.UserID, refreshTokenClaims.SessionID).
-					Return(existingSession, nil)
-
-				fs.userRepo.On("GetUserByUsername", mock.Anything, refreshTokenClaims.Username).
-					Return(user.PrivateProfile{
-						PublicProfile: user.PublicProfile{
-							ID:       refreshTokenClaims.UserID,
-							Name:     "name",
-							Username: "username",
-						},
-					}, nil)
-
-				fs.tokenService.On("NewAccessToken", args.req.RequestTime, user.AccessTokenClaims{
-					SessionID: refreshTokenClaims.SessionID,
-					UserID:    refreshTokenClaims.UserID,
-					Username:  "username",
-					Name:      "name",
-				}).Return("access_token", nil)
-
-				fs.tokenService.On("NewRefreshToken", args.req.RequestTime, user.RefreshTokenClaims{
-					SessionID: refreshTokenClaims.SessionID,
-					UserID:    refreshTokenClaims.UserID,
-					Username:  "username",
-				}).Return("refresh_token", nil)
-
-				fs.sessionRepo.On("UpdateSession", mock.Anything, dto.UpdateSessionRequest{
-					RequestTime:  args.req.RequestTime,
-					UserID:       refreshTokenClaims.UserID,
-					RefreshToken: "refresh_token",
-					SessionID:    refreshTokenClaims.SessionID,
-					Expiration:   fs.conf.RefreshTokenTTL,
-				}).Return(nil)
-			},
-			wantAccessToken:  "access_token",
-			wantRefreshToken: "refresh_token",
-			wantErr:          assert.NoError,
-		},
-		{
-			name: "trying to refresh tokens with expired session",
-			args: args{
-				req: dto.TokensRefreshRequest{
-					RequestTime:  time.Now().UTC(),
-					RefreshToken: "refresh_token",
-				},
-			},
-			setup: func(fs fields, args args) {
-				userID := uuid.Must(uuid.NewV7())
-				sessionID := uuid.Must(uuid.NewV7())
-
-				fs.tokenService.On("ParseRefreshToken", args.req.RefreshToken).
-					Return(user.RefreshTokenClaims{
-						UserID:    userID,
-						SessionID: sessionID,
-					}, nil)
-
-				fs.sessionRepo.On("GetSession", mock.Anything, userID, sessionID).
-					Return(user.Session{}, errors.New("session not found"))
-			},
-			wantAccessToken:  "",
-			wantRefreshToken: "",
-			wantErr:          assert.Error,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
+			h := newAuthHarness(t)
+			cause := errors.New("dependency unavailable")
+			setup := func() {
+				if failure == "parse" {
+					h.tokens.On("ParseRefreshToken", "old-refresh").Return(user.RefreshTokenClaims{}, cause).Once()
+					return
+				}
 
-			userRepo := mocks.NewUserRepository(t)
-			tokenService := mocks.NewTokenService(t)
-			sessionRepo := mocks.NewSessionRepository(t)
-			conf := auth.Config{
-				RefreshTokenTTL: time.Hour,
+				h.tokens.On("ParseRefreshToken", "old-refresh").Return(h.refreshClaims(), nil).Once()
+
+				if failure == "session lookup" {
+					h.sessions.On("GetSession", mock.Anything, h.profile.ID, h.session).Return(user.Session{}, cause).Once()
+					return
+				}
+
+				h.sessions.On("GetSession", mock.Anything, h.profile.ID, h.session).
+					Return(user.Session{UserID: h.profile.ID, SessionID: h.session, RefreshToken: "old-refresh"}, nil).Once()
+
+				if failure == "user lookup" {
+					h.users.On("GetUserByUsername", mock.Anything, h.profile.Username).Return(user.PrivateProfile{}, cause).Once()
+					return
+				}
+
+				h.users.On("GetUserByUsername", mock.Anything, h.profile.Username).Return(h.profile, nil).Once()
+
+				if failure == "access token" {
+					h.tokens.On("NewAccessToken", h.now, h.accessClaims()).Return("", cause).Once()
+					return
+				}
+
+				h.tokens.On("NewAccessToken", h.now, h.accessClaims()).Return("new-access", nil).Once()
+
+				if failure == "refresh token" {
+					h.tokens.On("NewRefreshToken", h.now, h.refreshClaims()).Return("", cause).Once()
+					return
+				}
+
+				h.tokens.On("NewRefreshToken", h.now, h.refreshClaims()).Return("new-refresh", nil).Once()
+
+				var updateErr error
+				if failure == "session update" {
+					updateErr = cause
+				}
+
+				h.sessions.On("UpdateSession", mock.Anything, dto.UpdateSessionRequest{
+					RequestTime: h.now, UserID: h.profile.ID, SessionID: h.session,
+					RefreshToken: "new-refresh", Expiration: h.config.RefreshTokenTTL,
+				}).Return(updateErr).Once()
 			}
-			fs := fields{
-				conf:         conf,
-				sessionRepo:  sessionRepo,
-				tokenService: tokenService,
-				userRepo:     userRepo,
+			setup()
+
+			access, refresh, err := h.uc.RefreshTokens(t.Context(), dto.TokensRefreshRequest{
+				RequestTime:  h.now,
+				RefreshToken: "old-refresh",
+			})
+			if failure != "" {
+				require.ErrorIs(t, err, cause)
+				assert.Empty(t, access)
+				assert.Empty(t, refresh)
+
+				return
 			}
-			tt.setup(fs, tt.args)
 
-			uc := auth.NewUsecase(fs.conf, nil, fs.tokenService, fs.userRepo, fs.sessionRepo)
-
-			accessToken, refreshToken, err := uc.RefreshTokens(t.Context(), tt.args.req)
-			tt.wantErr(t, err)
-			assert.Equal(t, tt.wantAccessToken, accessToken)
-			assert.Equal(t, tt.wantRefreshToken, refreshToken)
+			require.NoError(t, err)
+			assert.Equal(t, "new-access", access)
+			assert.Equal(t, "new-refresh", refresh)
 		})
 	}
 }
@@ -383,66 +299,30 @@ func TestUsecase_RefreshTokens(t *testing.T) {
 func TestUsecase_GetOAuth(t *testing.T) {
 	t.Parallel()
 
-	oauthInfoResponse := []user.OAuth{
-		{OAuthID: "oauth_id1", Issuer: "provider1"},
-		{OAuthID: "oauth_id2", Issuer: "provider2"},
-	}
-
-	type fields struct {
-		userRepo *mocks.UserRepository
-	}
-
-	type args struct {
-		userID uuid.UUID
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		want    []user.OAuth
-		wantErr assert.ErrorAssertionFunc
+	cause := errors.New("oauth lookup unavailable")
+	for _, tt := range []struct {
+		name string
+		want []user.OAuth
+		err  error
 	}{
 		{
-			name: "successfully get oauth info",
-			args: args{
-				userID: uuid.Must(uuid.NewV7()),
+			name: "providers returned",
+			want: []user.OAuth{
+				{OAuthID: "discord-id", Issuer: user.DiscordOAuth},
+				{OAuthID: "yandex-id", Issuer: user.YandexOAuth},
 			},
-			setup: func(fs fields, args args) {
-				fs.userRepo.On("GetOAuth", mock.Anything, args.userID).
-					Return(oauthInfoResponse, nil)
-			},
-			want:    oauthInfoResponse,
-			wantErr: assert.NoError,
 		},
-		{
-			name: "failed to get oauth info",
-			args: args{
-				userID: uuid.Must(uuid.NewV7()),
-			},
-			setup: func(fs fields, args args) {
-				fs.userRepo.On("GetOAuth", mock.Anything, args.userID).
-					Return(nil, errors.New("failed to get oauth info"))
-			},
-			want:    nil,
-			wantErr: assert.Error,
-		},
-	}
-
-	for _, tt := range tests {
+		{name: "empty providers", want: []user.OAuth{}},
+		{name: "nil providers"},
+		{name: "lookup failure", err: cause},
+	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
-			userRepo := mocks.NewUserRepository(t)
-			fs := fields{
-				userRepo: userRepo,
-			}
-			tt.setup(fs, tt.args)
-
-			uc := auth.NewUsecase(auth.Config{}, nil, nil, fs.userRepo, nil)
-
-			_, err := uc.GetOAuth(t.Context(), tt.args.userID)
-			tt.wantErr(t, err)
+			h := newAuthHarness(t)
+			h.users.On("GetOAuth", mock.Anything, h.profile.ID).Return(tt.want, tt.err).Once()
+			got, err := h.uc.GetOAuth(t.Context(), h.profile.ID)
+			require.ErrorIs(t, err, tt.err)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -450,66 +330,33 @@ func TestUsecase_GetOAuth(t *testing.T) {
 func TestUsecase_GetSessions(t *testing.T) {
 	t.Parallel()
 
-	userSessionsResponse := []user.Session{
-		{UserID: uuid.Must(uuid.NewV7()), SessionID: uuid.Must(uuid.NewV7())},
-		{UserID: uuid.Must(uuid.NewV7()), SessionID: uuid.Must(uuid.NewV7())},
-	}
+	cause := errors.New("sessions unavailable")
 
-	type fields struct {
-		sessionRepo *mocks.SessionRepository
-	}
-
-	type args struct {
-		userID uuid.UUID
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		want    []user.Session
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successfully get user session",
-			args: args{
-				userID: uuid.Must(uuid.NewV7()),
-			},
-			setup: func(fs fields, args args) {
-				fs.sessionRepo.On("GetSessions", mock.Anything, args.userID, mock.Anything).
-					Return(userSessionsResponse, nil)
-			},
-			want:    userSessionsResponse,
-			wantErr: assert.NoError,
-		},
-		{
-			name: "failed to get user session",
-			args: args{
-				userID: uuid.Must(uuid.NewV7()),
-			},
-			setup: func(fs fields, args args) {
-				fs.sessionRepo.On("GetSessions", mock.Anything, args.userID, mock.Anything).
-					Return([]user.Session(nil), errors.New("failed to get user session"))
-			},
-			want:    []user.Session(nil),
-			wantErr: assert.Error,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, scenario := range []string{"sessions returned", "empty sessions", "nil sessions", "lookup failure"} {
+		t.Run(scenario, func(t *testing.T) {
 			t.Parallel()
+			h := newAuthHarness(t)
 
-			sessionRepo := mocks.NewSessionRepository(t)
-			fs := fields{
-				sessionRepo: sessionRepo,
+			var (
+				want    []user.Session
+				wantErr error
+			)
+
+			switch scenario {
+			case "sessions returned":
+				want = []user.Session{{
+					UserID: h.profile.ID, SessionID: h.session, UA: "browser", RefreshToken: "refresh", LastActive: h.now,
+				}}
+			case "empty sessions":
+				want = []user.Session{}
+			case "lookup failure":
+				wantErr = cause
 			}
-			tt.setup(fs, tt.args)
 
-			uc := auth.NewUsecase(auth.Config{}, nil, nil, nil, fs.sessionRepo)
-
-			_, err := uc.GetSessions(t.Context(), tt.args.userID)
-			tt.wantErr(t, err)
+			h.sessions.On("GetSessions", mock.Anything, h.profile.ID).Return(want, wantErr).Once()
+			got, err := h.uc.GetSessions(t.Context(), h.profile.ID)
+			require.ErrorIs(t, err, wantErr)
+			assert.Equal(t, want, got)
 		})
 	}
 }
@@ -517,69 +364,41 @@ func TestUsecase_GetSessions(t *testing.T) {
 func TestUsecase_DeleteSession(t *testing.T) {
 	t.Parallel()
 
-	type fields struct {
-		sessionRepo *mocks.SessionRepository
-	}
-
-	type args struct {
-		userID    uuid.UUID
-		sessionID uuid.UUID
-	}
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successfully delete user session",
-			args: args{
-				userID:    uuid.Must(uuid.NewV7()),
-				sessionID: uuid.Must(uuid.NewV7()),
-			},
-			setup: func(fs fields, args args) {
-				fs.sessionRepo.On("GetSession", mock.Anything, args.userID, args.sessionID).
-					Return(user.Session{UserID: args.userID, SessionID: args.sessionID}, nil)
-
-				fs.sessionRepo.On("DeleteSession", mock.Anything, args.userID, args.sessionID).
-					Return(nil)
-			},
-			wantErr: assert.NoError,
-		},
-		{
-			name: "trying to get user session of another user",
-			args: args{
-				userID:    uuid.Must(uuid.NewV7()),
-				sessionID: uuid.Must(uuid.NewV7()),
-			},
-			setup: func(fs fields, args args) {
-				fs.sessionRepo.On("GetSession", mock.Anything, args.userID, args.sessionID).
-					Return(user.Session{UserID: uuid.Must(uuid.NewV7()), SessionID: args.sessionID}, nil)
-			},
-			wantErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, user.ErrSessionWrongUser)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, scenario := range []string{"success", "lookup failure", "different owner", "delete failure"} {
+		t.Run(scenario, func(t *testing.T) {
 			t.Parallel()
+			h := newAuthHarness(t)
+			cause := errors.New("session repository unavailable")
+			session := user.Session{UserID: h.profile.ID, SessionID: h.session}
 
-			sessionRepo := mocks.NewSessionRepository(t)
-			fs := fields{
-				sessionRepo: sessionRepo,
+			var want error
+
+			if scenario == "different owner" {
+				session.UserID = uuid.Nil
+				want = user.ErrSessionWrongUser
 			}
-			tt.setup(fs, tt.args)
 
-			uc := auth.NewUsecase(auth.Config{}, nil, nil, nil, fs.sessionRepo)
+			var lookupErr error
+			if scenario == "lookup failure" {
+				lookupErr = cause
+				want = cause
+			}
 
-			err := uc.DeleteSession(t.Context(), tt.args.userID, tt.args.sessionID)
-			tt.wantErr(t, err)
+			lookup := h.sessions.On("GetSession", mock.Anything, h.profile.ID, h.session).Return(session, lookupErr).Once()
 
-			if err != nil {
-				sessionRepo.AssertNotCalled(t, "DeleteSession", mock.Anything, mock.Anything, mock.Anything)
+			if scenario == "success" || scenario == "delete failure" {
+				if scenario == "delete failure" {
+					want = cause
+				}
+
+				deletion := h.sessions.On("DeleteSession", mock.Anything, h.profile.ID, h.session).Return(want).Once()
+				mock.InOrder(lookup, deletion)
+			}
+
+			require.ErrorIs(t, h.uc.DeleteSession(t.Context(), h.profile.ID, h.session), want)
+
+			if scenario == "lookup failure" || scenario == "different owner" {
+				h.sessions.AssertNotCalled(t, "DeleteSession", mock.Anything, mock.Anything, mock.Anything)
 			}
 		})
 	}

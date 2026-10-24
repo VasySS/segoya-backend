@@ -1,6 +1,7 @@
 package usecase_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -31,20 +32,23 @@ func TestInvalidCreationRequestsDoNotReachPersistence(t *testing.T) {
 		{provider: "google", rounds: 1, timer: 9, want: game.ErrInvalidTimerSeconds},
 		{provider: "google", rounds: 1, timer: 601, want: game.ErrInvalidTimerSeconds},
 	} {
-		_, err := sp.NewGame(t.Context(), dto.NewSingleplayerGameRequest{
-			Provider: input.provider, Rounds: input.rounds, TimerSeconds: input.timer,
-		})
-		require.ErrorIs(t, err, input.want)
+		t.Run(fmt.Sprintf("provider=%s/rounds=%d/timer=%d", input.provider, input.rounds, input.timer), func(t *testing.T) {
+			t.Parallel()
+			_, err := sp.NewGame(t.Context(), dto.NewSingleplayerGameRequest{
+				Provider: input.provider, Rounds: input.rounds, TimerSeconds: input.timer,
+			})
+			require.ErrorIs(t, err, input.want)
 
-		_, err = mp.NewGame(t.Context(), dto.NewMultiplayerGameRequest{
-			Provider: input.provider, Rounds: input.rounds, TimerSeconds: input.timer,
-		})
-		require.ErrorIs(t, err, input.want)
+			_, err = mp.NewGame(t.Context(), dto.NewMultiplayerGameRequest{
+				Provider: input.provider, Rounds: input.rounds, TimerSeconds: input.timer,
+			})
+			require.ErrorIs(t, err, input.want)
 
-		_, err = lobbies.NewLobby(t.Context(), dto.NewLobbyRequest{
-			Provider: input.provider, Rounds: input.rounds, TimerSeconds: input.timer, MaxPlayers: 2,
+			_, err = lobbies.NewLobby(t.Context(), dto.NewLobbyRequest{
+				Provider: input.provider, Rounds: input.rounds, TimerSeconds: input.timer, MaxPlayers: 2,
+			})
+			require.ErrorIs(t, err, input.want)
 		})
-		require.ErrorIs(t, err, input.want)
 	}
 
 	_, err := mp.NewGame(t.Context(), dto.NewMultiplayerGameRequest{Provider: "google", Rounds: 1})

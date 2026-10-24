@@ -1,6 +1,13 @@
 
 MAIN_FILE := ./cmd/server/main.go
 MIGRATION_FILE := ./migrations/main.go
+TEST_FLAGS ?=
+
+# Cover handwritten packages, including calls across package boundaries.
+empty :=
+space := $(empty) $(empty)
+comma := ,
+COVERAGE_PACKAGES = $(subst $(space),$(comma),$(filter-out %/mocks,$(shell go list -mod=readonly ./cmd/... ./internal/... ./migrations/... ./pkg/...)))
 
 .PHONY: all
 all: ogen run
@@ -11,8 +18,26 @@ run:
 
 .PHONY: test
 test:
-	go install gotest.tools/gotestsum@latest
-	gotestsum --format-hide-empty-pkg --format-icons hivis
+	go test -mod=readonly -shuffle=on -count=1 $(TEST_FLAGS) ./...
+
+.PHONY: test-integration
+test-integration:
+	go test -mod=readonly -tags integration -shuffle=on -count=1 -p=1 -parallel=2 -timeout=5m $(TEST_FLAGS) ./internal/infrastructure/repository/... ./tests/integration
+
+.PHONY: test-cover
+test-cover: | output
+	go test -mod=readonly -shuffle=on -count=1 -timeout=5m $(TEST_FLAGS) -coverpkg=$(COVERAGE_PACKAGES) -coverprofile=output/coverage-unit.out ./...
+	go tool cover -func=output/coverage-unit.out
+	go tool cover -html=output/coverage-unit.out -o output/coverage-unit.html
+
+.PHONY: test-cover-integration
+test-cover-integration: | output
+	go test -mod=readonly -tags integration -shuffle=on -count=1 -p=1 -parallel=2 -timeout=5m $(TEST_FLAGS) -coverpkg=$(COVERAGE_PACKAGES) -coverprofile=output/coverage-integration.out ./internal/infrastructure/repository/... ./tests/integration
+	go tool cover -func=output/coverage-integration.out
+	go tool cover -html=output/coverage-integration.out -o output/coverage-integration.html
+
+output:
+	mkdir output
 
 # npm install -g @redocly/cli
 .PHONY: ogen

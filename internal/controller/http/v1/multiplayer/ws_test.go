@@ -52,30 +52,32 @@ func TestMultiplayerAdmission(t *testing.T) {
 			route.URLParams.Add("id", gameID.String())
 			ctx := context.WithValue(t.Context(), chi.RouteCtxKey, route)
 			session := &wsfake.Session{Req: httptest.NewRequestWithContext(ctx, http.MethodGet, "/", nil)}
-			service := &wsfake.Service{Clients: []transport.WebSocketSession{session}}
+			service := &wsfake.Service{}
+			service.SetSessions(session)
+
 			uc := &admissionUsecase{
 				denied:  denied,
 				profile: user.MultiplayerUser{PublicProfile: user.PublicProfile{ID: uuid.New()}},
 			}
-			session.BeforeSend = func() { require.Empty(t, session.BroadcastID) }
+			session.BeforeSend = func() { require.Empty(t, session.Snapshot().BroadcastID) }
 
 			tokens := wsfake.Tokens{Authorized: true, Claims: user.AccessTokenClaims{UserID: uc.profile.ID}}
 			multiplayer.NewHandler(multiplayer.Config{}, uc, tokens, service)
 			service.Connect(session)
 
 			if denied {
-				require.True(t, session.Closed)
-				require.Empty(t, session.BroadcastID)
+				require.True(t, session.Snapshot().Closed)
+				require.Empty(t, session.Snapshot().BroadcastID)
 				require.Zero(t, uc.lookups)
 				service.Message(session, transport.WebSocketMessageInput{
 					Type:    dto.MultiplayerMessageUserGuess,
 					Payload: json.RawMessage(`{"guess":null}`),
 				})
-				require.Empty(t, service.Broadcasts)
+				require.Empty(t, service.Broadcasts())
 			} else {
-				require.False(t, session.Closed)
-				require.Equal(t, gameID.String(), session.BroadcastID)
-				require.Len(t, service.Broadcasts, 1)
+				require.False(t, session.Snapshot().Closed)
+				require.Equal(t, gameID.String(), session.Snapshot().BroadcastID)
+				require.Len(t, service.Broadcasts(), 1)
 			}
 		})
 	}

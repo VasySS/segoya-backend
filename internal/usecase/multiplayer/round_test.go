@@ -2,282 +2,198 @@ package multiplayer_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
-	multiplayerEntity "github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
+	mp "github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 	"github.com/VasySS/segoya-backend/internal/usecase/multiplayer"
 	"github.com/VasySS/segoya-backend/internal/usecase/multiplayer/mocks"
 )
 
-// TODO: refactor
-//
-//nolint:maintidx
+type multiplayerHarness struct {
+	uc       *multiplayer.Usecase
+	repo     *mocks.Repository
+	pano     *mocks.PanoramaUsecase
+	config   multiplayer.Config
+	now      time.Time
+	userID   uuid.UUID
+	game     mp.Game
+	round    mp.Round
+	metadata game.PanoramaMetadata
+}
+
+func newMultiplayerHarness(t *testing.T) *multiplayerHarness {
+	t.Helper()
+	h := &multiplayerHarness{
+		repo: mocks.NewRepository(t), pano: mocks.NewPanoramaUsecase(t),
+		config: multiplayer.Config{RoundStartDelay: 5 * time.Second, RoundEndDelay: 10 * time.Second},
+		now:    time.Date(2026, 10, 11, 12, 0, 0, 0, time.UTC),
+		userID: uuid.MustParse("019a553a-fc00-7000-8000-000000000001"),
+		game: mp.Game{
+			ID:           uuid.MustParse("019a553a-fc00-7000-8000-000000000002"),
+			Provider:     game.GoogleProvider,
+			Players:      2,
+			Rounds:       5,
+			RoundCurrent: 2,
+		},
+		round: mp.Round{ID: uuid.MustParse("019a553a-fc00-7000-8000-000000000003"), RoundNum: 2},
+		metadata: game.PanoramaMetadata{
+			ID:           uuid.MustParse("019a553a-fc00-7000-8000-000000000004"),
+			StreetviewID: "panorama",
+			LatLng:       game.LatLng{Lat: 12, Lng: 34},
+		},
+	}
+	h.game.CreatorID = h.userID
+	h.round.GameID, h.round.StartedAt, h.round.EndedAt = h.game.ID, h.now, h.now.Add(-h.config.RoundEndDelay)
+	h.uc = multiplayer.NewUsecase(h.config, h.repo, h.pano)
+
+	return h
+}
+
+func (h *multiplayerHarness) expectTransaction() {
+	h.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+		Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
+}
+
+func (h *multiplayerHarness) expectFailureTransaction(failure string, cause error) bool {
+	if failure == "transaction" {
+		h.repo.On("RunTx", mock.Anything, mock.Anything).Return(cause).Once()
+		return false
+	}
+
+	if failure == "commit" {
+		h.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
+			Return(func(ctx context.Context, fn repository.TxFunc) error {
+				if err := fn(ctx); err != nil {
+					return err
+				}
+
+				return cause
+			}).Once()
+	} else {
+		h.expectTransaction()
+	}
+
+	return true
+}
+
+func (h *multiplayerHarness) participants() []user.MultiplayerUser {
+	return []user.MultiplayerUser{{PublicProfile: user.PublicProfile{ID: h.userID}, Connected: true}}
+}
+
 func TestUsecase_NewRound(t *testing.T) {
 	t.Parallel()
 
-	newRoundReq := dto.NewMultiplayerRoundRequest{
-		RequestTime: time.Now().UTC(),
-		GameID:      uuid.Must(uuid.NewV7()),
-		UserID:      uuid.Must(uuid.NewV7()),
-	}
-
-	createdPanoID := uuid.Must(uuid.NewV7())
-	createdStreetviewID := "some_streetview_id"
-
-	newRoundResp := multiplayerEntity.Round{
-		ID:           uuid.Must(uuid.NewV7()),
-		GameID:       newRoundReq.GameID,
-		StreetviewID: createdStreetviewID,
-		RoundNum:     2,
-		CreatedAt:    newRoundReq.RequestTime,
-		StartedAt:    newRoundReq.RequestTime.Add(5 * time.Second),
-	}
-
-	type fields struct {
-		cfg  multiplayer.Config
-		repo *mocks.Repository
-		pano *mocks.PanoramaUsecase
-	}
-
-	type args struct {
-		req dto.NewMultiplayerRoundRequest
-	}
-
-	roundID := uuid.Must(uuid.NewV7())
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		want    multiplayerEntity.Round
-		wantErr assert.ErrorAssertionFunc
+	for _, tt := range []struct {
+		name                     string
+		current                  int
+		finished, missing, reuse bool
+		offset                   time.Duration
+		want                     error
 	}{
-		{
-			name: "successfully create new round",
-			args: args{
-				req: newRoundReq,
-			},
-			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
-
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
-
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: newRoundReq.UserID, Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           args.req.GameID,
-						CreatorID:    args.req.UserID,
-						Provider:     "google",
-						Players:      2,
-						Rounds:       5,
-						RoundCurrent: 1,
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 1).
-					Return(multiplayerEntity.Round{
-						ID:       roundID,
-						RoundNum: 2,
-						Finished: true,
-					}, nil)
-
-				fs.pano.On("NewStreetview", mock.Anything, game.PanoramaProvider("google")).
-					Return(game.PanoramaMetadata{
-						ID:           createdPanoID,
-						StreetviewID: createdStreetviewID,
-						LatLng:       game.LatLng{Lat: 12.34, Lng: 45.67},
-					}, nil)
-
-				fs.repo.On("NewMultiplayerRound", mock.Anything, dto.NewMultiplayerRoundRequestDB{
-					GameID:     args.req.GameID,
-					LocationID: createdPanoID,
-					RoundNum:   2,
-					CreatedAt:  args.req.RequestTime,
-					StartedAt:  args.req.RequestTime.Add(fs.cfg.RoundStartDelay),
-				}).Return(newRoundResp, nil)
-			},
-			want:    newRoundResp,
-			wantErr: assert.NoError,
-		},
-		{
-			name: "user trying to generate new round for a game he is not a participant of",
-			args: args{
-				req: newRoundReq,
-			},
-			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
-
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
-
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-			},
-			want: multiplayerEntity.Round{},
-			wantErr: func(tt assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(tt, err, multiplayerEntity.ErrGameWrongUserID)
-			},
-		},
-		{
-			name: "trying to generate a new round above the maximum number of rounds",
-			args: args{
-				req: newRoundReq,
-			},
-			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
-
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
-
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: newRoundReq.UserID, Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           args.req.GameID,
-						CreatorID:    args.req.UserID,
-						Provider:     "google",
-						Players:      2,
-						Rounds:       5,
-						RoundCurrent: 5,
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 5).
-					Return(multiplayerEntity.Round{
-						ID:       uuid.Must(uuid.NewV7()),
-						RoundNum: 5,
-						Finished: true,
-					}, nil)
-			},
-			want: multiplayerEntity.Round{},
-			wantErr: func(tt assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(tt, err, multiplayerEntity.ErrRoundMaxAmount)
-			},
-		},
-		{
-			name: "trying to generate a new round when delay after last round has not passed",
-			args: args{
-				req: newRoundReq,
-			},
-			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
-
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
-
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: newRoundReq.UserID, Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           args.req.GameID,
-						CreatorID:    args.req.UserID,
-						Provider:     "google",
-						Players:      2,
-						Rounds:       5,
-						RoundCurrent: 3,
-						TimerSeconds: 60,
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 3).
-					Return(multiplayerEntity.Round{
-						ID:       roundID,
-						RoundNum: 3,
-						Finished: true,
-						EndedAt:  args.req.RequestTime.Add(-9 * time.Second),
-					}, nil)
-			},
-			want: multiplayerEntity.Round{
-				ID:       roundID,
-				RoundNum: 3,
-				Finished: true,
-				EndedAt:  newRoundReq.RequestTime.Add(-9 * time.Second),
-			},
-			wantErr: assert.NoError,
-		},
-	}
-
-	for _, tt := range tests {
+		{name: "unfinished round reuses after delay", current: 2, offset: time.Nanosecond, reuse: true},
+		{name: "finished round reuses before delay", current: 2, finished: true, offset: -time.Nanosecond, reuse: true},
+		{name: "finished round replaced at delay", current: 2, finished: true},
+		{name: "finished round replaced after delay", current: 2, finished: true, offset: time.Nanosecond},
+		{name: "unfinished final round reuses", current: 5, offset: time.Nanosecond, reuse: true},
+		{name: "finished final round reuses before delay", current: 5, finished: true, offset: -time.Nanosecond, reuse: true},
+		{name: "finished final round rejects at delay", current: 5, finished: true, want: mp.ErrRoundMaxAmount},
+		{name: "missing round creates next round", current: 2, missing: true},
+		{name: "first round creates", missing: true},
+	} {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+			h := newMultiplayerHarness(t)
+			h.game.RoundCurrent, h.round.RoundNum, h.round.Finished = tt.current, tt.current, tt.finished
+			req := dto.NewMultiplayerRoundRequest{RequestTime: h.now.Add(tt.offset), GameID: h.game.ID, UserID: h.userID}
+			h.expectTransaction()
+			lock := h.repo.On("LockMultiplayerGame", mock.Anything, h.game.ID).Return(nil).Once()
+			members := h.repo.On("GetMultiplayerGameUsers", mock.Anything, h.game.ID).Return(h.participants(), nil).Once()
+			fetchGame := h.repo.On("GetMultiplayerGame", mock.Anything, h.game.ID).Return(h.game, nil).Once()
 
-			repo := mocks.NewRepository(t)
-			pano := mocks.NewPanoramaUsecase(t)
-			cfg := multiplayer.Config{
-				RoundStartDelay: 5 * time.Second,
-				RoundEndDelay:   10 * time.Second,
+			var lookupErr error
+			if tt.missing {
+				lookupErr = mp.ErrRoundNotFound
 			}
-			fs := fields{
-				cfg:  cfg,
-				repo: repo,
-				pano: pano,
+
+			fetchRound := h.repo.On("GetMultiplayerRound", mock.Anything, h.game.ID, tt.current).
+				Return(h.round, lookupErr).Once()
+			mock.InOrder(lock, members, fetchGame, fetchRound)
+
+			var want mp.Round
+			if tt.reuse {
+				want = h.round
+			} else if tt.want == nil {
+				generate := h.pano.On("NewStreetview", mock.Anything, game.GoogleProvider).Return(h.metadata, nil).Once()
+				want = mp.Round{
+					ID:        h.round.ID,
+					GameID:    h.game.ID,
+					RoundNum:  tt.current + 1,
+					CreatedAt: req.RequestTime,
+					StartedAt: req.RequestTime.Add(h.config.RoundStartDelay),
+				}
+				insert := h.repo.On("NewMultiplayerRound", mock.Anything, dto.NewMultiplayerRoundRequestDB{
+					GameID: h.game.ID, LocationID: h.metadata.ID, RoundNum: tt.current + 1,
+					CreatedAt: req.RequestTime, StartedAt: req.RequestTime.Add(h.config.RoundStartDelay),
+				}).Return(want, nil).Once()
+				mock.InOrder(fetchRound, generate, insert)
 			}
-			tt.setup(fs, tt.args)
 
-			uc := multiplayer.NewUsecase(cfg, repo, pano)
+			got, err := h.uc.NewRound(t.Context(), req)
+			require.ErrorIs(t, err, tt.want)
+			assert.Equal(t, want, got)
+		})
+	}
+}
 
-			got, err := uc.NewRound(t.Context(), tt.args.req)
-			tt.wantErr(t, err)
-			assert.Equal(t, tt.want, got)
+func TestUsecase_NewRoundFailures(t *testing.T) {
+	t.Parallel()
+
+	for _, failure := range []string{
+		"transaction",
+		"lock",
+		"participants",
+		"not a participant",
+		"game",
+		"invalid game",
+		"round",
+		"panorama",
+		"insert",
+		"commit",
+	} {
+		t.Run(failure, func(t *testing.T) {
+			t.Parallel()
+			h := newMultiplayerHarness(t)
+			cause := errors.New("repository unavailable")
+
+			want := cause
+			if failure == "not a participant" {
+				want = mp.ErrGameWrongUserID
+			}
+
+			if failure == "invalid game" {
+				want = game.ErrInvalidPlayers
+			}
+
+			setupMultiplayerNewRoundFailure(h, failure, cause)
+
+			got, err := h.uc.NewRound(t.Context(), dto.NewMultiplayerRoundRequest{
+				RequestTime: h.now,
+				GameID:      h.game.ID,
+				UserID:      h.userID,
+			})
+			require.ErrorIs(t, err, want)
+			assert.Equal(t, mp.Round{}, got)
 		})
 	}
 }
@@ -285,129 +201,148 @@ func TestUsecase_NewRound(t *testing.T) {
 func TestUsecase_GetRound(t *testing.T) {
 	t.Parallel()
 
-	type fields struct {
-		repo *mocks.Repository
-		pano *mocks.PanoramaUsecase
-	}
+	for _, failure := range []string{"", "transaction", "lock", "participants", "not a participant", "game", "round"} {
+		name := failure + " failure"
+		if failure == "" {
+			name = "success"
+		}
 
-	type args struct {
-		req dto.GetMultiplayerRoundRequest
-	}
-
-	roundID := uuid.Must(uuid.NewV7())
-
-	tests := []struct {
-		name    string
-		args    args
-		setup   func(fields, args)
-		want    multiplayerEntity.Round
-		wantErr assert.ErrorAssertionFunc
-	}{
-		{
-			name: "successfully get round",
-			args: args{
-				req: dto.GetMultiplayerRoundRequest{
-					GameID: uuid.Must(uuid.NewV7()),
-					UserID: uuid.Must(uuid.NewV7()),
-				},
-			},
-			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
-
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
-
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: args.req.UserID, Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-
-				fs.repo.On("GetMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(multiplayerEntity.Game{
-						ID:           args.req.GameID,
-						CreatorID:    args.req.UserID,
-						Provider:     "google",
-						Players:      2,
-						Rounds:       5,
-						RoundCurrent: 3,
-						TimerSeconds: 60,
-					}, nil)
-
-				fs.repo.On("GetMultiplayerRound", mock.Anything, args.req.GameID, 3).
-					Return(multiplayerEntity.Round{
-						ID:       roundID,
-						RoundNum: 3,
-					}, nil)
-			},
-			want: multiplayerEntity.Round{
-				ID:       roundID,
-				RoundNum: 3,
-			},
-			wantErr: assert.NoError,
-		},
-		{
-			name: "trying to get round of a game where user is not participanting",
-			args: args{
-				req: dto.GetMultiplayerRoundRequest{
-					GameID: uuid.Must(uuid.NewV7()),
-					UserID: uuid.Must(uuid.NewV7()),
-				},
-			},
-			setup: func(fs fields, args args) {
-				fs.repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
-					Return(func(ctx context.Context, fn repository.TxFunc) error {
-						return fn(ctx)
-					})
-
-				fs.repo.On("LockMultiplayerGame", mock.Anything, args.req.GameID).
-					Return(nil)
-
-				fs.repo.On("GetMultiplayerGameUsers", mock.Anything, args.req.GameID).
-					Return([]user.MultiplayerUser{
-						{
-							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username1"},
-							Connected:     true,
-						},
-						{
-							PublicProfile: user.PublicProfile{ID: uuid.Must(uuid.NewV7()), Username: "username2"},
-							Connected:     true,
-						},
-					}, nil)
-			},
-			want: multiplayerEntity.Round{},
-			wantErr: func(t assert.TestingT, err error, _ ...any) bool {
-				return assert.ErrorIs(t, err, multiplayerEntity.ErrGameWrongUserID)
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		t.Run(name, func(t *testing.T) {
 			t.Parallel()
+			h := newMultiplayerHarness(t)
+			cause := errors.New("repository unavailable")
+			setupMultiplayerGetRound(h, failure, cause)
 
-			repo := mocks.NewRepository(t)
-			pano := mocks.NewPanoramaUsecase(t)
-			fs := fields{
-				repo: repo,
-				pano: pano,
+			got, err := h.uc.GetRound(t.Context(), dto.GetMultiplayerRoundRequest{
+				RequestTime: h.now,
+				GameID:      h.game.ID,
+				UserID:      h.userID,
+			})
+
+			if failure != "" {
+				want := cause
+				if failure == "not a participant" {
+					want = mp.ErrGameWrongUserID
+				}
+
+				require.ErrorIs(t, err, want)
+				assert.Equal(t, mp.Round{}, got)
+
+				return
 			}
-			tt.setup(fs, tt.args)
 
-			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano)
-
-			got, err := uc.GetRound(t.Context(), tt.args.req)
-			tt.wantErr(t, err)
-			assert.Equal(t, tt.want, got)
+			require.NoError(t, err)
+			assert.Equal(t, h.round, got)
 		})
 	}
+}
+
+func setupMultiplayerNewRoundFailure(h *multiplayerHarness, failure string, cause error) {
+	if !setupLockedMultiplayerGame(h, failure, cause) {
+		return
+	}
+
+	if failure == "round" {
+		h.repo.On("GetMultiplayerRound", mock.Anything, h.game.ID, 2).Return(mp.Round{}, cause).Once()
+		return
+	}
+
+	h.repo.On("GetMultiplayerRound", mock.Anything, h.game.ID, 2).Return(mp.Round{}, mp.ErrRoundNotFound).Once()
+
+	if failure == "panorama" {
+		h.pano.On("NewStreetview", mock.Anything, game.GoogleProvider).Return(game.PanoramaMetadata{}, cause).Once()
+		return
+	}
+
+	h.pano.On("NewStreetview", mock.Anything, game.GoogleProvider).Return(h.metadata, nil).Once()
+
+	var insertErr error
+	if failure == "insert" {
+		insertErr = cause
+	}
+
+	h.repo.On("NewMultiplayerRound", mock.Anything, dto.NewMultiplayerRoundRequestDB{
+		GameID: h.game.ID, LocationID: h.metadata.ID, RoundNum: 3,
+		CreatedAt: h.now, StartedAt: h.now.Add(h.config.RoundStartDelay),
+	}).Return(h.round, insertErr).Once()
+}
+
+func setupMultiplayerGetRound(h *multiplayerHarness, failure string, cause error) {
+	if failure == "transaction" {
+		h.repo.On("RunTx", mock.Anything, mock.Anything).Return(cause).Once()
+		return
+	}
+
+	h.expectTransaction()
+
+	if failure == "lock" {
+		h.repo.On("LockMultiplayerGame", mock.Anything, h.game.ID).Return(cause).Once()
+		return
+	}
+
+	h.repo.On("LockMultiplayerGame", mock.Anything, h.game.ID).Return(nil).Once()
+
+	if failure == "participants" {
+		h.repo.On("GetMultiplayerGameUsers", mock.Anything, h.game.ID).Return(nil, cause).Once()
+		return
+	}
+
+	if failure == "not a participant" {
+		h.repo.On("GetMultiplayerGameUsers", mock.Anything, h.game.ID).Return([]user.MultiplayerUser{}, nil).Once()
+		return
+	}
+
+	h.repo.On("GetMultiplayerGameUsers", mock.Anything, h.game.ID).Return(h.participants(), nil).Once()
+
+	if failure == "game" {
+		h.repo.On("GetMultiplayerGame", mock.Anything, h.game.ID).Return(mp.Game{}, cause).Once()
+		return
+	}
+
+	h.repo.On("GetMultiplayerGame", mock.Anything, h.game.ID).Return(h.game, nil).Once()
+
+	var roundErr error
+	if failure == "round" {
+		roundErr = cause
+	}
+
+	h.repo.On("GetMultiplayerRound", mock.Anything, h.game.ID, h.game.RoundCurrent).Return(h.round, roundErr).Once()
+}
+
+func setupLockedMultiplayerGame(h *multiplayerHarness, failure string, cause error) bool {
+	if !h.expectFailureTransaction(failure, cause) {
+		return false
+	}
+
+	if failure == "lock" {
+		h.repo.On("LockMultiplayerGame", mock.Anything, h.game.ID).Return(cause).Once()
+		return false
+	}
+
+	h.repo.On("LockMultiplayerGame", mock.Anything, h.game.ID).Return(nil).Once()
+
+	if failure == "participants" {
+		h.repo.On("GetMultiplayerGameUsers", mock.Anything, h.game.ID).Return(nil, cause).Once()
+		return false
+	}
+
+	if failure == "not a participant" {
+		h.repo.On("GetMultiplayerGameUsers", mock.Anything, h.game.ID).Return([]user.MultiplayerUser{}, nil).Once()
+		return false
+	}
+
+	h.repo.On("GetMultiplayerGameUsers", mock.Anything, h.game.ID).Return(h.participants(), nil).Once()
+
+	if failure == "game" {
+		h.repo.On("GetMultiplayerGame", mock.Anything, h.game.ID).Return(mp.Game{}, cause).Once()
+		return false
+	}
+
+	if failure == "invalid game" {
+		h.game.Players = 1
+	}
+
+	h.repo.On("GetMultiplayerGame", mock.Anything, h.game.ID).Return(h.game, nil).Once()
+
+	return failure != "invalid game"
 }

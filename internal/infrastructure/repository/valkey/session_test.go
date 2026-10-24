@@ -1,207 +1,121 @@
+//go:build integration
+
 package valkey_test
 
 import (
-	"context"
+	"errors"
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/valkey-io/valkey-go"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
-	valkeyRepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/valkey"
-	"github.com/VasySS/segoya-backend/tests/containers"
+	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
 func TestSessionTestSuite(t *testing.T) {
 	t.Parallel()
-
 	suite.Run(t, new(SessionTestSuite))
 }
 
-type SessionTestSuite struct {
-	suite.Suite
+type SessionTestSuite struct{ valkeyTestSuite }
 
-	ctx             context.Context
-	valkeyContainer *containers.ValkeyContainer
-	valkeyRepo      *valkeyRepo.Repository
+func (s *SessionTestSuite) TestSessionRoundTrip() {
+	req := s.newSession(uuid.New())
+	got, err := s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
+	s.Require().NoError(err)
+	s.Equal(user.Session{
+		UserID: req.UserID, SessionID: req.SessionID, RefreshToken: req.RefreshToken,
+		UA: req.UA, LastActive: req.RequestTime,
+	}, got)
+
+	_, err = s.valkeyRepo.GetSession(s.ctx, uuid.New(), req.SessionID)
+	s.Require().ErrorIs(err, user.ErrSessionNotFound)
+	_, err = s.valkeyRepo.GetSession(s.ctx, req.UserID, uuid.New())
+	s.Require().ErrorIs(err, user.ErrSessionNotFound)
 }
 
-func (s *SessionTestSuite) SetupSuite() {
-	s.ctx = context.Background()
-
-	valkeyContainer, err := containers.NewValkeyContainer(s.ctx)
+func (s *SessionTestSuite) TestGetSessionsIsolatesUsers() {
+	userID := uuid.New()
+	empty, err := s.valkeyRepo.GetSessions(s.ctx, userID)
 	s.Require().NoError(err)
+	s.Empty(empty)
 
-	valkeyClient, err := valkey.NewClient(valkey.MustParseURL(valkeyContainer.ConnectionString))
-	s.Require().NoError(err)
-
-	repo := valkeyRepo.New(s.ctx, valkeyClient)
-
-	s.valkeyContainer = valkeyContainer
-	s.valkeyRepo = repo
-}
-
-func (s *SessionTestSuite) TearDownSuite() {
-	err := s.valkeyContainer.Terminate(s.ctx)
-	s.Require().NoError(err)
-}
-
-func (s *SessionTestSuite) TestNewUserSession() {
-	userUUID, _ := uuid.NewV7()
-	sessionUUID, _ := uuid.NewV7()
-
-	req := dto.NewSessionRequest{
-		RequestTime:  time.Now().UTC(),
-		UserID:       userUUID,
-		SessionID:    sessionUUID,
-		RefreshToken: gofakeit.UUID(),
-		Expiration:   2 * time.Second,
-		UA:           "Test User Agent",
-	}
-
-	err := s.valkeyRepo.NewSession(s.ctx, req)
-	s.Require().NoError(err)
-
-	session, err := s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
-	s.Require().NoError(err)
-	s.Require().Equal(req.UserID, session.UserID)
-	s.Require().Equal(req.SessionID, session.SessionID)
-	s.Require().Equal(req.RefreshToken, session.RefreshToken)
-	s.Require().Equal(req.UA, session.UA)
-
-	time.Sleep(3 * time.Second)
-
-	_, err = s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
-	s.Require().Error(err)
-}
-
-func (s *SessionTestSuite) TestGetUserSession() {
-	userUUID, _ := uuid.NewV7()
-	sessionUUID, _ := uuid.NewV7()
-
-	req := dto.NewSessionRequest{
-		RequestTime:  time.Now().UTC(),
-		UserID:       userUUID,
-		SessionID:    sessionUUID,
-		RefreshToken: gofakeit.UUID(),
-		Expiration:   2 * time.Second,
-		UA:           "Test User Agent",
-	}
-
-	err := s.valkeyRepo.NewSession(s.ctx, req)
-	s.Require().NoError(err)
-
-	session, err := s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
-	s.Require().NoError(err)
-	s.Require().Equal(req.UserID, session.UserID)
-	s.Require().Equal(req.SessionID, session.SessionID)
-	s.Require().Equal(req.RefreshToken, session.RefreshToken)
-	s.Require().Equal(req.UA, session.UA)
-
-	time.Sleep(3 * time.Second)
-
-	_, err = s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
-	s.Require().Error(err)
-}
-
-func (s *SessionTestSuite) TestGetUserSessions() {
-	userUUID, _ := uuid.NewV7()
-	newSessionIDs := make([]string, 0, 3)
-
+	expected := make([]uuid.UUID, 0, 3)
 	for range 3 {
-		sessionUUID, _ := uuid.NewV7()
-
-		req := dto.NewSessionRequest{
-			RequestTime:  time.Now().UTC(),
-			UserID:       userUUID,
-			SessionID:    sessionUUID,
-			RefreshToken: gofakeit.UUID(),
-			Expiration:   2 * time.Second,
-			UA:           "Test User Agent",
-		}
-
-		err := s.valkeyRepo.NewSession(s.ctx, req)
-		s.Require().NoError(err)
-
-		newSessionIDs = append(newSessionIDs, req.SessionID.String())
+		expected = append(expected, s.newSession(userID).SessionID)
 	}
 
-	sessions, err := s.valkeyRepo.GetSessions(s.ctx, userUUID)
+	s.newSession(uuid.New())
+	got, err := s.valkeyRepo.GetSessions(s.ctx, userID)
 	s.Require().NoError(err)
 
-	getSessionIDs := make([]string, 0, len(sessions))
-	for _, session := range sessions {
-		getSessionIDs = append(getSessionIDs, session.SessionID.String())
+	actual := make([]uuid.UUID, 0, len(got))
+	for _, session := range got {
+		actual = append(actual, session.SessionID)
+		s.Equal(userID, session.UserID)
 	}
 
-	s.ElementsMatch(newSessionIDs, getSessionIDs)
+	s.ElementsMatch(expected, actual)
 }
 
-func (s *SessionTestSuite) TestUpdateUserSession() {
-	userUUID, _ := uuid.NewV7()
-	sessionUUID, _ := uuid.NewV7()
+func (s *SessionTestSuite) TestUpdateSessionReplacesTokenAndExtendsTTL() {
+	req := s.newSession(uuid.New())
+	key := "user:" + req.UserID.String() + "session:" + req.SessionID.String()
+	s.Require().NoError(s.client.Do(s.ctx, s.client.B().Expire().Key(key).Seconds(2).Build()).Error())
 
-	createReq := dto.NewSessionRequest{
-		RequestTime:  time.Now().UTC(),
-		UserID:       userUUID,
-		SessionID:    sessionUUID,
-		RefreshToken: gofakeit.UUID(),
-		Expiration:   2 * time.Second,
-		UA:           "Test User Agent",
+	update := dto.UpdateSessionRequest{
+		UserID: req.UserID, SessionID: req.SessionID, RequestTime: fixtureTime().Add(time.Minute),
+		RefreshToken: "replacement-refresh-token", Expiration: time.Minute,
 	}
-
-	updateReq := dto.UpdateSessionRequest{
-		RequestTime:  time.Now().UTC(),
-		UserID:       userUUID,
-		SessionID:    sessionUUID,
-		RefreshToken: gofakeit.UUID(),
-		Expiration:   10 * time.Second,
-	}
-
-	err := s.valkeyRepo.NewSession(s.ctx, createReq)
+	s.Require().NoError(s.valkeyRepo.UpdateSession(s.ctx, update))
+	got, err := s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
 	s.Require().NoError(err)
-
-	err = s.valkeyRepo.UpdateSession(s.ctx, updateReq)
-	s.Require().NoError(err)
-
-	time.Sleep(3 * time.Second)
-
-	session, err := s.valkeyRepo.GetSession(s.ctx, updateReq.UserID, updateReq.SessionID)
-	s.Require().NoError(err)
-
-	s.Equal(updateReq.UserID, session.UserID)
-	s.Equal(updateReq.SessionID, session.SessionID)
-	s.Equal(updateReq.RefreshToken, session.RefreshToken)
-	s.Equal(createReq.UA, session.UA)
-	s.WithinDuration(updateReq.RequestTime, session.LastActive, 1*time.Second)
+	s.Equal(update.RefreshToken, got.RefreshToken)
+	s.Equal(update.RequestTime, got.LastActive)
+	s.Equal(req.UA, got.UA)
+	s.Equal(req.UserID, got.UserID)
+	s.Equal(req.SessionID, got.SessionID)
+	s.Greater(s.ttl(key), int64(30_000))
+	s.LessOrEqual(s.ttl(key), int64(60_000))
 }
 
-func (s *SessionTestSuite) TestDeleteUserSession() {
-	userUUID, _ := uuid.NewV7()
-	sessionUUID, _ := uuid.NewV7()
+func (s *SessionTestSuite) TestDeleteSessionPreservesOtherSessions() {
+	userID := uuid.New()
+	deleted, retained := s.newSession(userID), s.newSession(userID)
+	s.Require().NoError(s.valkeyRepo.DeleteSession(s.ctx, userID, deleted.SessionID))
+	s.Require().NoError(s.valkeyRepo.DeleteSession(s.ctx, userID, deleted.SessionID))
+	_, err := s.valkeyRepo.GetSession(s.ctx, userID, deleted.SessionID)
+	s.Require().ErrorIs(err, user.ErrSessionNotFound)
+	_, err = s.valkeyRepo.GetSession(s.ctx, userID, retained.SessionID)
+	s.NoError(err)
+}
+
+func (s *SessionTestSuite) TestSessionExpiration() {
+	req := dto.NewSessionRequest{
+		RequestTime: fixtureTime(), UserID: uuid.New(), SessionID: uuid.New(),
+		RefreshToken: uuid.NewString(), Expiration: time.Second,
+	}
+	s.Require().NoError(s.valkeyRepo.NewSession(s.ctx, req))
+	s.Eventually(func() bool {
+		_, err := s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
+		return errors.Is(err, user.ErrSessionNotFound)
+	}, 3*time.Second, 20*time.Millisecond)
+
+	sessions, err := s.valkeyRepo.GetSessions(s.ctx, req.UserID)
+	s.Require().NoError(err)
+	s.Empty(sessions)
+}
+
+func (s *SessionTestSuite) newSession(userID uuid.UUID) dto.NewSessionRequest {
+	s.T().Helper()
 
 	req := dto.NewSessionRequest{
-		RequestTime:  time.Now().UTC(),
-		UserID:       userUUID,
-		SessionID:    sessionUUID,
-		RefreshToken: gofakeit.UUID(),
-		Expiration:   10 * time.Second,
-		UA:           "Test User Agent",
+		RequestTime: fixtureTime(), UserID: userID, SessionID: uuid.New(),
+		RefreshToken: "original-refresh-token", Expiration: time.Minute, UA: "Test User Agent",
 	}
+	s.Require().NoError(s.valkeyRepo.NewSession(s.ctx, req))
 
-	err := s.valkeyRepo.NewSession(s.ctx, req)
-	s.Require().NoError(err)
-
-	l, err := s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
-	s.Require().NoError(err)
-	s.Equal(req.UserID, l.UserID)
-
-	err = s.valkeyRepo.DeleteSession(s.ctx, req.UserID, req.SessionID)
-	s.Require().NoError(err)
-
-	_, err = s.valkeyRepo.GetSession(s.ctx, req.UserID, req.SessionID)
-	s.Require().Error(err)
+	return req
 }

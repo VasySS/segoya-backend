@@ -1,90 +1,46 @@
+//go:build integration
+
 package valkey_test
 
 import (
-	"context"
+	"errors"
 	"testing"
 	"time"
 
-	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/valkey-io/valkey-go"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
-	valkeyRepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/valkey"
-	"github.com/VasySS/segoya-backend/tests/containers"
 )
 
 func TestOAuthTestSuite(t *testing.T) {
 	t.Parallel()
-
 	suite.Run(t, new(OAuthTestSuite))
 }
 
-type OAuthTestSuite struct {
-	suite.Suite
+type OAuthTestSuite struct{ valkeyTestSuite }
 
-	ctx             context.Context
-	valkeyContainer *containers.ValkeyContainer
-	valkeyRepo      *valkeyRepo.Repository
+func (s *OAuthTestSuite) TestOAuthStateRoundTrip() {
+	userID := uuid.New()
+	s.Require().NoError(s.valkeyRepo.NewOAuthState(s.ctx, dto.NewOAuthRequest{
+		RequestTime: fixtureTime(), State: "known-state", UserID: userID, StateTTL: time.Minute,
+	}))
+
+	got, err := s.valkeyRepo.GetOAuthUserID(s.ctx, "known-state")
+	s.Require().NoError(err)
+	s.Equal(userID, got)
+	_, err = s.valkeyRepo.GetOAuthUserID(s.ctx, "different-state")
+	s.ErrorIs(err, valkey.Nil)
 }
 
-func (s *OAuthTestSuite) SetupSuite() {
-	s.ctx = context.Background()
-
-	valkeyContainer, err := containers.NewValkeyContainer(s.ctx)
-	s.Require().NoError(err)
-
-	valkeyClient, err := valkey.NewClient(valkey.MustParseURL(valkeyContainer.ConnectionString))
-	s.Require().NoError(err)
-
-	repo := valkeyRepo.New(s.ctx, valkeyClient)
-
-	s.valkeyContainer = valkeyContainer
-	s.valkeyRepo = repo
-}
-
-func (s *OAuthTestSuite) TearDownSuite() {
-	err := s.valkeyContainer.Terminate(s.ctx)
-	s.Require().NoError(err)
-}
-
-func (s *OAuthTestSuite) TestNewOAuthUserState() {
-	userUUID, _ := uuid.NewV7()
-
-	req := dto.NewOAuthRequest{
-		RequestTime: time.Now().UTC(),
-		State:       gofakeit.UUID(),
-		UserID:      userUUID,
-		StateTTL:    2 * time.Second,
-	}
-
-	err := s.valkeyRepo.NewOAuthState(s.ctx, req)
-	s.Require().NoError(err)
-
-	_, err = s.valkeyRepo.GetOAuthUserID(s.ctx, req.State)
-	s.Require().NoError(err)
-
-	time.Sleep(3 * time.Second)
-
-	_, err = s.valkeyRepo.GetOAuthUserID(s.ctx, req.State)
-	s.Require().Error(err)
-}
-
-func (s *OAuthTestSuite) TestGetOAuthUserID() {
-	userUUID, _ := uuid.NewV7()
-
-	req := dto.NewOAuthRequest{
-		RequestTime: time.Now().UTC(),
-		State:       gofakeit.UUID(),
-		UserID:      userUUID,
-		StateTTL:    2 * time.Second,
-	}
-
-	err := s.valkeyRepo.NewOAuthState(s.ctx, req)
-	s.Require().NoError(err)
-
-	userID, err := s.valkeyRepo.GetOAuthUserID(s.ctx, req.State)
-	s.Require().NoError(err)
-	s.Require().Equal(req.UserID, userID)
+func (s *OAuthTestSuite) TestOAuthStateExpiration() {
+	s.Require().NoError(s.valkeyRepo.NewOAuthState(s.ctx, dto.NewOAuthRequest{
+		RequestTime: fixtureTime(), State: "expiring-state", UserID: uuid.New(), StateTTL: time.Second,
+	}))
+	s.Positive(s.ttl("oauthState:expiring-state"))
+	s.Eventually(func() bool {
+		_, err := s.valkeyRepo.GetOAuthUserID(s.ctx, "expiring-state")
+		return errors.Is(err, valkey.Nil)
+	}, 3*time.Second, 20*time.Millisecond)
 }

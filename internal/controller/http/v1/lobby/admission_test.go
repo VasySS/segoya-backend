@@ -54,7 +54,9 @@ func TestAdmissionInitialization(t *testing.T) {
 			route.URLParams.Add("id", "lobby")
 			ctx = context.WithValue(ctx, chi.RouteCtxKey, route)
 			session := &wsfake.Session{Req: httptest.NewRequestWithContext(ctx, http.MethodGet, "/", nil)}
-			service := &wsfake.Service{Clients: []transport.WebSocketSession{session}}
+			service := &wsfake.Service{}
+			service.SetSessions(session)
+
 			profile := user.PublicProfile{ID: uuid.New(), Username: "authenticated"}
 			released := 0
 			uc := admissionUsecase{
@@ -80,7 +82,7 @@ func TestAdmissionInitialization(t *testing.T) {
 				},
 			}
 
-			session.BeforeSend = func() { require.Empty(t, session.BroadcastID) }
+			session.BeforeSend = func() { require.Empty(t, session.Snapshot().BroadcastID) }
 			if scenario == "synchronization failure" {
 				session.SendErr = errors.New("socket failed")
 			}
@@ -92,8 +94,8 @@ func TestAdmissionInitialization(t *testing.T) {
 			service.Connect(session)
 
 			if scenario == "success" {
-				require.False(t, session.Closed)
-				require.Equal(t, "lobby", session.BroadcastID)
+				require.False(t, session.Snapshot().Closed)
+				require.Equal(t, "lobby", session.Snapshot().BroadcastID)
 
 				before := time.Now().UTC()
 
@@ -102,18 +104,20 @@ func TestAdmissionInitialization(t *testing.T) {
 					Payload: json.RawMessage(`{"message":{"username":"spoofed","text":"hello","time":"2000-01-01T00:00:00Z"}}`),
 				})
 
-				message, ok := service.Broadcasts[len(service.Broadcasts)-1].Payload["message"].(dto.LobbyChatMessage)
+				broadcasts := service.Broadcasts()
+				require.Len(t, broadcasts, 2)
+				message, ok := broadcasts[1].Message.Payload["message"].(dto.LobbyChatMessage)
 				require.True(t, ok)
 				require.Equal(t, profile.Username, message.Username)
 				require.False(t, message.Time.Before(before))
 			} else {
-				require.True(t, session.Closed)
-				require.Empty(t, session.BroadcastID)
+				require.True(t, session.Snapshot().Closed)
+				require.Empty(t, session.Snapshot().BroadcastID)
 				service.Message(session, transport.WebSocketMessageInput{
 					Type:    dto.LobbyMessageTypeChatInput,
 					Payload: json.RawMessage(`{"message":{}}`),
 				})
-				require.Empty(t, service.Broadcasts)
+				require.Empty(t, service.Broadcasts())
 			}
 
 			cancel()

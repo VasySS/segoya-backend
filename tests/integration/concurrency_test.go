@@ -15,15 +15,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
-	"github.com/valkey-io/valkey-go"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
-	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository/postgres"
-	valkeyrepo "github.com/VasySS/segoya-backend/internal/infrastructure/repository/valkey"
 	multiplayeruc "github.com/VasySS/segoya-backend/internal/usecase/multiplayer"
 	useruc "github.com/VasySS/segoya-backend/internal/usecase/user"
 	"github.com/VasySS/segoya-backend/migrations/tables"
@@ -32,19 +29,9 @@ import (
 
 func postgresFixture(t *testing.T) (*pgxpool.Pool, *postgres.Repository) {
 	t.Helper()
-	container, err := containers.NewPostgresContainer(t.Context())
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
-		defer cancel()
-
-		require.NoError(t, container.Terminate(ctx))
-	})
-
-	pool, err := pgxpool.New(t.Context(), container.ConnectionString)
-	require.NoError(t, err)
-	t.Cleanup(pool.Close)
-	require.NoError(t, tables.RunGooseMigrations(t.Context(), pool, "up"))
+	container := containers.NewTestPostgres(t)
+	pool := containers.NewTestPostgresPool(t, container.ConnectionString)
+	require.NoError(t, tables.RunGooseMigrations(containers.TestContext(t), pool, "up"))
 
 	return pool, postgres.New(postgres.NewTxManager(pool))
 }
@@ -54,7 +41,7 @@ func createUser(t *testing.T, repo *postgres.Repository) user.PrivateProfile {
 
 	name := uuid.NewString()
 	require.NoError(t, repo.NewUser(t.Context(), dto.RegisterRequestDB{
-		Username: name, Name: name, Password: "test", RequestTime: time.Now().UTC(),
+		Username: name, Name: name, Password: "test", RequestTime: integrationTime(),
 	}))
 
 	profile, err := repo.GetUserByUsername(t.Context(), name)
@@ -96,10 +83,10 @@ func TestGuessCompletionSerialization(t *testing.T) {
 
 	for _, guessFirst := range []bool{true, false} {
 		t.Run(map[bool]string{true: "guess locks first", false: "completion locks first"}[guessFirst], func(t *testing.T) {
-			ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
-			defer cancel()
+			workers := newTestWorkers(t)
+			ctx := workers.ctx
 
-			start := time.Now().UTC().Add(-time.Minute).Truncate(time.Microsecond)
+			start := integrationTime().Add(-time.Minute).Truncate(time.Microsecond)
 			gameID, err := repo.NewMultiplayerGame(ctx, dto.NewMultiplayerGameRequest{
 				RequestTime: start, CreatorID: creator.ID,
 				ConnectedPlayers: []user.PublicProfile{creator.PublicProfile, other.PublicProfile},
@@ -147,9 +134,9 @@ func TestGuessCompletionSerialization(t *testing.T) {
 			}
 
 			if guessFirst {
-				go guess()
+				workers.Go(guess)
 			} else {
-				go end()
+				workers.Go(end)
 			}
 
 			select {
@@ -159,9 +146,9 @@ func TestGuessCompletionSerialization(t *testing.T) {
 			}
 
 			if guessFirst {
-				go end()
+				workers.Go(end)
 			} else {
-				go guess()
+				workers.Go(guess)
 			}
 
 			select {
@@ -173,8 +160,8 @@ func TestGuessCompletionSerialization(t *testing.T) {
 			waitForDatabaseLock(t, ctx, pool)
 			close(first.release)
 
-			guessErr := <-guessResult
-			ended := <-endResult
+			guessErr := receive(t, ctx, guessResult)
+			ended := receive(t, ctx, endResult)
 			require.NoError(t, ended.err)
 
 			if guessFirst {
@@ -196,8 +183,8 @@ func TestGuessCompletionSerialization(t *testing.T) {
 func TestGuessPresenceAndParticipantAuthorization(t *testing.T) {
 	pool, repo := postgresFixture(t)
 	creator, other, outsider := createUser(t, repo), createUser(t, repo), createUser(t, repo)
-	ctx := t.Context()
-	start := time.Now().UTC().Truncate(time.Microsecond)
+	ctx := containers.TestContext(t)
+	start := integrationTime().Truncate(time.Microsecond)
 
 	locationID := createZeroLocation(t, pool)
 	gameID, err := repo.NewMultiplayerGame(ctx, dto.NewMultiplayerGameRequest{
@@ -269,6 +256,68 @@ func TestGuessPresenceAndParticipantAuthorization(t *testing.T) {
 	require.ElementsMatch(t, ended, history)
 }
 
+func TestCanceledGuessWaitingForGameLockDoesNotPersist(t *testing.T) {
+	pool, repo := postgresFixture(t)
+	creator, other := createUser(t, repo), createUser(t, repo)
+	workers := newTestWorkers(t)
+	ctx := workers.ctx
+	start := integrationTime()
+	gameID, err := repo.NewMultiplayerGame(ctx, dto.NewMultiplayerGameRequest{
+		RequestTime: start, CreatorID: creator.ID, Provider: "google", Rounds: 1, TimerSeconds: 10,
+		ConnectedPlayers: []user.PublicProfile{creator.PublicProfile, other.PublicProfile},
+	})
+	require.NoError(t, err)
+	_, err = repo.NewMultiplayerRound(ctx, dto.NewMultiplayerRoundRequestDB{
+		GameID: gameID, LocationID: createZeroLocation(t, pool), RoundNum: 1, CreatedAt: start, StartedAt: start,
+	})
+	require.NoError(t, err)
+
+	locked, release := make(chan struct{}), make(chan struct{})
+	lockResult := make(chan error, 1)
+
+	workers.Go(func() {
+		lockResult <- repo.RunTx(ctx, func(txCtx context.Context) error {
+			if err := repo.LockMultiplayerGame(txCtx, gameID); err != nil {
+				return fmt.Errorf("hold game lock: %w", err)
+			}
+
+			close(locked)
+
+			select {
+			case <-release:
+				return nil
+			case <-ctx.Done():
+				return fmt.Errorf("hold game lock: %w", ctx.Err())
+			}
+		})
+	})
+	receive(t, ctx, locked)
+
+	guessCtx, cancelGuess := context.WithCancel(ctx)
+	defer cancelGuess()
+
+	uc := multiplayeruc.NewUsecase(multiplayeruc.Config{}, repo, nil)
+	guessResult := make(chan error, 1)
+	request := dto.NewMultiplayerRoundGuessRequest{
+		RequestTime: start, GameID: gameID, UserID: creator.ID, Guess: &game.LatLng{},
+	}
+
+	workers.Go(func() { guessResult <- uc.NewRoundGuess(guessCtx, request) })
+	waitForDatabaseLock(t, ctx, pool)
+	cancelGuess()
+	require.ErrorIs(t, receive(t, ctx, guessResult), context.Canceled)
+	close(release)
+	require.NoError(t, receive(t, ctx, lockResult))
+	stored, err := repo.GetMultiplayerRound(ctx, gameID, 1)
+	require.NoError(t, err)
+	require.Zero(t, stored.GuessesCount)
+	// A fresh request succeeds after cancellation releases the failed transaction.
+	require.NoError(t, uc.NewRoundGuess(ctx, request))
+	stored, err = repo.GetMultiplayerRound(ctx, gameID, 1)
+	require.NoError(t, err)
+	require.Equal(t, 1, stored.GuessesCount)
+}
+
 type avatarStorage struct {
 	uploads   atomic.Int32
 	deletions atomic.Int32
@@ -293,20 +342,20 @@ func TestAvatarCooldownSerialization(t *testing.T) {
 	pool, repo := postgresFixture(t)
 	profile := createUser(t, repo)
 
-	ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
-	defer cancel()
+	workers := newTestWorkers(t)
+	ctx := workers.ctx
 
 	storage := &avatarStorage{entered: make(chan struct{}), release: make(chan struct{})}
 	uc := useruc.NewUsecase(useruc.Config{AvatarUpdateLimit: time.Hour}, repo, storage)
-	now := time.Now().UTC().Truncate(time.Microsecond)
+	now := integrationTime().Truncate(time.Microsecond)
 
 	first, second := make(chan error, 1), make(chan error, 1)
 
-	go func() {
+	workers.Go(func() {
 		first <- uc.UpdateAvatar(ctx, dto.UpdateAvatarRequest{
 			UserID: profile.ID, RequestTime: now, File: bytes.NewBufferString("first"), MimeType: "image/png",
 		})
-	}()
+	})
 
 	select {
 	case <-storage.entered:
@@ -314,172 +363,22 @@ func TestAvatarCooldownSerialization(t *testing.T) {
 		t.Fatal(ctx.Err())
 	}
 
-	go func() {
+	workers.Go(func() {
 		second <- uc.UpdateAvatar(ctx, dto.UpdateAvatarRequest{
 			UserID: profile.ID, RequestTime: now, File: bytes.NewBufferString("second"), MimeType: "image/png",
 		})
-	}()
+	})
 
 	waitForDatabaseLock(t, ctx, pool)
 	close(storage.release)
-	require.NoError(t, <-first)
-	require.ErrorIs(t, <-second, user.ErrAvatarUpdateTooFrequent)
+	require.NoError(t, receive(t, ctx, first))
+	require.ErrorIs(t, receive(t, ctx, second), user.ErrAvatarUpdateTooFrequent)
 	require.EqualValues(t, 1, storage.uploads.Load())
 	require.Zero(t, storage.deletions.Load())
 
 	stored, err := repo.GetUserByID(ctx, profile.ID)
 	require.NoError(t, err)
 	require.Equal(t, now, stored.AvatarLastUpdate)
-}
-
-func TestAtomicLobbyMembership(t *testing.T) {
-	container, err := containers.NewValkeyContainer(t.Context())
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		ctx, cancel := context.WithTimeout(context.WithoutCancel(t.Context()), 30*time.Second)
-		defer cancel()
-
-		require.NoError(t, container.Terminate(ctx))
-	})
-
-	client, err := valkey.NewClient(valkey.MustParseURL(container.ConnectionString))
-	require.NoError(t, err)
-	t.Cleanup(client.Close)
-
-	repo := valkeyrepo.New(t.Context(), client)
-
-	for _, private := range []bool{false, true} {
-		t.Run(map[bool]string{false: "public", true: "private"}[private], func(t *testing.T) {
-			id, creator, first, second := uuid.NewString(), uuid.New(), uuid.New(), uuid.New()
-
-			req := dto.NewLobbyRequestDB{
-				ID: id, CreatorID: creator, RequestTime: time.Now().UTC(), Provider: "google", Rounds: 1, MaxPlayers: 2,
-			}
-			if private {
-				err = repo.NewPrivateLobby(t.Context(), req)
-			} else {
-				err = repo.NewLobby(t.Context(), req)
-			}
-
-			require.NoError(t, err)
-
-			prefix := "lobby:"
-			if private {
-				prefix = "lobby:private:"
-			}
-
-			ttl := func() int64 {
-				result, err := client.Do(t.Context(), client.B().Pttl().Key(prefix+id).Build()).AsInt64()
-				require.NoError(t, err)
-
-				return result
-			}
-			require.Positive(t, ttl())
-			require.NoError(t, repo.AdmitLobbyUser(t.Context(), id, creator, "creator"))
-			require.EqualValues(t, -1, ttl())
-
-			require.NoError(t, repo.AdmitLobbyUser(t.Context(), id, creator, "creator"))
-			require.ErrorIs(t, repo.AdmitLobbyUser(t.Context(), id, creator, "duplicate"), lobby.ErrAlreadyConnected)
-
-			ready, results := make(chan struct{}), make(chan error, 2)
-
-			for _, uid := range []uuid.UUID{first, second} {
-				go func() { <-ready; results <- repo.AdmitLobbyUser(t.Context(), id, uid, uid.String()) }()
-			}
-
-			close(ready)
-
-			joined, rejected := 0, 0
-
-			for range 2 {
-				if err := <-results; err == nil {
-					joined++
-				} else {
-					require.ErrorIs(t, err, lobby.ErrLobbyIsFull)
-
-					rejected++
-				}
-			}
-
-			require.Equal(t, 1, joined)
-			require.Equal(t, 1, rejected)
-			value, err := repo.GetLobby(t.Context(), id)
-			require.NoError(t, err)
-			require.Equal(t, 2, value.CurrentPlayers)
-			require.NoError(t, repo.ReleaseLobbyUser(t.Context(), id, creator, "wrong", 3*time.Minute))
-
-			ready = make(chan struct{})
-
-			for _, uid := range []uuid.UUID{creator, first, second} {
-				go func() {
-					<-ready
-
-					sid := uid.String()
-					if uid == creator {
-						sid = "creator"
-					}
-
-					results <- repo.ReleaseLobbyUser(t.Context(), id, uid, sid, 3*time.Minute)
-				}()
-			}
-
-			close(ready)
-
-			for range 3 {
-				require.NoError(t, <-results)
-			}
-
-			value, err = repo.GetLobby(t.Context(), id)
-			require.NoError(t, err)
-			require.Zero(t, value.CurrentPlayers)
-			require.Positive(t, ttl())
-			require.NoError(t, repo.ReleaseLobbyUser(t.Context(), id, creator, "creator", 3*time.Minute))
-			require.NoError(t, repo.AdmitLobbyUser(t.Context(), id, creator, "new"))
-			require.NoError(t, repo.ReleaseLobbyUser(t.Context(), id, creator, "creator", 3*time.Minute))
-			value, err = repo.GetLobby(t.Context(), id)
-			require.NoError(t, err)
-			require.Equal(t, 1, value.CurrentPlayers)
-			require.EqualValues(t, -1, ttl())
-			raceLobbyJoinAndRelease(t, repo, id, creator, first, ttl)
-		})
-	}
-
-	exerciseLobbyWatchRetries(t, client)
-}
-
-func raceLobbyJoinAndRelease(
-	t *testing.T, repo *valkeyrepo.Repository, id string, creator, joining uuid.UUID, ttl func() int64,
-) {
-	t.Helper()
-
-	results := make(chan error, 2)
-	// Racing the last release with a new admission must leave one persistent member.
-	for range 10 {
-		race := make(chan struct{})
-		go func() {
-			<-race
-
-			results <- repo.ReleaseLobbyUser(t.Context(), id, creator, "new", 3*time.Minute)
-		}()
-		go func() {
-			<-race
-
-			results <- repo.AdmitLobbyUser(t.Context(), id, joining, "joined")
-		}()
-
-		close(race)
-
-		for range 2 {
-			require.NoError(t, <-results)
-		}
-
-		value, err := repo.GetLobby(t.Context(), id)
-		require.NoError(t, err)
-		require.Equal(t, 1, value.CurrentPlayers)
-		require.EqualValues(t, -1, ttl())
-		require.NoError(t, repo.ReleaseLobbyUser(t.Context(), id, joining, "joined", 3*time.Minute))
-		require.NoError(t, repo.AdmitLobbyUser(t.Context(), id, creator, "new"))
-	}
 }
 
 func createZeroLocation(t *testing.T, pool *pgxpool.Pool) uuid.UUID {

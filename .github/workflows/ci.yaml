@@ -32,7 +32,7 @@ jobs:
       - name: Check docker image versions consistency
         run: bash scripts/check-docker-images.sh
 
-  test:
+  test-unit:
     needs: verify-versions
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -46,14 +46,44 @@ jobs:
       - name: Build
         run: go build -v ./...
 
-      - name: Run tests
-        run: go test -v ./...
+      - name: Run unit tests with race detection and coverage
+        run: make test-cover TEST_FLAGS=-race
+
+      - name: Upload unit coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit
+          path: output/coverage-unit.*
+          if-no-files-found: ignore
 
       - name: Verify go.mod
         run: |
           go mod verify
           go mod tidy
           git diff --exit-code go.mod go.sum
+
+  test-integration:
+    needs: verify-versions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Run repository and concurrency tests with race detection
+        run: make test-cover-integration TEST_FLAGS=-race
+
+      - name: Upload integration coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-integration
+          path: output/coverage-integration.*
+          if-no-files-found: ignore
 
   lint:
     needs: verify-versions

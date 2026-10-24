@@ -16,6 +16,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
+	wsfake "github.com/VasySS/segoya-backend/tests/websocket"
 )
 
 type settingsUsecase struct {
@@ -28,51 +29,16 @@ func (u settingsUsecase) UpdateLobbySettings(ctx context.Context, req dto.Update
 	return u.update(ctx, req)
 }
 
-type settingsWebSocket struct {
-	transport.WebSocketService
+func lobbySession(t *testing.T, room string, profile any) *wsfake.Session {
+	t.Helper()
+	session := &wsfake.Session{Req: httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)}
+	session.SetBroadcastID(room)
 
-	messageHandler transport.WebSocketMessageHandler
-	broadcasts     []transport.WebSocketMessageOutput
-	broadcastIDs   []string
-}
+	if profile != nil {
+		session.Set(dto.LobbyUserProfileKey, profile)
+	}
 
-func (ws *settingsWebSocket) SetMessageHandler(handler transport.WebSocketMessageHandler) {
-	ws.messageHandler = handler
-}
-
-func (*settingsWebSocket) SetConnectHandler(transport.WebSocketConnectHandler) {}
-
-func (*settingsWebSocket) SetDisconnectHandler(transport.WebSocketDisconnectHandler) {}
-
-func (ws *settingsWebSocket) Broadcast(id string, message transport.WebSocketMessageOutput) error {
-	ws.broadcastIDs = append(ws.broadcastIDs, id)
-	ws.broadcasts = append(ws.broadcasts, message)
-
-	return nil
-}
-
-type settingsSession struct {
-	transport.WebSocketSession
-
-	request *http.Request
-	profile user.PublicProfile
-	errors  []string
-}
-
-func (s *settingsSession) Request() *http.Request {
-	return s.request
-}
-
-func (s *settingsSession) Get(key string) (any, bool) {
-	return s.profile, key == dto.LobbyUserProfileKey
-}
-
-func (*settingsSession) GetBroadcastID() (string, bool) {
-	return "test-lobby", true
-}
-
-func (s *settingsSession) SendError(message string) {
-	s.errors = append(s.errors, message)
+	return session
 }
 
 func TestHandler_SettingsValidation(t *testing.T) {
@@ -142,11 +108,9 @@ func TestHandler_SettingsValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			ws := &settingsWebSocket{}
+			ws := &wsfake.Service{}
 			profile := user.PublicProfile{ID: uuid.MustParse("0199027e-ade6-784d-9d43-cc9c776a6943")}
-			session := &settingsSession{
-				request: httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil), profile: profile,
-			}
+			session := lobbySession(t, "test-lobby", profile)
 
 			var requests []dto.UpdateLobbySettingsRequest
 
@@ -159,28 +123,27 @@ func TestHandler_SettingsValidation(t *testing.T) {
 			payload, err := json.Marshal(dto.LobbyNewSettingsMessage{Settings: tt.settings})
 			require.NoError(t, err)
 
-			ws.messageHandler(session, transport.WebSocketMessageInput{
+			ws.Message(session, transport.WebSocketMessageInput{
 				Type: dto.LobbyMessageTypeSettingsNew, Payload: payload,
 			})
 
 			if tt.wantErr != "" {
-				assert.Equal(t, []string{tt.wantErr}, session.errors)
+				assert.Equal(t, []string{tt.wantErr}, session.Snapshot().Errors)
 				assert.Empty(t, requests)
-				assert.Empty(t, ws.broadcasts)
+				assert.Empty(t, ws.Broadcasts())
 
 				return
 			}
 
-			assert.Empty(t, session.errors)
+			assert.Empty(t, session.Snapshot().Errors)
 			require.Len(t, requests, 1)
 			assert.Equal(t, "test-lobby", requests[0].LobbyID)
 			assert.Equal(t, profile, requests[0].Creator)
 			assert.Equal(t, tt.settings, requests[0].Settings)
 			assert.False(t, requests[0].RequestTime.IsZero())
-			assert.Equal(t, []string{"test-lobby"}, ws.broadcastIDs)
-			assert.Equal(t, []transport.WebSocketMessageOutput{{
+			assert.Equal(t, []wsfake.Broadcast{{RoomID: "test-lobby", Message: transport.WebSocketMessageOutput{
 				Type: dto.LobbyMessageTypeSettingsChanged, Payload: map[string]any{"settings": tt.settings},
-			}}, ws.broadcasts)
+			}}}, ws.Broadcasts())
 		})
 	}
 }
@@ -216,10 +179,8 @@ func TestHandler_SettingsFailure(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			ws := &settingsWebSocket{}
-			session := &settingsSession{
-				request: httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil), profile: tt.profile,
-			}
+			ws := &wsfake.Service{}
+			session := lobbySession(t, "test-lobby", tt.profile)
 			calls := 0
 			uc := settingsUsecase{update: func(context.Context, dto.UpdateLobbySettingsRequest) error {
 				calls++
@@ -227,13 +188,13 @@ func TestHandler_SettingsFailure(t *testing.T) {
 			}}
 			lobby.NewHandler(lobby.Config{}, uc, nil, ws)
 
-			ws.messageHandler(session, transport.WebSocketMessageInput{
+			ws.Message(session, transport.WebSocketMessageInput{
 				Type: dto.LobbyMessageTypeSettingsNew, Payload: tt.payload,
 			})
 
-			assert.Equal(t, []string{tt.wantMessage}, session.errors)
+			assert.Equal(t, []string{tt.wantMessage}, session.Snapshot().Errors)
 			assert.Equal(t, tt.wantCalls, calls)
-			assert.Empty(t, ws.broadcasts)
+			assert.Empty(t, ws.Broadcasts())
 		})
 	}
 }

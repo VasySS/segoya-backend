@@ -1,12 +1,15 @@
 package token_test
 
 import (
-	"context"
+	"encoding/base64"
+	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,311 +18,270 @@ import (
 	"github.com/VasySS/segoya-backend/internal/infrastructure/token"
 )
 
-func setupService(ctx context.Context, jwtSecret []byte, accessTokenTTL, refreshTokenTTL time.Duration) *token.Service {
-	return token.NewService(ctx, string(jwtSecret), accessTokenTTL, refreshTokenTTL, "", &http.Client{})
+func newTokenService(t *testing.T) *token.Service {
+	t.Helper()
+	return token.NewService(t.Context(), "jwt-secret", time.Hour, 31*24*time.Hour, "", &http.Client{})
 }
 
-func TestNewAccessToken(t *testing.T) {
-	t.Parallel()
-
-	var (
-		jwtSecret       = []byte("jwt-secret")
-		accessTokenTTL  = time.Hour
-		refreshTokenTTL = 31 * 24 * time.Hour
-	)
-
-	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
-	currentTime := time.Now().UTC()
-
-	sessionID, _ := uuid.NewV7()
-	userID, _ := uuid.NewV7()
-
-	claims := user.AccessTokenClaims{
-		SessionID: sessionID,
-		UserID:    userID,
-		Username:  "testuser",
-		Name:      "Test User",
+func tokenClaims() user.AccessTokenClaims {
+	return user.AccessTokenClaims{
+		SessionID: uuid.MustParse("019a553a-fc00-7000-8000-000000000002"),
+		UserID:    uuid.MustParse("019a553a-fc00-7000-8000-000000000001"),
+		Username:  "alice", Name: "Alice",
 	}
-
-	t.Run("Valid Access Token", func(t *testing.T) {
-		t.Parallel()
-
-		tokenStr, err := service.NewAccessToken(currentTime, claims)
-		require.NoError(t, err)
-		assert.NotEmpty(t, tokenStr)
-
-		parsedClaims, err := service.ParseAccessToken(tokenStr)
-		require.NoError(t, err)
-		assert.Equal(t, claims, parsedClaims)
-	})
 }
 
-func TestNewRefreshToken(t *testing.T) {
+func TestService_TokenRoundTrip(t *testing.T) {
 	t.Parallel()
 
-	var (
-		jwtSecret       = []byte("jwt-secret")
-		accessTokenTTL  = time.Hour
-		refreshTokenTTL = 31 * 24 * time.Hour
-	)
+	for _, kind := range []token.Type{token.AccessToken, token.RefreshToken} {
+		t.Run(string(kind), func(t *testing.T) {
+			t.Parallel()
+			service := newTokenService(t)
+			// Parsing uses the real clock; keep validity far from the three-minute skew boundary.
+			now := time.Now().UTC().Truncate(time.Second)
+			claims := tokenClaims()
 
-	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
-	currentTime := time.Now()
+			var (
+				encoded string
+				err     error
+			)
 
-	sessionID, _ := uuid.NewV7()
-	userID, _ := uuid.NewV7()
+			ttl := time.Hour
 
-	claims := user.RefreshTokenClaims{
-		SessionID: sessionID,
-		UserID:    userID,
-		Username:  "testuser",
+			if kind == token.AccessToken {
+				encoded, err = service.NewAccessToken(now, claims)
+			} else {
+				ttl = 31 * 24 * time.Hour
+				encoded, err = service.NewRefreshToken(now, user.RefreshTokenClaims{
+					SessionID: claims.SessionID, UserID: claims.UserID, Username: claims.Username,
+				})
+			}
+
+			require.NoError(t, err)
+			require.NotEmpty(t, encoded)
+			parsed, err := jwt.ParseString(encoded, jwt.WithKey(jwa.HS256(), []byte("jwt-secret")))
+			require.NoError(t, err)
+
+			issued, ok := parsed.IssuedAt()
+			require.True(t, ok)
+			assert.Equal(t, now, issued)
+
+			expires, ok := parsed.Expiration()
+			require.True(t, ok)
+			assert.Equal(t, now.Add(ttl), expires)
+
+			if kind == token.AccessToken {
+				got, err := service.ParseAccessToken(encoded)
+				require.NoError(t, err)
+				assert.Equal(t, claims, got)
+			} else {
+				got, err := service.ParseRefreshToken(encoded)
+				require.NoError(t, err)
+				assert.Equal(t, user.RefreshTokenClaims{
+					SessionID: claims.SessionID,
+					UserID:    claims.UserID,
+					Username:  claims.Username,
+				}, got)
+			}
+		})
 	}
-
-	t.Run("Valid Refresh Token", func(t *testing.T) {
-		t.Parallel()
-
-		tokenStr, err := service.NewRefreshToken(currentTime, claims)
-		require.NoError(t, err)
-		assert.NotEmpty(t, tokenStr)
-
-		parsedClaims, err := service.ParseRefreshToken(tokenStr)
-		require.NoError(t, err)
-		assert.Equal(t, claims, parsedClaims)
-	})
 }
 
-func TestParseAccessToken(t *testing.T) {
-	t.Parallel()
+func signedClaims(
+	t *testing.T, kind token.Type, change func(map[string]any), secret string, algorithm jwa.SignatureAlgorithm,
+) string {
+	t.Helper()
 
-	var (
-		jwtSecret       = []byte("jwt-secret")
-		accessTokenTTL  = time.Hour
-		refreshTokenTTL = 31 * 24 * time.Hour
-	)
-
-	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
+	claims := tokenClaims()
 	now := time.Now().UTC()
 
-	sessionID, _ := uuid.NewV7()
-	userID, _ := uuid.NewV7()
-
-	claims := user.AccessTokenClaims{
-		SessionID: sessionID,
-		UserID:    userID,
-		Username:  "testuser",
-		Name:      "Test User",
+	values := map[string]any{
+		"iat": now.Add(-time.Minute), "exp": now.Add(time.Hour),
+		token.ClaimsTokenTypeKey: string(kind), token.ClaimsSessionIDKey: claims.SessionID.String(),
+		token.ClaimsUserIDKey: claims.UserID.String(), token.ClaimsUsernameKey: claims.Username,
+	}
+	if kind == token.AccessToken {
+		values[token.ClaimsNameKey] = claims.Name
 	}
 
-	t.Run("Valid Access Token", func(t *testing.T) {
-		t.Parallel()
+	if change != nil {
+		change(values)
+	}
 
-		tokenStr, err := service.NewAccessToken(now, claims)
-		require.NoError(t, err)
+	raw := jwt.New()
+	for key, value := range values {
+		require.NoError(t, raw.Set(key, value))
+	}
 
-		parsedClaims, err := service.ParseAccessToken(tokenStr)
-		require.NoError(t, err)
-		assert.Equal(t, claims, parsedClaims)
-	})
+	encoded, err := jwt.Sign(raw, jwt.WithKey(algorithm, []byte(secret)))
+	require.NoError(t, err)
 
-	t.Run("Expired Access Token", func(t *testing.T) {
-		t.Parallel()
-
-		builder := jwt.NewBuilder().
-			IssuedAt(now.Add(-2*time.Hour)).
-			Expiration(now.Add(-1*time.Hour)).
-			Claim(token.ClaimsSessionIDKey, claims.SessionID).
-			Claim(token.ClaimsUserIDKey, claims.UserID).
-			Claim(token.ClaimsNameKey, claims.Name).
-			Claim(token.ClaimsUsernameKey, claims.Username).
-			Claim(token.ClaimsTokenTypeKey, token.AccessToken)
-
-		rawToken, err := builder.Build()
-		require.NoError(t, err)
-
-		signedToken, err := jwt.Sign(rawToken, jwt.WithKey(token.SignatureMethod, jwtSecret))
-		require.NoError(t, err)
-
-		_, err = service.ParseAccessToken(string(signedToken))
-		assert.ErrorContains(t, err, "\"exp\" not satisfied")
-	})
-
-	t.Run("Wrong token type", func(t *testing.T) {
-		t.Parallel()
-
-		builder := jwt.NewBuilder().
-			IssuedAt(now).
-			Expiration(now.Add(refreshTokenTTL)).
-			Claim(token.ClaimsSessionIDKey, claims.SessionID).
-			Claim(token.ClaimsUserIDKey, claims.UserID).
-			Claim(token.ClaimsNameKey, claims.Name).
-			Claim(token.ClaimsUsernameKey, claims.Username).
-			Claim(token.ClaimsTokenTypeKey, token.RefreshToken)
-
-		rawToken, err := builder.Build()
-		require.NoError(t, err)
-
-		signedToken, err := jwt.Sign(rawToken, jwt.WithKey(token.SignatureMethod, jwtSecret))
-		require.NoError(t, err)
-
-		_, err = service.ParseAccessToken(string(signedToken))
-		assert.ErrorIs(t, err, user.ErrWrongTokenType)
-	})
-
-	t.Run("Missing Required Claim", func(t *testing.T) {
-		t.Parallel()
-
-		// Build token without 'name' claim
-		builder := jwt.NewBuilder().
-			IssuedAt(now).
-			Expiration(now.Add(accessTokenTTL)).
-			Claim(token.ClaimsSessionIDKey, claims.SessionID).
-			Claim(token.ClaimsUserIDKey, claims.UserID).
-			Claim(token.ClaimsUsernameKey, claims.Username).
-			Claim(token.ClaimsTokenTypeKey, token.AccessToken)
-
-		rawToken, err := builder.Build()
-		require.NoError(t, err)
-
-		signedToken, err := jwt.Sign(rawToken, jwt.WithKey(token.SignatureMethod, jwtSecret))
-		require.NoError(t, err)
-
-		_, err = service.ParseAccessToken(string(signedToken))
-		assert.Error(t, err)
-	})
+	return string(encoded)
 }
 
-func TestParseRefreshToken(t *testing.T) {
-	t.Parallel()
+func assertRejectedToken(t *testing.T, kind token.Type, encoded string, want error) {
+	t.Helper()
 
-	var (
-		jwtSecret       = []byte("jwt-secret")
-		accessTokenTTL  = time.Hour
-		refreshTokenTTL = 31 * 24 * time.Hour
-	)
+	service := newTokenService(t)
+	if kind == token.AccessToken {
+		claims, err := service.ParseAccessToken(encoded)
+		require.Error(t, err)
 
-	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
-	now := time.Now().UTC()
+		if want != nil {
+			require.ErrorIs(t, err, want)
+		}
 
-	sessionID, _ := uuid.NewV7()
-	userID, _ := uuid.NewV7()
+		assert.Equal(t, user.AccessTokenClaims{}, claims)
+	} else {
+		claims, err := service.ParseRefreshToken(encoded)
+		require.Error(t, err)
 
-	claims := user.RefreshTokenClaims{
-		SessionID: sessionID,
-		UserID:    userID,
-		Username:  "testuser",
+		if want != nil {
+			require.ErrorIs(t, err, want)
+		}
+
+		assert.Equal(t, user.RefreshTokenClaims{}, claims)
 	}
-
-	t.Run("Valid Refresh Token", func(t *testing.T) {
-		t.Parallel()
-
-		tokenStr, err := service.NewRefreshToken(now, claims)
-		require.NoError(t, err)
-
-		parsedClaims, err := service.ParseRefreshToken(tokenStr)
-		require.NoError(t, err)
-		assert.Equal(t, claims, parsedClaims)
-	})
-
-	t.Run("Expired Refresh Token", func(t *testing.T) {
-		t.Parallel()
-
-		builder := jwt.NewBuilder().
-			IssuedAt(now.Add(-96*time.Hour)).
-			Expiration(now.Add(-48*time.Hour)).
-			Claim(token.ClaimsSessionIDKey, claims.SessionID).
-			Claim(token.ClaimsUserIDKey, claims.UserID).
-			Claim(token.ClaimsUsernameKey, claims.Username).
-			Claim(token.ClaimsTokenTypeKey, token.RefreshToken)
-
-		rawToken, err := builder.Build()
-		require.NoError(t, err)
-
-		signedToken, err := jwt.Sign(rawToken, jwt.WithKey(token.SignatureMethod, jwtSecret))
-		require.NoError(t, err)
-
-		_, err = service.ParseRefreshToken(string(signedToken))
-		assert.ErrorContains(t, err, "\"exp\" not satisfied")
-	})
-
-	t.Run("Wrong Token Type", func(t *testing.T) {
-		t.Parallel()
-
-		// Build refresh token with access token type
-		builder := jwt.NewBuilder().
-			IssuedAt(now).
-			Expiration(now.Add(refreshTokenTTL)).
-			Claim(token.ClaimsSessionIDKey, claims.SessionID).
-			Claim(token.ClaimsUserIDKey, claims.UserID).
-			Claim(token.ClaimsUsernameKey, claims.Username).
-			Claim(token.ClaimsTokenTypeKey, token.AccessToken)
-
-		rawToken, err := builder.Build()
-		require.NoError(t, err)
-
-		signedToken, err := jwt.Sign(rawToken, jwt.WithKey(token.SignatureMethod, jwtSecret))
-		require.NoError(t, err)
-
-		_, err = service.ParseRefreshToken(string(signedToken))
-		assert.ErrorIs(t, err, user.ErrWrongTokenType)
-	})
-
-	t.Run("Missing Required Claim", func(t *testing.T) {
-		t.Parallel()
-
-		// Build token without UserID
-		builder := jwt.NewBuilder().
-			IssuedAt(now).
-			Expiration(now.Add(refreshTokenTTL)).
-			Claim(token.ClaimsSessionIDKey, claims.SessionID).
-			Claim(token.ClaimsUsernameKey, claims.Username).
-			Claim(token.ClaimsTokenTypeKey, token.RefreshToken)
-
-		rawToken, err := builder.Build()
-		require.NoError(t, err)
-
-		signedToken, err := jwt.Sign(rawToken, jwt.WithKey(token.SignatureMethod, jwtSecret))
-		require.NoError(t, err)
-
-		_, err = service.ParseRefreshToken(string(signedToken))
-		assert.Error(t, err)
-	})
 }
 
-func TestContext(t *testing.T) {
+func TestService_RejectInvalidTokenEnvelope(t *testing.T) {
 	t.Parallel()
 
+	for _, kind := range []token.Type{token.AccessToken, token.RefreshToken} {
+		t.Run(string(kind), func(t *testing.T) {
+			t.Parallel()
+
+			for _, scenario := range []string{
+				"empty",
+				"malformed",
+				"unsigned",
+				"wrong secret",
+				"wrong algorithm",
+				"tampered payload",
+				"expired",
+				"issued in future",
+				"wrong type",
+			} {
+				t.Run(scenario, func(t *testing.T) {
+					t.Parallel()
+
+					encoded, want := invalidTokenEnvelope(t, kind, scenario)
+					assertRejectedToken(t, kind, encoded, want)
+				})
+			}
+		})
+	}
+}
+
+func TestService_RejectInvalidRequiredClaims(t *testing.T) {
+	t.Parallel()
+
+	for _, kind := range []token.Type{token.AccessToken, token.RefreshToken} {
+		t.Run(string(kind), func(t *testing.T) {
+			t.Parallel()
+
+			keys := []string{token.ClaimsTokenTypeKey, token.ClaimsSessionIDKey, token.ClaimsUserIDKey, token.ClaimsUsernameKey}
+			if kind == token.AccessToken {
+				keys = append(keys, token.ClaimsNameKey)
+			}
+
+			for _, key := range keys {
+				for _, corruption := range []string{"missing", "wrong JSON type", "null"} {
+					t.Run(key+"/"+corruption, func(t *testing.T) {
+						t.Parallel()
+						encoded := signedClaims(t, kind, func(values map[string]any) {
+							switch corruption {
+							case "missing":
+								delete(values, key)
+							case "wrong JSON type":
+								values[key] = 42
+							case "null":
+								values[key] = nil
+							}
+						}, "jwt-secret", jwa.HS256())
+						assertRejectedToken(t, kind, encoded, nil)
+					})
+				}
+			}
+
+			for _, key := range []string{token.ClaimsSessionIDKey, token.ClaimsUserIDKey} {
+				t.Run(key+"/invalid UUID", func(t *testing.T) {
+					t.Parallel()
+					encoded := signedClaims(t, kind, func(values map[string]any) {
+						values[key] = "not-a-uuid"
+					}, "jwt-secret", jwa.HS256())
+					assertRejectedToken(t, kind, encoded, nil)
+				})
+			}
+		})
+	}
+}
+
+func TestService_Context(t *testing.T) {
+	t.Parallel()
+	service := newTokenService(t)
+	claims := tokenClaims()
+	ctx := service.NewContext(t.Context(), claims)
+	got, ok := service.FromContext(ctx)
+	require.True(t, ok)
+	assert.Equal(t, claims, got)
+	missing, ok := service.FromContext(t.Context())
+	assert.False(t, ok)
+	assert.Equal(t, user.AccessTokenClaims{}, missing)
+}
+
+func invalidTokenEnvelope(t *testing.T, kind token.Type, scenario string) (string, error) {
+	t.Helper()
+
 	var (
-		jwtSecret       = []byte("jwt-secret")
-		accessTokenTTL  = time.Hour
-		refreshTokenTTL = 31 * 24 * time.Hour
+		encoded string
+		want    error
 	)
 
-	service := setupService(t.Context(), jwtSecret, accessTokenTTL, refreshTokenTTL)
+	switch scenario {
+	case "empty":
+		encoded = ""
+	case "malformed":
+		encoded = "not.a.jwt"
+	case "unsigned":
+		encoded = "eyJhbGciOiJub25lIn0.e30."
+	case "wrong secret":
+		encoded = signedClaims(t, kind, nil, "other-secret", jwa.HS256())
+	case "wrong algorithm":
+		encoded = signedClaims(t, kind, nil, "jwt-secret", jwa.HS512())
+	case "tampered payload":
+		parts := strings.Split(signedClaims(t, kind, nil, "jwt-secret", jwa.HS256()), ".")
+		payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+		require.NoError(t, err)
 
-	sessionID, _ := uuid.NewV7()
-	userID, _ := uuid.NewV7()
+		var values map[string]any
 
-	claims := user.AccessTokenClaims{
-		SessionID: sessionID,
-		UserID:    userID,
-		Username:  "testuser",
-		Name:      "Test User",
+		require.NoError(t, json.Unmarshal(payload, &values))
+		values[token.ClaimsUsernameKey] = "mallory"
+		payload, err = json.Marshal(values)
+		require.NoError(t, err)
+
+		parts[1] = base64.RawURLEncoding.EncodeToString(payload)
+		encoded = strings.Join(parts, ".")
+	case "expired":
+		encoded = signedClaims(t, kind, func(v map[string]any) {
+			v["iat"] = time.Now().Add(-2 * time.Hour)
+			v["exp"] = time.Now().Add(-time.Hour)
+		}, "jwt-secret", jwa.HS256())
+	case "issued in future":
+		encoded = signedClaims(t, kind, func(v map[string]any) {
+			v["iat"] = time.Now().Add(time.Hour)
+			v["exp"] = time.Now().Add(2 * time.Hour)
+		}, "jwt-secret", jwa.HS256())
+	case "wrong type":
+		other := map[token.Type]token.Type{
+			token.AccessToken: token.RefreshToken, token.RefreshToken: token.AccessToken,
+		}[kind]
+
+		encoded = signedClaims(t, other, nil, "jwt-secret", jwa.HS256())
+		want = user.ErrWrongTokenType
 	}
 
-	t.Run("Valid Context", func(t *testing.T) {
-		t.Parallel()
-
-		newCtx := service.NewContext(t.Context(), claims)
-		retrievedClaims, ok := service.FromContext(newCtx)
-		assert.True(t, ok)
-		assert.Equal(t, claims, retrievedClaims)
-	})
-
-	t.Run("Missing Context", func(t *testing.T) {
-		t.Parallel()
-
-		retrievedClaims, ok := service.FromContext(t.Context())
-		assert.False(t, ok)
-		assert.Empty(t, retrievedClaims)
-	})
+	return encoded, want
 }
