@@ -462,7 +462,9 @@ ON CONFLICT (preset_id, location_id) DO NOTHING`
 }
 
 func lockPlayAreaCatalog(ctx context.Context, tx pgx.Tx) error {
-	if _, err := tx.Exec(ctx, "SELECT pg_advisory_xact_lock(731904264)"); err != nil {
+	query := "SELECT pg_advisory_xact_lock(731904264)"
+
+	if _, err := tx.Exec(ctx, query); err != nil {
 		return fmt.Errorf("lock play area catalog maintenance: %w", err)
 	}
 

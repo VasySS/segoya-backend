@@ -79,11 +79,13 @@ func (r *Repository) CountPlayAreaLocations(
 		return 0, err
 	}
 
+	query := `
+		SELECT COUNT(*) FROM panorama_location pl
+		WHERE pl.provider = @provider AND ` + predicate
+
 	var count int
 
-	err = r.txManager.GetQueryEngine(ctx).QueryRow(ctx, `
-		SELECT COUNT(*) FROM panorama_location pl
-		WHERE pl.provider = @provider AND `+predicate, args).Scan(&count)
+	err = r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, args).Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("count play area locations: %w", err)
 	}
@@ -105,12 +107,15 @@ func (r *Repository) ValidatePlayAreaPresets(
 		return playarea.ErrInvalidSelection
 	}
 
-	var count int
-
-	err = r.txManager.GetQueryEngine(ctx).QueryRow(ctx, `
+	query := `
 		SELECT COUNT(*) FROM play_area_preset
 		WHERE id = ANY(@ids::uuid[]) AND @provider = ANY(providers)
-	`, pgx.NamedArgs{"ids": area.PresetIDs, "provider": string(provider)}).Scan(&count)
+	`
+
+	var count int
+
+	err = r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query,
+		pgx.NamedArgs{"ids": area.PresetIDs, "provider": string(provider)}).Scan(&count)
 	if err != nil {
 		return fmt.Errorf("validate play area presets: %w", err)
 	}
@@ -156,18 +161,21 @@ func (r *Repository) RandomPlayAreaLocation(
 		roundTable = "multiplayer_round"
 	}
 
-	var location game.PanoramaMetadata
-
 	// roundTable comes exclusively from the fixed allowlist above.
-	err = r.txManager.GetQueryEngine(ctx).QueryRow(ctx, `
+	query := `
 		SELECT pl.id, COALESCE(pl.streetview_id, ''), pl.lat, pl.lng
 		FROM panorama_location pl
-		WHERE pl.provider = @provider AND `+predicate+`
+		WHERE pl.provider = @provider AND ` + predicate + `
 		AND NOT EXISTS (
-			SELECT 1 FROM `+roundTable+` pr WHERE pr.game_id = @game_id AND pr.location_id = pl.id
+			SELECT 1 FROM ` + roundTable + ` pr WHERE pr.game_id = @game_id AND pr.location_id = pl.id
 		)
 		ORDER BY RANDOM() LIMIT 1
-	`, args).Scan(&location.ID, &location.StreetviewID, &location.Lat, &location.Lng)
+	`
+
+	var location game.PanoramaMetadata
+
+	err = r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, args).
+		Scan(&location.ID, &location.StreetviewID, &location.Lat, &location.Lng)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return game.PanoramaMetadata{}, playarea.ErrInsufficientLocations
 	}
@@ -196,15 +204,17 @@ func (r *Repository) ListPlayAreaPresets(
 		return nil, playarea.ErrInvalidSelection
 	}
 
-	rows, err := r.txManager.GetQueryEngine(ctx).Query(ctx, `
-		SELECT `+presetColumns+`, (
+	query := `
+		SELECT ` + presetColumns + `, (
 			SELECT COUNT(*) FROM play_area_preset_location pal
 			JOIN panorama_location pl ON pl.id = pal.location_id
 			WHERE pal.preset_id = p.id AND pl.provider = @provider::panorama_provider
 		)
 		FROM play_area_preset p WHERE @provider::text = ANY(p.providers)
 		ORDER BY p.name, p.id
-	`, pgx.NamedArgs{"provider": string(provider)})
+	`
+
+	rows, err := r.txManager.GetQueryEngine(ctx).Query(ctx, query, pgx.NamedArgs{"provider": string(provider)})
 	if err != nil {
 		return nil, fmt.Errorf("list play area presets: %w", err)
 	}
@@ -234,12 +244,14 @@ func (r *Repository) GetPlayAreaPreset(ctx context.Context, id uuid.UUID) (playa
 	ctx, span := r.tracer.Start(ctx, "GetPlayAreaPreset")
 	defer span.End()
 
+	query := `
+		SELECT ` + presetColumns + `, ST_AsGeoJSON(p.display_geom)::jsonb
+		FROM play_area_preset p WHERE p.id = @id
+	`
+
 	var preset playarea.Preset
 
-	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, `
-		SELECT `+presetColumns+`, ST_AsGeoJSON(p.display_geom)::jsonb
-		FROM play_area_preset p WHERE p.id = @id
-	`, pgx.NamedArgs{"id": id})
+	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, pgx.NamedArgs{"id": id})
 
 	err := scanPreset(row, &preset, &preset.Polygon)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -298,12 +310,14 @@ func (r *Repository) CreatePlayArea(
 		return playarea.Saved{}, err
 	}
 
-	var saved playarea.Saved
-
-	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, `
+	query := `
 		INSERT INTO saved_play_area (owner_id, name, polygon, visibility)
 		VALUES (@owner, @name, @polygon, @visibility)
-		RETURNING `+savedPlayAreaColumns, pgx.NamedArgs{
+		RETURNING ` + savedPlayAreaColumns
+
+	var saved playarea.Saved
+
+	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, pgx.NamedArgs{
 		"owner": owner, "name": name, "polygon": polygon, "visibility": visibility,
 	})
 	if err := scanSavedPlayArea(row, &saved); err != nil {
@@ -318,12 +332,14 @@ func (r *Repository) GetPlayArea(ctx context.Context, id, user uuid.UUID) (playa
 	ctx, span := r.tracer.Start(ctx, "GetPlayArea")
 	defer span.End()
 
+	query := `
+		SELECT ` + savedPlayAreaColumns + ` FROM saved_play_area
+		WHERE id = @id AND (owner_id = @user OR visibility = 'unlisted')
+	`
+
 	var saved playarea.Saved
 
-	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, `
-		SELECT `+savedPlayAreaColumns+` FROM saved_play_area
-		WHERE id = @id AND (owner_id = @user OR visibility = 'unlisted')
-	`, pgx.NamedArgs{"id": id, "user": user})
+	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, pgx.NamedArgs{"id": id, "user": user})
 
 	err := scanSavedPlayArea(row, &saved)
 	if errors.Is(err, pgx.ErrNoRows) {
@@ -352,17 +368,22 @@ func (r *Repository) ListPlayAreas(
 
 	tx := r.txManager.GetQueryEngine(ctx)
 
+	countQuery := `SELECT COUNT(*) FROM saved_play_area WHERE owner_id = @owner`
+
 	var total int
 
-	if err := tx.QueryRow(ctx, `SELECT COUNT(*) FROM saved_play_area WHERE owner_id = @owner`,
+	if err := tx.QueryRow(ctx, countQuery,
 		pgx.NamedArgs{"owner": owner}).Scan(&total); err != nil {
 		return nil, 0, fmt.Errorf("count saved play areas: %w", err)
 	}
 
-	rows, err := tx.Query(ctx, `
-		SELECT `+savedPlayAreaColumns+` FROM saved_play_area WHERE owner_id = @owner
+	query := `
+		SELECT ` + savedPlayAreaColumns + ` FROM saved_play_area WHERE owner_id = @owner
 		ORDER BY created_at DESC, id DESC LIMIT @limit OFFSET @offset
-	`, pgx.NamedArgs{"owner": owner, "limit": pageSize, "offset": int64(page-1) * int64(pageSize)})
+	`
+
+	rows, err := tx.Query(ctx, query,
+		pgx.NamedArgs{"owner": owner, "limit": pageSize, "offset": int64(page-1) * int64(pageSize)})
 	if err != nil {
 		return nil, 0, fmt.Errorf("list saved play areas: %w", err)
 	}
@@ -419,14 +440,16 @@ func (r *Repository) UpdatePlayArea(
 		}
 	}
 
-	var saved playarea.Saved
-
-	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, `
+	query := `
 		UPDATE saved_play_area SET name = COALESCE(@name, name),
 			polygon = COALESCE(@polygon::jsonb, polygon),
 			visibility = COALESCE(@visibility, visibility), updated_at = clock_timestamp()
 		WHERE id = @id AND owner_id = @owner
-		RETURNING `+savedPlayAreaColumns, pgx.NamedArgs{
+		RETURNING ` + savedPlayAreaColumns
+
+	var saved playarea.Saved
+
+	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, pgx.NamedArgs{
 		"id": id, "owner": owner, "name": name, "polygon": polygon, "visibility": visibility,
 	})
 
@@ -447,9 +470,11 @@ func (r *Repository) DeletePlayArea(ctx context.Context, id, owner uuid.UUID) er
 	ctx, span := r.tracer.Start(ctx, "DeletePlayArea")
 	defer span.End()
 
-	result, err := r.txManager.GetQueryEngine(ctx).Exec(ctx, `
+	query := `
 		DELETE FROM saved_play_area WHERE id = @id AND owner_id = @owner
-	`, pgx.NamedArgs{"id": id, "owner": owner})
+	`
+
+	result, err := r.txManager.GetQueryEngine(ctx).Exec(ctx, query, pgx.NamedArgs{"id": id, "owner": owner})
 	if err != nil {
 		return fmt.Errorf("delete saved play area: %w", err)
 	}
@@ -475,10 +500,11 @@ func (r *Repository) validatePlayAreaPolygon(ctx context.Context, polygon playar
 		return fmt.Errorf("validate play area polygon: %w", err)
 	}
 
+	query := `SELECT ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON(@polygon::jsonb), 4326))`
+
 	var valid bool
 
-	err := r.txManager.GetQueryEngine(ctx).QueryRow(ctx,
-		`SELECT ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON(@polygon::jsonb), 4326))`,
+	err := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query,
 		pgx.NamedArgs{"polygon": polygon}).Scan(&valid)
 	if err != nil {
 		return fmt.Errorf("validate play area topology: %w", err)
