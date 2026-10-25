@@ -34,10 +34,10 @@ func PlayAreaBodyLimit(next http.Handler) http.Handler {
 			w.Header().Set("Content-Type", "application/problem+json")
 			w.WriteHeader(http.StatusRequestEntityTooLarge)
 			_, _ = io.WriteString(w, `{
- "title": "Request Entity Too Large",
- "status": 413,
- "detail": "Play area requests must not exceed 64 KiB"
-}`)
+				"title": "Request Entity Too Large",
+				"status": 413,
+				"detail": "Play area requests must not exceed 64 KiB"
+			}`)
 
 			return
 		}

@@ -6,6 +6,9 @@ ALTER TABLE panorama_location
     ADD COLUMN geom geometry(Point, 4326)
         GENERATED ALWAYS AS (ST_SetSRID(ST_MakePoint(lng, lat), 4326)) STORED;
 
+COMMENT ON COLUMN panorama_location.geom IS
+    'Stored WGS84 point generated from lng and lat; X is longitude and Y is latitude.';
+
 CREATE INDEX panorama_location_geom_idx ON panorama_location USING GIST (geom);
 
 CREATE TABLE play_area_preset (
@@ -24,6 +27,31 @@ CREATE TABLE play_area_preset (
     CHECK (ST_IsValid(display_geom) AND NOT ST_IsEmpty(display_geom))
 );
 
+COMMENT ON TABLE play_area_preset IS
+    'Versioned country and region boundaries used to restrict round starting locations.';
+COMMENT ON COLUMN play_area_preset.id IS
+    'Stable UUID derived from the pinned source version and source feature identifier.';
+COMMENT ON COLUMN play_area_preset.name IS
+    'Display name of the country or region.';
+COMMENT ON COLUMN play_area_preset.kind IS
+    'Administrative area category: country or region.';
+COMMENT ON COLUMN play_area_preset.country_code IS
+    'Catalog country or territory code; identifies the parent country for regional presets.';
+COMMENT ON COLUMN play_area_preset.version IS
+    'Pinned boundary-source version used to preserve the meaning of existing preset references.';
+COMMENT ON COLUMN play_area_preset.source IS
+    'Pinned upstream URL identifying the boundary dataset.';
+COMMENT ON COLUMN play_area_preset.license IS
+    'Original source license retained with the boundary.';
+COMMENT ON COLUMN play_area_preset.attribution IS
+    'Source acknowledgements and copyright attribution to expose with the preset.';
+COMMENT ON COLUMN play_area_preset.providers IS
+    'Eligible panorama providers; location counts are calculated separately for each provider.';
+COMMENT ON COLUMN play_area_preset.geom IS
+    'Full-resolution WGS84 boundary used for membership, counts, and round selection; includes boundary points.';
+COMMENT ON COLUMN play_area_preset.display_geom IS
+    'Simplified, validity-repaired WGS84 outline for map display only; never used for location eligibility.';
+
 CREATE INDEX play_area_preset_geom_idx ON play_area_preset USING GIST (geom);
 CREATE INDEX play_area_preset_providers_idx ON play_area_preset USING GIN (providers);
 
@@ -32,6 +60,13 @@ CREATE TABLE play_area_preset_location (
     location_id UUID NOT NULL REFERENCES panorama_location(id) ON DELETE CASCADE,
     PRIMARY KEY (preset_id, location_id)
 );
+
+COMMENT ON TABLE play_area_preset_location IS
+    'Precomputed provider-compatible memberships, including boundary points; overlapping presets can share locations.';
+COMMENT ON COLUMN play_area_preset_location.preset_id IS
+    'Preset whose full-resolution boundary covers the location.';
+COMMENT ON COLUMN play_area_preset_location.location_id IS
+    'Stored panorama location belonging to the preset; unique within each preset.';
 
 CREATE INDEX play_area_preset_location_location_id_idx
     ON play_area_preset_location (location_id, preset_id);
@@ -48,10 +83,32 @@ CREATE TABLE saved_play_area (
     CHECK (ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON(polygon), 4326)))
 );
 
+COMMENT ON TABLE saved_play_area IS
+    'User-owned named custom polygons; applied lobby and game settings retain independent polygon snapshots.';
+COMMENT ON COLUMN saved_play_area.id IS
+    'Saved-area identifier used to apply the area or share an unlisted area by link.';
+COMMENT ON COLUMN saved_play_area.owner_id IS
+    'Owning user; only the owner may edit or delete the saved area.';
+COMMENT ON COLUMN saved_play_area.name IS
+    'Display name with a trimmed length of 1-100 characters.';
+COMMENT ON COLUMN saved_play_area.polygon IS
+    'Provider-independent GeoJSON Polygon in WGS84 [longitude, latitude] degrees; the API accepts one ring without holes.';
+COMMENT ON COLUMN saved_play_area.visibility IS
+    'Private permits owner access; unlisted also permits other authenticated users to read and use the area by ID.';
+COMMENT ON COLUMN saved_play_area.created_at IS
+    'Time the saved area was created.';
+COMMENT ON COLUMN saved_play_area.updated_at IS
+    'Time the saved area was last updated.';
+
 CREATE INDEX saved_play_area_owner_created_idx ON saved_play_area (owner_id, created_at DESC, id DESC);
 
 ALTER TABLE singleplayer_game ADD COLUMN play_area JSONB NOT NULL DEFAULT '{"type":"all"}';
 ALTER TABLE multiplayer_game ADD COLUMN play_area JSONB NOT NULL DEFAULT '{"type":"all"}';
+
+COMMENT ON COLUMN singleplayer_game.play_area IS
+    'Resolved round-start selection: all, immutable preset IDs, or a polygon snapshot; legacy games default to all.';
+COMMENT ON COLUMN multiplayer_game.play_area IS
+    'Resolved round-start selection: all, immutable preset IDs, or a polygon snapshot; legacy games default to all.';
 -- +goose StatementEnd
 
 -- +goose Down
