@@ -23,6 +23,17 @@ func (uc Usecase) NewGame(ctx context.Context, req dto.NewSingleplayerGameReques
 	var response uuid.UUID
 
 	err := uc.repo.RunTx(ctx, func(ctx context.Context) error {
+		if uc.areas == nil {
+			return errAreaServiceNotConfigured
+		}
+
+		selection, err := uc.areas.Prepare(ctx, game.PanoramaProvider(req.Provider), req.PlayArea, req.UserID, req.Rounds)
+		if err != nil {
+			return fmt.Errorf("prepare play area: %w", err)
+		}
+
+		req.PlayArea = selection
+
 		id, err := uc.repo.NewSingleplayerGame(ctx, req)
 		if err != nil {
 			return fmt.Errorf("failed to create singleplayer game: %w", err)

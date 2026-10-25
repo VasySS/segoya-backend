@@ -17,6 +17,7 @@ import (
 
 	"github.com/VasySS/segoya-backend/internal/config"
 	controller "github.com/VasySS/segoya-backend/internal/controller/http"
+	areaHTTP "github.com/VasySS/segoya-backend/internal/controller/http/v1/playarea"
 	singleplayerHTTP "github.com/VasySS/segoya-backend/internal/controller/http/v1/singleplayer"
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
@@ -68,7 +69,7 @@ func (u *gameUsecase) EndRound(
 	return dto.EndCurrentRoundResponse{Score: 321, Distance: 654}, u.failure
 }
 
-func newRouter(t *testing.T) (http.Handler, string, *gameUsecase) {
+func newRouter(t *testing.T, areas ...areaHTTP.Usecase) (http.Handler, string, *gameUsecase) {
 	t.Helper()
 
 	var cfg config.Config
@@ -87,7 +88,12 @@ func newRouter(t *testing.T) (http.Handler, string, *gameUsecase) {
 	t.Cleanup(func() { assert.NoError(t, multiplayerWS.Close()) })
 	uc := &gameUsecase{t: t}
 
-	return controller.NewRouter(cfg, nil, ts, nil, lobbyWS, multiplayerWS, nil, nil, nil, uc, nil), access, uc
+	var areaUsecase areaHTTP.Usecase
+	if len(areas) > 0 {
+		areaUsecase = areas[0]
+	}
+
+	return controller.NewRouter(cfg, nil, ts, nil, lobbyWS, multiplayerWS, nil, nil, nil, uc, nil, areaUsecase), access, uc
 }
 
 func serve(t *testing.T, router http.Handler, method, path, body, access string) *httptest.ResponseRecorder {

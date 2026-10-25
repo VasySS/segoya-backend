@@ -2,14 +2,14 @@
 
 set -e
 
-POSTGRES_COMPOSE_VERSION=$(grep 'image: postgres:' docker-compose.yaml | sed -E 's/.*postgres:([^@]+@sha256:[^ ]+).*/\1/')
-POSTGRES_TESTCONTAINERS_VERSION=$(grep 'postgres.Run' -A 5 tests/containers/postgres.go | grep '"' | head -n1 | sed -E 's/.*postgres:([^"]+)".*/\1/')
+POSTGRES_COMPOSE_VERSION=$(grep 'image: postgis/postgis:' docker-compose.yaml | sed -E 's/.*image: ([^ ]+).*/\1/')
+POSTGRES_TESTCONTAINERS_VERSION=$(grep 'postgres.Run' -A 5 tests/containers/postgres.go | grep '"postgis/postgis:' | head -n1 | sed -E 's/.*"([^"]+)".*/\1/')
 
 echo "Checking Postgres version consistency..."
 echo "docker-compose.yml version: $POSTGRES_COMPOSE_VERSION"
 echo "testcontainers-go version:  $POSTGRES_TESTCONTAINERS_VERSION"
 
-if [[ "$POSTGRES_COMPOSE_VERSION" != "$POSTGRES_TESTCONTAINERS_VERSION" ]]; then
+if [[ -z "$POSTGRES_COMPOSE_VERSION" || "$POSTGRES_COMPOSE_VERSION" != "$POSTGRES_TESTCONTAINERS_VERSION" ]]; then
   echo "::error::Mismatch between docker-compose Postgres ($POSTGRES_COMPOSE_VERSION) and testcontainers Postgres ($POSTGRES_TESTCONTAINERS_VERSION)"
   exit 1
 fi

@@ -29,6 +29,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/usecase/lobby"
 	"github.com/VasySS/segoya-backend/internal/usecase/multiplayer"
 	"github.com/VasySS/segoya-backend/internal/usecase/panorama"
+	"github.com/VasySS/segoya-backend/internal/usecase/playarea"
 	"github.com/VasySS/segoya-backend/internal/usecase/singleplayer"
 	"github.com/VasySS/segoya-backend/internal/usecase/user"
 	"github.com/VasySS/segoya-backend/pkg/crypto"
@@ -79,7 +80,7 @@ func Run(ctx context.Context, conf config.Config) error {
 		conf.HTTPClient,
 	)
 
-	lobbyWebSocketService := melody.NewWebSocketService()
+	lobbyWebSocketService := melody.NewWebSocketServiceWithLimit(64 << 10)
 	closer.AddWithError(lobbyWebSocketService.Close)
 
 	multiplayerWebSocketService := melody.NewWebSocketService()
@@ -89,9 +90,11 @@ func Run(ctx context.Context, conf config.Config) error {
 	userUsecase := user.NewUsecase(user.NewConfig(conf), pgRepo, cloudflareS3)
 
 	panoramaUsecase := panorama.NewUsecase(panorama.NewConfig(conf), pgRepo)
-	singleplayerUsecase := singleplayer.NewUsecase(singleplayer.NewConfig(conf), pgRepo, panoramaUsecase)
-	multiplayerUsecase := multiplayer.NewUsecase(multiplayer.NewConfig(conf), pgRepo, panoramaUsecase)
-	lobbyUsecase := lobby.NewUsecase(lobby.NewConfig(conf), cryptoService, pgRepo, valkeyRepo, multiplayerUsecase)
+	playAreaUsecase := playarea.NewUsecase(pgRepo)
+	singleplayerUsecase := singleplayer.NewUsecase(singleplayer.NewConfig(conf), pgRepo, panoramaUsecase, playAreaUsecase)
+	multiplayerUsecase := multiplayer.NewUsecase(multiplayer.NewConfig(conf), pgRepo, panoramaUsecase, playAreaUsecase)
+	lobbyUsecase := lobby.NewUsecase(lobby.NewConfig(conf), cryptoService, pgRepo, valkeyRepo,
+		multiplayerUsecase, playAreaUsecase)
 
 	r := httpController.NewRouter(
 		conf,
@@ -105,6 +108,7 @@ func Run(ctx context.Context, conf config.Config) error {
 		lobbyUsecase,
 		singleplayerUsecase,
 		multiplayerUsecase,
+		playAreaUsecase,
 	)
 
 	go startHTTP(closer, r)

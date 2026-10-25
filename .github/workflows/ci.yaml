@@ -74,6 +74,11 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Pull integration database images
+        run: |
+          docker pull "$(awk '/image: postgis\/postgis:/ {print $2; exit}' docker-compose.yaml)"
+          docker pull "$(awk '/image: valkey\/valkey:/ {print $2; exit}' docker-compose.yaml)"
+
       - name: Run repository and concurrency tests with race detection
         run: make test-cover-integration TEST_FLAGS=-race
 

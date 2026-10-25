@@ -143,7 +143,7 @@ func TestUsecase_NewLobby(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := lobby.NewUsecase(conf, rnd, nil, lobbyRepo, nil)
+			uc := lobby.NewUsecase(conf, rnd, nil, lobbyRepo, nil, areaUsecaseStub{})
 
 			got, err := uc.NewLobby(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
@@ -206,7 +206,7 @@ func TestUsecase_GetLobby(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil)
+			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil, areaUsecaseStub{})
 
 			got, err := uc.GetLobby(t.Context(), tt.args.id)
 			tt.wantErr(t, err)
@@ -289,7 +289,7 @@ func TestUsecase_GetLobbies(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil)
+			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil, areaUsecaseStub{})
 
 			got, total, err := uc.GetLobbies(t.Context(), tt.args.req)
 			tt.wantErr(t, err)

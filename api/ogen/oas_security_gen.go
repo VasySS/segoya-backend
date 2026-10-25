@@ -36,7 +36,10 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 
 // operationRolesBearer is a private map storing roles per operation.
 var operationRolesBearer = map[string][]string{
+	CountPlayAreaOperation:              []string{},
+	CreatePlayAreaOperation:             []string{},
 	DeleteDiscordOperation:              []string{},
+	DeletePlayAreaOperation:             []string{},
 	DeleteUserSessionOperation:          []string{},
 	DeleteYandexOperation:               []string{},
 	EndSingleplayerGameOperation:        []string{},
@@ -47,6 +50,10 @@ var operationRolesBearer = map[string][]string{
 	GetMultiplayerGameGuessesOperation:  []string{},
 	GetMultiplayerRoundOperation:        []string{},
 	GetOAuthProvidersOperation:          []string{},
+	GetPlayAreaOperation:                []string{},
+	GetPlayAreaPresetOperation:          []string{},
+	GetPlayAreaPresetsOperation:         []string{},
+	GetPlayAreasOperation:               []string{},
 	GetPrivateProfileOperation:          []string{},
 	GetPublicProfileOperation:           []string{},
 	GetSingleplayerGameOperation:        []string{},
@@ -60,6 +67,7 @@ var operationRolesBearer = map[string][]string{
 	NewSingleplayerGameOperation:        []string{},
 	NewSingleplayerRoundOperation:       []string{},
 	NewYandexOperation:                  []string{},
+	UpdatePlayAreaOperation:             []string{},
 	UpdateUserOperation:                 []string{},
 	UpdateUserAvatarOperation:           []string{},
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 // NewLobby handles the creation of a new lobby.
@@ -23,7 +24,30 @@ func (h Handler) NewLobby(
 		return &api.NewLobbyBadRequest{Title: "Invalid settings", Status: http.StatusBadRequest, Detail: err.Error()}, nil
 	}
 
+	claims, ok := h.ts.FromContext(ctx)
+	if !ok {
+		return &api.NewLobbyUnauthorized{
+			Title:  "Authentication required",
+			Status: http.StatusUnauthorized,
+			Detail: "Authentication required",
+		}, nil
+	}
+
+	if req.CreatorID != claims.UserID {
+		return &api.NewLobbyBadRequest{
+			Title:  "Invalid creator",
+			Status: http.StatusBadRequest,
+			Detail: "creatorID must match the authenticated user",
+		}, nil
+	}
+
+	selection, err := dto.PlayAreaFromAPI(req.PlayArea)
+	if err != nil {
+		return &api.NewLobbyBadRequest{Title: "Invalid play area", Status: http.StatusBadRequest, Detail: err.Error()}, nil
+	}
+
 	lobbyID, err := h.uc.NewLobby(ctx, dto.NewLobbyRequest{
+		PlayArea:        selection,
 		RequestTime:     time.Now().UTC(),
 		CreatorID:       req.CreatorID,
 		MaxPlayers:      req.MaxPlayers,
@@ -34,6 +58,18 @@ func (h Handler) NewLobby(
 		Private:         req.Private,
 	})
 	if err != nil {
+		if errors.Is(err, playarea.ErrNotFound) {
+			return &api.NewLobbyNotFound{
+				Title:  "Play area not found",
+				Status: http.StatusNotFound,
+				Detail: playarea.ErrNotFound.Error(),
+			}, nil
+		}
+
+		if playarea.IsInvalid(err) {
+			return &api.NewLobbyBadRequest{Title: "Invalid play area", Status: http.StatusBadRequest, Detail: err.Error()}, nil
+		}
+
 		slog.Error("error creating lobby", slog.Any("error", err))
 
 		return &api.NewLobbyInternalServerError{

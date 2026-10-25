@@ -7,6 +7,7 @@ import (
 
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 )
@@ -68,6 +69,7 @@ func LobbyToAPI(l lobby.Lobby) *api.Lobby {
 		CreatedAt:       l.CreatedAt,
 		Rounds:          l.Rounds,
 		Provider:        api.Provider(l.Provider),
+		PlayArea:        PlayAreaToAPI(l.PlayArea),
 		MovementAllowed: l.MovementAllowed,
 		TimerSeconds:    l.TimerSeconds,
 		CurrentPlayers:  l.CurrentPlayers,
@@ -92,6 +94,7 @@ func LobbiesToAPI(l []lobby.Lobby, total int) *api.LobbiesResponse {
 
 // NewLobbyRequest is a request to create a new lobby.
 type NewLobbyRequest struct {
+	PlayArea        playarea.Selection
 	RequestTime     time.Time
 	MaxPlayers      int
 	CreatorID       uuid.UUID
@@ -104,6 +107,7 @@ type NewLobbyRequest struct {
 
 // NewLobbyRequestDB is a request to create a new lobby in the database.
 type NewLobbyRequestDB struct {
+	PlayArea        playarea.Selection
 	Expiration      time.Duration
 	RequestTime     time.Time
 	ID              string

@@ -41,20 +41,26 @@ func (r *Repository) NewSingleplayerGame(
 	ctx, span := r.tracer.Start(ctx, "NewSingleplayerGame")
 	defer span.End()
 
+	selection, err := req.PlayArea.Normalize()
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("normalize play area: %w", err)
+	}
+
 	query := `
 		INSERT INTO singleplayer_game
-		(user_id, rounds, movement_allowed, provider, created_at, timer_seconds)
-		VALUES (@user_id, @rounds, @movement_allowed, @provider, @created_at, @timer_seconds) 
+		(user_id, rounds, movement_allowed, provider, created_at, timer_seconds, play_area)
+		VALUES (@user_id, @rounds, @movement_allowed, @provider, @created_at, @timer_seconds, @play_area)
 		RETURNING id
 	`
 
 	var gameID uuid.UUID
 
-	err := tx.QueryRow(ctx, query, pgx.NamedArgs{
+	err = tx.QueryRow(ctx, query, pgx.NamedArgs{
 		"user_id":          req.UserID.String(),
 		"rounds":           req.Rounds,
 		"movement_allowed": req.MovementAllowed,
 		"provider":         req.Provider,
+		"play_area":        selection,
 		"created_at":       req.RequestTime,
 		"timer_seconds":    req.TimerSeconds,
 	}).Scan(&gameID)
@@ -81,6 +87,7 @@ func (r *Repository) GetSingleplayerGame(ctx context.Context, gameID uuid.UUID) 
 			sg.timer_seconds,
 			sg.movement_allowed,
 			sg.provider,
+			sg.play_area,
 			COALESCE(SUM(srg.score), 0) AS score,
 			sg.finished,
 			sg.created_at,
@@ -141,6 +148,7 @@ func (r *Repository) GetSingleplayerGames(
 			sg.timer_seconds,
 			sg.movement_allowed,
 			sg.provider,
+			sg.play_area,
 			COALESCE(SUM(srg.score), 0) AS score,
 			sg.finished,
 			sg.created_at,

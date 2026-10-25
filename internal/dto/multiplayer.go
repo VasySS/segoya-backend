@@ -8,6 +8,7 @@ import (
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 )
@@ -45,6 +46,7 @@ func MultiplayerGameToAPI(g multiplayer.Game) *api.MultiplayerGame {
 		RoundCurrent:    g.RoundCurrent,
 		MovementAllowed: g.MovementAllowed,
 		Provider:        api.Provider(g.Provider),
+		PlayArea:        PlayAreaToAPI(g.PlayArea),
 		TimerSeconds:    g.TimerSeconds,
 		Players:         g.Players,
 		Finished:        g.Finished,
@@ -91,6 +93,7 @@ func MultiplayerGameGuessesToAPI(guesses []multiplayer.Guess) *api.GetMultiplaye
 
 // NewMultiplayerGameRequest is a request for a new multiplayer game.
 type NewMultiplayerGameRequest struct {
+	PlayArea         playarea.Selection
 	RequestTime      time.Time
 	CreatorID        uuid.UUID
 	ConnectedPlayers []user.PublicProfile

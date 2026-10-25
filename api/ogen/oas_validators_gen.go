@@ -42,6 +42,195 @@ func (s *BackendError) Validate() error {
 	return nil
 }
 
+func (s *CountPlayAreaBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CountPlayAreaInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CountPlayAreaNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CountPlayAreaRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Provider.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "provider",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.PlayArea.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "playArea",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *CountPlayAreaRequestEntityTooLarge) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CountPlayAreaUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CreatePlayAreaBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CreatePlayAreaInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CreatePlayAreaNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *CreatePlayAreaRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.String{
+			MinLength:     1,
+			MinLengthSet:  true,
+			MaxLength:     100,
+			MaxLengthSet:  true,
+			Email:         false,
+			Hostname:      false,
+			Regex:         nil,
+			MinNumeric:    0,
+			MinNumericSet: false,
+			MaxNumeric:    0,
+			MaxNumericSet: false,
+		}).Validate(string(s.Name)); err != nil {
+			return errors.Wrap(err, "string")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "name",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Polygon.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "polygon",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Visibility.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "visibility",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *CreatePlayAreaRequestEntityTooLarge) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s CreatePlayAreaRequestVisibility) Validate() error {
+	switch s {
+	case "private":
+		return nil
+	case "unlisted":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *CreatePlayAreaUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *DeleteDiscordInternalServerError) Validate() error {
 	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
@@ -51,6 +240,38 @@ func (s *DeleteDiscordInternalServerError) Validate() error {
 }
 
 func (s *DeleteDiscordUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeletePlayAreaBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeletePlayAreaInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeletePlayAreaNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *DeletePlayAreaUnauthorized) Validate() error {
 	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -315,6 +536,159 @@ func (s *GetOAuthProvidersUnauthorized) Validate() error {
 	return nil
 }
 
+func (s *GetPlayAreaBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaPresetBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaPresetInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaPresetNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaPresetUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaPresetsBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaPresetsInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaPresetsNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s GetPlayAreaPresetsOKApplicationJSON) Validate() error {
+	alias := ([]PlayAreaPreset)(s)
+	if alias == nil {
+		return errors.New("nil is invalid value")
+	}
+	var failures []validate.FieldError
+	for i, elem := range alias {
+		if err := func() error {
+			if err := elem.Validate(); err != nil {
+				return err
+			}
+			return nil
+		}(); err != nil {
+			failures = append(failures, validate.FieldError{
+				Name:  fmt.Sprintf("[%d]", i),
+				Error: err,
+			})
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *GetPlayAreaPresetsUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreaUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreasBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreasInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreasNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetPlayAreasUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *GetPrivateProfileInternalServerError) Validate() error {
 	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
@@ -453,6 +827,14 @@ func (s *GetSingleplayerGamesBadRequest) Validate() error {
 }
 
 func (s *GetSingleplayerGamesInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *GetSingleplayerGamesNotFound) Validate() error {
 	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -617,6 +999,24 @@ func (s *Lobby) Validate() error {
 
 	var failures []validate.FieldError
 	if err := func() error {
+		if value, ok := s.PlayArea.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "playArea",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Provider.Validate(); err != nil {
 			return err
 		}
@@ -721,6 +1121,24 @@ func (s *MultiplayerGame) Validate() error {
 	}
 
 	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.PlayArea.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "playArea",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if err := s.Provider.Validate(); err != nil {
 			return err
@@ -901,6 +1319,24 @@ func (s *NewLobby) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.PlayArea.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "playArea",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Provider.Validate(); err != nil {
 			return err
 		}
@@ -961,6 +1397,30 @@ func (s *NewLobbyInternalServerError) Validate() error {
 	return nil
 }
 
+func (s *NewLobbyNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *NewLobbyRequestEntityTooLarge) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *NewLobbyUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (s *NewMultiplayerRoundInternalServerError) Validate() error {
 	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
@@ -994,6 +1454,14 @@ func (s *NewSingleplayerGameBadRequest) Validate() error {
 }
 
 func (s *NewSingleplayerGameInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *NewSingleplayerGameNotFound) Validate() error {
 	alias := (*BackendError)(s)
 	if err := alias.Validate(); err != nil {
 		return err
@@ -1057,6 +1525,24 @@ func (s *NewSingleplayerGameRequest) Validate() error {
 		})
 	}
 	if err := func() error {
+		if value, ok := s.PlayArea.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "playArea",
+			Error: err,
+		})
+	}
+	if err := func() error {
 		if err := s.Provider.Validate(); err != nil {
 			return err
 		}
@@ -1069,6 +1555,14 @@ func (s *NewSingleplayerGameRequest) Validate() error {
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *NewSingleplayerGameRequestEntityTooLarge) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
 	}
 	return nil
 }
@@ -1143,6 +1637,429 @@ func (s *NewYandexCallbackUnauthorized) Validate() error {
 		return err
 	}
 	return nil
+}
+
+func (s *PlayAreaCount) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := (validate.Int{
+			MinSet:        true,
+			Min:           0,
+			MaxSet:        false,
+			Max:           0,
+			MinExclusive:  false,
+			MaxExclusive:  false,
+			MultipleOfSet: false,
+			MultipleOf:    0,
+			Pattern:       nil,
+		}).Validate(int64(s.LocationCount)); err != nil {
+			return errors.Wrap(err, "int")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "locationCount",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *PlayAreaPreset) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Providers == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Providers {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "providers",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Bounds == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Bounds {
+			if err := func() error {
+				if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+					return errors.Wrap(err, "float")
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "bounds",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Polygon.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "polygon",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *PlayAreaSelection) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.PresetIDs == nil {
+			return nil // optional
+		}
+		if err := (validate.Array{
+			MinLength:    1,
+			MinLengthSet: true,
+			MaxLength:    300,
+			MaxLengthSet: true,
+		}).ValidateLength(len(s.PresetIDs)); err != nil {
+			return errors.Wrap(err, "array")
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "presetIDs",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Polygon.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "polygon",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s PlayAreaSelectionType) Validate() error {
+	switch s {
+	case "all":
+		return nil
+	case "presets":
+		return nil
+	case "polygon":
+		return nil
+	case "saved":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *Polygon) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Coordinates == nil {
+			return errors.New("nil is invalid value")
+		}
+		if err := (validate.Array{
+			MinLength:    1,
+			MinLengthSet: true,
+			MaxLength:    1,
+			MaxLengthSet: true,
+		}).ValidateLength(len(s.Coordinates)); err != nil {
+			return errors.Wrap(err, "array")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Coordinates {
+			if err := func() error {
+				if elem == nil {
+					return errors.New("nil is invalid value")
+				}
+				if err := (validate.Array{
+					MinLength:    4,
+					MinLengthSet: true,
+					MaxLength:    501,
+					MaxLengthSet: true,
+				}).ValidateLength(len(elem)); err != nil {
+					return errors.Wrap(err, "array")
+				}
+				var failures []validate.FieldError
+				for i, elem := range elem {
+					if err := func() error {
+						if elem == nil {
+							return errors.New("nil is invalid value")
+						}
+						if err := (validate.Array{
+							MinLength:    2,
+							MinLengthSet: true,
+							MaxLength:    2,
+							MaxLengthSet: true,
+						}).ValidateLength(len(elem)); err != nil {
+							return errors.Wrap(err, "array")
+						}
+						var failures []validate.FieldError
+						for i, elem := range elem {
+							if err := func() error {
+								if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+									return errors.Wrap(err, "float")
+								}
+								return nil
+							}(); err != nil {
+								failures = append(failures, validate.FieldError{
+									Name:  fmt.Sprintf("[%d]", i),
+									Error: err,
+								})
+							}
+						}
+						if len(failures) > 0 {
+							return &validate.Error{Fields: failures}
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "coordinates",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s PolygonType) Validate() error {
+	switch s {
+	case "Polygon":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *PresetGeometry) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Type.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "type",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if s.Coordinates == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Coordinates {
+			if err := func() error {
+				if elem == nil {
+					return errors.New("nil is invalid value")
+				}
+				var failures []validate.FieldError
+				for i, elem := range elem {
+					if err := func() error {
+						if elem == nil {
+							return errors.New("nil is invalid value")
+						}
+						var failures []validate.FieldError
+						for i, elem := range elem {
+							if err := func() error {
+								if elem == nil {
+									return errors.New("nil is invalid value")
+								}
+								var failures []validate.FieldError
+								for i, elem := range elem {
+									if err := func() error {
+										if err := (validate.Float{}).Validate(float64(elem)); err != nil {
+											return errors.Wrap(err, "float")
+										}
+										return nil
+									}(); err != nil {
+										failures = append(failures, validate.FieldError{
+											Name:  fmt.Sprintf("[%d]", i),
+											Error: err,
+										})
+									}
+								}
+								if len(failures) > 0 {
+									return &validate.Error{Fields: failures}
+								}
+								return nil
+							}(); err != nil {
+								failures = append(failures, validate.FieldError{
+									Name:  fmt.Sprintf("[%d]", i),
+									Error: err,
+								})
+							}
+						}
+						if len(failures) > 0 {
+							return &validate.Error{Fields: failures}
+						}
+						return nil
+					}(); err != nil {
+						failures = append(failures, validate.FieldError{
+							Name:  fmt.Sprintf("[%d]", i),
+							Error: err,
+						})
+					}
+				}
+				if len(failures) > 0 {
+					return &validate.Error{Fields: failures}
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "coordinates",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s PresetGeometryType) Validate() error {
+	switch s {
+	case "MultiPolygon":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s Provider) Validate() error {
@@ -1288,12 +2205,115 @@ func (s *RegisterRequest) Validate() error {
 	return nil
 }
 
+func (s *SavedPlayArea) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if err := s.Polygon.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "polygon",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if err := s.Visibility.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "visibility",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s SavedPlayAreaVisibility) Validate() error {
+	switch s {
+	case "private":
+		return nil
+	case "unlisted":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *SavedPlayAreas) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if s.Areas == nil {
+			return errors.New("nil is invalid value")
+		}
+		var failures []validate.FieldError
+		for i, elem := range s.Areas {
+			if err := func() error {
+				if err := elem.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				failures = append(failures, validate.FieldError{
+					Name:  fmt.Sprintf("[%d]", i),
+					Error: err,
+				})
+			}
+		}
+		if len(failures) > 0 {
+			return &validate.Error{Fields: failures}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "areas",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
 func (s *SingleplayerGame) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
 
 	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.PlayArea.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "playArea",
+			Error: err,
+		})
+	}
 	if err := func() error {
 		if err := s.Provider.Validate(); err != nil {
 			return err
@@ -1467,6 +2487,135 @@ func (s *SingleplayerRoundGuess) Validate() error {
 	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *UpdatePlayAreaBadRequest) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *UpdatePlayAreaInternalServerError) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *UpdatePlayAreaNotFound) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *UpdatePlayAreaRequest) Validate() error {
+	if s == nil {
+		return validate.ErrNilPointer
+	}
+
+	var failures []validate.FieldError
+	if err := func() error {
+		if value, ok := s.Name.Get(); ok {
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:     1,
+					MinLengthSet:  true,
+					MaxLength:     100,
+					MaxLengthSet:  true,
+					Email:         false,
+					Hostname:      false,
+					Regex:         nil,
+					MinNumeric:    0,
+					MinNumericSet: false,
+					MaxNumeric:    0,
+					MaxNumericSet: false,
+				}).Validate(string(value)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "name",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Polygon.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "polygon",
+			Error: err,
+		})
+	}
+	if err := func() error {
+		if value, ok := s.Visibility.Get(); ok {
+			if err := func() error {
+				if err := value.Validate(); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "visibility",
+			Error: err,
+		})
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+	return nil
+}
+
+func (s *UpdatePlayAreaRequestEntityTooLarge) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s UpdatePlayAreaRequestVisibility) Validate() error {
+	switch s {
+	case "private":
+		return nil
+	case "unlisted":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
+}
+
+func (s *UpdatePlayAreaUnauthorized) Validate() error {
+	alias := (*BackendError)(s)
+	if err := alias.Validate(); err != nil {
+		return err
 	}
 	return nil
 }

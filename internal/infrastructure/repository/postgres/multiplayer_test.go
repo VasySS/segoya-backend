@@ -12,6 +12,7 @@ import (
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
@@ -22,6 +23,22 @@ func TestMultiplayerTestSuite(t *testing.T) {
 }
 
 type MultiplayerTestSuite struct{ postgresTestSuite }
+
+func (s *MultiplayerTestSuite) TestMultiplayerPlayAreaRoundTrip() {
+	owner, second := s.newTestUser(), s.newTestUser()
+	selection := playarea.Selection{Type: "polygon", Polygon: &playarea.Polygon{
+		Type: "Polygon", Coordinates: [][][]float64{{{10, 20}, {11, 20}, {11, 21}, {10, 20}}},
+	}}
+	id, err := s.postgresRepo.NewMultiplayerGame(s.ctx, dto.NewMultiplayerGameRequest{
+		CreatorID: owner.ID, Provider: "google", Rounds: 3, RequestTime: fixtureTime(), PlayArea: selection,
+		ConnectedPlayers: []user.PublicProfile{owner.PublicProfile, second.PublicProfile},
+	})
+	s.Require().NoError(err)
+
+	got, err := s.postgresRepo.GetMultiplayerGame(s.ctx, id)
+	s.Require().NoError(err)
+	s.Equal(selection, got.PlayArea)
+}
 
 func (s *MultiplayerTestSuite) TestNewMultiplayerGame() {
 	ctx := s.ctx
@@ -47,6 +64,7 @@ func (s *MultiplayerTestSuite) TestNewMultiplayerGame() {
 	s.Equal(gameReq.MovementAllowed, newGame.MovementAllowed)
 	s.Equal(len(gameReq.ConnectedPlayers), newGame.Players)
 	s.Equal(gameReq.RequestTime, newGame.CreatedAt)
+	s.Equal(playarea.Selection{Type: "all"}, newGame.PlayArea)
 }
 
 func (s *MultiplayerTestSuite) TestMultiplayerGameByID() {

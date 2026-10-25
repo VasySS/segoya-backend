@@ -21,6 +21,8 @@ security:
   - Bearer: []
 
 tags:
+  - name: play-areas
+    description: Predefined areas, custom polygon counts, and saved areas.
   - name: auth
     description: Authentication and authorization.
   - name: general
@@ -35,6 +37,16 @@ tags:
     description: User profile management.
 
 paths:
+  /v1/play-areas/presets:
+    $ref: "paths/play-areas.yaml#/Presets"
+  /v1/play-areas/presets/{id}:
+    $ref: "paths/play-areas.yaml#/Preset"
+  /v1/play-areas/count:
+    $ref: "paths/play-areas.yaml#/Count"
+  /v1/play-areas:
+    $ref: "paths/play-areas.yaml#/Collection"
+  /v1/play-areas/{id}:
+    $ref: "paths/play-areas.yaml#/Item"
   /:
     get:
       operationId: getRoot

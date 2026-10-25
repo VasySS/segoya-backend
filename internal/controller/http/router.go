@@ -16,6 +16,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/controller/http/v1/auth"
 	"github.com/VasySS/segoya-backend/internal/controller/http/v1/lobby"
 	"github.com/VasySS/segoya-backend/internal/controller/http/v1/multiplayer"
+	"github.com/VasySS/segoya-backend/internal/controller/http/v1/playarea"
 	"github.com/VasySS/segoya-backend/internal/controller/http/v1/singleplayer"
 	"github.com/VasySS/segoya-backend/internal/controller/http/v1/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/token"
@@ -30,6 +31,7 @@ type APIHandler struct {
 	api.LobbiesHandler
 	api.SingleplayerHandler
 	api.MultiplayerHandler
+	api.PlayAreasHandler
 }
 
 func newAPIHandler(
@@ -38,6 +40,7 @@ func newAPIHandler(
 	lh api.LobbiesHandler,
 	sh api.SingleplayerHandler,
 	mh api.MultiplayerHandler,
+	ph api.PlayAreasHandler,
 ) *APIHandler {
 	return &APIHandler{
 		UsersHandler:        uh,
@@ -45,6 +48,7 @@ func newAPIHandler(
 		LobbiesHandler:      lh,
 		SingleplayerHandler: sh,
 		MultiplayerHandler:  mh,
+		PlayAreasHandler:    ph,
 	}
 }
 
@@ -71,6 +75,7 @@ func NewRouter(
 	lobbyUsecase lobby.Usecase,
 	singleplayerUsecase singleplayer.Usecase,
 	multiplayerUsecase multiplayer.Usecase,
+	playAreaUsecase playarea.Usecase,
 ) http.Handler {
 	mux := chi.NewMux()
 
@@ -82,6 +87,7 @@ func NewRouter(
 		chiMiddleware.CleanPath,
 		chiMiddleware.StripSlashes,
 		middleware.Compress,
+		middleware.PlayAreaBodyLimit,
 	)
 
 	uh := user.NewHandler(user.NewConfig(conf), userUsecase, tokenService)
@@ -89,11 +95,12 @@ func NewRouter(
 	lh := lobby.NewHandler(lobby.NewConfig(conf), lobbyUsecase, tokenService, lobbyWSService)
 	sh := singleplayer.NewHandler(singleplayer.NewConfig(conf), singleplayerUsecase, tokenService)
 	mh := multiplayer.NewHandler(multiplayer.NewConfig(conf), multiplayerUsecase, tokenService, multiplayerWSService)
+	ph := playarea.NewHandler(playAreaUsecase, tokenService)
 
 	authMW := middleware.NewAuth(tokenService)
 
 	ogenServer, err := api.NewServer(
-		newAPIHandler(uh, ah, lh, sh, mh),
+		newAPIHandler(uh, ah, lh, sh, mh, ph),
 		authMW,
 		api.WithErrorHandler(middleware.ErrorHandler),
 		api.WithMiddleware(middleware.OpenTelemetry{}.Middleware),

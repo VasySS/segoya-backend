@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
 )
 
@@ -23,9 +24,19 @@ func (uc Usecase) NewLobby(ctx context.Context, req dto.NewLobbyRequest) (string
 		return "", fmt.Errorf("validate game settings and state: %w", err)
 	}
 
+	if uc.areas == nil {
+		return "", errAreaServiceNotConfigured
+	}
+
+	selection, err := uc.areas.Resolve(ctx, game.PanoramaProvider(req.Provider), req.PlayArea, req.CreatorID)
+	if err != nil {
+		return "", fmt.Errorf("resolve play area: %w", err)
+	}
+
 	id := uc.rnd.NewRandomHexString(uc.conf.LobbyIDLength)
 
 	dbReq := dto.NewLobbyRequestDB{
+		PlayArea:        selection,
 		Expiration:      uc.conf.LobbyExpiration,
 		ID:              id,
 		RequestTime:     req.RequestTime,

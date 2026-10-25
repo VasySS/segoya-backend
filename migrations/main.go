@@ -3,10 +3,13 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -38,6 +41,9 @@ Commands:
 	up-to VERSION       Migrate the DB to a specific VERSION
 	up-with-data        Migrate the DB to the most recent version available and apply data migrations
 	data-only           Run only data migrations
+	play-areas-verify              Validate the bundled boundary catalog (no DB required)
+	play-areas-import              Import bundled boundaries and backfill memberships
+	play-areas-backfill            Backfill memberships without reimporting panorama CSVs
 	down                Roll back the version by 1
 	down-to VERSION     Roll back to the specified VERSION
 	version             Print the current version
@@ -46,15 +52,20 @@ Commands:
 )
 
 const (
-	upFlag         = "up"
-	upToFlag       = "up-to"
-	upWithDataFlag = "up-with-data"
-	dataOnlyFlag   = "data-only"
-	downFlag       = "down"
-	downToFlag     = "down-to"
-	versionFlag    = "version"
-	statusFlag     = "status"
+	upFlag                = "up"
+	upToFlag              = "up-to"
+	upWithDataFlag        = "up-with-data"
+	dataOnlyFlag          = "data-only"
+	downFlag              = "down"
+	downToFlag            = "down-to"
+	versionFlag           = "version"
+	statusFlag            = "status"
+	playAreasVerifyFlag   = "play-areas-verify"
+	playAreasImportFlag   = "play-areas-import"
+	playAreasBackfillFlag = "play-areas-backfill"
 )
+
+var errInvalidMigrationCommand = errors.New("invalid migration command")
 
 func flagsUsage() {
 	fmt.Println(flagUsagePrefix) //nolint:forbidigo
@@ -63,12 +74,28 @@ func flagsUsage() {
 }
 
 func main() {
-	ctx := context.Background()
+	if err := run(); err != nil {
+		slog.Error("migration failed", slog.Any("error", err))
+		os.Exit(1)
+	}
+}
+
+//nolint:cyclop // Keep command dispatch and sequential migration stages explicit.
+func run() error {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	command, commandArgs, err := parseEnvAndCommand()
 	if err != nil {
-		slog.Error("failed to parse env and command", slog.Any("error", err))
-		return
+		return err
+	}
+
+	if command == "" {
+		return nil
+	}
+
+	if command == playAreasVerifyFlag {
+		return migrationResult("verify play area sources", dataMigrations.VerifyPlayAreaSources(ctx))
 	}
 
 	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s",
@@ -80,14 +107,20 @@ func main() {
 
 	pool, err := pgxpool.New(ctx, connStr)
 	if err != nil {
-		slog.Error("unable to connect to database", slog.Any("error", err))
-		return
+		return fmt.Errorf("connect to database: %w", err)
 	}
 	defer pool.Close()
 
 	if err := pool.Ping(ctx); err != nil {
-		slog.Error("unable to ping database", slog.Any("error", err))
-		return
+		return fmt.Errorf("ping database: %w", err)
+	}
+
+	if command == playAreasImportFlag {
+		return migrationResult("import play areas", dataMigrations.ImportPlayAreas(ctx, pool))
+	}
+
+	if command == playAreasBackfillFlag {
+		return migrationResult("backfill play areas", dataMigrations.RefreshPlayAreaMemberships(ctx, pool))
 	}
 
 	if command != dataOnlyFlag {
@@ -99,8 +132,7 @@ func main() {
 		}
 
 		if err := tables.RunGooseMigrations(ctx, pool, gooseCommand, commandArgs...); err != nil {
-			slog.Error("unable to migrate data", slog.Any("error", err))
-			return
+			return fmt.Errorf("migrate tables: %w", err)
 		}
 	}
 
@@ -108,10 +140,11 @@ func main() {
 		slog.Info("adding data to the tables")
 
 		if err := dataMigrations.MigrateAllCSVData(ctx, pool); err != nil {
-			slog.Error("unable to migrate data", slog.Any("error", err))
-			return
+			return fmt.Errorf("import panorama locations: %w", err)
 		}
 	}
+
+	return nil
 }
 
 func parseEnvAndCommand() (string, []string, error) {
@@ -127,7 +160,16 @@ func parseEnvAndCommand() (string, []string, error) {
 	}
 
 	command := flagArgs[0]
+
 	commandArgs := flagArgs[1:]
+
+	if err := validateCommand(command, commandArgs); err != nil {
+		return "", nil, err
+	}
+
+	if command == playAreasVerifyFlag {
+		return command, commandArgs, nil
+	}
 
 	if err := cleanenv.ReadConfig(".env", &parsedENV); err != nil {
 		slog.Info("failed to read .env, using environment variables")
@@ -139,4 +181,31 @@ func parseEnvAndCommand() (string, []string, error) {
 	}
 
 	return command, commandArgs, nil
+}
+
+func validateCommand(command string, args []string) error {
+	wantArguments := 0
+
+	switch command {
+	case upFlag, upWithDataFlag, dataOnlyFlag, downFlag, versionFlag, statusFlag,
+		playAreasBackfillFlag, playAreasVerifyFlag, playAreasImportFlag:
+	case upToFlag, downToFlag:
+		wantArguments = 1
+	default:
+		return fmt.Errorf("%w: unknown migration command %q", errInvalidMigrationCommand, command)
+	}
+
+	if len(args) != wantArguments {
+		return fmt.Errorf("%w: command %s requires %d arguments", errInvalidMigrationCommand, command, wantArguments)
+	}
+
+	return nil
+}
+
+func migrationResult(action string, err error) error {
+	if err != nil {
+		return fmt.Errorf("%s: %w", action, err)
+	}
+
+	return nil
 }

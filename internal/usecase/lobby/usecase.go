@@ -5,6 +5,7 @@ package lobby
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,7 +13,9 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
@@ -52,6 +55,18 @@ type RandomGenerator interface {
 	NewRandomHexString(length int) string
 }
 
+var errAreaServiceNotConfigured = errors.New("play area service is not configured")
+
+// AreaUsecase resolves saved areas into immutable lobby snapshots.
+type AreaUsecase interface {
+	Resolve(
+		ctx context.Context,
+		provider game.PanoramaProvider,
+		selection playarea.Selection,
+		userID uuid.UUID,
+	) (playarea.Selection, error)
+}
+
 // Usecase contains lobby management business logic and its dependencies.
 type Usecase struct {
 	conf      Config
@@ -59,6 +74,7 @@ type Usecase struct {
 	lobbyRepo Repository
 	userRepo  UserRepository
 	mult      MultiplayerUsecase
+	areas     AreaUsecase
 	tracer    trace.Tracer
 }
 
@@ -79,8 +95,15 @@ func NewUsecase(
 	userRepo UserRepository,
 	lobbyRepo Repository,
 	mult MultiplayerUsecase,
+	areas ...AreaUsecase,
 ) *Usecase {
+	var areaUsecase AreaUsecase
+	if len(areas) > 0 {
+		areaUsecase = areas[0]
+	}
+
 	return &Usecase{
+		areas:     areaUsecase,
 		conf:      conf,
 		rnd:       rnd,
 		lobbyRepo: lobbyRepo,

@@ -13,12 +13,40 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
+// CountPlayArea implements countPlayArea operation.
+//
+// Exact provider-specific count including the boundary; zero matches is a successful response. Maximum
+// body size is 64 KiB; query deadline is three seconds.
+//
+// POST /v1/play-areas/count
+func (UnimplementedHandler) CountPlayArea(ctx context.Context, req *CountPlayAreaRequest) (r CountPlayAreaRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreatePlayArea implements createPlayArea operation.
+//
+// Save a named custom polygon.
+//
+// POST /v1/play-areas
+func (UnimplementedHandler) CreatePlayArea(ctx context.Context, req *CreatePlayAreaRequest) (r CreatePlayAreaRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteDiscord implements deleteDiscord operation.
 //
 // Delete login with Discord OAuth.
 //
 // DELETE /v1/auth/discord
 func (UnimplementedHandler) DeleteDiscord(ctx context.Context) (r DeleteDiscordRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DeletePlayArea implements deletePlayArea operation.
+//
+// Delete an area you own.
+//
+// DELETE /v1/play-areas/{id}
+func (UnimplementedHandler) DeletePlayArea(ctx context.Context, params DeletePlayAreaParams) (r DeletePlayAreaRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -136,6 +164,42 @@ func (UnimplementedHandler) GetMultiplayerRound(ctx context.Context, params GetM
 //
 // GET /v1/auth/providers
 func (UnimplementedHandler) GetOAuthProviders(ctx context.Context) (r GetOAuthProvidersRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetPlayArea implements getPlayArea operation.
+//
+// Read your area or an unlisted area shared by ID.
+//
+// GET /v1/play-areas/{id}
+func (UnimplementedHandler) GetPlayArea(ctx context.Context, params GetPlayAreaParams) (r GetPlayAreaRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetPlayAreaPreset implements getPlayAreaPreset operation.
+//
+// Get an immutable preset boundary and attribution.
+//
+// GET /v1/play-areas/presets/{id}
+func (UnimplementedHandler) GetPlayAreaPreset(ctx context.Context, params GetPlayAreaPresetParams) (r GetPlayAreaPresetRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetPlayAreaPresets implements getPlayAreaPresets operation.
+//
+// List provider-specific predefined areas.
+//
+// GET /v1/play-areas/presets
+func (UnimplementedHandler) GetPlayAreaPresets(ctx context.Context, params GetPlayAreaPresetsParams) (r GetPlayAreaPresetsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetPlayAreas implements getPlayAreas operation.
+//
+// List your saved custom areas.
+//
+// GET /v1/play-areas
+func (UnimplementedHandler) GetPlayAreas(ctx context.Context, params GetPlayAreasParams) (r GetPlayAreasRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -307,6 +371,15 @@ func (UnimplementedHandler) RefreshTokens(ctx context.Context, req *RefreshToken
 //
 // POST /v1/auth/register
 func (UnimplementedHandler) Register(ctx context.Context, req *RegisterRequest, params RegisterParams) (r RegisterRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// UpdatePlayArea implements updatePlayArea operation.
+//
+// Edit an area you own.
+//
+// PATCH /v1/play-areas/{id}
+func (UnimplementedHandler) UpdatePlayArea(ctx context.Context, req *UpdatePlayAreaRequest, params UpdatePlayAreaParams) (r UpdatePlayAreaRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

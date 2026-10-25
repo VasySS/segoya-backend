@@ -41,7 +41,13 @@ post:
                 type: string
             required:
               - id
+    "401":
+      $ref: "../../components/responses.yaml#/Unauthorized"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
+    "413":
+      $ref: "../../components/responses.yaml#/PayloadTooLarge"
     "500":
       $ref: "../../components/responses.yaml#/ServerError"

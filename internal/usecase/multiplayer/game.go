@@ -28,6 +28,17 @@ func (uc Usecase) NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest
 	var response uuid.UUID
 
 	err := uc.repo.RunTx(ctx, func(ctx context.Context) error {
+		if uc.areas == nil {
+			return errAreaServiceNotConfigured
+		}
+
+		selection, err := uc.areas.Prepare(ctx, game.PanoramaProvider(req.Provider), req.PlayArea, req.CreatorID, req.Rounds)
+		if err != nil {
+			return fmt.Errorf("prepare play area: %w", err)
+		}
+
+		req.PlayArea = selection
+
 		gID, err := uc.repo.NewMultiplayerGame(ctx, req)
 		if err != nil {
 			return fmt.Errorf("error creating multiplayer game: %w", err)

@@ -9,12 +9,20 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 // Repository provides access to panorama metadata.
 //
 //go:generate go tool mockery --name=Repository
 type Repository interface {
+	RandomPlayAreaLocation(
+		ctx context.Context,
+		provider game.PanoramaProvider,
+		area playarea.Selection,
+		gameID uuid.UUID,
+		multiplayer bool,
+	) (game.PanoramaMetadata, error)
 	GetGoogleStreetview(ctx context.Context, id uuid.UUID) (game.GoogleStreetview, error)
 	GetSeznamStreetview(ctx context.Context, id uuid.UUID) (game.SeznamStreetview, error)
 	GetYandexStreetview(ctx context.Context, id uuid.UUID) (game.YandexStreetview, error)

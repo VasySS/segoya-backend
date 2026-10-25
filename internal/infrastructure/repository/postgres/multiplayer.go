@@ -41,12 +41,18 @@ func (r *Repository) NewMultiplayerGame(
 	ctx, span := r.tracer.Start(ctx, "NewMultiplayerGame")
 	defer span.End()
 
+	selection, err := req.PlayArea.Normalize()
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("normalize play area: %w", err)
+	}
+
 	query := `
         WITH 
 		new_game AS (
             INSERT INTO multiplayer_game
-                (created_at, creator_id, rounds, movement_allowed, provider, timer_seconds, players)
-            VALUES (@created_at, @creator_id, @rounds, @movement_allowed, @provider, @timer_seconds, @players)
+                (created_at, creator_id, rounds, movement_allowed, provider, timer_seconds, players, play_area)
+            VALUES (@created_at, @creator_id, @rounds, @movement_allowed,
+                @provider, @timer_seconds, @players, @play_area)
             RETURNING id
         ),
 		inserted_users AS (
@@ -65,12 +71,13 @@ func (r *Repository) NewMultiplayerGame(
 
 	var gameID uuid.UUID
 
-	err := pgxscan.Get(ctx, tx, &gameID, query, pgx.NamedArgs{
+	err = pgxscan.Get(ctx, tx, &gameID, query, pgx.NamedArgs{
 		"created_at":       req.RequestTime,
 		"creator_id":       req.CreatorID.String(),
 		"rounds":           req.Rounds,
 		"movement_allowed": req.MovementAllowed,
 		"provider":         req.Provider,
+		"play_area":        selection,
 		"timer_seconds":    req.TimerSeconds,
 		"players":          len(req.ConnectedPlayers),
 		"user_ids":         userIDs.Strings(),
@@ -97,6 +104,7 @@ func (r *Repository) GetMultiplayerGame(ctx context.Context, gameID uuid.UUID) (
 			COUNT(mr.id) AS round_current,
 			mg.movement_allowed,
 			mg.provider,
+			mg.play_area,
 			mg.timer_seconds,
 			mg.players,
 			mg.finished,

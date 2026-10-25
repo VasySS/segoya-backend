@@ -1,0 +1,205 @@
+Presets:
+  get:
+    operationId: getPlayAreaPresets
+    summary: List provider-specific predefined areas
+    tags: [play-areas]
+    x-ogen-operation-group: PlayAreas
+    parameters:
+      - name: provider
+        in: query
+        required: true
+        schema:
+          $ref: '../components/schemas/panorama.yaml#/Provider'
+    responses:
+      '200':
+        description: Predefined areas with exact location counts, without geometry.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../components/schemas/playarea.yaml#/PlayAreaPreset'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/ServerError'
+
+Preset:
+  get:
+    operationId: getPlayAreaPreset
+    summary: Get an immutable preset boundary and attribution
+    tags: [play-areas]
+    x-ogen-operation-group: PlayAreas
+    parameters:
+      - $ref: '../components/parameters.yaml#/idUUID'
+    responses:
+      '200':
+        description: Preset with simplified display geometry.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/playarea.yaml#/PlayAreaPreset'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/ServerError'
+
+Count:
+  post:
+    operationId: countPlayArea
+    summary: Count stored locations in a play area
+    description: Exact provider-specific count including the boundary; zero matches is a successful response. Maximum body size is 64 KiB; query deadline is three seconds.
+    tags: [play-areas]
+    x-ogen-operation-group: PlayAreas
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/playarea.yaml#/CountPlayAreaRequest'
+    responses:
+      '200':
+        description: Count without candidate location coordinates.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/playarea.yaml#/PlayAreaCount'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '500':
+        $ref: '../components/responses.yaml#/ServerError'
+
+Collection:
+  get:
+    operationId: getPlayAreas
+    summary: List your saved custom areas
+    tags: [play-areas]
+    x-ogen-operation-group: PlayAreas
+    parameters:
+      - $ref: '../components/parameters.yaml#/pageQuery'
+      - $ref: '../components/parameters.yaml#/pageSizeQuery'
+    responses:
+      '200':
+        description: Saved areas belonging to the authenticated user.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/playarea.yaml#/SavedPlayAreas'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/ServerError'
+  post:
+    operationId: createPlayArea
+    summary: Save a named custom polygon
+    tags: [play-areas]
+    x-ogen-operation-group: PlayAreas
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/playarea.yaml#/CreatePlayAreaRequest'
+    responses:
+      '201':
+        description: Saved custom area, private unless explicitly shared.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/playarea.yaml#/SavedPlayArea'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '500':
+        $ref: '../components/responses.yaml#/ServerError'
+
+Item:
+  parameters:
+    - $ref: '../components/parameters.yaml#/idUUID'
+  get:
+    operationId: getPlayArea
+    summary: Read your area or an unlisted area shared by ID
+    tags: [play-areas]
+    x-ogen-operation-group: PlayAreas
+    responses:
+      '200':
+        description: An accessible custom area.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/playarea.yaml#/SavedPlayArea'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/ServerError'
+  patch:
+    operationId: updatePlayArea
+    summary: Edit an area you own
+    tags: [play-areas]
+    x-ogen-operation-group: PlayAreas
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/playarea.yaml#/UpdatePlayAreaRequest'
+    responses:
+      '200':
+        description: Updated saved area. Existing game/lobby snapshots are unaffected.
+        content:
+          application/json:
+            schema:
+              $ref: '../components/schemas/playarea.yaml#/SavedPlayArea'
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '413':
+        $ref: '../components/responses.yaml#/PayloadTooLarge'
+      '500':
+        $ref: '../components/responses.yaml#/ServerError'
+  delete:
+    operationId: deletePlayArea
+    summary: Delete an area you own
+    tags: [play-areas]
+    x-ogen-operation-group: PlayAreas
+    responses:
+      '204':
+        description: Deleted. Existing game/lobby snapshots are unaffected.
+      '400':
+        $ref: '../components/responses.yaml#/BadRequest'
+      '401':
+        $ref: '../components/responses.yaml#/Unauthorized'
+      '404':
+        $ref: '../components/responses.yaml#/NotFound'
+      '500':
+        $ref: '../components/responses.yaml#/ServerError'

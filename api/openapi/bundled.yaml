@@ -17,6 +17,8 @@ servers:
 security:
   - Bearer: []
 tags:
+  - name: play-areas
+    description: Predefined areas, custom polygon counts, and saved areas.
   - name: auth
     description: Authentication and authorization.
   - name: general
@@ -30,6 +32,215 @@ tags:
   - name: users
     description: User profile management.
 paths:
+  /v1/play-areas/presets:
+    get:
+      operationId: getPlayAreaPresets
+      summary: List provider-specific predefined areas
+      tags:
+        - play-areas
+      x-ogen-operation-group: PlayAreas
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Provider'
+      responses:
+        '200':
+          description: Predefined areas with exact location counts, without geometry.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlayAreaPreset'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /v1/play-areas/presets/{id}:
+    get:
+      operationId: getPlayAreaPreset
+      summary: Get an immutable preset boundary and attribution
+      tags:
+        - play-areas
+      x-ogen-operation-group: PlayAreas
+      parameters:
+        - $ref: '#/components/parameters/idUUID'
+      responses:
+        '200':
+          description: Preset with simplified display geometry.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayAreaPreset'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /v1/play-areas/count:
+    post:
+      operationId: countPlayArea
+      summary: Count stored locations in a play area
+      description: Exact provider-specific count including the boundary; zero matches is a successful response. Maximum body size is 64 KiB; query deadline is three seconds.
+      tags:
+        - play-areas
+      x-ogen-operation-group: PlayAreas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CountPlayAreaRequest'
+      responses:
+        '200':
+          description: Count without candidate location coordinates.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayAreaCount'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /v1/play-areas:
+    get:
+      operationId: getPlayAreas
+      summary: List your saved custom areas
+      tags:
+        - play-areas
+      x-ogen-operation-group: PlayAreas
+      parameters:
+        - $ref: '#/components/parameters/pageQuery'
+        - $ref: '#/components/parameters/pageSizeQuery'
+      responses:
+        '200':
+          description: Saved areas belonging to the authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedPlayAreas'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      operationId: createPlayArea
+      summary: Save a named custom polygon
+      tags:
+        - play-areas
+      x-ogen-operation-group: PlayAreas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePlayAreaRequest'
+      responses:
+        '201':
+          description: Saved custom area, private unless explicitly shared.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedPlayArea'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /v1/play-areas/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idUUID'
+    get:
+      operationId: getPlayArea
+      summary: Read your area or an unlisted area shared by ID
+      tags:
+        - play-areas
+      x-ogen-operation-group: PlayAreas
+      responses:
+        '200':
+          description: An accessible custom area.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedPlayArea'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    patch:
+      operationId: updatePlayArea
+      summary: Edit an area you own
+      tags:
+        - play-areas
+      x-ogen-operation-group: PlayAreas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePlayAreaRequest'
+      responses:
+        '200':
+          description: Updated saved area. Existing game/lobby snapshots are unaffected.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedPlayArea'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    delete:
+      operationId: deletePlayArea
+      summary: Delete an area you own
+      tags:
+        - play-areas
+      x-ogen-operation-group: PlayAreas
+      responses:
+        '204':
+          description: Deleted. Existing game/lobby snapshots are unaffected.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
   /:
     get:
       operationId: getRoot
@@ -672,6 +883,12 @@ paths:
                   - id
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
         '500':
           $ref: '#/components/responses/ServerError'
   /v1/lobbies/{id}:
@@ -717,6 +934,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
     post:
@@ -749,6 +968,10 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
         '500':
           $ref: '#/components/responses/ServerError'
   /v1/singleplayer/{id}:
@@ -1018,6 +1241,249 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    Provider:
+      type: string
+      enum:
+        - google
+        - yandex
+        - yandex_air
+        - seznam
+    PresetGeometry:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiPolygon
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                type: array
+                items:
+                  type: number
+                  format: double
+      required:
+        - type
+        - coordinates
+    PlayAreaPreset:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        kind:
+          type: string
+        countryCode:
+          type: string
+        version:
+          type: string
+        source:
+          type: string
+        license:
+          type: string
+        attribution:
+          type: string
+        providers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Provider'
+        bounds:
+          description: West, south, east, north; display bounds in degrees.
+          type: array
+          items:
+            type: number
+            format: double
+        polygon:
+          $ref: '#/components/schemas/PresetGeometry'
+        locationCount:
+          description: Count for the requested provider in the preset list. Provider-independent detail responses omit this field.
+          type: integer
+      required:
+        - id
+        - name
+        - kind
+        - countryCode
+        - version
+        - source
+        - license
+        - attribution
+        - providers
+        - bounds
+    BackendError:
+      title: Error Object
+      description: An RFC 7807/RFC 9457 application/problem+json object
+      type: object
+      properties:
+        title:
+          type: string
+          description: A short, human-readable summary of the problem type.
+        status:
+          type: integer
+          description: The HTTP status code generated by the origin server for this occurrence of the problem.
+          minimum: 100
+          maximum: 599
+        detail:
+          type: string
+          description: A human-readable explanation specific to this occurrence of the problem.
+      required:
+        - title
+        - status
+        - detail
+    Polygon:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          enum:
+            - Polygon
+        coordinates:
+          description: One closed ring, 3-500 distinct vertices; each coordinate is [longitude, latitude]. Holes and antimeridian crossings are unsupported.
+          type: array
+          minItems: 1
+          maxItems: 1
+          items:
+            type: array
+            minItems: 4
+            maxItems: 501
+            items:
+              type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                type: number
+                format: double
+      required:
+        - type
+        - coordinates
+    PlayAreaSelection:
+      description: Tagged union validated by the backend. all has no other fields; presets requires only presetIDs; polygon requires only polygon; saved requires only savedID. Omitted settings select all. Applied saved selections return a polygon snapshot.
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: string
+          enum:
+            - all
+            - presets
+            - polygon
+            - saved
+        presetIDs:
+          type: array
+          minItems: 1
+          maxItems: 300
+          items:
+            type: string
+            format: uuid
+        polygon:
+          $ref: '#/components/schemas/Polygon'
+        savedID:
+          type: string
+          format: uuid
+      required:
+        - type
+    CountPlayAreaRequest:
+      type: object
+      properties:
+        provider:
+          $ref: '#/components/schemas/Provider'
+        playArea:
+          $ref: '#/components/schemas/PlayAreaSelection'
+      required:
+        - provider
+        - playArea
+    PlayAreaCount:
+      type: object
+      properties:
+        locationCount:
+          type: integer
+          minimum: 0
+      required:
+        - locationCount
+    SavedPlayArea:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        ownerID:
+          type: string
+          format: uuid
+        name:
+          type: string
+        polygon:
+          $ref: '#/components/schemas/Polygon'
+        visibility:
+          type: string
+          enum:
+            - private
+            - unlisted
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - ownerID
+        - name
+        - polygon
+        - visibility
+        - createdAt
+        - updatedAt
+    SavedPlayAreas:
+      type: object
+      properties:
+        total:
+          type: integer
+        areas:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedPlayArea'
+      required:
+        - total
+        - areas
+    CreatePlayAreaRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        polygon:
+          $ref: '#/components/schemas/Polygon'
+        visibility:
+          type: string
+          enum:
+            - private
+            - unlisted
+          default: private
+      required:
+        - name
+        - polygon
+    UpdatePlayAreaRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        polygon:
+          $ref: '#/components/schemas/Polygon'
+        visibility:
+          type: string
+          enum:
+            - private
+            - unlisted
     UserPrivateProfile:
       type: object
       properties:
@@ -1045,26 +1511,6 @@ components:
         - registerDate
         - yandexConnected
         - discordConnected
-    BackendError:
-      title: Error Object
-      description: An RFC 7807/RFC 9457 application/problem+json object
-      type: object
-      properties:
-        title:
-          type: string
-          description: A short, human-readable summary of the problem type.
-        status:
-          type: integer
-          description: The HTTP status code generated by the origin server for this occurrence of the problem.
-          minimum: 100
-          maximum: 599
-        detail:
-          type: string
-          description: A human-readable explanation specific to this occurrence of the problem.
-      required:
-        - title
-        - status
-        - detail
     UserUpdateRequest:
       type: object
       properties:
@@ -1158,13 +1604,6 @@ components:
       required:
         - provider
         - createdAt
-    Provider:
-      type: string
-      enum:
-        - google
-        - yandex
-        - yandex_air
-        - seznam
     Lobby:
       type: object
       properties:
@@ -1178,6 +1617,8 @@ components:
           format: date-time
         rounds:
           type: integer
+        playArea:
+          $ref: '#/components/schemas/PlayAreaSelection'
         provider:
           $ref: '#/components/schemas/Provider'
         movementAllowed:
@@ -1227,6 +1668,8 @@ components:
           type: integer
           minimum: 1
           maximum: 10
+        playArea:
+          $ref: '#/components/schemas/PlayAreaSelection'
         provider:
           $ref: '#/components/schemas/Provider'
         timerSeconds:
@@ -1267,6 +1710,8 @@ components:
           type: integer
         movementAllowed:
           type: boolean
+        playArea:
+          $ref: '#/components/schemas/PlayAreaSelection'
         provider:
           $ref: '#/components/schemas/Provider'
         score:
@@ -1318,6 +1763,8 @@ components:
                 maximum: 9
         movementAllowed:
           type: boolean
+        playArea:
+          $ref: '#/components/schemas/PlayAreaSelection'
         provider:
           $ref: '#/components/schemas/Provider'
       required:
@@ -1440,6 +1887,8 @@ components:
           type: boolean
         players:
           type: integer
+        playArea:
+          $ref: '#/components/schemas/PlayAreaSelection'
         provider:
           $ref: '#/components/schemas/Provider'
         finished:
@@ -1529,14 +1978,14 @@ components:
         - startedAt
         - endedAt
   responses:
-    Unauthorized:
-      description: An unauthorized request error response.
+    BadRequest:
+      description: A bad request error response.
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/BackendError'
-    ServerError:
-      description: An internal server error response.
+    Unauthorized:
+      description: An unauthorized request error response.
       content:
         application/problem+json:
           schema:
@@ -1547,14 +1996,20 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/BackendError'
-    RateLimited:
-      description: A too many requests error response.
+    ServerError:
+      description: An internal server error response.
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/BackendError'
-    BadRequest:
-      description: A bad request error response.
+    PayloadTooLarge:
+      description: Area-bearing request body exceeds 64 KiB.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/BackendError'
+    RateLimited:
+      description: A too many requests error response.
       content:
         application/problem+json:
           schema:
@@ -1580,12 +2035,6 @@ components:
       schema:
         type: string
         format: uuid
-    captchaHeader:
-      name: Frontend-Captcha-Token
-      in: header
-      description: Captcha token, required only for production environment.
-      schema:
-        type: string
     pageQuery:
       name: page
       in: query
@@ -1603,6 +2052,12 @@ components:
         type: integer
         minimum: 1
         maximum: 50
+    captchaHeader:
+      name: Frontend-Captcha-Token
+      in: header
+      description: Captcha token, required only for production environment.
+      schema:
+        type: string
     idStr:
       name: id
       description: String ID of the resource in path.

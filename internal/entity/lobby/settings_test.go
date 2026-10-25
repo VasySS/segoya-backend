@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 func TestSettings_Validate(t *testing.T) {
@@ -82,10 +83,15 @@ func TestSettings_Validate(t *testing.T) {
 func TestSettings_JSON(t *testing.T) {
 	t.Parallel()
 
-	settings := lobby.Settings{Provider: "google", MovementAllowed: true, Rounds: 5, TimerSeconds: 60}
+	settings := lobby.Settings{
+		Provider: "google", MovementAllowed: true, Rounds: 5, TimerSeconds: 60,
+		PlayArea: playarea.Selection{Type: "all"},
+	}
 	payload, err := json.Marshal(settings)
 	require.NoError(t, err)
-	assert.JSONEq(t, `{"provider":"google","movementAllowed":true,"rounds":5,"timerSeconds":60}`, string(payload))
+	assert.JSONEq(t,
+		`{"provider":"google","movementAllowed":true,"rounds":5,"timerSeconds":60,"playArea":{"type":"all"}}`,
+		string(payload))
 
 	var decoded lobby.Settings
 

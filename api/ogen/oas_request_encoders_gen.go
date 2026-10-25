@@ -14,6 +14,34 @@ import (
 	"github.com/ogen-go/ogen/uri"
 )
 
+func encodeCountPlayAreaRequest(
+	req *CountPlayAreaRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeCreatePlayAreaRequest(
+	req *CreatePlayAreaRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
 func encodeEndSingleplayerRoundRequest(
 	req *SingleplayerRoundGuess,
 	r *http.Request,
@@ -86,6 +114,20 @@ func encodeRefreshTokensRequest(
 
 func encodeRegisterRequest(
 	req *RegisterRequest,
+	r *http.Request,
+) error {
+	const contentType = "application/json"
+	e := new(jx.Encoder)
+	{
+		req.Encode(e)
+	}
+	encoded := e.Bytes()
+	ht.SetBody(r, bytes.NewReader(encoded), contentType)
+	return nil
+}
+
+func encodeUpdatePlayAreaRequest(
+	req *UpdatePlayAreaRequest,
 	r *http.Request,
 ) error {
 	const contentType = "application/json"

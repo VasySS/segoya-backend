@@ -72,7 +72,7 @@ func (uc Usecase) getOrGenerateRound(
 		return multiplayer.Round{}, multiplayer.ErrRoundMaxAmount
 	}
 
-	pano, err := uc.pano.NewStreetview(ctx, game.Provider)
+	pano, err := uc.pano.NewStreetviewInArea(ctx, game.Provider, game.PlayArea, game.ID, true)
 	if err != nil {
 		return multiplayer.Round{}, fmt.Errorf("failed to create panorama: %w", err)
 	}

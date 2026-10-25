@@ -8,6 +8,7 @@ import (
 	api "github.com/VasySS/segoya-backend/api/ogen"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 // SingleplayerGameToAPI converts a singleplayer game entity to the API model.
@@ -20,6 +21,7 @@ func SingleplayerGameToAPI(g singleplayer.Game) *api.SingleplayerGame {
 		TimerSeconds:    g.TimerSeconds,
 		MovementAllowed: g.MovementAllowed,
 		Provider:        api.Provider(g.Provider),
+		PlayArea:        PlayAreaToAPI(g.PlayArea),
 		Score:           g.Score,
 		Finished:        g.Finished,
 		CreatedAt:       g.CreatedAt,
@@ -82,6 +84,7 @@ func SingleplyerGamesToAPI(g []singleplayer.Game, gamesTotal int) *api.Singlepla
 			TimerSeconds:    game.TimerSeconds,
 			MovementAllowed: game.MovementAllowed,
 			Provider:        api.Provider(game.Provider),
+			PlayArea:        PlayAreaToAPI(game.PlayArea),
 			Score:           game.Score,
 			Finished:        game.Finished,
 			CreatedAt:       game.CreatedAt,
@@ -112,6 +115,7 @@ type NewSingleplayerRoundDBRequest struct {
 
 // NewSingleplayerGameRequest represents a request to create a new singleplayer game.
 type NewSingleplayerGameRequest struct {
+	PlayArea        playarea.Selection
 	RequestTime     time.Time
 	UserID          uuid.UUID
 	Rounds          int

@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
+	"github.com/google/uuid"
 	"github.com/ogen-go/ogen/json"
 	"github.com/ogen-go/ogen/validate"
 )
@@ -255,6 +256,664 @@ func (s *BackendError) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes CountPlayAreaBadRequest as json.
+func (s *CountPlayAreaBadRequest) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CountPlayAreaBadRequest from json.
+func (s *CountPlayAreaBadRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CountPlayAreaBadRequest to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CountPlayAreaBadRequest(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CountPlayAreaBadRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CountPlayAreaBadRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CountPlayAreaInternalServerError as json.
+func (s *CountPlayAreaInternalServerError) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CountPlayAreaInternalServerError from json.
+func (s *CountPlayAreaInternalServerError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CountPlayAreaInternalServerError to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CountPlayAreaInternalServerError(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CountPlayAreaInternalServerError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CountPlayAreaInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CountPlayAreaNotFound as json.
+func (s *CountPlayAreaNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CountPlayAreaNotFound from json.
+func (s *CountPlayAreaNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CountPlayAreaNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CountPlayAreaNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CountPlayAreaNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CountPlayAreaNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *CountPlayAreaRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *CountPlayAreaRequest) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("provider")
+		s.Provider.Encode(e)
+	}
+	{
+		e.FieldStart("playArea")
+		s.PlayArea.Encode(e)
+	}
+}
+
+var jsonFieldsNameOfCountPlayAreaRequest = [2]string{
+	0: "provider",
+	1: "playArea",
+}
+
+// Decode decodes CountPlayAreaRequest from json.
+func (s *CountPlayAreaRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CountPlayAreaRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "provider":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Provider.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"provider\"")
+			}
+		case "playArea":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.PlayArea.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"playArea\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode CountPlayAreaRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfCountPlayAreaRequest) {
+					name = jsonFieldsNameOfCountPlayAreaRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CountPlayAreaRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CountPlayAreaRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CountPlayAreaRequestEntityTooLarge as json.
+func (s *CountPlayAreaRequestEntityTooLarge) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CountPlayAreaRequestEntityTooLarge from json.
+func (s *CountPlayAreaRequestEntityTooLarge) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CountPlayAreaRequestEntityTooLarge to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CountPlayAreaRequestEntityTooLarge(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CountPlayAreaRequestEntityTooLarge) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CountPlayAreaRequestEntityTooLarge) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CountPlayAreaUnauthorized as json.
+func (s *CountPlayAreaUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CountPlayAreaUnauthorized from json.
+func (s *CountPlayAreaUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CountPlayAreaUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CountPlayAreaUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CountPlayAreaUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CountPlayAreaUnauthorized) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CreatePlayAreaBadRequest as json.
+func (s *CreatePlayAreaBadRequest) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CreatePlayAreaBadRequest from json.
+func (s *CreatePlayAreaBadRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreatePlayAreaBadRequest to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CreatePlayAreaBadRequest(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreatePlayAreaBadRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreatePlayAreaBadRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CreatePlayAreaInternalServerError as json.
+func (s *CreatePlayAreaInternalServerError) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CreatePlayAreaInternalServerError from json.
+func (s *CreatePlayAreaInternalServerError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreatePlayAreaInternalServerError to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CreatePlayAreaInternalServerError(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreatePlayAreaInternalServerError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreatePlayAreaInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CreatePlayAreaNotFound as json.
+func (s *CreatePlayAreaNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CreatePlayAreaNotFound from json.
+func (s *CreatePlayAreaNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreatePlayAreaNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CreatePlayAreaNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreatePlayAreaNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreatePlayAreaNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *CreatePlayAreaRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *CreatePlayAreaRequest) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("polygon")
+		s.Polygon.Encode(e)
+	}
+	{
+		if s.Visibility.Set {
+			e.FieldStart("visibility")
+			s.Visibility.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfCreatePlayAreaRequest = [3]string{
+	0: "name",
+	1: "polygon",
+	2: "visibility",
+}
+
+// Decode decodes CreatePlayAreaRequest from json.
+func (s *CreatePlayAreaRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreatePlayAreaRequest to nil")
+	}
+	var requiredBitSet [1]uint8
+	s.setDefaults()
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "polygon":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				if err := s.Polygon.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"polygon\"")
+			}
+		case "visibility":
+			if err := func() error {
+				s.Visibility.Reset()
+				if err := s.Visibility.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"visibility\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode CreatePlayAreaRequest")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfCreatePlayAreaRequest) {
+					name = jsonFieldsNameOfCreatePlayAreaRequest[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreatePlayAreaRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreatePlayAreaRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CreatePlayAreaRequestEntityTooLarge as json.
+func (s *CreatePlayAreaRequestEntityTooLarge) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CreatePlayAreaRequestEntityTooLarge from json.
+func (s *CreatePlayAreaRequestEntityTooLarge) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreatePlayAreaRequestEntityTooLarge to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CreatePlayAreaRequestEntityTooLarge(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreatePlayAreaRequestEntityTooLarge) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreatePlayAreaRequestEntityTooLarge) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CreatePlayAreaRequestVisibility as json.
+func (s CreatePlayAreaRequestVisibility) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes CreatePlayAreaRequestVisibility from json.
+func (s *CreatePlayAreaRequestVisibility) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreatePlayAreaRequestVisibility to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch CreatePlayAreaRequestVisibility(v) {
+	case CreatePlayAreaRequestVisibilityPrivate:
+		*s = CreatePlayAreaRequestVisibilityPrivate
+	case CreatePlayAreaRequestVisibilityUnlisted:
+		*s = CreatePlayAreaRequestVisibilityUnlisted
+	default:
+		*s = CreatePlayAreaRequestVisibility(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s CreatePlayAreaRequestVisibility) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreatePlayAreaRequestVisibility) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes CreatePlayAreaUnauthorized as json.
+func (s *CreatePlayAreaUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes CreatePlayAreaUnauthorized from json.
+func (s *CreatePlayAreaUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode CreatePlayAreaUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = CreatePlayAreaUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *CreatePlayAreaUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *CreatePlayAreaUnauthorized) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes DeleteDiscordInternalServerError as json.
 func (s *DeleteDiscordInternalServerError) Encode(e *jx.Encoder) {
 	unwrapped := (*BackendError)(s)
@@ -327,6 +986,158 @@ func (s *DeleteDiscordUnauthorized) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *DeleteDiscordUnauthorized) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DeletePlayAreaBadRequest as json.
+func (s *DeletePlayAreaBadRequest) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes DeletePlayAreaBadRequest from json.
+func (s *DeletePlayAreaBadRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeletePlayAreaBadRequest to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = DeletePlayAreaBadRequest(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeletePlayAreaBadRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeletePlayAreaBadRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DeletePlayAreaInternalServerError as json.
+func (s *DeletePlayAreaInternalServerError) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes DeletePlayAreaInternalServerError from json.
+func (s *DeletePlayAreaInternalServerError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeletePlayAreaInternalServerError to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = DeletePlayAreaInternalServerError(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeletePlayAreaInternalServerError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeletePlayAreaInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DeletePlayAreaNotFound as json.
+func (s *DeletePlayAreaNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes DeletePlayAreaNotFound from json.
+func (s *DeletePlayAreaNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeletePlayAreaNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = DeletePlayAreaNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeletePlayAreaNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeletePlayAreaNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes DeletePlayAreaUnauthorized as json.
+func (s *DeletePlayAreaUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes DeletePlayAreaUnauthorized from json.
+func (s *DeletePlayAreaUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode DeletePlayAreaUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = DeletePlayAreaUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *DeletePlayAreaUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *DeletePlayAreaUnauthorized) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -1704,6 +2515,664 @@ func (s *GetOAuthProvidersUnauthorized) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes GetPlayAreaBadRequest as json.
+func (s *GetPlayAreaBadRequest) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaBadRequest from json.
+func (s *GetPlayAreaBadRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaBadRequest to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaBadRequest(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaBadRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaBadRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaInternalServerError as json.
+func (s *GetPlayAreaInternalServerError) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaInternalServerError from json.
+func (s *GetPlayAreaInternalServerError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaInternalServerError to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaInternalServerError(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaInternalServerError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaNotFound as json.
+func (s *GetPlayAreaNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaNotFound from json.
+func (s *GetPlayAreaNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetBadRequest as json.
+func (s *GetPlayAreaPresetBadRequest) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaPresetBadRequest from json.
+func (s *GetPlayAreaPresetBadRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetBadRequest to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetBadRequest(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaPresetBadRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetBadRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetInternalServerError as json.
+func (s *GetPlayAreaPresetInternalServerError) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaPresetInternalServerError from json.
+func (s *GetPlayAreaPresetInternalServerError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetInternalServerError to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetInternalServerError(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaPresetInternalServerError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetNotFound as json.
+func (s *GetPlayAreaPresetNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaPresetNotFound from json.
+func (s *GetPlayAreaPresetNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaPresetNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetUnauthorized as json.
+func (s *GetPlayAreaPresetUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaPresetUnauthorized from json.
+func (s *GetPlayAreaPresetUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaPresetUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetUnauthorized) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetsBadRequest as json.
+func (s *GetPlayAreaPresetsBadRequest) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaPresetsBadRequest from json.
+func (s *GetPlayAreaPresetsBadRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetsBadRequest to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetsBadRequest(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaPresetsBadRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetsBadRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetsInternalServerError as json.
+func (s *GetPlayAreaPresetsInternalServerError) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaPresetsInternalServerError from json.
+func (s *GetPlayAreaPresetsInternalServerError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetsInternalServerError to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetsInternalServerError(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaPresetsInternalServerError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetsInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetsNotFound as json.
+func (s *GetPlayAreaPresetsNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaPresetsNotFound from json.
+func (s *GetPlayAreaPresetsNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetsNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetsNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaPresetsNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetsNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetsOKApplicationJSON as json.
+func (s GetPlayAreaPresetsOKApplicationJSON) Encode(e *jx.Encoder) {
+	unwrapped := []PlayAreaPreset(s)
+
+	e.ArrStart()
+	for _, elem := range unwrapped {
+		elem.Encode(e)
+	}
+	e.ArrEnd()
+}
+
+// Decode decodes GetPlayAreaPresetsOKApplicationJSON from json.
+func (s *GetPlayAreaPresetsOKApplicationJSON) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetsOKApplicationJSON to nil")
+	}
+	var unwrapped []PlayAreaPreset
+	if err := func() error {
+		unwrapped = make([]PlayAreaPreset, 0)
+		if err := d.Arr(func(d *jx.Decoder) error {
+			var elem PlayAreaPreset
+			if err := elem.Decode(d); err != nil {
+				return err
+			}
+			unwrapped = append(unwrapped, elem)
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetsOKApplicationJSON(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s GetPlayAreaPresetsOKApplicationJSON) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetsOKApplicationJSON) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaPresetsUnauthorized as json.
+func (s *GetPlayAreaPresetsUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaPresetsUnauthorized from json.
+func (s *GetPlayAreaPresetsUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaPresetsUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaPresetsUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaPresetsUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaPresetsUnauthorized) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreaUnauthorized as json.
+func (s *GetPlayAreaUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreaUnauthorized from json.
+func (s *GetPlayAreaUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreaUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreaUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreaUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreaUnauthorized) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreasBadRequest as json.
+func (s *GetPlayAreasBadRequest) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreasBadRequest from json.
+func (s *GetPlayAreasBadRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreasBadRequest to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreasBadRequest(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreasBadRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreasBadRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreasInternalServerError as json.
+func (s *GetPlayAreasInternalServerError) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreasInternalServerError from json.
+func (s *GetPlayAreasInternalServerError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreasInternalServerError to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreasInternalServerError(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreasInternalServerError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreasInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreasNotFound as json.
+func (s *GetPlayAreasNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreasNotFound from json.
+func (s *GetPlayAreasNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreasNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreasNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreasNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreasNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes GetPlayAreasUnauthorized as json.
+func (s *GetPlayAreasUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetPlayAreasUnauthorized from json.
+func (s *GetPlayAreasUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetPlayAreasUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetPlayAreasUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetPlayAreasUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetPlayAreasUnauthorized) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes GetPrivateProfileInternalServerError as json.
 func (s *GetPrivateProfileInternalServerError) Encode(e *jx.Encoder) {
 	unwrapped := (*BackendError)(s)
@@ -2324,6 +3793,44 @@ func (s *GetSingleplayerGamesInternalServerError) UnmarshalJSON(data []byte) err
 	return s.Decode(d)
 }
 
+// Encode encodes GetSingleplayerGamesNotFound as json.
+func (s *GetSingleplayerGamesNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes GetSingleplayerGamesNotFound from json.
+func (s *GetSingleplayerGamesNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode GetSingleplayerGamesNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = GetSingleplayerGamesNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *GetSingleplayerGamesNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *GetSingleplayerGamesNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes GetSingleplayerGamesUnauthorized as json.
 func (s *GetSingleplayerGamesUnauthorized) Encode(e *jx.Encoder) {
 	unwrapped := (*BackendError)(s)
@@ -2864,6 +4371,12 @@ func (s *Lobby) encodeFields(e *jx.Encoder) {
 		e.Int(s.Rounds)
 	}
 	{
+		if s.PlayArea.Set {
+			e.FieldStart("playArea")
+			s.PlayArea.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("provider")
 		s.Provider.Encode(e)
 	}
@@ -2889,17 +4402,18 @@ func (s *Lobby) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfLobby = [10]string{
-	0: "id",
-	1: "creatorID",
-	2: "createdAt",
-	3: "rounds",
-	4: "provider",
-	5: "movementAllowed",
-	6: "timerSeconds",
-	7: "currentPlayers",
-	8: "maxPlayers",
-	9: "private",
+var jsonFieldsNameOfLobby = [11]string{
+	0:  "id",
+	1:  "creatorID",
+	2:  "createdAt",
+	3:  "rounds",
+	4:  "playArea",
+	5:  "provider",
+	6:  "movementAllowed",
+	7:  "timerSeconds",
+	8:  "currentPlayers",
+	9:  "maxPlayers",
+	10: "private",
 }
 
 // Decode decodes Lobby from json.
@@ -2959,8 +4473,18 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"rounds\"")
 			}
+		case "playArea":
+			if err := func() error {
+				s.PlayArea.Reset()
+				if err := s.PlayArea.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"playArea\"")
+			}
 		case "provider":
-			requiredBitSet[0] |= 1 << 4
+			requiredBitSet[0] |= 1 << 5
 			if err := func() error {
 				if err := s.Provider.Decode(d); err != nil {
 					return err
@@ -2970,7 +4494,7 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"provider\"")
 			}
 		case "movementAllowed":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.MovementAllowed = bool(v)
@@ -2982,7 +4506,7 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"movementAllowed\"")
 			}
 		case "timerSeconds":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Int()
 				s.TimerSeconds = int(v)
@@ -2994,7 +4518,7 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"timerSeconds\"")
 			}
 		case "currentPlayers":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Int()
 				s.CurrentPlayers = int(v)
@@ -3006,7 +4530,7 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"currentPlayers\"")
 			}
 		case "maxPlayers":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Int()
 				s.MaxPlayers = int(v)
@@ -3018,7 +4542,7 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"maxPlayers\"")
 			}
 		case "private":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := d.Bool()
 				s.Private = bool(v)
@@ -3039,8 +4563,8 @@ func (s *Lobby) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11111111,
-		0b00000011,
+		0b11101111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -3351,6 +4875,12 @@ func (s *MultiplayerGame) encodeFields(e *jx.Encoder) {
 		e.Int(s.Players)
 	}
 	{
+		if s.PlayArea.Set {
+			e.FieldStart("playArea")
+			s.PlayArea.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("provider")
 		s.Provider.Encode(e)
 	}
@@ -3364,17 +4894,18 @@ func (s *MultiplayerGame) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfMultiplayerGame = [10]string{
-	0: "id",
-	1: "creatorID",
-	2: "rounds",
-	3: "roundCurrent",
-	4: "timerSeconds",
-	5: "movementAllowed",
-	6: "players",
-	7: "provider",
-	8: "finished",
-	9: "createdAt",
+var jsonFieldsNameOfMultiplayerGame = [11]string{
+	0:  "id",
+	1:  "creatorID",
+	2:  "rounds",
+	3:  "roundCurrent",
+	4:  "timerSeconds",
+	5:  "movementAllowed",
+	6:  "players",
+	7:  "playArea",
+	8:  "provider",
+	9:  "finished",
+	10: "createdAt",
 }
 
 // Decode decodes MultiplayerGame from json.
@@ -3470,8 +5001,18 @@ func (s *MultiplayerGame) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"players\"")
 			}
+		case "playArea":
+			if err := func() error {
+				s.PlayArea.Reset()
+				if err := s.PlayArea.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"playArea\"")
+			}
 		case "provider":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				if err := s.Provider.Decode(d); err != nil {
 					return err
@@ -3481,7 +5022,7 @@ func (s *MultiplayerGame) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"provider\"")
 			}
 		case "finished":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Bool()
 				s.Finished = bool(v)
@@ -3493,7 +5034,7 @@ func (s *MultiplayerGame) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"finished\"")
 			}
 		case "createdAt":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -3514,8 +5055,8 @@ func (s *MultiplayerGame) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11111111,
-		0b00000011,
+		0b01111111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -4179,6 +5720,12 @@ func (s *NewLobby) encodeFields(e *jx.Encoder) {
 		e.Int(s.Rounds)
 	}
 	{
+		if s.PlayArea.Set {
+			e.FieldStart("playArea")
+			s.PlayArea.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("provider")
 		s.Provider.Encode(e)
 	}
@@ -4198,14 +5745,15 @@ func (s *NewLobby) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfNewLobby = [7]string{
+var jsonFieldsNameOfNewLobby = [8]string{
 	0: "creatorID",
 	1: "maxPlayers",
 	2: "rounds",
-	3: "provider",
-	4: "timerSeconds",
-	5: "movementAllowed",
-	6: "private",
+	3: "playArea",
+	4: "provider",
+	5: "timerSeconds",
+	6: "movementAllowed",
+	7: "private",
 }
 
 // Decode decodes NewLobby from json.
@@ -4253,8 +5801,18 @@ func (s *NewLobby) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"rounds\"")
 			}
+		case "playArea":
+			if err := func() error {
+				s.PlayArea.Reset()
+				if err := s.PlayArea.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"playArea\"")
+			}
 		case "provider":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.Provider.Decode(d); err != nil {
 					return err
@@ -4274,7 +5832,7 @@ func (s *NewLobby) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"timerSeconds\"")
 			}
 		case "movementAllowed":
-			requiredBitSet[0] |= 1 << 5
+			requiredBitSet[0] |= 1 << 6
 			if err := func() error {
 				v, err := d.Bool()
 				s.MovementAllowed = bool(v)
@@ -4286,7 +5844,7 @@ func (s *NewLobby) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"movementAllowed\"")
 			}
 		case "private":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				v, err := d.Bool()
 				s.Private = bool(v)
@@ -4307,7 +5865,7 @@ func (s *NewLobby) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b01101111,
+		0b11010111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -4521,6 +6079,120 @@ func (s *NewLobbyInternalServerError) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NewLobbyInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NewLobbyNotFound as json.
+func (s *NewLobbyNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes NewLobbyNotFound from json.
+func (s *NewLobbyNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewLobbyNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = NewLobbyNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewLobbyNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewLobbyNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NewLobbyRequestEntityTooLarge as json.
+func (s *NewLobbyRequestEntityTooLarge) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes NewLobbyRequestEntityTooLarge from json.
+func (s *NewLobbyRequestEntityTooLarge) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewLobbyRequestEntityTooLarge to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = NewLobbyRequestEntityTooLarge(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewLobbyRequestEntityTooLarge) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewLobbyRequestEntityTooLarge) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NewLobbyUnauthorized as json.
+func (s *NewLobbyUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes NewLobbyUnauthorized from json.
+func (s *NewLobbyUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewLobbyUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = NewLobbyUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewLobbyUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewLobbyUnauthorized) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -4811,6 +6483,44 @@ func (s *NewSingleplayerGameInternalServerError) UnmarshalJSON(data []byte) erro
 	return s.Decode(d)
 }
 
+// Encode encodes NewSingleplayerGameNotFound as json.
+func (s *NewSingleplayerGameNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes NewSingleplayerGameNotFound from json.
+func (s *NewSingleplayerGameNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewSingleplayerGameNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = NewSingleplayerGameNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewSingleplayerGameNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewSingleplayerGameNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode implements json.Marshaler.
 func (s *NewSingleplayerGameRequest) Encode(e *jx.Encoder) {
 	e.ObjStart()
@@ -4835,16 +6545,23 @@ func (s *NewSingleplayerGameRequest) encodeFields(e *jx.Encoder) {
 		e.Bool(s.MovementAllowed)
 	}
 	{
+		if s.PlayArea.Set {
+			e.FieldStart("playArea")
+			s.PlayArea.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("provider")
 		s.Provider.Encode(e)
 	}
 }
 
-var jsonFieldsNameOfNewSingleplayerGameRequest = [4]string{
+var jsonFieldsNameOfNewSingleplayerGameRequest = [5]string{
 	0: "rounds",
 	1: "timerSeconds",
 	2: "movementAllowed",
-	3: "provider",
+	3: "playArea",
+	4: "provider",
 }
 
 // Decode decodes NewSingleplayerGameRequest from json.
@@ -4890,8 +6607,18 @@ func (s *NewSingleplayerGameRequest) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"movementAllowed\"")
 			}
+		case "playArea":
+			if err := func() error {
+				s.PlayArea.Reset()
+				if err := s.PlayArea.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"playArea\"")
+			}
 		case "provider":
-			requiredBitSet[0] |= 1 << 3
+			requiredBitSet[0] |= 1 << 4
 			if err := func() error {
 				if err := s.Provider.Decode(d); err != nil {
 					return err
@@ -4910,7 +6637,7 @@ func (s *NewSingleplayerGameRequest) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [1]uint8{
-		0b00001101,
+		0b00010101,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -4952,6 +6679,44 @@ func (s *NewSingleplayerGameRequest) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *NewSingleplayerGameRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes NewSingleplayerGameRequestEntityTooLarge as json.
+func (s *NewSingleplayerGameRequestEntityTooLarge) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes NewSingleplayerGameRequestEntityTooLarge from json.
+func (s *NewSingleplayerGameRequestEntityTooLarge) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode NewSingleplayerGameRequestEntityTooLarge to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = NewSingleplayerGameRequestEntityTooLarge(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *NewSingleplayerGameRequestEntityTooLarge) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *NewSingleplayerGameRequestEntityTooLarge) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -5342,6 +7107,39 @@ func (s *NilLatLng) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes CreatePlayAreaRequestVisibility as json.
+func (o OptCreatePlayAreaRequestVisibility) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes CreatePlayAreaRequestVisibility from json.
+func (o *OptCreatePlayAreaRequestVisibility) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptCreatePlayAreaRequestVisibility to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptCreatePlayAreaRequestVisibility) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptCreatePlayAreaRequestVisibility) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes int as json.
 func (o OptInt) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -5377,6 +7175,105 @@ func (s *OptInt) UnmarshalJSON(data []byte) error {
 	return s.Decode(d)
 }
 
+// Encode encodes PlayAreaSelection as json.
+func (o OptPlayAreaSelection) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes PlayAreaSelection from json.
+func (o *OptPlayAreaSelection) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPlayAreaSelection to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPlayAreaSelection) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPlayAreaSelection) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes Polygon as json.
+func (o OptPolygon) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes Polygon from json.
+func (o *OptPolygon) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPolygon to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPolygon) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPolygon) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PresetGeometry as json.
+func (o OptPresetGeometry) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	o.Value.Encode(e)
+}
+
+// Decode decodes PresetGeometry from json.
+func (o *OptPresetGeometry) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptPresetGeometry to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptPresetGeometry) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptPresetGeometry) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
 // Encode encodes string as json.
 func (o OptString) Encode(e *jx.Encoder) {
 	if !o.Set {
@@ -5408,6 +7305,1060 @@ func (s OptString) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *OptString) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes uuid.UUID as json.
+func (o OptUUID) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	json.EncodeUUID(e, o.Value)
+}
+
+// Decode decodes uuid.UUID from json.
+func (o *OptUUID) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUUID to nil")
+	}
+	o.Set = true
+	v, err := json.DecodeUUID(d)
+	if err != nil {
+		return err
+	}
+	o.Value = v
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUUID) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUUID) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdatePlayAreaRequestVisibility as json.
+func (o OptUpdatePlayAreaRequestVisibility) Encode(e *jx.Encoder) {
+	if !o.Set {
+		return
+	}
+	e.Str(string(o.Value))
+}
+
+// Decode decodes UpdatePlayAreaRequestVisibility from json.
+func (o *OptUpdatePlayAreaRequestVisibility) Decode(d *jx.Decoder) error {
+	if o == nil {
+		return errors.New("invalid: unable to decode OptUpdatePlayAreaRequestVisibility to nil")
+	}
+	o.Set = true
+	if err := o.Value.Decode(d); err != nil {
+		return err
+	}
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s OptUpdatePlayAreaRequestVisibility) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *OptUpdatePlayAreaRequestVisibility) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *PlayAreaCount) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *PlayAreaCount) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("locationCount")
+		e.Int(s.LocationCount)
+	}
+}
+
+var jsonFieldsNameOfPlayAreaCount = [1]string{
+	0: "locationCount",
+}
+
+// Decode decodes PlayAreaCount from json.
+func (s *PlayAreaCount) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PlayAreaCount to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "locationCount":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.LocationCount = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"locationCount\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PlayAreaCount")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfPlayAreaCount) {
+					name = jsonFieldsNameOfPlayAreaCount[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PlayAreaCount) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PlayAreaCount) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *PlayAreaPreset) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *PlayAreaPreset) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("kind")
+		e.Str(s.Kind)
+	}
+	{
+		e.FieldStart("countryCode")
+		e.Str(s.CountryCode)
+	}
+	{
+		e.FieldStart("version")
+		e.Str(s.Version)
+	}
+	{
+		e.FieldStart("source")
+		e.Str(s.Source)
+	}
+	{
+		e.FieldStart("license")
+		e.Str(s.License)
+	}
+	{
+		e.FieldStart("attribution")
+		e.Str(s.Attribution)
+	}
+	{
+		e.FieldStart("providers")
+		e.ArrStart()
+		for _, elem := range s.Providers {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+	{
+		e.FieldStart("bounds")
+		e.ArrStart()
+		for _, elem := range s.Bounds {
+			e.Float64(elem)
+		}
+		e.ArrEnd()
+	}
+	{
+		if s.Polygon.Set {
+			e.FieldStart("polygon")
+			s.Polygon.Encode(e)
+		}
+	}
+	{
+		if s.LocationCount.Set {
+			e.FieldStart("locationCount")
+			s.LocationCount.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfPlayAreaPreset = [12]string{
+	0:  "id",
+	1:  "name",
+	2:  "kind",
+	3:  "countryCode",
+	4:  "version",
+	5:  "source",
+	6:  "license",
+	7:  "attribution",
+	8:  "providers",
+	9:  "bounds",
+	10: "polygon",
+	11: "locationCount",
+}
+
+// Decode decodes PlayAreaPreset from json.
+func (s *PlayAreaPreset) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PlayAreaPreset to nil")
+	}
+	var requiredBitSet [2]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "kind":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Kind = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"kind\"")
+			}
+		case "countryCode":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				v, err := d.Str()
+				s.CountryCode = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"countryCode\"")
+			}
+		case "version":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				v, err := d.Str()
+				s.Version = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"version\"")
+			}
+		case "source":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := d.Str()
+				s.Source = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"source\"")
+			}
+		case "license":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := d.Str()
+				s.License = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"license\"")
+			}
+		case "attribution":
+			requiredBitSet[0] |= 1 << 7
+			if err := func() error {
+				v, err := d.Str()
+				s.Attribution = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"attribution\"")
+			}
+		case "providers":
+			requiredBitSet[1] |= 1 << 0
+			if err := func() error {
+				s.Providers = make([]Provider, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem Provider
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Providers = append(s.Providers, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"providers\"")
+			}
+		case "bounds":
+			requiredBitSet[1] |= 1 << 1
+			if err := func() error {
+				s.Bounds = make([]float64, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem float64
+					v, err := d.Float64()
+					elem = float64(v)
+					if err != nil {
+						return err
+					}
+					s.Bounds = append(s.Bounds, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"bounds\"")
+			}
+		case "polygon":
+			if err := func() error {
+				s.Polygon.Reset()
+				if err := s.Polygon.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"polygon\"")
+			}
+		case "locationCount":
+			if err := func() error {
+				s.LocationCount.Reset()
+				if err := s.LocationCount.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"locationCount\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PlayAreaPreset")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [2]uint8{
+		0b11111111,
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfPlayAreaPreset) {
+					name = jsonFieldsNameOfPlayAreaPreset[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PlayAreaPreset) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PlayAreaPreset) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *PlayAreaSelection) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *PlayAreaSelection) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+	{
+		if s.PresetIDs != nil {
+			e.FieldStart("presetIDs")
+			e.ArrStart()
+			for _, elem := range s.PresetIDs {
+				json.EncodeUUID(e, elem)
+			}
+			e.ArrEnd()
+		}
+	}
+	{
+		if s.Polygon.Set {
+			e.FieldStart("polygon")
+			s.Polygon.Encode(e)
+		}
+	}
+	{
+		if s.SavedID.Set {
+			e.FieldStart("savedID")
+			s.SavedID.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfPlayAreaSelection = [4]string{
+	0: "type",
+	1: "presetIDs",
+	2: "polygon",
+	3: "savedID",
+}
+
+// Decode decodes PlayAreaSelection from json.
+func (s *PlayAreaSelection) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PlayAreaSelection to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "type":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "presetIDs":
+			if err := func() error {
+				s.PresetIDs = make([]uuid.UUID, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem uuid.UUID
+					v, err := json.DecodeUUID(d)
+					elem = v
+					if err != nil {
+						return err
+					}
+					s.PresetIDs = append(s.PresetIDs, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"presetIDs\"")
+			}
+		case "polygon":
+			if err := func() error {
+				s.Polygon.Reset()
+				if err := s.Polygon.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"polygon\"")
+			}
+		case "savedID":
+			if err := func() error {
+				s.SavedID.Reset()
+				if err := s.SavedID.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"savedID\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PlayAreaSelection")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000001,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfPlayAreaSelection) {
+					name = jsonFieldsNameOfPlayAreaSelection[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PlayAreaSelection) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PlayAreaSelection) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PlayAreaSelectionType as json.
+func (s PlayAreaSelectionType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PlayAreaSelectionType from json.
+func (s *PlayAreaSelectionType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PlayAreaSelectionType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PlayAreaSelectionType(v) {
+	case PlayAreaSelectionTypeAll:
+		*s = PlayAreaSelectionTypeAll
+	case PlayAreaSelectionTypePresets:
+		*s = PlayAreaSelectionTypePresets
+	case PlayAreaSelectionTypePolygon:
+		*s = PlayAreaSelectionTypePolygon
+	case PlayAreaSelectionTypeSaved:
+		*s = PlayAreaSelectionTypeSaved
+	default:
+		*s = PlayAreaSelectionType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PlayAreaSelectionType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PlayAreaSelectionType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *Polygon) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *Polygon) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+	{
+		e.FieldStart("coordinates")
+		e.ArrStart()
+		for _, elem := range s.Coordinates {
+			e.ArrStart()
+			for _, elem := range elem {
+				e.ArrStart()
+				for _, elem := range elem {
+					e.Float64(elem)
+				}
+				e.ArrEnd()
+			}
+			e.ArrEnd()
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfPolygon = [2]string{
+	0: "type",
+	1: "coordinates",
+}
+
+// Decode decodes Polygon from json.
+func (s *Polygon) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode Polygon to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "type":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "coordinates":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Coordinates = make([][][]float64, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem [][]float64
+					elem = make([][]float64, 0)
+					if err := d.Arr(func(d *jx.Decoder) error {
+						var elemElem []float64
+						elemElem = make([]float64, 0)
+						if err := d.Arr(func(d *jx.Decoder) error {
+							var elemElemElem float64
+							v, err := d.Float64()
+							elemElemElem = float64(v)
+							if err != nil {
+								return err
+							}
+							elemElem = append(elemElem, elemElemElem)
+							return nil
+						}); err != nil {
+							return err
+						}
+						elem = append(elem, elemElem)
+						return nil
+					}); err != nil {
+						return err
+					}
+					s.Coordinates = append(s.Coordinates, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"coordinates\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode Polygon")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfPolygon) {
+					name = jsonFieldsNameOfPolygon[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *Polygon) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *Polygon) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PolygonType as json.
+func (s PolygonType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PolygonType from json.
+func (s *PolygonType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PolygonType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PolygonType(v) {
+	case PolygonTypePolygon:
+		*s = PolygonTypePolygon
+	default:
+		*s = PolygonType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PolygonType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PolygonType) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *PresetGeometry) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *PresetGeometry) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("type")
+		s.Type.Encode(e)
+	}
+	{
+		e.FieldStart("coordinates")
+		e.ArrStart()
+		for _, elem := range s.Coordinates {
+			e.ArrStart()
+			for _, elem := range elem {
+				e.ArrStart()
+				for _, elem := range elem {
+					e.ArrStart()
+					for _, elem := range elem {
+						e.Float64(elem)
+					}
+					e.ArrEnd()
+				}
+				e.ArrEnd()
+			}
+			e.ArrEnd()
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfPresetGeometry = [2]string{
+	0: "type",
+	1: "coordinates",
+}
+
+// Decode decodes PresetGeometry from json.
+func (s *PresetGeometry) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PresetGeometry to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "type":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				if err := s.Type.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"type\"")
+			}
+		case "coordinates":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Coordinates = make([][][][]float64, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem [][][]float64
+					elem = make([][][]float64, 0)
+					if err := d.Arr(func(d *jx.Decoder) error {
+						var elemElem [][]float64
+						elemElem = make([][]float64, 0)
+						if err := d.Arr(func(d *jx.Decoder) error {
+							var elemElemElem []float64
+							elemElemElem = make([]float64, 0)
+							if err := d.Arr(func(d *jx.Decoder) error {
+								var elemElemElemElem float64
+								v, err := d.Float64()
+								elemElemElemElem = float64(v)
+								if err != nil {
+									return err
+								}
+								elemElemElem = append(elemElemElem, elemElemElemElem)
+								return nil
+							}); err != nil {
+								return err
+							}
+							elemElem = append(elemElem, elemElemElem)
+							return nil
+						}); err != nil {
+							return err
+						}
+						elem = append(elem, elemElem)
+						return nil
+					}); err != nil {
+						return err
+					}
+					s.Coordinates = append(s.Coordinates, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"coordinates\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode PresetGeometry")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfPresetGeometry) {
+					name = jsonFieldsNameOfPresetGeometry[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *PresetGeometry) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PresetGeometry) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes PresetGeometryType as json.
+func (s PresetGeometryType) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes PresetGeometryType from json.
+func (s *PresetGeometryType) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode PresetGeometryType to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch PresetGeometryType(v) {
+	case PresetGeometryTypeMultiPolygon:
+		*s = PresetGeometryTypeMultiPolygon
+	default:
+		*s = PresetGeometryType(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s PresetGeometryType) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *PresetGeometryType) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
@@ -5873,6 +8824,363 @@ func (s *RegisterRequest) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
+func (s *SavedPlayArea) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SavedPlayArea) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("id")
+		json.EncodeUUID(e, s.ID)
+	}
+	{
+		e.FieldStart("ownerID")
+		json.EncodeUUID(e, s.OwnerID)
+	}
+	{
+		e.FieldStart("name")
+		e.Str(s.Name)
+	}
+	{
+		e.FieldStart("polygon")
+		s.Polygon.Encode(e)
+	}
+	{
+		e.FieldStart("visibility")
+		s.Visibility.Encode(e)
+	}
+	{
+		e.FieldStart("createdAt")
+		json.EncodeDateTime(e, s.CreatedAt)
+	}
+	{
+		e.FieldStart("updatedAt")
+		json.EncodeDateTime(e, s.UpdatedAt)
+	}
+}
+
+var jsonFieldsNameOfSavedPlayArea = [7]string{
+	0: "id",
+	1: "ownerID",
+	2: "name",
+	3: "polygon",
+	4: "visibility",
+	5: "createdAt",
+	6: "updatedAt",
+}
+
+// Decode decodes SavedPlayArea from json.
+func (s *SavedPlayArea) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SavedPlayArea to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "id":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.ID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"id\"")
+			}
+		case "ownerID":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				v, err := json.DecodeUUID(d)
+				s.OwnerID = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"ownerID\"")
+			}
+		case "name":
+			requiredBitSet[0] |= 1 << 2
+			if err := func() error {
+				v, err := d.Str()
+				s.Name = string(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "polygon":
+			requiredBitSet[0] |= 1 << 3
+			if err := func() error {
+				if err := s.Polygon.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"polygon\"")
+			}
+		case "visibility":
+			requiredBitSet[0] |= 1 << 4
+			if err := func() error {
+				if err := s.Visibility.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"visibility\"")
+			}
+		case "createdAt":
+			requiredBitSet[0] |= 1 << 5
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.CreatedAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"createdAt\"")
+			}
+		case "updatedAt":
+			requiredBitSet[0] |= 1 << 6
+			if err := func() error {
+				v, err := json.DecodeDateTime(d)
+				s.UpdatedAt = v
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"updatedAt\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SavedPlayArea")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b01111111,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSavedPlayArea) {
+					name = jsonFieldsNameOfSavedPlayArea[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SavedPlayArea) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SavedPlayArea) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes SavedPlayAreaVisibility as json.
+func (s SavedPlayAreaVisibility) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes SavedPlayAreaVisibility from json.
+func (s *SavedPlayAreaVisibility) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SavedPlayAreaVisibility to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch SavedPlayAreaVisibility(v) {
+	case SavedPlayAreaVisibilityPrivate:
+		*s = SavedPlayAreaVisibilityPrivate
+	case SavedPlayAreaVisibilityUnlisted:
+		*s = SavedPlayAreaVisibilityUnlisted
+	default:
+		*s = SavedPlayAreaVisibility(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s SavedPlayAreaVisibility) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SavedPlayAreaVisibility) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *SavedPlayAreas) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *SavedPlayAreas) encodeFields(e *jx.Encoder) {
+	{
+		e.FieldStart("total")
+		e.Int(s.Total)
+	}
+	{
+		e.FieldStart("areas")
+		e.ArrStart()
+		for _, elem := range s.Areas {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+	}
+}
+
+var jsonFieldsNameOfSavedPlayAreas = [2]string{
+	0: "total",
+	1: "areas",
+}
+
+// Decode decodes SavedPlayAreas from json.
+func (s *SavedPlayAreas) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode SavedPlayAreas to nil")
+	}
+	var requiredBitSet [1]uint8
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "total":
+			requiredBitSet[0] |= 1 << 0
+			if err := func() error {
+				v, err := d.Int()
+				s.Total = int(v)
+				if err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"total\"")
+			}
+		case "areas":
+			requiredBitSet[0] |= 1 << 1
+			if err := func() error {
+				s.Areas = make([]SavedPlayArea, 0)
+				if err := d.Arr(func(d *jx.Decoder) error {
+					var elem SavedPlayArea
+					if err := elem.Decode(d); err != nil {
+						return err
+					}
+					s.Areas = append(s.Areas, elem)
+					return nil
+				}); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"areas\"")
+			}
+		default:
+			return d.Skip()
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode SavedPlayAreas")
+	}
+	// Validate required fields.
+	var failures []validate.FieldError
+	for i, mask := range [1]uint8{
+		0b00000011,
+	} {
+		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
+			// Mask only required fields and check equality to mask using XOR.
+			//
+			// If XOR result is not zero, result is not equal to expected, so some fields are missed.
+			// Bits of fields which would be set are actually bits of missed fields.
+			missed := bits.OnesCount8(result)
+			for bitN := 0; bitN < missed; bitN++ {
+				bitIdx := bits.TrailingZeros8(result)
+				fieldIdx := i*8 + bitIdx
+				var name string
+				if fieldIdx < len(jsonFieldsNameOfSavedPlayAreas) {
+					name = jsonFieldsNameOfSavedPlayAreas[fieldIdx]
+				} else {
+					name = strconv.Itoa(fieldIdx)
+				}
+				failures = append(failures, validate.FieldError{
+					Name:  name,
+					Error: validate.ErrFieldRequired,
+				})
+				// Reset bit.
+				result &^= 1 << bitIdx
+			}
+		}
+	}
+	if len(failures) > 0 {
+		return &validate.Error{Fields: failures}
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *SavedPlayAreas) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *SavedPlayAreas) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
 func (s *SingleplayerGame) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
@@ -5906,6 +9214,12 @@ func (s *SingleplayerGame) encodeFields(e *jx.Encoder) {
 		e.Bool(s.MovementAllowed)
 	}
 	{
+		if s.PlayArea.Set {
+			e.FieldStart("playArea")
+			s.PlayArea.Encode(e)
+		}
+	}
+	{
 		e.FieldStart("provider")
 		s.Provider.Encode(e)
 	}
@@ -5923,17 +9237,18 @@ func (s *SingleplayerGame) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfSingleplayerGame = [10]string{
-	0: "id",
-	1: "userID",
-	2: "rounds",
-	3: "roundCurrent",
-	4: "timerSeconds",
-	5: "movementAllowed",
-	6: "provider",
-	7: "score",
-	8: "finished",
-	9: "createdAt",
+var jsonFieldsNameOfSingleplayerGame = [11]string{
+	0:  "id",
+	1:  "userID",
+	2:  "rounds",
+	3:  "roundCurrent",
+	4:  "timerSeconds",
+	5:  "movementAllowed",
+	6:  "playArea",
+	7:  "provider",
+	8:  "score",
+	9:  "finished",
+	10: "createdAt",
 }
 
 // Decode decodes SingleplayerGame from json.
@@ -6017,8 +9332,18 @@ func (s *SingleplayerGame) Decode(d *jx.Decoder) error {
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"movementAllowed\"")
 			}
+		case "playArea":
+			if err := func() error {
+				s.PlayArea.Reset()
+				if err := s.PlayArea.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"playArea\"")
+			}
 		case "provider":
-			requiredBitSet[0] |= 1 << 6
+			requiredBitSet[0] |= 1 << 7
 			if err := func() error {
 				if err := s.Provider.Decode(d); err != nil {
 					return err
@@ -6028,7 +9353,7 @@ func (s *SingleplayerGame) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"provider\"")
 			}
 		case "score":
-			requiredBitSet[0] |= 1 << 7
+			requiredBitSet[1] |= 1 << 0
 			if err := func() error {
 				v, err := d.Int()
 				s.Score = int(v)
@@ -6040,7 +9365,7 @@ func (s *SingleplayerGame) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"score\"")
 			}
 		case "finished":
-			requiredBitSet[1] |= 1 << 0
+			requiredBitSet[1] |= 1 << 1
 			if err := func() error {
 				v, err := d.Bool()
 				s.Finished = bool(v)
@@ -6052,7 +9377,7 @@ func (s *SingleplayerGame) Decode(d *jx.Decoder) error {
 				return errors.Wrap(err, "decode field \"finished\"")
 			}
 		case "createdAt":
-			requiredBitSet[1] |= 1 << 1
+			requiredBitSet[1] |= 1 << 2
 			if err := func() error {
 				v, err := json.DecodeDateTime(d)
 				s.CreatedAt = v
@@ -6073,8 +9398,8 @@ func (s *SingleplayerGame) Decode(d *jx.Decoder) error {
 	// Validate required fields.
 	var failures []validate.FieldError
 	for i, mask := range [2]uint8{
-		0b11111111,
-		0b00000011,
+		0b10111111,
+		0b00000111,
 	} {
 		if result := (requiredBitSet[i] & mask) ^ mask; result != 0 {
 			// Mask only required fields and check equality to mask using XOR.
@@ -6781,6 +10106,333 @@ func (s *SingleplayerRoundGuess) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
 func (s *SingleplayerRoundGuess) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdatePlayAreaBadRequest as json.
+func (s *UpdatePlayAreaBadRequest) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes UpdatePlayAreaBadRequest from json.
+func (s *UpdatePlayAreaBadRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdatePlayAreaBadRequest to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdatePlayAreaBadRequest(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UpdatePlayAreaBadRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdatePlayAreaBadRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdatePlayAreaInternalServerError as json.
+func (s *UpdatePlayAreaInternalServerError) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes UpdatePlayAreaInternalServerError from json.
+func (s *UpdatePlayAreaInternalServerError) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdatePlayAreaInternalServerError to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdatePlayAreaInternalServerError(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UpdatePlayAreaInternalServerError) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdatePlayAreaInternalServerError) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdatePlayAreaNotFound as json.
+func (s *UpdatePlayAreaNotFound) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes UpdatePlayAreaNotFound from json.
+func (s *UpdatePlayAreaNotFound) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdatePlayAreaNotFound to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdatePlayAreaNotFound(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UpdatePlayAreaNotFound) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdatePlayAreaNotFound) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode implements json.Marshaler.
+func (s *UpdatePlayAreaRequest) Encode(e *jx.Encoder) {
+	e.ObjStart()
+	s.encodeFields(e)
+	e.ObjEnd()
+}
+
+// encodeFields encodes fields.
+func (s *UpdatePlayAreaRequest) encodeFields(e *jx.Encoder) {
+	{
+		if s.Name.Set {
+			e.FieldStart("name")
+			s.Name.Encode(e)
+		}
+	}
+	{
+		if s.Polygon.Set {
+			e.FieldStart("polygon")
+			s.Polygon.Encode(e)
+		}
+	}
+	{
+		if s.Visibility.Set {
+			e.FieldStart("visibility")
+			s.Visibility.Encode(e)
+		}
+	}
+}
+
+var jsonFieldsNameOfUpdatePlayAreaRequest = [3]string{
+	0: "name",
+	1: "polygon",
+	2: "visibility",
+}
+
+// Decode decodes UpdatePlayAreaRequest from json.
+func (s *UpdatePlayAreaRequest) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdatePlayAreaRequest to nil")
+	}
+
+	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
+		switch string(k) {
+		case "name":
+			if err := func() error {
+				s.Name.Reset()
+				if err := s.Name.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"name\"")
+			}
+		case "polygon":
+			if err := func() error {
+				s.Polygon.Reset()
+				if err := s.Polygon.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"polygon\"")
+			}
+		case "visibility":
+			if err := func() error {
+				s.Visibility.Reset()
+				if err := s.Visibility.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"visibility\"")
+			}
+		default:
+			return errors.Errorf("unexpected field %q", k)
+		}
+		return nil
+	}); err != nil {
+		return errors.Wrap(err, "decode UpdatePlayAreaRequest")
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UpdatePlayAreaRequest) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdatePlayAreaRequest) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdatePlayAreaRequestEntityTooLarge as json.
+func (s *UpdatePlayAreaRequestEntityTooLarge) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes UpdatePlayAreaRequestEntityTooLarge from json.
+func (s *UpdatePlayAreaRequestEntityTooLarge) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdatePlayAreaRequestEntityTooLarge to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdatePlayAreaRequestEntityTooLarge(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UpdatePlayAreaRequestEntityTooLarge) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdatePlayAreaRequestEntityTooLarge) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdatePlayAreaRequestVisibility as json.
+func (s UpdatePlayAreaRequestVisibility) Encode(e *jx.Encoder) {
+	e.Str(string(s))
+}
+
+// Decode decodes UpdatePlayAreaRequestVisibility from json.
+func (s *UpdatePlayAreaRequestVisibility) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdatePlayAreaRequestVisibility to nil")
+	}
+	v, err := d.StrBytes()
+	if err != nil {
+		return err
+	}
+	// Try to use constant string.
+	switch UpdatePlayAreaRequestVisibility(v) {
+	case UpdatePlayAreaRequestVisibilityPrivate:
+		*s = UpdatePlayAreaRequestVisibilityPrivate
+	case UpdatePlayAreaRequestVisibilityUnlisted:
+		*s = UpdatePlayAreaRequestVisibilityUnlisted
+	default:
+		*s = UpdatePlayAreaRequestVisibility(v)
+	}
+
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s UpdatePlayAreaRequestVisibility) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdatePlayAreaRequestVisibility) UnmarshalJSON(data []byte) error {
+	d := jx.DecodeBytes(data)
+	return s.Decode(d)
+}
+
+// Encode encodes UpdatePlayAreaUnauthorized as json.
+func (s *UpdatePlayAreaUnauthorized) Encode(e *jx.Encoder) {
+	unwrapped := (*BackendError)(s)
+
+	unwrapped.Encode(e)
+}
+
+// Decode decodes UpdatePlayAreaUnauthorized from json.
+func (s *UpdatePlayAreaUnauthorized) Decode(d *jx.Decoder) error {
+	if s == nil {
+		return errors.New("invalid: unable to decode UpdatePlayAreaUnauthorized to nil")
+	}
+	var unwrapped BackendError
+	if err := func() error {
+		if err := unwrapped.Decode(d); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		return errors.Wrap(err, "alias")
+	}
+	*s = UpdatePlayAreaUnauthorized(unwrapped)
+	return nil
+}
+
+// MarshalJSON implements stdjson.Marshaler.
+func (s *UpdatePlayAreaUnauthorized) MarshalJSON() ([]byte, error) {
+	e := jx.Encoder{}
+	s.Encode(&e)
+	return e.Bytes(), nil
+}
+
+// UnmarshalJSON implements stdjson.Unmarshaler.
+func (s *UpdatePlayAreaUnauthorized) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

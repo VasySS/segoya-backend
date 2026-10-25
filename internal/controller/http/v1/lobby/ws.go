@@ -13,6 +13,7 @@ import (
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 )
@@ -264,15 +265,7 @@ func (h Handler) processSettingsNew(
 	}
 
 	if err := settings.Validate(); err != nil {
-		switch {
-		case errors.Is(err, lobby.ErrInvalidProvider):
-			session.SendError("provider field is set wrong")
-		case errors.Is(err, lobby.ErrInvalidRounds):
-			session.SendError("rounds must be between 1 and 10")
-		case errors.Is(err, lobby.ErrInvalidTimerSeconds):
-			session.SendError("timer must be between 10 and 600")
-		}
-
+		sendSettingsValidationError(session, err)
 		return
 	}
 
@@ -283,13 +276,43 @@ func (h Handler) processSettingsNew(
 		Settings:    settings,
 	}); err != nil {
 		slog.Error("error updating lobby settings", slog.Any("error", err))
+
+		if playarea.IsInvalid(err) || errors.Is(err, playarea.ErrNotFound) {
+			session.SendError(err.Error())
+			return
+		}
+
 		session.SendError("error updating lobby settings")
 
 		return
+	}
+
+	stored, err := h.uc.GetLobby(ctx, lobbyID)
+	if err != nil {
+		session.SendError("error reading updated lobby settings")
+		return
+	}
+
+	settings = dto.LobbySettingsMessage{
+		Provider: stored.Provider, Rounds: stored.Rounds, TimerSeconds: stored.TimerSeconds,
+		MovementAllowed: stored.MovementAllowed, PlayArea: stored.PlayArea,
 	}
 
 	_ = h.ws.Broadcast(lobbyID, transport.WebSocketMessageOutput{
 		Type:    dto.LobbyMessageTypeSettingsChanged,
 		Payload: map[string]any{"settings": settings},
 	})
+}
+
+func sendSettingsValidationError(session transport.WebSocketSession, err error) {
+	switch {
+	case errors.Is(err, lobby.ErrInvalidProvider):
+		session.SendError("provider field is set wrong")
+	case errors.Is(err, lobby.ErrInvalidRounds):
+		session.SendError("rounds must be between 1 and 10")
+	case errors.Is(err, lobby.ErrInvalidTimerSeconds):
+		session.SendError("timer must be between 10 and 600")
+	default:
+		session.SendError("invalid play area")
+	}
 }

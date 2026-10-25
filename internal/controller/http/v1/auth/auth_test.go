@@ -154,6 +154,7 @@ func TestAuthentication_CaptchaSubmissions(t *testing.T) {
 					nil,
 					nil,
 					nil,
+					nil,
 				)
 
 				ctx := context.WithValue(t.Context(), requestContextKey{}, "request metadata")

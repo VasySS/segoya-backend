@@ -11,6 +11,7 @@ type Handler interface {
 	AuthHandler
 	LobbiesHandler
 	MultiplayerHandler
+	PlayAreasHandler
 	SingleplayerHandler
 	UsersHandler
 	// GetHealth implements getHealth operation.
@@ -181,6 +182,61 @@ type MultiplayerHandler interface {
 	//
 	// POST /v1/multiplayer/{id}/round
 	NewMultiplayerRound(ctx context.Context, params NewMultiplayerRoundParams) (NewMultiplayerRoundRes, error)
+}
+
+// PlayAreasHandler handles operations described by OpenAPI v3 specification.
+//
+// x-ogen-operation-group: PlayAreas
+type PlayAreasHandler interface {
+	// CountPlayArea implements countPlayArea operation.
+	//
+	// Exact provider-specific count including the boundary; zero matches is a successful response. Maximum
+	// body size is 64 KiB; query deadline is three seconds.
+	//
+	// POST /v1/play-areas/count
+	CountPlayArea(ctx context.Context, req *CountPlayAreaRequest) (CountPlayAreaRes, error)
+	// CreatePlayArea implements createPlayArea operation.
+	//
+	// Save a named custom polygon.
+	//
+	// POST /v1/play-areas
+	CreatePlayArea(ctx context.Context, req *CreatePlayAreaRequest) (CreatePlayAreaRes, error)
+	// DeletePlayArea implements deletePlayArea operation.
+	//
+	// Delete an area you own.
+	//
+	// DELETE /v1/play-areas/{id}
+	DeletePlayArea(ctx context.Context, params DeletePlayAreaParams) (DeletePlayAreaRes, error)
+	// GetPlayArea implements getPlayArea operation.
+	//
+	// Read your area or an unlisted area shared by ID.
+	//
+	// GET /v1/play-areas/{id}
+	GetPlayArea(ctx context.Context, params GetPlayAreaParams) (GetPlayAreaRes, error)
+	// GetPlayAreaPreset implements getPlayAreaPreset operation.
+	//
+	// Get an immutable preset boundary and attribution.
+	//
+	// GET /v1/play-areas/presets/{id}
+	GetPlayAreaPreset(ctx context.Context, params GetPlayAreaPresetParams) (GetPlayAreaPresetRes, error)
+	// GetPlayAreaPresets implements getPlayAreaPresets operation.
+	//
+	// List provider-specific predefined areas.
+	//
+	// GET /v1/play-areas/presets
+	GetPlayAreaPresets(ctx context.Context, params GetPlayAreaPresetsParams) (GetPlayAreaPresetsRes, error)
+	// GetPlayAreas implements getPlayAreas operation.
+	//
+	// List your saved custom areas.
+	//
+	// GET /v1/play-areas
+	GetPlayAreas(ctx context.Context, params GetPlayAreasParams) (GetPlayAreasRes, error)
+	// UpdatePlayArea implements updatePlayArea operation.
+	//
+	// Edit an area you own.
+	//
+	// PATCH /v1/play-areas/{id}
+	UpdatePlayArea(ctx context.Context, req *UpdatePlayAreaRequest, params UpdatePlayAreaParams) (UpdatePlayAreaRes, error)
 }
 
 // SingleplayerHandler handles operations described by OpenAPI v3 specification.

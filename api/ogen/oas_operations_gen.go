@@ -6,7 +6,10 @@ package api
 type OperationName = string
 
 const (
+	CountPlayAreaOperation              OperationName = "CountPlayArea"
+	CreatePlayAreaOperation             OperationName = "CreatePlayArea"
 	DeleteDiscordOperation              OperationName = "DeleteDiscord"
+	DeletePlayAreaOperation             OperationName = "DeletePlayArea"
 	DeleteUserSessionOperation          OperationName = "DeleteUserSession"
 	DeleteYandexOperation               OperationName = "DeleteYandex"
 	DiscordLoginOperation               OperationName = "DiscordLogin"
@@ -20,6 +23,10 @@ const (
 	GetMultiplayerGameGuessesOperation  OperationName = "GetMultiplayerGameGuesses"
 	GetMultiplayerRoundOperation        OperationName = "GetMultiplayerRound"
 	GetOAuthProvidersOperation          OperationName = "GetOAuthProviders"
+	GetPlayAreaOperation                OperationName = "GetPlayArea"
+	GetPlayAreaPresetOperation          OperationName = "GetPlayAreaPreset"
+	GetPlayAreaPresetsOperation         OperationName = "GetPlayAreaPresets"
+	GetPlayAreasOperation               OperationName = "GetPlayAreas"
 	GetPrivateProfileOperation          OperationName = "GetPrivateProfile"
 	GetPublicProfileOperation           OperationName = "GetPublicProfile"
 	GetRootOperation                    OperationName = "GetRoot"
@@ -39,6 +46,7 @@ const (
 	NewYandexCallbackOperation          OperationName = "NewYandexCallback"
 	RefreshTokensOperation              OperationName = "RefreshTokens"
 	RegisterOperation                   OperationName = "Register"
+	UpdatePlayAreaOperation             OperationName = "UpdatePlayArea"
 	UpdateUserOperation                 OperationName = "UpdateUser"
 	UpdateUserAvatarOperation           OperationName = "UpdateUserAvatar"
 	YandexLoginOperation                OperationName = "YandexLogin"

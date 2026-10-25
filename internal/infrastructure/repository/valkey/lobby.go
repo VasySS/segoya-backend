@@ -2,6 +2,7 @@ package valkey
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 const (
@@ -23,6 +25,7 @@ const (
 	lobbyCreatorIDField       = "creatorID"
 	lobbyCreatedAtField       = "createdAt"
 	lobbyRoundsField          = "rounds"
+	lobbyPlayAreaField        = "playArea"
 	lobbyProviderField        = "provider"
 	lobbyTimerSecondsField    = "timerSeconds"
 	lobbyMovementAllowedField = "movementAllowed"
@@ -51,6 +54,16 @@ func (r *Repository) createLobby(ctx context.Context, req dto.NewLobbyRequestDB,
 		return fmt.Errorf("validate game settings and state: %w", err)
 	}
 
+	selection, err := req.PlayArea.Normalize()
+	if err != nil {
+		return fmt.Errorf("normalize play area: %w", err)
+	}
+
+	areaJSON, err := json.Marshal(selection)
+	if err != nil {
+		return fmt.Errorf("marshal play area: %w", err)
+	}
+
 	ttl := req.Expiration
 	if ttl <= 0 {
 		ttl = 3 * time.Minute
@@ -62,6 +75,7 @@ func (r *Repository) createLobby(ctx context.Context, req dto.NewLobbyRequestDB,
 	}
 
 	fields := map[string]string{
+		lobbyPlayAreaField:        string(areaJSON),
 		lobbyIDField:              req.ID,
 		lobbyCreatorIDField:       req.CreatorID.String(),
 		lobbyCreatedAtField:       req.RequestTime.Format(time.RFC3339Nano),
@@ -131,6 +145,16 @@ func (r *Repository) UpdateLobby(ctx context.Context, info lobby.Lobby) error {
 		return fmt.Errorf("validate game settings and state: %w", err)
 	}
 
+	selection, err := info.PlayArea.Normalize()
+	if err != nil {
+		return fmt.Errorf("normalize play area: %w", err)
+	}
+
+	areaJSON, err := json.Marshal(selection)
+	if err != nil {
+		return fmt.Errorf("marshal play area: %w", err)
+	}
+
 	return r.runLobbyTransaction(ctx, info.ID, func(client valkey.DedicatedClient) (valkey.Commands, error) {
 		key, data, err := readWatchedLobby(ctx, client, info.ID)
 		if err != nil {
@@ -144,6 +168,7 @@ func (r *Repository) UpdateLobby(ctx context.Context, info lobby.Lobby) error {
 		return valkey.Commands{
 			client.B().Hset().Key(key).FieldValue().
 				FieldValue(lobbyRoundsField, strconv.Itoa(info.Rounds)).
+				FieldValue(lobbyPlayAreaField, string(areaJSON)).
 				FieldValue(lobbyProviderField, info.Provider).
 				FieldValue(lobbyTimerSecondsField, strconv.Itoa(info.TimerSeconds)).
 				FieldValue(lobbyMovementAllowedField, strconv.FormatBool(info.MovementAllowed)).Build(),
@@ -295,7 +320,13 @@ func parseLobbyData(id string, data map[string]string) (lobby.Lobby, error) {
 		return lobby.Lobby{}, fmt.Errorf("invalid private: %w", err)
 	}
 
+	selection, err := parseLobbyPlayArea(data[lobbyPlayAreaField])
+	if err != nil {
+		return lobby.Lobby{}, err
+	}
+
 	return lobby.Lobby{
+		PlayArea:        selection,
 		ID:              id,
 		CreatorID:       creatorID,
 		CreatedAt:       createdAt,
@@ -307,4 +338,20 @@ func parseLobbyData(id string, data map[string]string) (lobby.Lobby, error) {
 		CurrentPlayers:  currentPlayers,
 		Private:         private,
 	}, nil
+}
+
+func parseLobbyPlayArea(value string) (playarea.Selection, error) {
+	var selection playarea.Selection
+	if value != "" {
+		if err := json.Unmarshal([]byte(value), &selection); err != nil {
+			return playarea.Selection{}, fmt.Errorf("invalid play area: %w", err)
+		}
+	}
+
+	selection, err := selection.Normalize()
+	if err != nil {
+		return playarea.Selection{}, fmt.Errorf("invalid play area: %w", err)
+	}
+
+	return selection, nil
 }

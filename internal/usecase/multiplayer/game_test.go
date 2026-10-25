@@ -104,7 +104,8 @@ func TestUsecase_NewGame(t *testing.T) {
 				createdPanoID := uuid.Must(uuid.NewV7())
 				createdStreetviewID := "external_streetview_id"
 
-				fs.pano.On("NewStreetview", mock.Anything, game.PanoramaProvider(args.req.Provider)).
+				fs.pano.On("NewStreetviewInArea",
+					mock.Anything, game.PanoramaProvider(args.req.Provider), mock.Anything, mock.Anything, true).
 					Return(game.PanoramaMetadata{
 						ID:           createdPanoID,
 						StreetviewID: createdStreetviewID,
@@ -161,7 +162,7 @@ func TestUsecase_NewGame(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := multiplayer.NewUsecase(cfg, repo, pano)
+			uc := multiplayer.NewUsecase(cfg, repo, pano, areaUsecaseStub{})
 
 			got, err := uc.NewGame(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
@@ -267,7 +268,7 @@ func TestUsecase_GetGame(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano)
+			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano, areaUsecaseStub{})
 
 			got, err := uc.GetGame(t.Context(), tt.args.gameID, tt.args.userID)
 			tt.wantErr(t, err)
@@ -437,7 +438,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano)
+			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano, areaUsecaseStub{})
 
 			guesses, err := uc.GetGameGuesses(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
@@ -512,7 +513,7 @@ func TestUsecase_GameUser(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano)
+			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano, areaUsecaseStub{})
 
 			got, err := uc.GetGameUser(t.Context(), tt.args.userID, tt.args.gameID)
 			tt.wantErr(t, err)
@@ -579,7 +580,7 @@ func TestUsecase_GameUsers(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano)
+			uc := multiplayer.NewUsecase(multiplayer.Config{}, repo, pano, areaUsecaseStub{})
 
 			got, err := uc.GetGameUsers(t.Context(), tt.args.gameID)
 			tt.wantErr(t, err)

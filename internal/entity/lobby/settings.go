@@ -1,13 +1,17 @@
 package lobby
 
-import "github.com/VasySS/segoya-backend/internal/entity/game"
+import (
+	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
+)
 
 // Settings contains the game settings of a lobby.
 type Settings struct {
-	Provider        string `json:"provider"`
-	MovementAllowed bool   `json:"movementAllowed"`
-	Rounds          int    `json:"rounds"`
-	TimerSeconds    int    `json:"timerSeconds"`
+	PlayArea        playarea.Selection `json:"playArea"`
+	Provider        string             `json:"provider"`
+	MovementAllowed bool               `json:"movementAllowed"`
+	Rounds          int                `json:"rounds"`
+	TimerSeconds    int                `json:"timerSeconds"`
 }
 
 // Validate checks the provider, round count, and timer duration in that order.

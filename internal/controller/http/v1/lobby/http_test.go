@@ -16,6 +16,7 @@ import (
 	handler "github.com/VasySS/segoya-backend/internal/controller/http/v1/lobby"
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/user"
 	wsfake "github.com/VasySS/segoya-backend/tests/websocket"
 )
 
@@ -25,6 +26,12 @@ type httpUsecase struct {
 	newLobby   func(context.Context, dto.NewLobbyRequest) (string, error)
 	getLobby   func(context.Context, string) (lobby.Lobby, error)
 	getLobbies func(context.Context, dto.GetLobbiesRequest) ([]lobby.Lobby, int, error)
+}
+
+type httpToken struct{ id uuid.UUID }
+
+func (s httpToken) FromContext(context.Context) (user.AccessTokenClaims, bool) {
+	return user.AccessTokenClaims{UserID: s.id}, s.id != uuid.Nil
 }
 
 func (u httpUsecase) NewLobby(ctx context.Context, req dto.NewLobbyRequest) (string, error) {
@@ -69,7 +76,7 @@ func TestNewLobbyHTTP(t *testing.T) {
 
 				return "created-lobby", tt.usecaseErr
 			}}
-			h := handler.NewHandler(handler.Config{}, uc, nil, &wsfake.Service{})
+			h := handler.NewHandler(handler.Config{}, uc, httpToken{id: req.CreatorID}, &wsfake.Service{})
 			before := time.Now()
 			response, err := h.NewLobby(t.Context(), req)
 			require.NoError(t, err)

@@ -46,7 +46,7 @@ func TestUsecase_LobbyUserConnect(t *testing.T) {
 				mock.InOrder(lookup, admit)
 			}
 
-			uc := lobby.NewUsecase(lobby.Config{}, nil, users, repo, nil)
+			uc := lobby.NewUsecase(lobby.Config{}, nil, users, repo, nil, areaUsecaseStub{})
 
 			got, err := uc.ConnectLobbyUser(t.Context(), "lobby", id, "session")
 			if scenario != "success" {
@@ -77,7 +77,7 @@ func TestUsecase_LobbyUserDisconnect(t *testing.T) {
 			}
 
 			repo.On("ReleaseLobbyUser", mock.Anything, "lobby", id, "session", 3*time.Minute).Return(want).Once()
-			uc := lobby.NewUsecase(lobby.Config{LobbyExpiration: 3 * time.Minute}, nil, nil, repo, nil)
+			uc := lobby.NewUsecase(lobby.Config{LobbyExpiration: 3 * time.Minute}, nil, nil, repo, nil, areaUsecaseStub{})
 			require.ErrorIs(t, uc.DisconnectLobbyUser(t.Context(), "lobby", id, "session"), want)
 		})
 	}
@@ -144,7 +144,7 @@ func TestUsecase_LobbyGameStart(t *testing.T) {
 				}
 			}
 
-			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, repo, games)
+			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, repo, games, areaUsecaseStub{})
 			got, err := uc.StartLobbyGame(t.Context(), req)
 			require.ErrorIs(t, err, tt.want)
 

@@ -55,7 +55,7 @@ func newMultiplayerHarness(t *testing.T) *multiplayerHarness {
 	}
 	h.game.CreatorID = h.userID
 	h.round.GameID, h.round.StartedAt, h.round.EndedAt = h.game.ID, h.now, h.now.Add(-h.config.RoundEndDelay)
-	h.uc = multiplayer.NewUsecase(h.config, h.repo, h.pano)
+	h.uc = multiplayer.NewUsecase(h.config, h.repo, h.pano, areaUsecaseStub{})
 
 	return h
 }
@@ -134,7 +134,8 @@ func TestUsecase_NewRound(t *testing.T) {
 			if tt.reuse {
 				want = h.round
 			} else if tt.want == nil {
-				generate := h.pano.On("NewStreetview", mock.Anything, game.GoogleProvider).Return(h.metadata, nil).Once()
+				generate := h.pano.On("NewStreetviewInArea",
+					mock.Anything, game.GoogleProvider, mock.Anything, mock.Anything, true).Return(h.metadata, nil).Once()
 				want = mp.Round{
 					ID:        h.round.ID,
 					GameID:    h.game.ID,
@@ -250,11 +251,14 @@ func setupMultiplayerNewRoundFailure(h *multiplayerHarness, failure string, caus
 	h.repo.On("GetMultiplayerRound", mock.Anything, h.game.ID, 2).Return(mp.Round{}, mp.ErrRoundNotFound).Once()
 
 	if failure == "panorama" {
-		h.pano.On("NewStreetview", mock.Anything, game.GoogleProvider).Return(game.PanoramaMetadata{}, cause).Once()
+		h.pano.On("NewStreetviewInArea",
+			mock.Anything, game.GoogleProvider, mock.Anything, mock.Anything, true).Return(game.PanoramaMetadata{}, cause).Once()
+
 		return
 	}
 
-	h.pano.On("NewStreetview", mock.Anything, game.GoogleProvider).Return(h.metadata, nil).Once()
+	h.pano.On("NewStreetviewInArea",
+		mock.Anything, game.GoogleProvider, mock.Anything, mock.Anything, true).Return(h.metadata, nil).Once()
 
 	var insertErr error
 	if failure == "insert" {

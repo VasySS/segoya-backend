@@ -5,6 +5,13 @@ BadRequest:
       schema:
         $ref: "schemas/error.yaml#/BackendError"
 
+PayloadTooLarge:
+  description: Area-bearing request body exceeds 64 KiB.
+  content:
+    application/problem+json:
+      schema:
+        $ref: "schemas/error.yaml#/BackendError"
+
 Unauthorized:
   description: An unauthorized request error response.
   content:

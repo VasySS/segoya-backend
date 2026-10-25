@@ -13,6 +13,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
@@ -23,6 +24,29 @@ func TestSingleplayerTestSuite(t *testing.T) {
 }
 
 type SingleplayerTestSuite struct{ postgresTestSuite }
+
+func (s *SingleplayerTestSuite) TestSingleplayerPlayAreaRoundTrip() {
+	owner := s.newTestUser()
+	selection := playarea.Selection{Type: "polygon", Polygon: &playarea.Polygon{
+		Type: "Polygon", Coordinates: [][][]float64{{{10, 20}, {11, 20}, {11, 21}, {10, 20}}},
+	}}
+	id, err := s.postgresRepo.NewSingleplayerGame(s.ctx, dto.NewSingleplayerGameRequest{
+		UserID: owner.ID, Provider: "google", Rounds: 3, RequestTime: fixtureTime(), PlayArea: selection,
+	})
+	s.Require().NoError(err)
+
+	got, err := s.postgresRepo.GetSingleplayerGame(s.ctx, id)
+	s.Require().NoError(err)
+	s.Equal(selection, got.PlayArea)
+
+	listed, total, err := s.postgresRepo.GetSingleplayerGames(s.ctx, dto.GetSingleplayerGamesRequest{
+		UserID: owner.ID, Page: 1, PageSize: 10,
+	})
+	s.Require().NoError(err)
+	s.Equal(1, total)
+	s.Require().Len(listed, 1)
+	s.Equal(selection, listed[0].PlayArea)
+}
 
 func (s *SingleplayerTestSuite) TestNewSingleplayerGame() {
 	newUser := s.newTestUser()
@@ -36,6 +60,7 @@ func (s *SingleplayerTestSuite) TestNewSingleplayerGame() {
 	s.EqualValues(gameReq.Provider, game.Provider)
 	s.Equal(gameReq.MovementAllowed, game.MovementAllowed)
 	s.Equal(gameReq.RequestTime, game.CreatedAt)
+	s.Equal(playarea.Selection{Type: "all"}, game.PlayArea)
 }
 
 func (s *SingleplayerTestSuite) TestSingleplayerGameByID() {

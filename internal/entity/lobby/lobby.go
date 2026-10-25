@@ -7,20 +7,22 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 // Lobby struct contains lobby information, including game details.
 type Lobby struct {
-	ID              string    `json:"id"`
-	CreatorID       uuid.UUID `json:"creatorID"`
-	CreatedAt       time.Time `json:"createdAt"`
-	Rounds          int       `json:"rounds"`
-	Provider        string    `json:"provider"`
-	MovementAllowed bool      `json:"movementAllowed"`
-	TimerSeconds    int       `json:"timerSeconds"`
-	CurrentPlayers  int       `json:"currentPlayers"`
-	MaxPlayers      int       `json:"maxPlayers"`
-	Private         bool      `json:"private"`
+	PlayArea        playarea.Selection `json:"playArea"`
+	ID              string             `json:"id"`
+	CreatorID       uuid.UUID          `json:"creatorID"`
+	CreatedAt       time.Time          `json:"createdAt"`
+	Rounds          int                `json:"rounds"`
+	Provider        string             `json:"provider"`
+	MovementAllowed bool               `json:"movementAllowed"`
+	TimerSeconds    int                `json:"timerSeconds"`
+	CurrentPlayers  int                `json:"currentPlayers"`
+	MaxPlayers      int                `json:"maxPlayers"`
+	Private         bool               `json:"private"`
 }
 
 // IsFull returns true if the lobby has reached its maximum player capacity.
@@ -61,6 +63,7 @@ func (l Lobby) WithSettings(actorID uuid.UUID, settings Settings) (Lobby, error)
 	}
 
 	l.Provider = settings.Provider
+	l.PlayArea = settings.PlayArea
 	l.MovementAllowed = settings.MovementAllowed
 	l.Rounds = settings.Rounds
 	l.TimerSeconds = settings.TimerSeconds

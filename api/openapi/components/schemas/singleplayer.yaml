@@ -17,6 +17,8 @@ NewSingleplayerGameRequest:
             maximum: 9
     movementAllowed:
       type: boolean
+    playArea:
+      $ref: 'playarea.yaml#/PlayAreaSelection'
     provider:
       $ref: "panorama.yaml#/Provider"
   required: [rounds, movementAllowed, provider]
@@ -38,6 +40,8 @@ SingleplayerGame:
       type: integer
     movementAllowed:
       type: boolean
+    playArea:
+      $ref: 'playarea.yaml#/PlayAreaSelection'
     provider:
       $ref: "panorama.yaml#/Provider"
     score:

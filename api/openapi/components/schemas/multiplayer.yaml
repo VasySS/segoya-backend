@@ -17,6 +17,8 @@ MultiplayerGame:
       type: boolean
     players:
       type: integer
+    playArea:
+      $ref: 'playarea.yaml#/PlayAreaSelection'
     provider:
       $ref: "panorama.yaml#/Provider"
     finished:

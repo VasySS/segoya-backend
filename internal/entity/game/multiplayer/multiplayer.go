@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
@@ -150,6 +151,7 @@ func (p Participants) HasUser(userID uuid.UUID) error {
 
 // Game struct contains multiplayer game information.
 type Game struct {
+	PlayArea        playarea.Selection    `db:"play_area"        json:"playArea"`
 	ID              uuid.UUID             `db:"id"               json:"id"`
 	CreatorID       uuid.UUID             `db:"creator_id"       json:"creatorID"`
 	Rounds          int                   `db:"rounds"           json:"rounds"`

@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/dto"
+	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 )
 
@@ -78,6 +79,7 @@ func (uc Usecase) StartLobbyGame(
 		TimerSeconds:     lobbyRepo.TimerSeconds,
 		MovementAllowed:  lobbyRepo.MovementAllowed,
 		Provider:         lobbyRepo.Provider,
+		PlayArea:         lobbyRepo.PlayArea,
 	})
 	if err != nil {
 		span.RecordError(err)
@@ -111,8 +113,21 @@ func (uc Usecase) UpdateLobbySettings(
 		return err //nolint:wrapcheck // Preserve the existing unwrapped permission error.
 	}
 
+	if uc.areas == nil {
+		return errAreaServiceNotConfigured
+	}
+
+	selection, err := uc.areas.Resolve(ctx,
+		game.PanoramaProvider(lobbyInfo.Provider), lobbyInfo.PlayArea, req.Creator.ID)
+	if err != nil {
+		return fmt.Errorf("resolve play area: %w", err)
+	}
+
+	lobbyInfo.PlayArea = selection
+
 	if err := uc.lobbyRepo.UpdateLobby(ctx, lobbyInfo); err != nil {
 		span.RecordError(err)
+
 		return fmt.Errorf("error updating lobby settings: %w", err)
 	}
 

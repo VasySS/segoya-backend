@@ -27,6 +27,14 @@ func NewWebSocketService() *WebSocketService {
 	}
 }
 
+// NewWebSocketServiceWithLimit bounds incoming lobby settings, including polygons.
+func NewWebSocketServiceWithLimit(maxBytes int64) *WebSocketService {
+	ws := NewWebSocketService()
+	ws.m.Config.MaxMessageSize = maxBytes
+
+	return ws
+}
+
 // Close closes the WebSocket service.
 func (ws *WebSocketService) Close() error {
 	if err := ws.m.Close(); err != nil {

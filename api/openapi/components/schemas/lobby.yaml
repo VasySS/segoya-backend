@@ -12,6 +12,8 @@ NewLobby:
       type: integer
       minimum: 1
       maximum: 10
+    playArea:
+      $ref: 'playarea.yaml#/PlayAreaSelection'
     provider:
       $ref: "panorama.yaml#/Provider"
     timerSeconds:
@@ -43,6 +45,8 @@ Lobby:
       format: date-time
     rounds:
       type: integer
+    playArea:
+      $ref: 'playarea.yaml#/PlayAreaSelection'
     provider:
       $ref: "panorama.yaml#/Provider"
     movementAllowed:

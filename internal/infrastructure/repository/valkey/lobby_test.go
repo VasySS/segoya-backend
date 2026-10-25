@@ -12,6 +12,7 @@ import (
 
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 func TestLobbyTestSuite(t *testing.T) {
@@ -33,7 +34,8 @@ func (s *LobbyTestSuite) TestLobbyRoundTrip() {
 			got, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
 			s.Require().NoError(err)
 			s.Equal(lobby.Lobby{
-				ID: req.ID, CreatorID: req.CreatorID, CreatedAt: req.RequestTime,
+				PlayArea: playarea.Selection{Type: "all"},
+				ID:       req.ID, CreatorID: req.CreatorID, CreatedAt: req.RequestTime,
 				Provider: req.Provider, Rounds: req.Rounds, TimerSeconds: req.TimerSeconds,
 				MaxPlayers: req.MaxPlayers, MovementAllowed: req.MovementAllowed, Private: tc.private,
 			}, got)
@@ -59,6 +61,9 @@ func (s *LobbyTestSuite) TestUpdateLobbyPreservesMembershipAndIdentity() {
 
 			updated := original
 			updated.Provider, updated.Rounds, updated.TimerSeconds, updated.MovementAllowed = "yandex", 5, 60, false
+			updated.PlayArea = playarea.Selection{Type: "polygon", Polygon: &playarea.Polygon{
+				Type: "Polygon", Coordinates: [][][]float64{{{30, 50}, {31, 50}, {31, 51}, {30, 50}}},
+			}}
 			s.Require().NoError(s.valkeyRepo.UpdateLobby(s.ctx, updated))
 			got, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
 			s.Require().NoError(err)
@@ -73,6 +78,16 @@ func (s *LobbyTestSuite) TestUpdateLobbyPreservesMembershipAndIdentity() {
 			s.Equal(1, got.CurrentPlayers)
 		})
 	}
+}
+
+func (s *LobbyTestSuite) TestLegacyLobbyAreaDefaultsToAll() {
+	req := s.newLobby(false)
+	err := s.client.Do(s.ctx, s.client.B().Hdel().Key("lobby:"+req.ID).Field("playArea").Build()).Error()
+	s.Require().NoError(err)
+
+	got, err := s.valkeyRepo.GetLobby(s.ctx, req.ID)
+	s.Require().NoError(err)
+	s.Equal(playarea.Selection{Type: "all"}, got.PlayArea)
 }
 
 func (s *LobbyTestSuite) TestGetLobbiesPagination() {

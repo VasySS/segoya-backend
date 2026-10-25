@@ -11,6 +11,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 // NewSingleplayerGame creates new singleplayer game.
@@ -36,7 +37,17 @@ func (h Handler) NewSingleplayerGame(
 		}, nil
 	}
 
+	selection, err := dto.PlayAreaFromAPI(req.PlayArea)
+	if err != nil {
+		return &api.NewSingleplayerGameBadRequest{
+			Title:  "Invalid play area",
+			Status: http.StatusBadRequest,
+			Detail: err.Error(),
+		}, nil
+	}
+
 	gameID, err := h.uc.NewGame(ctx, dto.NewSingleplayerGameRequest{
+		PlayArea:        selection,
 		RequestTime:     time.Now().UTC(),
 		UserID:          claims.UserID,
 		Rounds:          req.Rounds,
@@ -45,6 +56,22 @@ func (h Handler) NewSingleplayerGame(
 		MovementAllowed: req.MovementAllowed,
 	})
 	if err != nil {
+		if errors.Is(err, playarea.ErrNotFound) {
+			return &api.NewSingleplayerGameNotFound{
+				Title:  "Play area not found",
+				Status: http.StatusNotFound,
+				Detail: playarea.ErrNotFound.Error(),
+			}, nil
+		}
+
+		if playarea.IsInvalid(err) {
+			return &api.NewSingleplayerGameBadRequest{
+				Title:  "Invalid play area",
+				Status: http.StatusBadRequest,
+				Detail: err.Error(),
+			}, nil
+		}
+
 		slog.Error("error creating singleplayer game", slog.Any("error", err))
 
 		return &api.NewSingleplayerGameInternalServerError{

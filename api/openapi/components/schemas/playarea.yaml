@@ -1,0 +1,184 @@
+Polygon:
+  type: object
+  additionalProperties: false
+  properties:
+    type:
+      type: string
+      enum: [Polygon]
+    coordinates:
+      description: One closed ring, 3-500 distinct vertices; each coordinate is [longitude, latitude]. Holes and antimeridian crossings are unsupported.
+      type: array
+      minItems: 1
+      maxItems: 1
+      items:
+        type: array
+        minItems: 4
+        maxItems: 501
+        items:
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            type: number
+            format: double
+  required: [type, coordinates]
+
+PlayAreaSelection:
+  description: Tagged union validated by the backend. all has no other fields; presets requires only presetIDs; polygon requires only polygon; saved requires only savedID. Omitted settings select all. Applied saved selections return a polygon snapshot.
+  type: object
+  additionalProperties: false
+  properties:
+    type:
+      type: string
+      enum: [all, presets, polygon, saved]
+    presetIDs:
+      type: array
+      minItems: 1
+      maxItems: 300
+      items:
+        type: string
+        format: uuid
+    polygon:
+      $ref: '#/Polygon'
+    savedID:
+      type: string
+      format: uuid
+  required: [type]
+
+CountPlayAreaRequest:
+  type: object
+  properties:
+    provider:
+      $ref: 'panorama.yaml#/Provider'
+    playArea:
+      $ref: '#/PlayAreaSelection'
+  required: [provider, playArea]
+
+PlayAreaCount:
+  type: object
+  properties:
+    locationCount:
+      type: integer
+      minimum: 0
+  required: [locationCount]
+
+CreatePlayAreaRequest:
+  type: object
+  additionalProperties: false
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 100
+    polygon:
+      $ref: '#/Polygon'
+    visibility:
+      type: string
+      enum: [private, unlisted]
+      default: private
+  required: [name, polygon]
+
+UpdatePlayAreaRequest:
+  type: object
+  additionalProperties: false
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 100
+    polygon:
+      $ref: '#/Polygon'
+    visibility:
+      type: string
+      enum: [private, unlisted]
+
+SavedPlayArea:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    ownerID:
+      type: string
+      format: uuid
+    name:
+      type: string
+    polygon:
+      $ref: '#/Polygon'
+    visibility:
+      type: string
+      enum: [private, unlisted]
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+  required: [id, ownerID, name, polygon, visibility, createdAt, updatedAt]
+
+SavedPlayAreas:
+  type: object
+  properties:
+    total:
+      type: integer
+    areas:
+      type: array
+      items:
+        $ref: '#/SavedPlayArea'
+  required: [total, areas]
+
+PresetGeometry:
+  type: object
+  properties:
+    type:
+      type: string
+      enum: [MultiPolygon]
+    coordinates:
+      type: array
+      items:
+        type: array
+        items:
+          type: array
+          items:
+            type: array
+            items:
+              type: number
+              format: double
+  required: [type, coordinates]
+
+PlayAreaPreset:
+  type: object
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+    kind:
+      type: string
+    countryCode:
+      type: string
+    version:
+      type: string
+    source:
+      type: string
+    license:
+      type: string
+    attribution:
+      type: string
+    providers:
+      type: array
+      items:
+        $ref: 'panorama.yaml#/Provider'
+    bounds:
+      description: West, south, east, north; display bounds in degrees.
+      type: array
+      items:
+        type: number
+        format: double
+    polygon:
+      $ref: '#/PresetGeometry'
+    locationCount:
+      description: Count for the requested provider in the preset list. Provider-independent detail responses omit this field.
+      type: integer
+  required: [id, name, kind, countryCode, version, source, license, attribution, providers, bounds]

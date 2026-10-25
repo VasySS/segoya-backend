@@ -16,6 +16,8 @@ get:
             $ref: "../../components/schemas/singleplayer.yaml#/SingleplayerGames"
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
     "401":
       $ref: "../../components/responses.yaml#/Unauthorized"
     "500":
@@ -48,7 +50,11 @@ post:
               - id
     "400":
       $ref: "../../components/responses.yaml#/BadRequest"
+    "404":
+      $ref: "../../components/responses.yaml#/NotFound"
     "401":
       $ref: "../../components/responses.yaml#/Unauthorized"
+    "413":
+      $ref: "../../components/responses.yaml#/PayloadTooLarge"
     "500":
       $ref: "../../components/responses.yaml#/ServerError"

@@ -8,6 +8,8 @@ import (
 	game "github.com/VasySS/segoya-backend/internal/entity/game"
 	mock "github.com/stretchr/testify/mock"
 
+	playarea "github.com/VasySS/segoya-backend/internal/entity/playarea"
+
 	uuid "github.com/google/uuid"
 )
 
@@ -44,27 +46,27 @@ func (_m *PanoramaUsecase) GetStreetview(ctx context.Context, provider game.Pano
 	return r0, r1
 }
 
-// NewStreetview provides a mock function with given fields: ctx, provider
-func (_m *PanoramaUsecase) NewStreetview(ctx context.Context, provider game.PanoramaProvider) (game.PanoramaMetadata, error) {
-	ret := _m.Called(ctx, provider)
+// NewStreetviewInArea provides a mock function with given fields: ctx, provider, selection, gameID, multiplayer
+func (_m *PanoramaUsecase) NewStreetviewInArea(ctx context.Context, provider game.PanoramaProvider, selection playarea.Selection, gameID uuid.UUID, multiplayer bool) (game.PanoramaMetadata, error) {
+	ret := _m.Called(ctx, provider, selection, gameID, multiplayer)
 
 	if len(ret) == 0 {
-		panic("no return value specified for NewStreetview")
+		panic("no return value specified for NewStreetviewInArea")
 	}
 
 	var r0 game.PanoramaMetadata
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, game.PanoramaProvider) (game.PanoramaMetadata, error)); ok {
-		return rf(ctx, provider)
+	if rf, ok := ret.Get(0).(func(context.Context, game.PanoramaProvider, playarea.Selection, uuid.UUID, bool) (game.PanoramaMetadata, error)); ok {
+		return rf(ctx, provider, selection, gameID, multiplayer)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, game.PanoramaProvider) game.PanoramaMetadata); ok {
-		r0 = rf(ctx, provider)
+	if rf, ok := ret.Get(0).(func(context.Context, game.PanoramaProvider, playarea.Selection, uuid.UUID, bool) game.PanoramaMetadata); ok {
+		r0 = rf(ctx, provider, selection, gameID, multiplayer)
 	} else {
 		r0 = ret.Get(0).(game.PanoramaMetadata)
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, game.PanoramaProvider) error); ok {
-		r1 = rf(ctx, provider)
+	if rf, ok := ret.Get(1).(func(context.Context, game.PanoramaProvider, playarea.Selection, uuid.UUID, bool) error); ok {
+		r1 = rf(ctx, provider, selection, gameID, multiplayer)
 	} else {
 		r1 = ret.Error(1)
 	}

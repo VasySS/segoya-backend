@@ -4,6 +4,7 @@ package singleplayer
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
@@ -12,6 +13,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/dto"
 	"github.com/VasySS/segoya-backend/internal/entity/game"
 	"github.com/VasySS/segoya-backend/internal/entity/game/singleplayer"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository"
 )
 
@@ -48,8 +50,27 @@ type Repository interface {
 //
 //go:generate go tool mockery --name=PanoramaUsecase
 type PanoramaUsecase interface {
-	NewStreetview(ctx context.Context, provider game.PanoramaProvider) (game.PanoramaMetadata, error)
+	NewStreetviewInArea(
+		ctx context.Context,
+		provider game.PanoramaProvider,
+		selection playarea.Selection,
+		gameID uuid.UUID,
+		multiplayer bool,
+	) (game.PanoramaMetadata, error)
 	GetStreetview(ctx context.Context, provider game.PanoramaProvider, id uuid.UUID) (game.PanoramaMetadata, error)
+}
+
+var errAreaServiceNotConfigured = errors.New("play area service is not configured")
+
+// AreaUsecase resolves the selection and checks that it can supply every round.
+type AreaUsecase interface {
+	Prepare(
+		ctx context.Context,
+		provider game.PanoramaProvider,
+		selection playarea.Selection,
+		userID uuid.UUID,
+		rounds int,
+	) (playarea.Selection, error)
 }
 
 // Usecase contains business logic for singleplayer game management.
@@ -57,6 +78,7 @@ type Usecase struct {
 	cfg    Config
 	repo   Repository
 	pano   PanoramaUsecase
+	areas  AreaUsecase
 	tracer trace.Tracer
 }
 
@@ -67,8 +89,14 @@ type Usecase struct {
 // repo - Implementation of the Repository interface for accessing game and round data.
 //
 // pano - Implementation of the PanoramaUsecase interface for working with streetview panoramas.
-func NewUsecase(cfg Config, repo Repository, pano PanoramaUsecase) *Usecase {
+func NewUsecase(cfg Config, repo Repository, pano PanoramaUsecase, areas ...AreaUsecase) *Usecase {
+	var areaUsecase AreaUsecase
+	if len(areas) > 0 {
+		areaUsecase = areas[0]
+	}
+
 	return &Usecase{
+		areas:  areaUsecase,
 		cfg:    cfg,
 		repo:   repo,
 		pano:   pano,

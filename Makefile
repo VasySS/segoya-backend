@@ -22,7 +22,7 @@ test:
 
 .PHONY: test-integration
 test-integration:
-	go test -mod=readonly -tags integration -shuffle=on -count=1 -p=1 -parallel=2 -timeout=5m $(TEST_FLAGS) ./internal/infrastructure/repository/... ./tests/integration
+	go test -mod=readonly -tags integration -shuffle=on -count=1 -p=1 -parallel=2 -timeout=5m $(TEST_FLAGS) ./internal/infrastructure/repository/... ./tests/integration ./migrations/...
 
 .PHONY: test-cover
 test-cover: | output
@@ -32,7 +32,7 @@ test-cover: | output
 
 .PHONY: test-cover-integration
 test-cover-integration: | output
-	go test -mod=readonly -tags integration -shuffle=on -count=1 -p=1 -parallel=2 -timeout=5m $(TEST_FLAGS) -coverpkg=$(COVERAGE_PACKAGES) -coverprofile=output/coverage-integration.out ./internal/infrastructure/repository/... ./tests/integration
+	go test -mod=readonly -tags integration -shuffle=on -count=1 -p=1 -parallel=2 -timeout=5m $(TEST_FLAGS) -coverpkg=$(COVERAGE_PACKAGES) -coverprofile=output/coverage-integration.out ./internal/infrastructure/repository/... ./tests/integration ./migrations/...
 	go tool cover -func=output/coverage-integration.out
 	go tool cover -html=output/coverage-integration.out -o output/coverage-integration.html
 

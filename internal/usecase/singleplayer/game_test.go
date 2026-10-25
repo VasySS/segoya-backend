@@ -89,7 +89,8 @@ func TestUsecase_NewGame(t *testing.T) {
 				createdPanoID := uuid.Must(uuid.NewV7())
 				createdStreetviewID := "some_streetview_id"
 
-				fs.panoUsecase.On("NewStreetview", mock.Anything, game.PanoramaProvider(args.req.Provider)).
+				fs.panoUsecase.On("NewStreetviewInArea",
+					mock.Anything, game.PanoramaProvider(args.req.Provider), mock.Anything, mock.Anything, false).
 					Return(game.PanoramaMetadata{
 						ID:           createdPanoID,
 						StreetviewID: createdStreetviewID,
@@ -161,7 +162,7 @@ func TestUsecase_NewGame(t *testing.T) {
 				RoundStartDelay: 5 * time.Second,
 			}
 			fs := fields{repo: repo, panoUsecase: panoramaUsecase, cfg: cfg}
-			uc := singleplayer.NewUsecase(cfg, repo, panoramaUsecase)
+			uc := singleplayer.NewUsecase(cfg, repo, panoramaUsecase, areaUsecaseStub{})
 
 			tt.setup(fs, tt.args)
 
@@ -257,7 +258,7 @@ func TestUsecase_GetGame(t *testing.T) {
 			fs := fields{repo: repo, panoUsecase: panoramaUsecase}
 			tt.setup(fs, tt.args)
 
-			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoramaUsecase)
+			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoramaUsecase, areaUsecaseStub{})
 
 			got, err := uc.GetGame(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
@@ -417,7 +418,7 @@ func TestUsecase_EndGame(t *testing.T) {
 			fs := fields{repo: repo, panoUsecase: panoUsecase}
 			tt.setup(fs, tt.args)
 
-			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase)
+			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase, areaUsecaseStub{})
 
 			err := uc.EndGame(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
@@ -452,7 +453,7 @@ func TestUsecase_EndGameRoundCountEquality(t *testing.T) {
 
 			repo := mocks.NewRepository(t)
 			pano := mocks.NewPanoramaUsecase(t)
-			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, pano)
+			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, pano, areaUsecaseStub{})
 			repo.On("RunTx", mock.Anything, mock.AnythingOfType("repository.TxFunc")).
 				Return(func(ctx context.Context, fn repository.TxFunc) error { return fn(ctx) }).Once()
 			repo.On("GetSingleplayerGame", mock.Anything, gameID).Return(singleplayerEntity.Game{
@@ -541,7 +542,7 @@ func TestUsecase_GetGames(t *testing.T) {
 			fs := fields{repo: repo, panoUsecase: panoUsecase}
 			tt.setup(fs, tt.args)
 
-			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase)
+			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase, areaUsecaseStub{})
 
 			gotGames, gotAmountOfGames, err := uc.GetGames(t.Context(), tt.args.req)
 			tt.wantErr(t, err)

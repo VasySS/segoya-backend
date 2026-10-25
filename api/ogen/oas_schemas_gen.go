@@ -108,6 +108,150 @@ func (s *Bearer) SetRoles(val []string) {
 	s.Roles = val
 }
 
+type CountPlayAreaBadRequest BackendError
+
+func (*CountPlayAreaBadRequest) countPlayAreaRes() {}
+
+type CountPlayAreaInternalServerError BackendError
+
+func (*CountPlayAreaInternalServerError) countPlayAreaRes() {}
+
+type CountPlayAreaNotFound BackendError
+
+func (*CountPlayAreaNotFound) countPlayAreaRes() {}
+
+// Ref: #/CountPlayAreaRequest
+type CountPlayAreaRequest struct {
+	Provider Provider          `json:"provider"`
+	PlayArea PlayAreaSelection `json:"playArea"`
+}
+
+// GetProvider returns the value of Provider.
+func (s *CountPlayAreaRequest) GetProvider() Provider {
+	return s.Provider
+}
+
+// GetPlayArea returns the value of PlayArea.
+func (s *CountPlayAreaRequest) GetPlayArea() PlayAreaSelection {
+	return s.PlayArea
+}
+
+// SetProvider sets the value of Provider.
+func (s *CountPlayAreaRequest) SetProvider(val Provider) {
+	s.Provider = val
+}
+
+// SetPlayArea sets the value of PlayArea.
+func (s *CountPlayAreaRequest) SetPlayArea(val PlayAreaSelection) {
+	s.PlayArea = val
+}
+
+type CountPlayAreaRequestEntityTooLarge BackendError
+
+func (*CountPlayAreaRequestEntityTooLarge) countPlayAreaRes() {}
+
+type CountPlayAreaUnauthorized BackendError
+
+func (*CountPlayAreaUnauthorized) countPlayAreaRes() {}
+
+type CreatePlayAreaBadRequest BackendError
+
+func (*CreatePlayAreaBadRequest) createPlayAreaRes() {}
+
+type CreatePlayAreaInternalServerError BackendError
+
+func (*CreatePlayAreaInternalServerError) createPlayAreaRes() {}
+
+type CreatePlayAreaNotFound BackendError
+
+func (*CreatePlayAreaNotFound) createPlayAreaRes() {}
+
+// Ref: #/CreatePlayAreaRequest
+type CreatePlayAreaRequest struct {
+	Name       string                             `json:"name"`
+	Polygon    Polygon                            `json:"polygon"`
+	Visibility OptCreatePlayAreaRequestVisibility `json:"visibility"`
+}
+
+// GetName returns the value of Name.
+func (s *CreatePlayAreaRequest) GetName() string {
+	return s.Name
+}
+
+// GetPolygon returns the value of Polygon.
+func (s *CreatePlayAreaRequest) GetPolygon() Polygon {
+	return s.Polygon
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *CreatePlayAreaRequest) GetVisibility() OptCreatePlayAreaRequestVisibility {
+	return s.Visibility
+}
+
+// SetName sets the value of Name.
+func (s *CreatePlayAreaRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetPolygon sets the value of Polygon.
+func (s *CreatePlayAreaRequest) SetPolygon(val Polygon) {
+	s.Polygon = val
+}
+
+// SetVisibility sets the value of Visibility.
+func (s *CreatePlayAreaRequest) SetVisibility(val OptCreatePlayAreaRequestVisibility) {
+	s.Visibility = val
+}
+
+type CreatePlayAreaRequestEntityTooLarge BackendError
+
+func (*CreatePlayAreaRequestEntityTooLarge) createPlayAreaRes() {}
+
+type CreatePlayAreaRequestVisibility string
+
+const (
+	CreatePlayAreaRequestVisibilityPrivate  CreatePlayAreaRequestVisibility = "private"
+	CreatePlayAreaRequestVisibilityUnlisted CreatePlayAreaRequestVisibility = "unlisted"
+)
+
+// AllValues returns all CreatePlayAreaRequestVisibility values.
+func (CreatePlayAreaRequestVisibility) AllValues() []CreatePlayAreaRequestVisibility {
+	return []CreatePlayAreaRequestVisibility{
+		CreatePlayAreaRequestVisibilityPrivate,
+		CreatePlayAreaRequestVisibilityUnlisted,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CreatePlayAreaRequestVisibility) MarshalText() ([]byte, error) {
+	switch s {
+	case CreatePlayAreaRequestVisibilityPrivate:
+		return []byte(s), nil
+	case CreatePlayAreaRequestVisibilityUnlisted:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CreatePlayAreaRequestVisibility) UnmarshalText(data []byte) error {
+	switch CreatePlayAreaRequestVisibility(data) {
+	case CreatePlayAreaRequestVisibilityPrivate:
+		*s = CreatePlayAreaRequestVisibilityPrivate
+		return nil
+	case CreatePlayAreaRequestVisibilityUnlisted:
+		*s = CreatePlayAreaRequestVisibilityUnlisted
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type CreatePlayAreaUnauthorized BackendError
+
+func (*CreatePlayAreaUnauthorized) createPlayAreaRes() {}
+
 type DeleteDiscordInternalServerError BackendError
 
 func (*DeleteDiscordInternalServerError) deleteDiscordRes() {}
@@ -120,6 +264,27 @@ func (*DeleteDiscordNoContent) deleteDiscordRes() {}
 type DeleteDiscordUnauthorized BackendError
 
 func (*DeleteDiscordUnauthorized) deleteDiscordRes() {}
+
+type DeletePlayAreaBadRequest BackendError
+
+func (*DeletePlayAreaBadRequest) deletePlayAreaRes() {}
+
+type DeletePlayAreaInternalServerError BackendError
+
+func (*DeletePlayAreaInternalServerError) deletePlayAreaRes() {}
+
+// DeletePlayAreaNoContent is response for DeletePlayArea operation.
+type DeletePlayAreaNoContent struct{}
+
+func (*DeletePlayAreaNoContent) deletePlayAreaRes() {}
+
+type DeletePlayAreaNotFound BackendError
+
+func (*DeletePlayAreaNotFound) deletePlayAreaRes() {}
+
+type DeletePlayAreaUnauthorized BackendError
+
+func (*DeletePlayAreaUnauthorized) deletePlayAreaRes() {}
 
 // DeleteUserSessionNoContent is response for DeleteUserSession operation.
 type DeleteUserSessionNoContent struct{}
@@ -352,6 +517,74 @@ type GetOAuthProvidersUnauthorized BackendError
 
 func (*GetOAuthProvidersUnauthorized) getOAuthProvidersRes() {}
 
+type GetPlayAreaBadRequest BackendError
+
+func (*GetPlayAreaBadRequest) getPlayAreaRes() {}
+
+type GetPlayAreaInternalServerError BackendError
+
+func (*GetPlayAreaInternalServerError) getPlayAreaRes() {}
+
+type GetPlayAreaNotFound BackendError
+
+func (*GetPlayAreaNotFound) getPlayAreaRes() {}
+
+type GetPlayAreaPresetBadRequest BackendError
+
+func (*GetPlayAreaPresetBadRequest) getPlayAreaPresetRes() {}
+
+type GetPlayAreaPresetInternalServerError BackendError
+
+func (*GetPlayAreaPresetInternalServerError) getPlayAreaPresetRes() {}
+
+type GetPlayAreaPresetNotFound BackendError
+
+func (*GetPlayAreaPresetNotFound) getPlayAreaPresetRes() {}
+
+type GetPlayAreaPresetUnauthorized BackendError
+
+func (*GetPlayAreaPresetUnauthorized) getPlayAreaPresetRes() {}
+
+type GetPlayAreaPresetsBadRequest BackendError
+
+func (*GetPlayAreaPresetsBadRequest) getPlayAreaPresetsRes() {}
+
+type GetPlayAreaPresetsInternalServerError BackendError
+
+func (*GetPlayAreaPresetsInternalServerError) getPlayAreaPresetsRes() {}
+
+type GetPlayAreaPresetsNotFound BackendError
+
+func (*GetPlayAreaPresetsNotFound) getPlayAreaPresetsRes() {}
+
+type GetPlayAreaPresetsOKApplicationJSON []PlayAreaPreset
+
+func (*GetPlayAreaPresetsOKApplicationJSON) getPlayAreaPresetsRes() {}
+
+type GetPlayAreaPresetsUnauthorized BackendError
+
+func (*GetPlayAreaPresetsUnauthorized) getPlayAreaPresetsRes() {}
+
+type GetPlayAreaUnauthorized BackendError
+
+func (*GetPlayAreaUnauthorized) getPlayAreaRes() {}
+
+type GetPlayAreasBadRequest BackendError
+
+func (*GetPlayAreasBadRequest) getPlayAreasRes() {}
+
+type GetPlayAreasInternalServerError BackendError
+
+func (*GetPlayAreasInternalServerError) getPlayAreasRes() {}
+
+type GetPlayAreasNotFound BackendError
+
+func (*GetPlayAreasNotFound) getPlayAreasRes() {}
+
+type GetPlayAreasUnauthorized BackendError
+
+func (*GetPlayAreasUnauthorized) getPlayAreasRes() {}
+
 type GetPrivateProfileInternalServerError BackendError
 
 func (*GetPrivateProfileInternalServerError) getPrivateProfileRes() {}
@@ -430,6 +663,10 @@ func (*GetSingleplayerGamesBadRequest) getSingleplayerGamesRes() {}
 type GetSingleplayerGamesInternalServerError BackendError
 
 func (*GetSingleplayerGamesInternalServerError) getSingleplayerGamesRes() {}
+
+type GetSingleplayerGamesNotFound BackendError
+
+func (*GetSingleplayerGamesNotFound) getSingleplayerGamesRes() {}
 
 type GetSingleplayerGamesUnauthorized BackendError
 
@@ -515,16 +752,17 @@ func (*LobbiesResponse) getLobbiesRes() {}
 
 // Ref: #/Lobby
 type Lobby struct {
-	ID              string    `json:"id"`
-	CreatorID       uuid.UUID `json:"creatorID"`
-	CreatedAt       time.Time `json:"createdAt"`
-	Rounds          int       `json:"rounds"`
-	Provider        Provider  `json:"provider"`
-	MovementAllowed bool      `json:"movementAllowed"`
-	TimerSeconds    int       `json:"timerSeconds"`
-	CurrentPlayers  int       `json:"currentPlayers"`
-	MaxPlayers      int       `json:"maxPlayers"`
-	Private         bool      `json:"private"`
+	ID              string               `json:"id"`
+	CreatorID       uuid.UUID            `json:"creatorID"`
+	CreatedAt       time.Time            `json:"createdAt"`
+	Rounds          int                  `json:"rounds"`
+	PlayArea        OptPlayAreaSelection `json:"playArea"`
+	Provider        Provider             `json:"provider"`
+	MovementAllowed bool                 `json:"movementAllowed"`
+	TimerSeconds    int                  `json:"timerSeconds"`
+	CurrentPlayers  int                  `json:"currentPlayers"`
+	MaxPlayers      int                  `json:"maxPlayers"`
+	Private         bool                 `json:"private"`
 }
 
 // GetID returns the value of ID.
@@ -545,6 +783,11 @@ func (s *Lobby) GetCreatedAt() time.Time {
 // GetRounds returns the value of Rounds.
 func (s *Lobby) GetRounds() int {
 	return s.Rounds
+}
+
+// GetPlayArea returns the value of PlayArea.
+func (s *Lobby) GetPlayArea() OptPlayAreaSelection {
+	return s.PlayArea
 }
 
 // GetProvider returns the value of Provider.
@@ -595,6 +838,11 @@ func (s *Lobby) SetCreatedAt(val time.Time) {
 // SetRounds sets the value of Rounds.
 func (s *Lobby) SetRounds(val int) {
 	s.Rounds = val
+}
+
+// SetPlayArea sets the value of PlayArea.
+func (s *Lobby) SetPlayArea(val OptPlayAreaSelection) {
+	s.PlayArea = val
 }
 
 // SetProvider sets the value of Provider.
@@ -686,16 +934,17 @@ func (*LoginUnauthorized) loginRes() {}
 
 // Ref: #/MultiplayerGame
 type MultiplayerGame struct {
-	ID              uuid.UUID `json:"id"`
-	CreatorID       uuid.UUID `json:"creatorID"`
-	Rounds          int       `json:"rounds"`
-	RoundCurrent    int       `json:"roundCurrent"`
-	TimerSeconds    int       `json:"timerSeconds"`
-	MovementAllowed bool      `json:"movementAllowed"`
-	Players         int       `json:"players"`
-	Provider        Provider  `json:"provider"`
-	Finished        bool      `json:"finished"`
-	CreatedAt       time.Time `json:"createdAt"`
+	ID              uuid.UUID            `json:"id"`
+	CreatorID       uuid.UUID            `json:"creatorID"`
+	Rounds          int                  `json:"rounds"`
+	RoundCurrent    int                  `json:"roundCurrent"`
+	TimerSeconds    int                  `json:"timerSeconds"`
+	MovementAllowed bool                 `json:"movementAllowed"`
+	Players         int                  `json:"players"`
+	PlayArea        OptPlayAreaSelection `json:"playArea"`
+	Provider        Provider             `json:"provider"`
+	Finished        bool                 `json:"finished"`
+	CreatedAt       time.Time            `json:"createdAt"`
 }
 
 // GetID returns the value of ID.
@@ -731,6 +980,11 @@ func (s *MultiplayerGame) GetMovementAllowed() bool {
 // GetPlayers returns the value of Players.
 func (s *MultiplayerGame) GetPlayers() int {
 	return s.Players
+}
+
+// GetPlayArea returns the value of PlayArea.
+func (s *MultiplayerGame) GetPlayArea() OptPlayAreaSelection {
+	return s.PlayArea
 }
 
 // GetProvider returns the value of Provider.
@@ -781,6 +1035,11 @@ func (s *MultiplayerGame) SetMovementAllowed(val bool) {
 // SetPlayers sets the value of Players.
 func (s *MultiplayerGame) SetPlayers(val int) {
 	s.Players = val
+}
+
+// SetPlayArea sets the value of PlayArea.
+func (s *MultiplayerGame) SetPlayArea(val OptPlayAreaSelection) {
+	s.PlayArea = val
 }
 
 // SetProvider sets the value of Provider.
@@ -1079,10 +1338,11 @@ func (*NewDiscordTemporaryRedirect) newDiscordRes() {}
 
 // Ref: #/NewLobby
 type NewLobby struct {
-	CreatorID  uuid.UUID `json:"creatorID"`
-	MaxPlayers int       `json:"maxPlayers"`
-	Rounds     int       `json:"rounds"`
-	Provider   Provider  `json:"provider"`
+	CreatorID  uuid.UUID            `json:"creatorID"`
+	MaxPlayers int                  `json:"maxPlayers"`
+	Rounds     int                  `json:"rounds"`
+	PlayArea   OptPlayAreaSelection `json:"playArea"`
+	Provider   Provider             `json:"provider"`
 	// Zero or omitted disables the timer; otherwise 10-600 seconds.
 	TimerSeconds    OptInt `json:"timerSeconds"`
 	MovementAllowed bool   `json:"movementAllowed"`
@@ -1102,6 +1362,11 @@ func (s *NewLobby) GetMaxPlayers() int {
 // GetRounds returns the value of Rounds.
 func (s *NewLobby) GetRounds() int {
 	return s.Rounds
+}
+
+// GetPlayArea returns the value of PlayArea.
+func (s *NewLobby) GetPlayArea() OptPlayAreaSelection {
+	return s.PlayArea
 }
 
 // GetProvider returns the value of Provider.
@@ -1137,6 +1402,11 @@ func (s *NewLobby) SetMaxPlayers(val int) {
 // SetRounds sets the value of Rounds.
 func (s *NewLobby) SetRounds(val int) {
 	s.Rounds = val
+}
+
+// SetPlayArea sets the value of PlayArea.
+func (s *NewLobby) SetPlayArea(val OptPlayAreaSelection) {
+	s.PlayArea = val
 }
 
 // SetProvider sets the value of Provider.
@@ -1183,6 +1453,18 @@ type NewLobbyInternalServerError BackendError
 
 func (*NewLobbyInternalServerError) newLobbyRes() {}
 
+type NewLobbyNotFound BackendError
+
+func (*NewLobbyNotFound) newLobbyRes() {}
+
+type NewLobbyRequestEntityTooLarge BackendError
+
+func (*NewLobbyRequestEntityTooLarge) newLobbyRes() {}
+
+type NewLobbyUnauthorized BackendError
+
+func (*NewLobbyUnauthorized) newLobbyRes() {}
+
 type NewMultiplayerRoundInternalServerError BackendError
 
 func (*NewMultiplayerRoundInternalServerError) newMultiplayerRoundRes() {}
@@ -1219,13 +1501,18 @@ type NewSingleplayerGameInternalServerError BackendError
 
 func (*NewSingleplayerGameInternalServerError) newSingleplayerGameRes() {}
 
+type NewSingleplayerGameNotFound BackendError
+
+func (*NewSingleplayerGameNotFound) newSingleplayerGameRes() {}
+
 // Ref: #/NewSingleplayerGameRequest
 type NewSingleplayerGameRequest struct {
 	Rounds int `json:"rounds"`
 	// Zero or omitted disables the timer; otherwise 10-600 seconds.
-	TimerSeconds    OptInt   `json:"timerSeconds"`
-	MovementAllowed bool     `json:"movementAllowed"`
-	Provider        Provider `json:"provider"`
+	TimerSeconds    OptInt               `json:"timerSeconds"`
+	MovementAllowed bool                 `json:"movementAllowed"`
+	PlayArea        OptPlayAreaSelection `json:"playArea"`
+	Provider        Provider             `json:"provider"`
 }
 
 // GetRounds returns the value of Rounds.
@@ -1241,6 +1528,11 @@ func (s *NewSingleplayerGameRequest) GetTimerSeconds() OptInt {
 // GetMovementAllowed returns the value of MovementAllowed.
 func (s *NewSingleplayerGameRequest) GetMovementAllowed() bool {
 	return s.MovementAllowed
+}
+
+// GetPlayArea returns the value of PlayArea.
+func (s *NewSingleplayerGameRequest) GetPlayArea() OptPlayAreaSelection {
+	return s.PlayArea
 }
 
 // GetProvider returns the value of Provider.
@@ -1263,10 +1555,19 @@ func (s *NewSingleplayerGameRequest) SetMovementAllowed(val bool) {
 	s.MovementAllowed = val
 }
 
+// SetPlayArea sets the value of PlayArea.
+func (s *NewSingleplayerGameRequest) SetPlayArea(val OptPlayAreaSelection) {
+	s.PlayArea = val
+}
+
 // SetProvider sets the value of Provider.
 func (s *NewSingleplayerGameRequest) SetProvider(val Provider) {
 	s.Provider = val
 }
+
+type NewSingleplayerGameRequestEntityTooLarge BackendError
+
+func (*NewSingleplayerGameRequestEntityTooLarge) newSingleplayerGameRes() {}
 
 type NewSingleplayerGameUnauthorized BackendError
 
@@ -1394,6 +1695,52 @@ func (o NilLatLng) Or(d LatLng) LatLng {
 	return d
 }
 
+// NewOptCreatePlayAreaRequestVisibility returns new OptCreatePlayAreaRequestVisibility with value set to v.
+func NewOptCreatePlayAreaRequestVisibility(v CreatePlayAreaRequestVisibility) OptCreatePlayAreaRequestVisibility {
+	return OptCreatePlayAreaRequestVisibility{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptCreatePlayAreaRequestVisibility is optional CreatePlayAreaRequestVisibility.
+type OptCreatePlayAreaRequestVisibility struct {
+	Value CreatePlayAreaRequestVisibility
+	Set   bool
+}
+
+// IsSet returns true if OptCreatePlayAreaRequestVisibility was set.
+func (o OptCreatePlayAreaRequestVisibility) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptCreatePlayAreaRequestVisibility) Reset() {
+	var v CreatePlayAreaRequestVisibility
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptCreatePlayAreaRequestVisibility) SetTo(v CreatePlayAreaRequestVisibility) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptCreatePlayAreaRequestVisibility) Get() (v CreatePlayAreaRequestVisibility, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptCreatePlayAreaRequestVisibility) Or(d CreatePlayAreaRequestVisibility) CreatePlayAreaRequestVisibility {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptInt returns new OptInt with value set to v.
 func NewOptInt(v int) OptInt {
 	return OptInt{
@@ -1434,6 +1781,144 @@ func (o OptInt) Get() (v int, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPlayAreaSelection returns new OptPlayAreaSelection with value set to v.
+func NewOptPlayAreaSelection(v PlayAreaSelection) OptPlayAreaSelection {
+	return OptPlayAreaSelection{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPlayAreaSelection is optional PlayAreaSelection.
+type OptPlayAreaSelection struct {
+	Value PlayAreaSelection
+	Set   bool
+}
+
+// IsSet returns true if OptPlayAreaSelection was set.
+func (o OptPlayAreaSelection) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPlayAreaSelection) Reset() {
+	var v PlayAreaSelection
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPlayAreaSelection) SetTo(v PlayAreaSelection) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPlayAreaSelection) Get() (v PlayAreaSelection, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPlayAreaSelection) Or(d PlayAreaSelection) PlayAreaSelection {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPolygon returns new OptPolygon with value set to v.
+func NewOptPolygon(v Polygon) OptPolygon {
+	return OptPolygon{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPolygon is optional Polygon.
+type OptPolygon struct {
+	Value Polygon
+	Set   bool
+}
+
+// IsSet returns true if OptPolygon was set.
+func (o OptPolygon) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPolygon) Reset() {
+	var v Polygon
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPolygon) SetTo(v Polygon) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPolygon) Get() (v Polygon, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPolygon) Or(d Polygon) Polygon {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptPresetGeometry returns new OptPresetGeometry with value set to v.
+func NewOptPresetGeometry(v PresetGeometry) OptPresetGeometry {
+	return OptPresetGeometry{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptPresetGeometry is optional PresetGeometry.
+type OptPresetGeometry struct {
+	Value PresetGeometry
+	Set   bool
+}
+
+// IsSet returns true if OptPresetGeometry was set.
+func (o OptPresetGeometry) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptPresetGeometry) Reset() {
+	var v PresetGeometry
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptPresetGeometry) SetTo(v PresetGeometry) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptPresetGeometry) Get() (v PresetGeometry, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptPresetGeometry) Or(d PresetGeometry) PresetGeometry {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1484,6 +1969,484 @@ func (o OptString) Or(d string) string {
 		return v
 	}
 	return d
+}
+
+// NewOptUUID returns new OptUUID with value set to v.
+func NewOptUUID(v uuid.UUID) OptUUID {
+	return OptUUID{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUUID is optional uuid.UUID.
+type OptUUID struct {
+	Value uuid.UUID
+	Set   bool
+}
+
+// IsSet returns true if OptUUID was set.
+func (o OptUUID) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUUID) Reset() {
+	var v uuid.UUID
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUUID) SetTo(v uuid.UUID) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUUID) Get() (v uuid.UUID, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUUID) Or(d uuid.UUID) uuid.UUID {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUpdatePlayAreaRequestVisibility returns new OptUpdatePlayAreaRequestVisibility with value set to v.
+func NewOptUpdatePlayAreaRequestVisibility(v UpdatePlayAreaRequestVisibility) OptUpdatePlayAreaRequestVisibility {
+	return OptUpdatePlayAreaRequestVisibility{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUpdatePlayAreaRequestVisibility is optional UpdatePlayAreaRequestVisibility.
+type OptUpdatePlayAreaRequestVisibility struct {
+	Value UpdatePlayAreaRequestVisibility
+	Set   bool
+}
+
+// IsSet returns true if OptUpdatePlayAreaRequestVisibility was set.
+func (o OptUpdatePlayAreaRequestVisibility) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUpdatePlayAreaRequestVisibility) Reset() {
+	var v UpdatePlayAreaRequestVisibility
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUpdatePlayAreaRequestVisibility) SetTo(v UpdatePlayAreaRequestVisibility) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUpdatePlayAreaRequestVisibility) Get() (v UpdatePlayAreaRequestVisibility, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUpdatePlayAreaRequestVisibility) Or(d UpdatePlayAreaRequestVisibility) UpdatePlayAreaRequestVisibility {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// Ref: #/PlayAreaCount
+type PlayAreaCount struct {
+	LocationCount int `json:"locationCount"`
+}
+
+// GetLocationCount returns the value of LocationCount.
+func (s *PlayAreaCount) GetLocationCount() int {
+	return s.LocationCount
+}
+
+// SetLocationCount sets the value of LocationCount.
+func (s *PlayAreaCount) SetLocationCount(val int) {
+	s.LocationCount = val
+}
+
+func (*PlayAreaCount) countPlayAreaRes() {}
+
+// Ref: #/PlayAreaPreset
+type PlayAreaPreset struct {
+	ID          uuid.UUID  `json:"id"`
+	Name        string     `json:"name"`
+	Kind        string     `json:"kind"`
+	CountryCode string     `json:"countryCode"`
+	Version     string     `json:"version"`
+	Source      string     `json:"source"`
+	License     string     `json:"license"`
+	Attribution string     `json:"attribution"`
+	Providers   []Provider `json:"providers"`
+	// West, south, east, north; display bounds in degrees.
+	Bounds  []float64         `json:"bounds"`
+	Polygon OptPresetGeometry `json:"polygon"`
+	// Count for the requested provider in the preset list. Provider-independent detail responses omit this
+	// field.
+	LocationCount OptInt `json:"locationCount"`
+}
+
+// GetID returns the value of ID.
+func (s *PlayAreaPreset) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetName returns the value of Name.
+func (s *PlayAreaPreset) GetName() string {
+	return s.Name
+}
+
+// GetKind returns the value of Kind.
+func (s *PlayAreaPreset) GetKind() string {
+	return s.Kind
+}
+
+// GetCountryCode returns the value of CountryCode.
+func (s *PlayAreaPreset) GetCountryCode() string {
+	return s.CountryCode
+}
+
+// GetVersion returns the value of Version.
+func (s *PlayAreaPreset) GetVersion() string {
+	return s.Version
+}
+
+// GetSource returns the value of Source.
+func (s *PlayAreaPreset) GetSource() string {
+	return s.Source
+}
+
+// GetLicense returns the value of License.
+func (s *PlayAreaPreset) GetLicense() string {
+	return s.License
+}
+
+// GetAttribution returns the value of Attribution.
+func (s *PlayAreaPreset) GetAttribution() string {
+	return s.Attribution
+}
+
+// GetProviders returns the value of Providers.
+func (s *PlayAreaPreset) GetProviders() []Provider {
+	return s.Providers
+}
+
+// GetBounds returns the value of Bounds.
+func (s *PlayAreaPreset) GetBounds() []float64 {
+	return s.Bounds
+}
+
+// GetPolygon returns the value of Polygon.
+func (s *PlayAreaPreset) GetPolygon() OptPresetGeometry {
+	return s.Polygon
+}
+
+// GetLocationCount returns the value of LocationCount.
+func (s *PlayAreaPreset) GetLocationCount() OptInt {
+	return s.LocationCount
+}
+
+// SetID sets the value of ID.
+func (s *PlayAreaPreset) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetName sets the value of Name.
+func (s *PlayAreaPreset) SetName(val string) {
+	s.Name = val
+}
+
+// SetKind sets the value of Kind.
+func (s *PlayAreaPreset) SetKind(val string) {
+	s.Kind = val
+}
+
+// SetCountryCode sets the value of CountryCode.
+func (s *PlayAreaPreset) SetCountryCode(val string) {
+	s.CountryCode = val
+}
+
+// SetVersion sets the value of Version.
+func (s *PlayAreaPreset) SetVersion(val string) {
+	s.Version = val
+}
+
+// SetSource sets the value of Source.
+func (s *PlayAreaPreset) SetSource(val string) {
+	s.Source = val
+}
+
+// SetLicense sets the value of License.
+func (s *PlayAreaPreset) SetLicense(val string) {
+	s.License = val
+}
+
+// SetAttribution sets the value of Attribution.
+func (s *PlayAreaPreset) SetAttribution(val string) {
+	s.Attribution = val
+}
+
+// SetProviders sets the value of Providers.
+func (s *PlayAreaPreset) SetProviders(val []Provider) {
+	s.Providers = val
+}
+
+// SetBounds sets the value of Bounds.
+func (s *PlayAreaPreset) SetBounds(val []float64) {
+	s.Bounds = val
+}
+
+// SetPolygon sets the value of Polygon.
+func (s *PlayAreaPreset) SetPolygon(val OptPresetGeometry) {
+	s.Polygon = val
+}
+
+// SetLocationCount sets the value of LocationCount.
+func (s *PlayAreaPreset) SetLocationCount(val OptInt) {
+	s.LocationCount = val
+}
+
+func (*PlayAreaPreset) getPlayAreaPresetRes() {}
+
+// Tagged union validated by the backend. all has no other fields; presets requires only presetIDs;
+// polygon requires only polygon; saved requires only savedID. Omitted settings select all. Applied
+// saved selections return a polygon snapshot.
+// Ref: #/PlayAreaSelection
+type PlayAreaSelection struct {
+	Type      PlayAreaSelectionType `json:"type"`
+	PresetIDs []uuid.UUID           `json:"presetIDs"`
+	Polygon   OptPolygon            `json:"polygon"`
+	SavedID   OptUUID               `json:"savedID"`
+}
+
+// GetType returns the value of Type.
+func (s *PlayAreaSelection) GetType() PlayAreaSelectionType {
+	return s.Type
+}
+
+// GetPresetIDs returns the value of PresetIDs.
+func (s *PlayAreaSelection) GetPresetIDs() []uuid.UUID {
+	return s.PresetIDs
+}
+
+// GetPolygon returns the value of Polygon.
+func (s *PlayAreaSelection) GetPolygon() OptPolygon {
+	return s.Polygon
+}
+
+// GetSavedID returns the value of SavedID.
+func (s *PlayAreaSelection) GetSavedID() OptUUID {
+	return s.SavedID
+}
+
+// SetType sets the value of Type.
+func (s *PlayAreaSelection) SetType(val PlayAreaSelectionType) {
+	s.Type = val
+}
+
+// SetPresetIDs sets the value of PresetIDs.
+func (s *PlayAreaSelection) SetPresetIDs(val []uuid.UUID) {
+	s.PresetIDs = val
+}
+
+// SetPolygon sets the value of Polygon.
+func (s *PlayAreaSelection) SetPolygon(val OptPolygon) {
+	s.Polygon = val
+}
+
+// SetSavedID sets the value of SavedID.
+func (s *PlayAreaSelection) SetSavedID(val OptUUID) {
+	s.SavedID = val
+}
+
+type PlayAreaSelectionType string
+
+const (
+	PlayAreaSelectionTypeAll     PlayAreaSelectionType = "all"
+	PlayAreaSelectionTypePresets PlayAreaSelectionType = "presets"
+	PlayAreaSelectionTypePolygon PlayAreaSelectionType = "polygon"
+	PlayAreaSelectionTypeSaved   PlayAreaSelectionType = "saved"
+)
+
+// AllValues returns all PlayAreaSelectionType values.
+func (PlayAreaSelectionType) AllValues() []PlayAreaSelectionType {
+	return []PlayAreaSelectionType{
+		PlayAreaSelectionTypeAll,
+		PlayAreaSelectionTypePresets,
+		PlayAreaSelectionTypePolygon,
+		PlayAreaSelectionTypeSaved,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PlayAreaSelectionType) MarshalText() ([]byte, error) {
+	switch s {
+	case PlayAreaSelectionTypeAll:
+		return []byte(s), nil
+	case PlayAreaSelectionTypePresets:
+		return []byte(s), nil
+	case PlayAreaSelectionTypePolygon:
+		return []byte(s), nil
+	case PlayAreaSelectionTypeSaved:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PlayAreaSelectionType) UnmarshalText(data []byte) error {
+	switch PlayAreaSelectionType(data) {
+	case PlayAreaSelectionTypeAll:
+		*s = PlayAreaSelectionTypeAll
+		return nil
+	case PlayAreaSelectionTypePresets:
+		*s = PlayAreaSelectionTypePresets
+		return nil
+	case PlayAreaSelectionTypePolygon:
+		*s = PlayAreaSelectionTypePolygon
+		return nil
+	case PlayAreaSelectionTypeSaved:
+		*s = PlayAreaSelectionTypeSaved
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/Polygon
+type Polygon struct {
+	Type PolygonType `json:"type"`
+	// One closed ring, 3-500 distinct vertices; each coordinate is [longitude, latitude]. Holes and
+	// antimeridian crossings are unsupported.
+	Coordinates [][][]float64 `json:"coordinates"`
+}
+
+// GetType returns the value of Type.
+func (s *Polygon) GetType() PolygonType {
+	return s.Type
+}
+
+// GetCoordinates returns the value of Coordinates.
+func (s *Polygon) GetCoordinates() [][][]float64 {
+	return s.Coordinates
+}
+
+// SetType sets the value of Type.
+func (s *Polygon) SetType(val PolygonType) {
+	s.Type = val
+}
+
+// SetCoordinates sets the value of Coordinates.
+func (s *Polygon) SetCoordinates(val [][][]float64) {
+	s.Coordinates = val
+}
+
+type PolygonType string
+
+const (
+	PolygonTypePolygon PolygonType = "Polygon"
+)
+
+// AllValues returns all PolygonType values.
+func (PolygonType) AllValues() []PolygonType {
+	return []PolygonType{
+		PolygonTypePolygon,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PolygonType) MarshalText() ([]byte, error) {
+	switch s {
+	case PolygonTypePolygon:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PolygonType) UnmarshalText(data []byte) error {
+	switch PolygonType(data) {
+	case PolygonTypePolygon:
+		*s = PolygonTypePolygon
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/PresetGeometry
+type PresetGeometry struct {
+	Type        PresetGeometryType `json:"type"`
+	Coordinates [][][][]float64    `json:"coordinates"`
+}
+
+// GetType returns the value of Type.
+func (s *PresetGeometry) GetType() PresetGeometryType {
+	return s.Type
+}
+
+// GetCoordinates returns the value of Coordinates.
+func (s *PresetGeometry) GetCoordinates() [][][][]float64 {
+	return s.Coordinates
+}
+
+// SetType sets the value of Type.
+func (s *PresetGeometry) SetType(val PresetGeometryType) {
+	s.Type = val
+}
+
+// SetCoordinates sets the value of Coordinates.
+func (s *PresetGeometry) SetCoordinates(val [][][][]float64) {
+	s.Coordinates = val
+}
+
+type PresetGeometryType string
+
+const (
+	PresetGeometryTypeMultiPolygon PresetGeometryType = "MultiPolygon"
+)
+
+// AllValues returns all PresetGeometryType values.
+func (PresetGeometryType) AllValues() []PresetGeometryType {
+	return []PresetGeometryType{
+		PresetGeometryTypeMultiPolygon,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PresetGeometryType) MarshalText() ([]byte, error) {
+	switch s {
+	case PresetGeometryTypeMultiPolygon:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PresetGeometryType) UnmarshalText(data []byte) error {
+	switch PresetGeometryType(data) {
+	case PresetGeometryTypeMultiPolygon:
+		*s = PresetGeometryTypeMultiPolygon
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 // Ref: #/Provider
@@ -1635,18 +2598,173 @@ func (s *RegisterRequest) SetName(val OptString) {
 	s.Name = val
 }
 
+// Ref: #/SavedPlayArea
+type SavedPlayArea struct {
+	ID         uuid.UUID               `json:"id"`
+	OwnerID    uuid.UUID               `json:"ownerID"`
+	Name       string                  `json:"name"`
+	Polygon    Polygon                 `json:"polygon"`
+	Visibility SavedPlayAreaVisibility `json:"visibility"`
+	CreatedAt  time.Time               `json:"createdAt"`
+	UpdatedAt  time.Time               `json:"updatedAt"`
+}
+
+// GetID returns the value of ID.
+func (s *SavedPlayArea) GetID() uuid.UUID {
+	return s.ID
+}
+
+// GetOwnerID returns the value of OwnerID.
+func (s *SavedPlayArea) GetOwnerID() uuid.UUID {
+	return s.OwnerID
+}
+
+// GetName returns the value of Name.
+func (s *SavedPlayArea) GetName() string {
+	return s.Name
+}
+
+// GetPolygon returns the value of Polygon.
+func (s *SavedPlayArea) GetPolygon() Polygon {
+	return s.Polygon
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *SavedPlayArea) GetVisibility() SavedPlayAreaVisibility {
+	return s.Visibility
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *SavedPlayArea) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *SavedPlayArea) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetID sets the value of ID.
+func (s *SavedPlayArea) SetID(val uuid.UUID) {
+	s.ID = val
+}
+
+// SetOwnerID sets the value of OwnerID.
+func (s *SavedPlayArea) SetOwnerID(val uuid.UUID) {
+	s.OwnerID = val
+}
+
+// SetName sets the value of Name.
+func (s *SavedPlayArea) SetName(val string) {
+	s.Name = val
+}
+
+// SetPolygon sets the value of Polygon.
+func (s *SavedPlayArea) SetPolygon(val Polygon) {
+	s.Polygon = val
+}
+
+// SetVisibility sets the value of Visibility.
+func (s *SavedPlayArea) SetVisibility(val SavedPlayAreaVisibility) {
+	s.Visibility = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *SavedPlayArea) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *SavedPlayArea) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+func (*SavedPlayArea) createPlayAreaRes() {}
+func (*SavedPlayArea) getPlayAreaRes()    {}
+func (*SavedPlayArea) updatePlayAreaRes() {}
+
+type SavedPlayAreaVisibility string
+
+const (
+	SavedPlayAreaVisibilityPrivate  SavedPlayAreaVisibility = "private"
+	SavedPlayAreaVisibilityUnlisted SavedPlayAreaVisibility = "unlisted"
+)
+
+// AllValues returns all SavedPlayAreaVisibility values.
+func (SavedPlayAreaVisibility) AllValues() []SavedPlayAreaVisibility {
+	return []SavedPlayAreaVisibility{
+		SavedPlayAreaVisibilityPrivate,
+		SavedPlayAreaVisibilityUnlisted,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s SavedPlayAreaVisibility) MarshalText() ([]byte, error) {
+	switch s {
+	case SavedPlayAreaVisibilityPrivate:
+		return []byte(s), nil
+	case SavedPlayAreaVisibilityUnlisted:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *SavedPlayAreaVisibility) UnmarshalText(data []byte) error {
+	switch SavedPlayAreaVisibility(data) {
+	case SavedPlayAreaVisibilityPrivate:
+		*s = SavedPlayAreaVisibilityPrivate
+		return nil
+	case SavedPlayAreaVisibilityUnlisted:
+		*s = SavedPlayAreaVisibilityUnlisted
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+// Ref: #/SavedPlayAreas
+type SavedPlayAreas struct {
+	Total int             `json:"total"`
+	Areas []SavedPlayArea `json:"areas"`
+}
+
+// GetTotal returns the value of Total.
+func (s *SavedPlayAreas) GetTotal() int {
+	return s.Total
+}
+
+// GetAreas returns the value of Areas.
+func (s *SavedPlayAreas) GetAreas() []SavedPlayArea {
+	return s.Areas
+}
+
+// SetTotal sets the value of Total.
+func (s *SavedPlayAreas) SetTotal(val int) {
+	s.Total = val
+}
+
+// SetAreas sets the value of Areas.
+func (s *SavedPlayAreas) SetAreas(val []SavedPlayArea) {
+	s.Areas = val
+}
+
+func (*SavedPlayAreas) getPlayAreasRes() {}
+
 // Ref: #/SingleplayerGame
 type SingleplayerGame struct {
-	ID              uuid.UUID `json:"id"`
-	UserID          uuid.UUID `json:"userID"`
-	Rounds          int       `json:"rounds"`
-	RoundCurrent    int       `json:"roundCurrent"`
-	TimerSeconds    int       `json:"timerSeconds"`
-	MovementAllowed bool      `json:"movementAllowed"`
-	Provider        Provider  `json:"provider"`
-	Score           int       `json:"score"`
-	Finished        bool      `json:"finished"`
-	CreatedAt       time.Time `json:"createdAt"`
+	ID              uuid.UUID            `json:"id"`
+	UserID          uuid.UUID            `json:"userID"`
+	Rounds          int                  `json:"rounds"`
+	RoundCurrent    int                  `json:"roundCurrent"`
+	TimerSeconds    int                  `json:"timerSeconds"`
+	MovementAllowed bool                 `json:"movementAllowed"`
+	PlayArea        OptPlayAreaSelection `json:"playArea"`
+	Provider        Provider             `json:"provider"`
+	Score           int                  `json:"score"`
+	Finished        bool                 `json:"finished"`
+	CreatedAt       time.Time            `json:"createdAt"`
 }
 
 // GetID returns the value of ID.
@@ -1677,6 +2795,11 @@ func (s *SingleplayerGame) GetTimerSeconds() int {
 // GetMovementAllowed returns the value of MovementAllowed.
 func (s *SingleplayerGame) GetMovementAllowed() bool {
 	return s.MovementAllowed
+}
+
+// GetPlayArea returns the value of PlayArea.
+func (s *SingleplayerGame) GetPlayArea() OptPlayAreaSelection {
+	return s.PlayArea
 }
 
 // GetProvider returns the value of Provider.
@@ -1727,6 +2850,11 @@ func (s *SingleplayerGame) SetTimerSeconds(val int) {
 // SetMovementAllowed sets the value of MovementAllowed.
 func (s *SingleplayerGame) SetMovementAllowed(val bool) {
 	s.MovementAllowed = val
+}
+
+// SetPlayArea sets the value of PlayArea.
+func (s *SingleplayerGame) SetPlayArea(val OptPlayAreaSelection) {
+	s.PlayArea = val
 }
 
 // SetProvider sets the value of Provider.
@@ -1991,6 +3119,104 @@ func (s *SingleplayerRoundGuess) GetGuess() NilLatLng {
 func (s *SingleplayerRoundGuess) SetGuess(val NilLatLng) {
 	s.Guess = val
 }
+
+type UpdatePlayAreaBadRequest BackendError
+
+func (*UpdatePlayAreaBadRequest) updatePlayAreaRes() {}
+
+type UpdatePlayAreaInternalServerError BackendError
+
+func (*UpdatePlayAreaInternalServerError) updatePlayAreaRes() {}
+
+type UpdatePlayAreaNotFound BackendError
+
+func (*UpdatePlayAreaNotFound) updatePlayAreaRes() {}
+
+// Ref: #/UpdatePlayAreaRequest
+type UpdatePlayAreaRequest struct {
+	Name       OptString                          `json:"name"`
+	Polygon    OptPolygon                         `json:"polygon"`
+	Visibility OptUpdatePlayAreaRequestVisibility `json:"visibility"`
+}
+
+// GetName returns the value of Name.
+func (s *UpdatePlayAreaRequest) GetName() OptString {
+	return s.Name
+}
+
+// GetPolygon returns the value of Polygon.
+func (s *UpdatePlayAreaRequest) GetPolygon() OptPolygon {
+	return s.Polygon
+}
+
+// GetVisibility returns the value of Visibility.
+func (s *UpdatePlayAreaRequest) GetVisibility() OptUpdatePlayAreaRequestVisibility {
+	return s.Visibility
+}
+
+// SetName sets the value of Name.
+func (s *UpdatePlayAreaRequest) SetName(val OptString) {
+	s.Name = val
+}
+
+// SetPolygon sets the value of Polygon.
+func (s *UpdatePlayAreaRequest) SetPolygon(val OptPolygon) {
+	s.Polygon = val
+}
+
+// SetVisibility sets the value of Visibility.
+func (s *UpdatePlayAreaRequest) SetVisibility(val OptUpdatePlayAreaRequestVisibility) {
+	s.Visibility = val
+}
+
+type UpdatePlayAreaRequestEntityTooLarge BackendError
+
+func (*UpdatePlayAreaRequestEntityTooLarge) updatePlayAreaRes() {}
+
+type UpdatePlayAreaRequestVisibility string
+
+const (
+	UpdatePlayAreaRequestVisibilityPrivate  UpdatePlayAreaRequestVisibility = "private"
+	UpdatePlayAreaRequestVisibilityUnlisted UpdatePlayAreaRequestVisibility = "unlisted"
+)
+
+// AllValues returns all UpdatePlayAreaRequestVisibility values.
+func (UpdatePlayAreaRequestVisibility) AllValues() []UpdatePlayAreaRequestVisibility {
+	return []UpdatePlayAreaRequestVisibility{
+		UpdatePlayAreaRequestVisibilityPrivate,
+		UpdatePlayAreaRequestVisibilityUnlisted,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UpdatePlayAreaRequestVisibility) MarshalText() ([]byte, error) {
+	switch s {
+	case UpdatePlayAreaRequestVisibilityPrivate:
+		return []byte(s), nil
+	case UpdatePlayAreaRequestVisibilityUnlisted:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UpdatePlayAreaRequestVisibility) UnmarshalText(data []byte) error {
+	switch UpdatePlayAreaRequestVisibility(data) {
+	case UpdatePlayAreaRequestVisibilityPrivate:
+		*s = UpdatePlayAreaRequestVisibilityPrivate
+		return nil
+	case UpdatePlayAreaRequestVisibilityUnlisted:
+		*s = UpdatePlayAreaRequestVisibilityUnlisted
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type UpdatePlayAreaUnauthorized BackendError
+
+func (*UpdatePlayAreaUnauthorized) updatePlayAreaRes() {}
 
 type UpdateUserAvatarInternalServerError BackendError
 

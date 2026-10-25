@@ -14,6 +14,8 @@ import (
 
 	"github.com/VasySS/segoya-backend/internal/controller/http/v1/lobby"
 	"github.com/VasySS/segoya-backend/internal/dto"
+	entitylobby "github.com/VasySS/segoya-backend/internal/entity/lobby"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/transport"
 	wsfake "github.com/VasySS/segoya-backend/tests/websocket"
@@ -23,10 +25,15 @@ type settingsUsecase struct {
 	lobby.Usecase
 
 	update func(context.Context, dto.UpdateLobbySettingsRequest) error
+	get    func(context.Context, string) (entitylobby.Lobby, error)
 }
 
 func (u settingsUsecase) UpdateLobbySettings(ctx context.Context, req dto.UpdateLobbySettingsRequest) error {
 	return u.update(ctx, req)
+}
+
+func (u settingsUsecase) GetLobby(ctx context.Context, id string) (entitylobby.Lobby, error) {
+	return u.get(ctx, id)
 }
 
 func lobbySession(t *testing.T, room string, profile any) *wsfake.Session {
@@ -114,7 +121,15 @@ func TestHandler_SettingsValidation(t *testing.T) {
 
 			var requests []dto.UpdateLobbySettingsRequest
 
-			uc := settingsUsecase{update: func(_ context.Context, req dto.UpdateLobbySettingsRequest) error {
+			uc := settingsUsecase{get: func(context.Context, string) (entitylobby.Lobby, error) {
+				return entitylobby.Lobby{
+					Provider:        tt.settings.Provider,
+					Rounds:          tt.settings.Rounds,
+					TimerSeconds:    tt.settings.TimerSeconds,
+					MovementAllowed: tt.settings.MovementAllowed,
+					PlayArea:        tt.settings.PlayArea,
+				}, nil
+			}, update: func(_ context.Context, req dto.UpdateLobbySettingsRequest) error {
 				requests = append(requests, req)
 				return nil
 			}}
@@ -197,4 +212,37 @@ func TestHandler_SettingsFailure(t *testing.T) {
 			assert.Empty(t, ws.Broadcasts())
 		})
 	}
+}
+
+func TestHandlerBroadcastsResolvedArea(t *testing.T) {
+	t.Parallel()
+
+	profile := user.PublicProfile{ID: uuid.New()}
+	settings := dto.LobbySettingsMessage{
+		Provider: "google", Rounds: 3,
+		PlayArea: playarea.Selection{Type: "saved", SavedID: uuid.New()},
+	}
+	polygon := playarea.Polygon{Type: "Polygon", Coordinates: [][][]float64{{{0, 0}, {2, 0}, {0, 2}, {0, 0}}}}
+	resolved := settings
+	resolved.PlayArea = playarea.Selection{Type: "polygon", Polygon: &polygon}
+	uc := settingsUsecase{
+		update: func(_ context.Context, request dto.UpdateLobbySettingsRequest) error {
+			require.Equal(t, settings, request.Settings)
+			return nil
+		},
+		get: func(context.Context, string) (entitylobby.Lobby, error) {
+			return entitylobby.Lobby{Provider: resolved.Provider, Rounds: resolved.Rounds, PlayArea: resolved.PlayArea}, nil
+		},
+	}
+	ws := &wsfake.Service{}
+	lobby.NewHandler(lobby.Config{}, uc, nil, ws)
+
+	payload, err := json.Marshal(dto.LobbyNewSettingsMessage{Settings: settings})
+	require.NoError(t, err)
+	ws.Message(lobbySession(t, "room", profile), transport.WebSocketMessageInput{
+		Type: dto.LobbyMessageTypeSettingsNew, Payload: payload,
+	})
+	require.Equal(t, []wsfake.Broadcast{{RoomID: "room", Message: transport.WebSocketMessageOutput{
+		Type: dto.LobbyMessageTypeSettingsChanged, Payload: map[string]any{"settings": resolved},
+	}}}, ws.Broadcasts())
 }

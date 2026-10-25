@@ -68,7 +68,7 @@ func (uc Usecase) getOrGenerateRound(
 		return singleplayer.Round{}, fmt.Errorf("failed to get current round: %w", err)
 	}
 
-	pano, err := uc.pano.NewStreetview(ctx, game.Provider)
+	pano, err := uc.pano.NewStreetviewInArea(ctx, game.Provider, game.PlayArea, game.ID, false)
 	if err != nil {
 		return singleplayer.Round{}, fmt.Errorf("failed to create panorama: %w", err)
 	}

@@ -65,7 +65,7 @@ func TestUsecase_NewRound(t *testing.T) {
 
 			repo := mocks.NewRepository(t)
 			pano := mocks.NewPanoramaUsecase(t)
-			uc := singleplayer.NewUsecase(cfg, repo, pano)
+			uc := singleplayer.NewUsecase(cfg, repo, pano, areaUsecaseStub{})
 			req := dto.NewSingleplayerRoundRequest{RequestTime: now, GameID: gameID, UserID: userID}
 
 			storedGame := singleplayerEntity.Game{
@@ -106,7 +106,8 @@ func TestUsecase_NewRound(t *testing.T) {
 						ID: roundID, GameID: gameID, RoundNum: tt.current + 1,
 						CreatedAt: now, StartedAt: now.Add(cfg.RoundStartDelay),
 					}
-					generate := pano.On("NewStreetview", mock.Anything, game.GoogleProvider).
+					generate := pano.On("NewStreetviewInArea",
+						mock.Anything, game.GoogleProvider, mock.Anything, mock.Anything, false).
 						Return(game.PanoramaMetadata{ID: panoramaID}, nil).Once()
 					create := repo.On("NewSingleplayerRound", mock.Anything, dto.NewSingleplayerRoundDBRequest{
 						GameID: gameID, LocationID: panoramaID, RoundNum: tt.current + 1,
@@ -235,7 +236,7 @@ func TestUsecase_GetRound(t *testing.T) {
 			fs := fields{repo: repo, pano: panoUsecase}
 			tt.setup(fs, tt.args)
 
-			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase)
+			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase, areaUsecaseStub{})
 
 			got, err := uc.GetRound(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
@@ -385,7 +386,7 @@ func TestUsecase_GetGameGuesses(t *testing.T) {
 			fs := fields{repo: repo, pano: panoUsecase}
 			tt.setup(fs, tt.args)
 
-			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase)
+			uc := singleplayer.NewUsecase(singleplayer.Config{}, repo, panoUsecase, areaUsecaseStub{})
 
 			got, err := uc.GetGameGuesses(t.Context(), tt.args.req)
 			tt.wantErr(t, err)

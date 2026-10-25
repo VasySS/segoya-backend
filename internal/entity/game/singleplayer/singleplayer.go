@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/VasySS/segoya-backend/internal/entity/playarea"
 )
 
 // MaxRoundsReached returns true if all rounds have been created.
@@ -26,6 +27,7 @@ func (r Round) TimerExpired(now time.Time, timerSeconds int) bool {
 
 // Game struct contains singleplayer game information.
 type Game struct {
+	PlayArea        playarea.Selection    `db:"play_area"        json:"playArea"`
 	ID              uuid.UUID             `db:"id"               json:"id"`
 	UserID          uuid.UUID             `db:"user_id"          json:"userID"`
 	Rounds          int                   `db:"rounds"           json:"rounds"`

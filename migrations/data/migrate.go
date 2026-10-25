@@ -74,6 +74,10 @@ func MigrateAllCSVData(ctx context.Context, pool *pgxpool.Pool) error {
 		slog.Info("data migration completed", slog.String("name", migration.CreateTableSQLPath))
 	}
 
+	if err := refreshPlayAreaMemberships(ctx, tx); err != nil {
+		return err
+	}
+
 	if err := tx.Commit(ctx); err != nil {
 		return fmt.Errorf("failed to commit transaction: %w", err)
 	}

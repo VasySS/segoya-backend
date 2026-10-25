@@ -119,7 +119,7 @@ func TestUsecase_UpdateLobbySettings(t *testing.T) {
 			}
 			tt.setup(fs, tt.args)
 
-			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil)
+			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil, areaUsecaseStub{})
 
 			err := uc.UpdateLobbySettings(t.Context(), tt.args.req)
 			tt.wantErr(t, err)
@@ -170,7 +170,7 @@ func TestUsecase_UpdateLobbySettingsPreservesRepositoryContract(t *testing.T) {
 				lobbyRepo.On("UpdateLobby", mock.Anything, tt.want).Return(nil).Once()
 			}
 
-			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil)
+			uc := lobby.NewUsecase(lobby.Config{}, nil, nil, lobbyRepo, nil, areaUsecaseStub{})
 
 			err := uc.UpdateLobbySettings(t.Context(), dto.UpdateLobbySettingsRequest{
 				LobbyID: original.ID, Creator: user.PublicProfile{ID: creatorID}, Settings: tt.settings,

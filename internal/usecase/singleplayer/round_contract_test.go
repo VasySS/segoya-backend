@@ -47,7 +47,8 @@ func newSingleplayerHarness(t *testing.T) *singleplayerHarness {
 		metadata: game.PanoramaMetadata{ID: uuid.MustParse("019a553a-fc00-7000-8000-000000000004")},
 	}
 	h.round.GameID, h.round.StartedAt = h.game.ID, h.now
-	h.uc = singleplayer.NewUsecase(singleplayer.Config{RoundStartDelay: 5 * time.Second}, h.repo, h.pano)
+	h.uc = singleplayer.NewUsecase(singleplayer.Config{RoundStartDelay: 5 * time.Second},
+		h.repo, h.pano, areaUsecaseStub{})
 
 	return h
 }
@@ -275,11 +276,15 @@ func setupSingleplayerNewRoundFailure(h *singleplayerHarness, failure string, ca
 		Return(sp.Round{}, sp.ErrRoundNotFound).Once()
 
 	if failure == "panorama" {
-		h.pano.On("NewStreetview", mock.Anything, game.GoogleProvider).Return(game.PanoramaMetadata{}, cause).Once()
+		h.pano.On("NewStreetviewInArea",
+			mock.Anything, game.GoogleProvider, mock.Anything, mock.Anything, false).
+			Return(game.PanoramaMetadata{}, cause).Once()
+
 		return
 	}
 
-	h.pano.On("NewStreetview", mock.Anything, game.GoogleProvider).Return(h.metadata, nil).Once()
+	h.pano.On("NewStreetviewInArea",
+		mock.Anything, game.GoogleProvider, mock.Anything, mock.Anything, false).Return(h.metadata, nil).Once()
 
 	var insertErr error
 	if failure == "insert" {

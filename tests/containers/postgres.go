@@ -20,12 +20,12 @@ type PostgresContainer struct {
 // NewPostgresContainer creates a new postgres test container.
 func NewPostgresContainer(ctx context.Context) (*PostgresContainer, error) {
 	postgresContainer, err := postgres.Run(ctx,
-		"postgres:18.1-alpine3.23@sha256:aa6eb304ddb6dd26df23d05db4e5cb05af8951cda3e0dc57731b771e0ef4ab29",
+		"postgis/postgis:18-3.6@sha256:e84455a058f60f06dd8c40e66a2c628b8fc113d9fca0896e1f308b25b897207f",
 		postgres.WithDatabase("segoya_data"),
 		postgres.WithSQLDriver("pgx"),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).WithStartupTimeout(10*time.Second),
+				WithOccurrence(2).WithStartupTimeout(60*time.Second),
 		),
 	)
 	if err != nil {
