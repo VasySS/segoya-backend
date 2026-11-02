@@ -70,7 +70,9 @@ func TestGuessBoundaries(t *testing.T) {
 
 				_, _, err := sp.EvaluateGuess(settings, start.Add(-time.Nanosecond), guess.coordinates)
 				require.ErrorIs(t, err, game.ErrRoundNotStarted)
-				_, _, err = mp.EvaluateGuess(game.GoogleProvider, start.Add(-time.Nanosecond), guess.coordinates)
+				_, _, err = mp.EvaluateGuess(multiplayer.Game{
+					Provider: game.GoogleProvider,
+				}, start.Add(-time.Nanosecond), guess.coordinates)
 				require.ErrorIs(t, err, game.ErrRoundNotStarted)
 			})
 
@@ -86,7 +88,9 @@ func TestGuessBoundaries(t *testing.T) {
 
 					spScore, spDistance, err := sp.EvaluateGuess(settings, start.Add(elapsed), guess.coordinates)
 					require.NoError(t, err)
-					mpScore, mpDistance, err := mp.EvaluateGuess(game.GoogleProvider, start.Add(elapsed), guess.coordinates)
+					mpScore, mpDistance, err := mp.EvaluateGuess(multiplayer.Game{
+						Provider: game.GoogleProvider,
+					}, start.Add(elapsed), guess.coordinates)
 					require.NoError(t, err)
 
 					wantSPScore := guess.score
@@ -126,7 +130,9 @@ func TestGuessInvalidCoordinates(t *testing.T) {
 			settings := singleplayer.Game{Provider: game.GoogleProvider}
 			_, _, err := (singleplayer.Round{}).EvaluateGuess(settings, time.Time{}, &tt.coordinates)
 			require.ErrorIs(t, err, game.ErrInvalidCoordinates)
-			_, _, err = (multiplayer.Round{}).EvaluateGuess(game.GoogleProvider, time.Time{}, &tt.coordinates)
+			_, _, err = (multiplayer.Round{}).EvaluateGuess(multiplayer.Game{
+				Provider: game.GoogleProvider,
+			}, time.Time{}, &tt.coordinates)
 			require.ErrorIs(t, err, game.ErrInvalidCoordinates)
 		})
 	}

@@ -40,7 +40,7 @@ func playAreaPredicate(area playarea.Selection, args pgx.NamedArgs) (string, err
 
 		args["play_area_polygon"] = string(polygon)
 
-		return "ST_Covers(ST_SetSRID(ST_GeomFromGeoJSON(@play_area_polygon::jsonb), 4326), pl.geom)", nil
+		return "ST_Covers(ST_SetSRID(ST_GeomFromGeoJSON(@play_area_polygon::text), 4326), pl.geom)", nil
 	default:
 		// Saved selections must be resolved with the user's access rights before querying.
 		return "", playarea.ErrInvalidSelection
@@ -245,15 +245,18 @@ func (r *Repository) GetPlayAreaPreset(ctx context.Context, id uuid.UUID) (playa
 	defer span.End()
 
 	query := `
-		SELECT ` + presetColumns + `, ST_AsGeoJSON(p.display_geom)::jsonb
+		SELECT ` + presetColumns + `, ST_AsGeoJSON(p.display_geom, 25, 0)
 		FROM play_area_preset p WHERE p.id = @id
 	`
 
-	var preset playarea.Preset
+	var (
+		preset  playarea.Preset
+		polygon []byte
+	)
 
 	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, pgx.NamedArgs{"id": id})
 
-	err := scanPreset(row, &preset, &preset.Polygon)
+	err := scanPreset(row, &preset, &polygon)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return playarea.Preset{}, playarea.ErrNotFound
 	}
@@ -261,6 +264,8 @@ func (r *Repository) GetPlayAreaPreset(ctx context.Context, id uuid.UUID) (playa
 	if err != nil {
 		return playarea.Preset{}, fmt.Errorf("get play area preset: %w", err)
 	}
+
+	preset.Polygon = json.RawMessage(polygon)
 
 	return preset, nil
 }
@@ -280,7 +285,7 @@ func scanPreset(row playAreaScanner, preset *playarea.Preset, last any) error {
 	return nil
 }
 
-const savedPlayAreaColumns = `id, owner_id, name, polygon, visibility, created_at, updated_at`
+const savedPlayAreaColumns = `id, owner_id, name, ST_AsGeoJSON(polygon, 25, 0), visibility, created_at, updated_at`
 
 // CreatePlayArea saves a provider-independent polygon in the user's library.
 func (r *Repository) CreatePlayArea(
@@ -310,15 +315,20 @@ func (r *Repository) CreatePlayArea(
 		return playarea.Saved{}, err
 	}
 
+	encoded, err := encodePolygon(polygon)
+	if err != nil {
+		return playarea.Saved{}, err
+	}
+
 	query := `
 		INSERT INTO saved_play_area (owner_id, name, polygon, visibility)
-		VALUES (@owner, @name, @polygon, @visibility)
+		VALUES (@owner, @name, ST_SetSRID(ST_GeomFromGeoJSON(@polygon::text), 4326), @visibility)
 		RETURNING ` + savedPlayAreaColumns
 
 	var saved playarea.Saved
 
 	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, pgx.NamedArgs{
-		"owner": owner, "name": name, "polygon": polygon, "visibility": visibility,
+		"owner": owner, "name": name, "polygon": encoded, "visibility": visibility,
 	})
 	if err := scanSavedPlayArea(row, &saved); err != nil {
 		return playarea.Saved{}, fmt.Errorf("create saved play area: %w", err)
@@ -428,8 +438,17 @@ func (r *Repository) UpdatePlayArea(
 		name = &trimmed
 	}
 
+	var encoded *string
+
 	if polygon != nil {
 		if err := r.validatePlayAreaPolygon(ctx, *polygon); err != nil {
+			return playarea.Saved{}, err
+		}
+
+		var err error
+
+		encoded, err = encodePolygon(*polygon)
+		if err != nil {
 			return playarea.Saved{}, err
 		}
 	}
@@ -442,7 +461,7 @@ func (r *Repository) UpdatePlayArea(
 
 	query := `
 		UPDATE saved_play_area SET name = COALESCE(@name, name),
-			polygon = COALESCE(@polygon::jsonb, polygon),
+			polygon = COALESCE(ST_SetSRID(ST_GeomFromGeoJSON(@polygon::text), 4326), polygon),
 			visibility = COALESCE(@visibility, visibility), updated_at = clock_timestamp()
 		WHERE id = @id AND owner_id = @owner
 		RETURNING ` + savedPlayAreaColumns
@@ -450,7 +469,7 @@ func (r *Repository) UpdatePlayArea(
 	var saved playarea.Saved
 
 	row := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query, pgx.NamedArgs{
-		"id": id, "owner": owner, "name": name, "polygon": polygon, "visibility": visibility,
+		"id": id, "owner": owner, "name": name, "polygon": encoded, "visibility": visibility,
 	})
 
 	err := scanSavedPlayArea(row, &saved)
@@ -487,9 +506,18 @@ func (r *Repository) DeletePlayArea(ctx context.Context, id, owner uuid.UUID) er
 }
 
 func scanSavedPlayArea(row playAreaScanner, saved *playarea.Saved) error {
-	if err := row.Scan(&saved.ID, &saved.OwnerID, &saved.Name, &saved.Polygon,
+	var polygon string
+
+	if err := row.Scan(&saved.ID, &saved.OwnerID, &saved.Name, &polygon,
 		&saved.Visibility, &saved.CreatedAt, &saved.UpdatedAt); err != nil {
 		return fmt.Errorf("scan saved play area row: %w", err)
+	}
+
+	var err error
+
+	saved.Polygon, err = decodePolygon(polygon)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -500,12 +528,17 @@ func (r *Repository) validatePlayAreaPolygon(ctx context.Context, polygon playar
 		return fmt.Errorf("validate play area polygon: %w", err)
 	}
 
-	query := `SELECT ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON(@polygon::jsonb), 4326))`
+	encoded, err := encodePolygon(polygon)
+	if err != nil {
+		return err
+	}
+
+	query := `SELECT ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON(@polygon::text), 4326))`
 
 	var valid bool
 
-	err := r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query,
-		pgx.NamedArgs{"polygon": polygon}).Scan(&valid)
+	err = r.txManager.GetQueryEngine(ctx).QueryRow(ctx, query,
+		pgx.NamedArgs{"polygon": encoded}).Scan(&valid)
 	if err != nil {
 		return fmt.Errorf("validate play area topology: %w", err)
 	}

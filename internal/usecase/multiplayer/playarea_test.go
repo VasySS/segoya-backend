@@ -23,6 +23,12 @@ type areaUsecaseStub struct {
 	prepare func(context.Context, game.PanoramaProvider, playarea.Selection, uuid.UUID, int) (playarea.Selection, error)
 }
 
+func (s areaUsecaseStub) ResolveScoring(
+	_ context.Context, provider game.PanoramaProvider, _ playarea.Selection,
+) (game.ScoringSettings, error) {
+	return game.ProviderScoring(provider), nil
+}
+
 func (s areaUsecaseStub) Prepare(
 	ctx context.Context, provider game.PanoramaProvider, area playarea.Selection,
 	userID uuid.UUID, rounds int,
@@ -84,6 +90,8 @@ func TestNewGamePreparesPlayAreaInTransaction(t *testing.T) {
 			if !insufficient {
 				expected := req
 				expected.PlayArea = polygon
+				scoring := game.ProviderScoring(game.GoogleProvider)
+				expected.Scoring = &scoring
 				repo.On("NewMultiplayerGame", mock.Anything, expected).Return(uuid.Nil, cause).Once()
 			}
 

@@ -93,6 +93,7 @@ func MultiplayerGameGuessesToAPI(guesses []multiplayer.Guess) *api.GetMultiplaye
 
 // NewMultiplayerGameRequest is a request for a new multiplayer game.
 type NewMultiplayerGameRequest struct {
+	Scoring          *game.ScoringSettings
 	PlayArea         playarea.Selection
 	RequestTime      time.Time
 	CreatorID        uuid.UUID

@@ -50,9 +50,9 @@ func TestPlayAreaGameLifecycle(t *testing.T) {
 				nextRound func() (uuid.UUID, error)
 			)
 
-			table, roundsTable := "singleplayer_game", "singleplayer_round"
+			roundsTable := "singleplayer_round"
 			if multiplayer {
-				table, roundsTable = "multiplayer_game", "multiplayer_round"
+				roundsTable = "multiplayer_round"
 				uc := multiplayeruc.NewUsecase(multiplayeruc.Config{}, repo, panoramas, areas)
 				newGame = func(rounds int, selection playarea.Selection) (uuid.UUID, error) {
 					return uc.NewGame(t.Context(), dto.NewMultiplayerGameRequest{
@@ -102,7 +102,18 @@ func TestPlayAreaGameLifecycle(t *testing.T) {
 
 			var stored playarea.Selection
 
-			require.NoError(t, pool.QueryRow(t.Context(), "SELECT play_area FROM "+table+" WHERE id=$1", gameID).Scan(&stored))
+			if multiplayer {
+				persisted, err := repo.GetMultiplayerGame(t.Context(), gameID)
+				require.NoError(t, err)
+
+				stored = persisted.PlayArea
+			} else {
+				persisted, err := repo.GetSingleplayerGame(t.Context(), gameID)
+				require.NoError(t, err)
+
+				stored = persisted.PlayArea
+			}
+
 			require.Equal(t, playarea.Selection{Type: "polygon", Polygon: &polygon}, stored)
 
 			finish := func() {
@@ -207,6 +218,10 @@ func TestPlayAreaMigrationOnRestoredCopy(t *testing.T) {
 		(id,user_id,rounds,provider,movement_allowed,timer_seconds,created_at)
 		VALUES ($1,$2,1,'google',TRUE,0,$3)`, gameID, owner, integrationTime())
 	require.NoError(t, err)
+	_, err = pool.Exec(t.Context(), `INSERT INTO multiplayer_game
+		(id,creator_id,rounds,provider,movement_allowed,timer_seconds,players,created_at)
+		VALUES ($1,$2,1,'google',TRUE,0,2,$3)`, gameID, owner, integrationTime())
+	require.NoError(t, err)
 
 	configuration, err := pgxpool.ParseConfig(container.ConnectionString)
 	require.NoError(t, err)
@@ -235,11 +250,23 @@ func TestPlayAreaMigrationOnRestoredCopy(t *testing.T) {
 	t.Cleanup(restored.Close)
 	require.NoError(t, tables.RunGooseMigrations(t.Context(), restored, "up"))
 
-	var selection playarea.Selection
+	var (
+		presetIDs []uuid.UUID
+		polygon   *string
+		version   *int
+		scale     *float64
+	)
 
-	err = restored.QueryRow(t.Context(), "SELECT play_area FROM singleplayer_game WHERE id=$1", gameID).Scan(&selection)
-	require.NoError(t, err)
-	require.Equal(t, "all", selection.Type)
+	for _, table := range []string{"singleplayer_game", "multiplayer_game"} {
+		err = restored.QueryRow(t.Context(), `SELECT play_area_preset_ids,ST_AsGeoJSON(play_area_polygon,25,0),
+			scoring_version,scoring_scale_meters FROM `+table+` WHERE id=$1`, gameID).
+			Scan(&presetIDs, &polygon, &version, &scale)
+		require.NoError(t, err)
+		require.Empty(t, presetIDs)
+		require.Nil(t, polygon)
+		require.Nil(t, version)
+		require.Nil(t, scale)
+	}
 
 	var correctPoint bool
 
@@ -250,6 +277,17 @@ func TestPlayAreaMigrationOnRestoredCopy(t *testing.T) {
 	var originalColumns int
 
 	require.NoError(t, pool.QueryRow(t.Context(), `SELECT COUNT(*) FROM information_schema.columns
-		WHERE table_name='singleplayer_game' AND column_name='play_area'`).Scan(&originalColumns))
+		WHERE table_name='singleplayer_game' AND column_name IN
+		('play_area_preset_ids','play_area_polygon','scoring_version','scoring_scale_meters')`).Scan(&originalColumns))
 	require.Zero(t, originalColumns, "upgrading the restored copy must not alter the original database")
+
+	require.NoError(t, tables.RunGooseMigrations(t.Context(), restored, "down-to", "11"))
+	require.NoError(t, restored.QueryRow(t.Context(), `SELECT COUNT(*) FROM information_schema.columns
+		WHERE table_name IN ('singleplayer_game','multiplayer_game') AND column_name IN
+		('play_area_preset_ids','play_area_polygon','scoring_version','scoring_scale_meters')`).Scan(&originalColumns))
+	require.Zero(t, originalColumns, "rollback removes the new storage columns")
+	require.NoError(t, restored.QueryRow(t.Context(), "SELECT COUNT(*) FROM singleplayer_game WHERE id=$1", gameID).
+		Scan(&originalColumns))
+	require.Equal(t, 1, originalColumns, "rollback preserves existing games")
+	require.NoError(t, tables.RunGooseMigrations(t.Context(), restored, "up"))
 }

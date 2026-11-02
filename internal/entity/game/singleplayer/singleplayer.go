@@ -27,7 +27,8 @@ func (r Round) TimerExpired(now time.Time, timerSeconds int) bool {
 
 // Game struct contains singleplayer game information.
 type Game struct {
-	PlayArea        playarea.Selection    `db:"play_area"        json:"playArea"`
+	Scoring         *game.ScoringSettings `db:"-"                json:"-"`
+	PlayArea        playarea.Selection    `db:"-"                json:"playArea"`
 	ID              uuid.UUID             `db:"id"               json:"id"`
 	UserID          uuid.UUID             `db:"user_id"          json:"userID"`
 	Rounds          int                   `db:"rounds"           json:"rounds"`
@@ -177,7 +178,16 @@ func (r Round) EvaluateGuess(g Game, requestTime time.Time, coordinates *game.La
 
 	location := game.LatLng{Lat: r.Lat, Lng: r.Lng}
 
-	score, distance := game.CalculateScore(g.Provider, location, *coordinates)
+	scoring := game.ProviderScoring(g.Provider)
+	if g.Scoring != nil {
+		scoring = *g.Scoring
+	}
+
+	if err := scoring.Validate(); err != nil {
+		return 0, 0, err
+	}
+
+	score, distance := scoring.Score(location, *coordinates)
 	if r.TimerExpired(requestTime, g.TimerSeconds) {
 		score = 0
 	}

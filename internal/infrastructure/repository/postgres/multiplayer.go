@@ -41,18 +41,20 @@ func (r *Repository) NewMultiplayerGame(
 	ctx, span := r.tracer.Start(ctx, "NewMultiplayerGame")
 	defer span.End()
 
-	selection, err := req.PlayArea.Normalize()
+	settings, err := encodeGameSettings(req.PlayArea, req.Scoring)
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("normalize play area: %w", err)
+		return uuid.Nil, fmt.Errorf("encode multiplayer settings: %w", err)
 	}
 
 	query := `
         WITH 
 		new_game AS (
             INSERT INTO multiplayer_game
-                (created_at, creator_id, rounds, movement_allowed, provider, timer_seconds, players, play_area)
+                (created_at, creator_id, rounds, movement_allowed, provider, timer_seconds, players,
+                 play_area_preset_ids, play_area_polygon, scoring_version, scoring_scale_meters)
             VALUES (@created_at, @creator_id, @rounds, @movement_allowed,
-                @provider, @timer_seconds, @players, @play_area)
+                @provider, @timer_seconds, @players, @preset_ids,
+                ST_SetSRID(ST_GeomFromGeoJSON(@polygon::text), 4326), @scoring_version, @scoring_scale_meters)
             RETURNING id
         ),
 		inserted_users AS (
@@ -72,15 +74,18 @@ func (r *Repository) NewMultiplayerGame(
 	var gameID uuid.UUID
 
 	err = pgxscan.Get(ctx, tx, &gameID, query, pgx.NamedArgs{
-		"created_at":       req.RequestTime,
-		"creator_id":       req.CreatorID.String(),
-		"rounds":           req.Rounds,
-		"movement_allowed": req.MovementAllowed,
-		"provider":         req.Provider,
-		"play_area":        selection,
-		"timer_seconds":    req.TimerSeconds,
-		"players":          len(req.ConnectedPlayers),
-		"user_ids":         userIDs.Strings(),
+		"created_at":           req.RequestTime,
+		"creator_id":           req.CreatorID.String(),
+		"rounds":               req.Rounds,
+		"movement_allowed":     req.MovementAllowed,
+		"provider":             req.Provider,
+		"preset_ids":           settings.PresetIDs,
+		"polygon":              settings.Polygon,
+		"scoring_version":      settings.ScoringVersion,
+		"scoring_scale_meters": settings.ScoringScaleMeters,
+		"timer_seconds":        req.TimerSeconds,
+		"players":              len(req.ConnectedPlayers),
+		"user_ids":             userIDs.Strings(),
 	})
 	if err != nil {
 		return uuid.UUID{}, fmt.Errorf("failed to create multiplayer game: %w", err)
@@ -104,7 +109,10 @@ func (r *Repository) GetMultiplayerGame(ctx context.Context, gameID uuid.UUID) (
 			COUNT(mr.id) AS round_current,
 			mg.movement_allowed,
 			mg.provider,
-			mg.play_area,
+			mg.play_area_preset_ids,
+			ST_AsGeoJSON(mg.play_area_polygon, 25, 0) AS play_area_polygon,
+			mg.scoring_version,
+			mg.scoring_scale_meters,
 			mg.timer_seconds,
 			mg.players,
 			mg.finished,
@@ -117,16 +125,21 @@ func (r *Repository) GetMultiplayerGame(ctx context.Context, gameID uuid.UUID) (
 		GROUP BY mg.id
 	`
 
-	var game multiplayer.Game
+	var row multiplayerGameRow
 
-	err := pgxscan.Get(ctx, tx, &game, query, pgx.NamedArgs{"game_id": gameID.String()})
+	err := pgxscan.Get(ctx, tx, &row, query, pgx.NamedArgs{"game_id": gameID.String()})
 	if pgxscan.NotFound(err) {
 		return multiplayer.Game{}, multiplayer.ErrGameNotFound
 	} else if err != nil {
 		return multiplayer.Game{}, fmt.Errorf("failed to get multiplayer game by id: %w", err)
 	}
 
-	return game, nil
+	result, err := row.toGame()
+	if err != nil {
+		return multiplayer.Game{}, fmt.Errorf("decode multiplayer settings: %w", err)
+	}
+
+	return result, nil
 }
 
 // EndMultiplayerGame ends a multiplayer game.

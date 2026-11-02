@@ -20,6 +20,7 @@ import (
 
 // GameRepo provides access to multiplayer game data.
 type GameRepo interface {
+	InitializeMultiplayerScoring(ctx context.Context, id uuid.UUID, scoring game.ScoringSettings) error
 	LockMultiplayerGame(ctx context.Context, gameID uuid.UUID) error
 	NewMultiplayerGame(ctx context.Context, req dto.NewMultiplayerGameRequest) (uuid.UUID, error)
 	GetMultiplayerGame(ctx context.Context, gameID uuid.UUID) (multiplayer.Game, error)
@@ -65,6 +66,11 @@ var errAreaServiceNotConfigured = errors.New("play area service is not configure
 
 // AreaUsecase resolves the selection and checks that it can supply every round.
 type AreaUsecase interface {
+	ResolveScoring(
+		ctx context.Context,
+		provider game.PanoramaProvider,
+		selection playarea.Selection,
+	) (game.ScoringSettings, error)
 	Prepare(
 		ctx context.Context,
 		provider game.PanoramaProvider,

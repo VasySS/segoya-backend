@@ -5,6 +5,9 @@ import (
 	"math"
 )
 
+// EarthRadiusMeters preserves the radius used by the existing Haversine calculation.
+const EarthRadiusMeters = 3958.75 * 1609.0
+
 // LatLng is a struct that contains latitude and longitude coordinates.
 type LatLng struct {
 	Lat float64 `json:"lat"`
@@ -23,7 +26,6 @@ func (l LatLng) Validate() error {
 
 // DistanceTo returns the Haversine distance in meters between two LatLng points.
 func (l LatLng) DistanceTo(other LatLng) float64 {
-	earthRadius := 3958.75
 	latDiff := other.Lat - l.Lat
 	lngDiff := other.Lng - l.Lng
 	latDiffRad := latDiff * (math.Pi / 180.0)
@@ -35,9 +37,6 @@ func (l LatLng) DistanceTo(other LatLng) float64 {
 	a = math.Max(0, math.Min(1, a))
 
 	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
-	distance := earthRadius * c
 
-	meterConversion := 1609.0
-
-	return distance * meterConversion
+	return EarthRadiusMeters * c
 }

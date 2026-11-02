@@ -68,7 +68,10 @@ func TestUsecase_NewGame(t *testing.T) {
 						return fn(ctx)
 					})
 
-				fs.repo.On("NewMultiplayerGame", mock.Anything, args.req).
+				expected := args.req
+				scoring := game.ProviderScoring(game.PanoramaProvider(args.req.Provider))
+				expected.Scoring = &scoring
+				fs.repo.On("NewMultiplayerGame", mock.Anything, expected).
 					Return(createdGameID, nil)
 
 				fs.repo.On("LockMultiplayerGame", mock.Anything, createdGameID).

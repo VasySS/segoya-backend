@@ -41,28 +41,33 @@ func (r *Repository) NewSingleplayerGame(
 	ctx, span := r.tracer.Start(ctx, "NewSingleplayerGame")
 	defer span.End()
 
-	selection, err := req.PlayArea.Normalize()
+	settings, err := encodeGameSettings(req.PlayArea, req.Scoring)
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("normalize play area: %w", err)
+		return uuid.Nil, fmt.Errorf("encode singleplayer settings: %w", err)
 	}
 
 	query := `
 		INSERT INTO singleplayer_game
-		(user_id, rounds, movement_allowed, provider, created_at, timer_seconds, play_area)
-		VALUES (@user_id, @rounds, @movement_allowed, @provider, @created_at, @timer_seconds, @play_area)
+		(user_id, rounds, movement_allowed, provider, created_at, timer_seconds,
+		 play_area_preset_ids, play_area_polygon, scoring_version, scoring_scale_meters)
+		VALUES (@user_id, @rounds, @movement_allowed, @provider, @created_at, @timer_seconds,
+		 @preset_ids, ST_SetSRID(ST_GeomFromGeoJSON(@polygon::text), 4326), @scoring_version, @scoring_scale_meters)
 		RETURNING id
 	`
 
 	var gameID uuid.UUID
 
 	err = tx.QueryRow(ctx, query, pgx.NamedArgs{
-		"user_id":          req.UserID.String(),
-		"rounds":           req.Rounds,
-		"movement_allowed": req.MovementAllowed,
-		"provider":         req.Provider,
-		"play_area":        selection,
-		"created_at":       req.RequestTime,
-		"timer_seconds":    req.TimerSeconds,
+		"user_id":              req.UserID.String(),
+		"rounds":               req.Rounds,
+		"movement_allowed":     req.MovementAllowed,
+		"provider":             req.Provider,
+		"preset_ids":           settings.PresetIDs,
+		"polygon":              settings.Polygon,
+		"scoring_version":      settings.ScoringVersion,
+		"scoring_scale_meters": settings.ScoringScaleMeters,
+		"created_at":           req.RequestTime,
+		"timer_seconds":        req.TimerSeconds,
 	}).Scan(&gameID)
 	if err != nil {
 		return uuid.UUID{}, fmt.Errorf("failed to create singleplayer game: %w", err)
@@ -87,7 +92,10 @@ func (r *Repository) GetSingleplayerGame(ctx context.Context, gameID uuid.UUID) 
 			sg.timer_seconds,
 			sg.movement_allowed,
 			sg.provider,
-			sg.play_area,
+			sg.play_area_preset_ids,
+			ST_AsGeoJSON(sg.play_area_polygon, 25, 0) AS play_area_polygon,
+			sg.scoring_version,
+			sg.scoring_scale_meters,
 			COALESCE(SUM(srg.score), 0) AS score,
 			sg.finished,
 			sg.created_at,
@@ -101,16 +109,21 @@ func (r *Repository) GetSingleplayerGame(ctx context.Context, gameID uuid.UUID) 
 		GROUP BY sg.id
 	`
 
-	var game singleplayer.Game
+	var row singleplayerGameRow
 
-	err := pgxscan.Get(ctx, tx, &game, query, pgx.NamedArgs{"game_id": gameID.String()})
+	err := pgxscan.Get(ctx, tx, &row, query, pgx.NamedArgs{"game_id": gameID.String()})
 	if pgxscan.NotFound(err) {
 		return singleplayer.Game{}, singleplayer.ErrGameNotFound
 	} else if err != nil {
 		return singleplayer.Game{}, fmt.Errorf("failed to get singleplayer game: %w", err)
 	}
 
-	return game, nil
+	result, err := row.toGame()
+	if err != nil {
+		return singleplayer.Game{}, fmt.Errorf("decode singleplayer settings: %w", err)
+	}
+
+	return result, nil
 }
 
 // GetSingleplayerGames returns a list of singleplayer games created by user.
@@ -148,7 +161,10 @@ func (r *Repository) GetSingleplayerGames(
 			sg.timer_seconds,
 			sg.movement_allowed,
 			sg.provider,
-			sg.play_area,
+			sg.play_area_preset_ids,
+			ST_AsGeoJSON(sg.play_area_polygon, 25, 0) AS play_area_polygon,
+			sg.scoring_version,
+			sg.scoring_scale_meters,
 			COALESCE(SUM(srg.score), 0) AS score,
 			sg.finished,
 			sg.created_at,
@@ -164,15 +180,26 @@ func (r *Repository) GetSingleplayerGames(
 		LIMIT @limit OFFSET @offset
 	`
 
-	var games []singleplayer.Game
+	var rows []singleplayerGameRow
 
-	err = pgxscan.Select(ctx, tx, &games, query, pgx.NamedArgs{
+	err = pgxscan.Select(ctx, tx, &rows, query, pgx.NamedArgs{
 		"user_id": req.UserID.String(),
 		"limit":   req.PageSize,
 		"offset":  offset,
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get singleplayer games: %w", err)
+	}
+
+	games := make([]singleplayer.Game, 0, len(rows))
+
+	for _, row := range rows {
+		result, err := row.toGame()
+		if err != nil {
+			return nil, 0, fmt.Errorf("decode singleplayer list settings: %w", err)
+		}
+
+		games = append(games, result)
 	}
 
 	return games, totalGames, nil

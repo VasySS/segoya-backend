@@ -34,6 +34,13 @@ func (uc Usecase) NewGame(ctx context.Context, req dto.NewSingleplayerGameReques
 
 		req.PlayArea = selection
 
+		scoring, err := uc.areas.ResolveScoring(ctx, game.PanoramaProvider(req.Provider), selection)
+		if err != nil {
+			return fmt.Errorf("prepare game scoring: %w", err)
+		}
+
+		req.Scoring = &scoring
+
 		id, err := uc.repo.NewSingleplayerGame(ctx, req)
 		if err != nil {
 			return fmt.Errorf("failed to create singleplayer game: %w", err)

@@ -115,6 +115,7 @@ type NewSingleplayerRoundDBRequest struct {
 
 // NewSingleplayerGameRequest represents a request to create a new singleplayer game.
 type NewSingleplayerGameRequest struct {
+	Scoring         *game.ScoringSettings
 	PlayArea        playarea.Selection
 	RequestTime     time.Time
 	UserID          uuid.UUID

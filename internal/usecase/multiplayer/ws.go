@@ -39,7 +39,7 @@ func (uc Usecase) NewRoundGuess(ctx context.Context, req dto.NewMultiplayerRound
 			return fmt.Errorf("failed to get current round: %w", err)
 		}
 
-		score, distance, err := round.EvaluateGuess(multiplayerGame.Provider, req.RequestTime, req.Guess)
+		score, distance, err := uc.scoreGuess(ctx, multiplayerGame, round, req.RequestTime, req.Guess)
 		if err != nil {
 			return err //nolint:wrapcheck // Preserve the existing unwrapped round error.
 		}

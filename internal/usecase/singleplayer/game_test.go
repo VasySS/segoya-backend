@@ -74,7 +74,10 @@ func TestUsecase_NewGame(t *testing.T) {
 						return fn(ctx)
 					})
 
-				fs.repo.On("NewSingleplayerGame", mock.Anything, args.req).
+				expected := args.req
+				scoring := game.ProviderScoring(game.PanoramaProvider(args.req.Provider))
+				expected.Scoring = &scoring
+				fs.repo.On("NewSingleplayerGame", mock.Anything, expected).
 					Return(createdGame.ID, nil)
 
 				fs.repo.On("LockSingleplayerGame", mock.Anything, createdGame.ID).
@@ -141,7 +144,10 @@ func TestUsecase_NewGame(t *testing.T) {
 						return fn(ctx)
 					})
 
-				fs.repo.On("NewSingleplayerGame", mock.Anything, args.req).
+				expected := args.req
+				scoring := game.ProviderScoring(game.PanoramaProvider(args.req.Provider))
+				expected.Scoring = &scoring
+				fs.repo.On("NewSingleplayerGame", mock.Anything, expected).
 					Return(createdGame.ID, nil)
 
 				fs.repo.On("LockSingleplayerGame", mock.Anything, createdGame.ID).

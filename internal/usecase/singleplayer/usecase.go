@@ -19,6 +19,7 @@ import (
 
 // GameRepo defines methods for accessing and modifying singleplayer game data.
 type GameRepo interface {
+	InitializeSingleplayerScoring(ctx context.Context, id uuid.UUID, scoring game.ScoringSettings) error
 	LockSingleplayerGame(ctx context.Context, gameID uuid.UUID) error
 	NewSingleplayerGame(ctx context.Context, req dto.NewSingleplayerGameRequest) (uuid.UUID, error)
 	GetSingleplayerGame(ctx context.Context, gameID uuid.UUID) (singleplayer.Game, error)
@@ -64,6 +65,11 @@ var errAreaServiceNotConfigured = errors.New("play area service is not configure
 
 // AreaUsecase resolves the selection and checks that it can supply every round.
 type AreaUsecase interface {
+	ResolveScoring(
+		ctx context.Context,
+		provider game.PanoramaProvider,
+		selection playarea.Selection,
+	) (game.ScoringSettings, error)
 	Prepare(
 		ctx context.Context,
 		provider game.PanoramaProvider,

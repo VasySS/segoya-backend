@@ -146,6 +146,10 @@ func (uc Usecase) EndRound(
 	var response dto.EndCurrentRoundResponse
 
 	err := uc.repo.RunTx(ctx, func(ctx context.Context) error {
+		if err := uc.repo.LockSingleplayerGame(ctx, req.GameID); err != nil {
+			return fmt.Errorf("failed to lock game: %w", err)
+		}
+
 		game, err := uc.repo.GetSingleplayerGame(ctx, req.GameID)
 		if err != nil {
 			return fmt.Errorf("failed to get singleplayer game: %w", err)
@@ -164,7 +168,7 @@ func (uc Usecase) EndRound(
 			return fmt.Errorf("failed to get current round from db: %w", err)
 		}
 
-		score, distance, err := round.EvaluateGuess(game, req.RequestTime, req.Guess)
+		score, distance, err := uc.scoreGuess(ctx, game, round, req.RequestTime, req.Guess)
 		if err != nil {
 			return err //nolint:wrapcheck // Preserve existing domain error wrapping.
 		}

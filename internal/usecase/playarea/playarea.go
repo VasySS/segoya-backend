@@ -17,6 +17,11 @@ import (
 
 // Repository provides spatial queries and access-controlled saved areas.
 type Repository interface {
+	GetPlayAreaPresetBounds(
+		ctx context.Context,
+		provider game.PanoramaProvider,
+		ids []uuid.UUID,
+	) (game.GeographicBounds, error)
 	CountPlayAreaLocations(ctx context.Context, provider game.PanoramaProvider, selection area.Selection) (int, error)
 	ValidatePlayAreaPresets(ctx context.Context, provider game.PanoramaProvider, ids []uuid.UUID) error
 	ListPlayAreaPresets(ctx context.Context, provider game.PanoramaProvider) ([]area.Preset, error)

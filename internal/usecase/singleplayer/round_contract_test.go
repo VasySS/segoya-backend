@@ -47,6 +47,8 @@ func newSingleplayerHarness(t *testing.T) *singleplayerHarness {
 		metadata: game.PanoramaMetadata{ID: uuid.MustParse("019a553a-fc00-7000-8000-000000000004")},
 	}
 	h.round.GameID, h.round.StartedAt = h.game.ID, h.now
+	scoring := game.ProviderScoring(h.game.Provider)
+	h.game.Scoring = &scoring
 	h.uc = singleplayer.NewUsecase(singleplayer.Config{RoundStartDelay: 5 * time.Second},
 		h.repo, h.pano, areaUsecaseStub{})
 
@@ -186,6 +188,7 @@ func TestUsecase_EndRound(t *testing.T) {
 
 			h.round.Finished = tt.finished
 			h.expectTransaction()
+			h.repo.On("LockSingleplayerGame", mock.Anything, h.game.ID).Return(nil).Once()
 
 			fetchGame := h.repo.On("GetSingleplayerGame", mock.Anything, h.game.ID).Return(h.game, nil).Once()
 
@@ -217,7 +220,7 @@ func TestUsecase_EndRound(t *testing.T) {
 func TestUsecase_EndRoundFailures(t *testing.T) {
 	t.Parallel()
 
-	for _, failure := range []string{"transaction", "game", "invalid game", "round", "write", "commit"} {
+	for _, failure := range []string{"transaction", "lock", "game", "invalid game", "round", "write", "commit"} {
 		t.Run(failure, func(t *testing.T) {
 			t.Parallel()
 			h := newSingleplayerHarness(t)
@@ -314,6 +317,13 @@ func setupSingleplayerEndRoundFailure(h *singleplayerHarness, failure string, ca
 	} else {
 		h.expectTransaction()
 	}
+
+	if failure == "lock" {
+		h.repo.On("LockSingleplayerGame", mock.Anything, h.game.ID).Return(cause).Once()
+		return
+	}
+
+	h.repo.On("LockSingleplayerGame", mock.Anything, h.game.ID).Return(nil).Once()
 
 	if failure == "game" {
 		h.repo.On("GetSingleplayerGame", mock.Anything, h.game.ID).Return(sp.Game{}, cause).Once()

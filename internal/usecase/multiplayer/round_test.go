@@ -54,6 +54,8 @@ func newMultiplayerHarness(t *testing.T) *multiplayerHarness {
 		},
 	}
 	h.game.CreatorID = h.userID
+	scoring := game.ProviderScoring(h.game.Provider)
+	h.game.Scoring = &scoring
 	h.round.GameID, h.round.StartedAt, h.round.EndedAt = h.game.ID, h.now, h.now.Add(-h.config.RoundEndDelay)
 	h.uc = multiplayer.NewUsecase(h.config, h.repo, h.pano, areaUsecaseStub{})
 

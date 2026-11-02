@@ -39,6 +39,13 @@ func (uc Usecase) NewGame(ctx context.Context, req dto.NewMultiplayerGameRequest
 
 		req.PlayArea = selection
 
+		scoring, err := uc.areas.ResolveScoring(ctx, game.PanoramaProvider(req.Provider), selection)
+		if err != nil {
+			return fmt.Errorf("prepare game scoring: %w", err)
+		}
+
+		req.Scoring = &scoring
+
 		gID, err := uc.repo.NewMultiplayerGame(ctx, req)
 		if err != nil {
 			return fmt.Errorf("error creating multiplayer game: %w", err)

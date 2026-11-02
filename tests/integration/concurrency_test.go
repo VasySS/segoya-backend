@@ -22,6 +22,7 @@ import (
 	"github.com/VasySS/segoya-backend/internal/entity/user"
 	"github.com/VasySS/segoya-backend/internal/infrastructure/repository/postgres"
 	multiplayeruc "github.com/VasySS/segoya-backend/internal/usecase/multiplayer"
+	playareauc "github.com/VasySS/segoya-backend/internal/usecase/playarea"
 	useruc "github.com/VasySS/segoya-backend/internal/usecase/user"
 	"github.com/VasySS/segoya-backend/migrations/tables"
 	"github.com/VasySS/segoya-backend/tests/containers"
@@ -111,7 +112,7 @@ func TestGuessCompletionSerialization(t *testing.T) {
 				guessRepo, endRepo = second, first
 			}
 
-			guessUC := multiplayeruc.NewUsecase(multiplayeruc.Config{}, guessRepo, nil)
+			guessUC := multiplayeruc.NewUsecase(multiplayeruc.Config{}, guessRepo, nil, playareauc.NewUsecase(guessRepo))
 			endUC := multiplayeruc.NewUsecase(multiplayeruc.Config{}, endRepo, nil)
 			guessResult := make(chan error, 1)
 
@@ -199,7 +200,7 @@ func TestGuessPresenceAndParticipantAuthorization(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	uc := multiplayeruc.NewUsecase(multiplayeruc.Config{}, repo, nil)
+	uc := multiplayeruc.NewUsecase(multiplayeruc.Config{}, repo, nil, playareauc.NewUsecase(repo))
 	_, err = uc.GetGameUser(ctx, outsider.ID, gameID)
 	require.ErrorIs(t, err, multiplayer.ErrGameWrongUserID)
 	require.ErrorIs(t, uc.NewRoundGuess(ctx, dto.NewMultiplayerRoundGuessRequest{
@@ -296,7 +297,7 @@ func TestCanceledGuessWaitingForGameLockDoesNotPersist(t *testing.T) {
 	guessCtx, cancelGuess := context.WithCancel(ctx)
 	defer cancelGuess()
 
-	uc := multiplayeruc.NewUsecase(multiplayeruc.Config{}, repo, nil)
+	uc := multiplayeruc.NewUsecase(multiplayeruc.Config{}, repo, nil, playareauc.NewUsecase(repo))
 	guessResult := make(chan error, 1)
 	request := dto.NewMultiplayerRoundGuessRequest{
 		RequestTime: start, GameID: gameID, UserID: creator.ID, Guess: &game.LatLng{},

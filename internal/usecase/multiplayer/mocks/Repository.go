@@ -6,6 +6,8 @@ import (
 	context "context"
 
 	dto "github.com/VasySS/segoya-backend/internal/dto"
+	game "github.com/VasySS/segoya-backend/internal/entity/game"
+
 	gamemultiplayer "github.com/VasySS/segoya-backend/internal/entity/game/multiplayer"
 
 	mock "github.com/stretchr/testify/mock"
@@ -230,6 +232,24 @@ func (_m *Repository) GetMultiplayerRoundGuesses(ctx context.Context, roundID uu
 	}
 
 	return r0, r1
+}
+
+// InitializeMultiplayerScoring provides a mock function with given fields: ctx, id, scoring
+func (_m *Repository) InitializeMultiplayerScoring(ctx context.Context, id uuid.UUID, scoring game.ScoringSettings) error {
+	ret := _m.Called(ctx, id, scoring)
+
+	if len(ret) == 0 {
+		panic("no return value specified for InitializeMultiplayerScoring")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uuid.UUID, game.ScoringSettings) error); ok {
+		r0 = rf(ctx, id, scoring)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
 
 // LockMultiplayerGame provides a mock function with given fields: ctx, gameID

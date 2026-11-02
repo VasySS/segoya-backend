@@ -13,8 +13,11 @@ import (
 	"testing/fstest"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 
+	"github.com/VasySS/segoya-backend/internal/entity/game"
+	"github.com/VasySS/segoya-backend/internal/infrastructure/repository/postgres"
 	"github.com/VasySS/segoya-backend/migrations/tables"
 	"github.com/VasySS/segoya-backend/tests/containers"
 )
@@ -115,4 +118,30 @@ func TestBundledPlayAreaImport(t *testing.T) {
 		Scan(&classifiedLocations)
 	require.NoError(t, err)
 	require.Equal(t, 4, classifiedLocations)
+
+	repository := postgres.New(postgres.NewTxManager(pool))
+
+	for _, provider := range []game.PanoramaProvider{game.GoogleProvider, game.YandexAirProvider} {
+		t.Run(string(provider)+" scoring bounds", func(t *testing.T) {
+			t.Parallel()
+
+			var ids []uuid.UUID
+
+			err := pool.QueryRow(ctx, `SELECT ARRAY_AGG(id) FROM play_area_preset
+				WHERE country_code IN ('RUS','USA','AUS') AND $1=ANY(providers)`, string(provider)).Scan(&ids)
+			require.NoError(t, err)
+			require.NotEmpty(t, ids)
+
+			queryCtx, stop := context.WithTimeout(ctx, 3*time.Second)
+			defer stop()
+
+			started := time.Now()
+			bounds, err := repository.GetPlayAreaPresetBounds(queryCtx, provider, ids)
+			require.NoError(t, err)
+			t.Logf("full-resolution scoring bounds for %d presets took %s", len(ids), time.Since(started))
+
+			_, err = game.AreaScoring(bounds)
+			require.NoError(t, err)
+		})
+	}
 }

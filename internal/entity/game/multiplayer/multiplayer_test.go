@@ -186,7 +186,9 @@ func TestRound_EvaluateGuess(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			score, distance, err := tt.round.EvaluateGuess(game.GoogleProvider, tt.round.StartedAt, &tt.guess)
+			score, distance, err := tt.round.EvaluateGuess(multiplayer.Game{
+				Provider: game.GoogleProvider,
+			}, tt.round.StartedAt, &tt.guess)
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
 			} else {

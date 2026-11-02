@@ -75,12 +75,11 @@ CREATE TABLE saved_play_area (
     id UUID PRIMARY KEY DEFAULT uuidv7(),
     owner_id UUID NOT NULL REFERENCES user_info(id) ON DELETE CASCADE,
     name TEXT NOT NULL CHECK (length(btrim(name)) BETWEEN 1 AND 100),
-    polygon JSONB NOT NULL,
+    polygon geometry(Polygon, 4326) NOT NULL,
     visibility TEXT NOT NULL DEFAULT 'private' CHECK (visibility IN ('private', 'unlisted')),
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CHECK (polygon->>'type' = 'Polygon'),
-    CHECK (ST_IsValid(ST_SetSRID(ST_GeomFromGeoJSON(polygon), 4326)))
+    CHECK (ST_IsValid(polygon) AND NOT ST_IsEmpty(polygon))
 );
 
 COMMENT ON TABLE saved_play_area IS
@@ -92,7 +91,7 @@ COMMENT ON COLUMN saved_play_area.owner_id IS
 COMMENT ON COLUMN saved_play_area.name IS
     'Display name with a trimmed length of 1-100 characters.';
 COMMENT ON COLUMN saved_play_area.polygon IS
-    'Provider-independent GeoJSON Polygon in WGS84 [longitude, latitude] degrees; the API accepts one ring without holes.';
+    'Provider-independent WGS84 polygon; X is longitude and Y is latitude. The API accepts one ring without holes.';
 COMMENT ON COLUMN saved_play_area.visibility IS
     'Private permits owner access; unlisted also permits other authenticated users to read and use the area by ID.';
 COMMENT ON COLUMN saved_play_area.created_at IS
@@ -102,19 +101,36 @@ COMMENT ON COLUMN saved_play_area.updated_at IS
 
 CREATE INDEX saved_play_area_owner_created_idx ON saved_play_area (owner_id, created_at DESC, id DESC);
 
-ALTER TABLE singleplayer_game ADD COLUMN play_area JSONB NOT NULL DEFAULT '{"type":"all"}';
-ALTER TABLE multiplayer_game ADD COLUMN play_area JSONB NOT NULL DEFAULT '{"type":"all"}';
+ALTER TABLE singleplayer_game
+    ADD COLUMN play_area_preset_ids UUID[] NOT NULL DEFAULT '{}',
+    ADD COLUMN play_area_polygon geometry(Polygon, 4326),
+    ADD CONSTRAINT singleplayer_game_play_area_check
+        CHECK (cardinality(play_area_preset_ids) = 0 OR play_area_polygon IS NULL),
+    ADD CONSTRAINT singleplayer_game_play_area_polygon_check
+        CHECK (ST_IsValid(play_area_polygon) AND NOT ST_IsEmpty(play_area_polygon));
 
-COMMENT ON COLUMN singleplayer_game.play_area IS
-    'Resolved round-start selection: all, immutable preset IDs, or a polygon snapshot; legacy games default to all.';
-COMMENT ON COLUMN multiplayer_game.play_area IS
-    'Resolved round-start selection: all, immutable preset IDs, or a polygon snapshot; legacy games default to all.';
+ALTER TABLE multiplayer_game
+    ADD COLUMN play_area_preset_ids UUID[] NOT NULL DEFAULT '{}',
+    ADD COLUMN play_area_polygon geometry(Polygon, 4326),
+    ADD CONSTRAINT multiplayer_game_play_area_check
+        CHECK (cardinality(play_area_preset_ids) = 0 OR play_area_polygon IS NULL),
+    ADD CONSTRAINT multiplayer_game_play_area_polygon_check
+        CHECK (ST_IsValid(play_area_polygon) AND NOT ST_IsEmpty(play_area_polygon));
+
+COMMENT ON COLUMN singleplayer_game.play_area_preset_ids IS
+    'Immutable preset references for round starts; empty with no polygon means the whole provider.';
+COMMENT ON COLUMN singleplayer_game.play_area_polygon IS
+    'Independent WGS84 polygon snapshot for round starts; mutually exclusive with preset references.';
+COMMENT ON COLUMN multiplayer_game.play_area_preset_ids IS
+    'Immutable preset references for round starts; empty with no polygon means the whole provider.';
+COMMENT ON COLUMN multiplayer_game.play_area_polygon IS
+    'Independent WGS84 polygon snapshot for round starts; mutually exclusive with preset references.';
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-ALTER TABLE multiplayer_game DROP COLUMN play_area;
-ALTER TABLE singleplayer_game DROP COLUMN play_area;
+ALTER TABLE multiplayer_game DROP COLUMN play_area_polygon, DROP COLUMN play_area_preset_ids;
+ALTER TABLE singleplayer_game DROP COLUMN play_area_polygon, DROP COLUMN play_area_preset_ids;
 DROP TABLE saved_play_area;
 DROP TABLE play_area_preset_location;
 DROP TABLE play_area_preset;

@@ -77,7 +77,7 @@ func (r Round) CanReuse(requestTime time.Time, endDelay time.Duration) bool {
 //
 //nolint:wrapcheck // Domain validation returns shared sentinel errors.
 func (r Round) EvaluateGuess(
-	provider game.PanoramaProvider,
+	g Game,
 	requestTime time.Time,
 	coordinates *game.LatLng,
 ) (int, int, error) {
@@ -97,11 +97,20 @@ func (r Round) EvaluateGuess(
 		return 0, 0, err
 	}
 
-	if !provider.IsSupported() {
+	if !g.Provider.IsSupported() {
 		return 0, 0, game.ErrInvalidProvider
 	}
 
-	score, distance := game.CalculateScore(provider, game.LatLng{Lat: r.Lat, Lng: r.Lng}, *coordinates)
+	scoring := game.ProviderScoring(g.Provider)
+	if g.Scoring != nil {
+		scoring = *g.Scoring
+	}
+
+	if err := scoring.Validate(); err != nil {
+		return 0, 0, err
+	}
+
+	score, distance := scoring.Score(game.LatLng{Lat: r.Lat, Lng: r.Lng}, *coordinates)
 
 	return score, distance, nil
 }
@@ -151,7 +160,8 @@ func (p Participants) HasUser(userID uuid.UUID) error {
 
 // Game struct contains multiplayer game information.
 type Game struct {
-	PlayArea        playarea.Selection    `db:"play_area"        json:"playArea"`
+	Scoring         *game.ScoringSettings `db:"-"                json:"-"`
+	PlayArea        playarea.Selection    `db:"-"                json:"playArea"`
 	ID              uuid.UUID             `db:"id"               json:"id"`
 	CreatorID       uuid.UUID             `db:"creator_id"       json:"creatorID"`
 	Rounds          int                   `db:"rounds"           json:"rounds"`
