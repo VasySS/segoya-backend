@@ -1,6 +1,6 @@
 module github.com/VasySS/segoya-backend
 
-go 1.26.4
+go 1.27.3
 
 tool (
 	github.com/ogen-go/ogen/cmd/ogen
@@ -12,7 +12,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.33.9
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.9
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
-	github.com/brianvoe/gofakeit/v7 v7.18.0
 	github.com/georgysavva/scany/v2 v2.1.4
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-faster/errors v0.8.0
